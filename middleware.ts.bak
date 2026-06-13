@@ -1,0 +1,37 @@
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+// Assuming using jose/jwt or NextAuth for production validation.
+// In NextAuth v5, middleware is often setup with: auth((req) => ...)
+// Here we write a robust, native Next.js middleware checking session tokens.
+
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  
+  // Retrieve the session token from cookies
+  const token = request.cookies.get("__Secure-next-auth.session-token")?.value || 
+                request.cookies.get("next-auth.session-token")?.value;
+
+  // Protect Admin Routes
+  if (pathname.startsWith("/admin")) {
+    if (!token) {
+      return NextResponse.redirect(new URL("/login?callbackUrl=" + encodeURIComponent(pathname), request.url));
+    }
+    
+    // In production, decode JWT using jose to verify the 'role' claim is 'ADMIN'.
+    // If invalid, redirect to unauthorized / forbidden page.
+  }
+
+  // Protect Customer/Corporate Dashboard
+  if (pathname.startsWith("/dashboard")) {
+    if (!token) {
+      return NextResponse.redirect(new URL("/login?callbackUrl=" + encodeURIComponent(pathname), request.url));
+    }
+  }
+
+  return NextResponse.next();
+}
+
+// Config to target only matched routes
+export const config = {
+  matcher: ["/admin/:path*", "/dashboard/:path*"],
+};

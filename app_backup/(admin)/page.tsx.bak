@@ -1,0 +1,222 @@
+"use client";
+
+import React from "react";
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  Legend
+} from "recharts";
+import { 
+  TrendingUp, 
+  Calendar, 
+  Building2, 
+  Car, 
+  DollarSign, 
+  Users, 
+  CheckCircle,
+  Clock 
+} from "lucide-react";
+
+// Mock datasets for Overview charts
+const monthlyRevenueData = [
+  { month: "Jan", revenue: 450000, bookings: 120 },
+  { month: "Feb", revenue: 520000, bookings: 145 },
+  { month: "Mar", revenue: 610000, bookings: 180 },
+  { month: "Apr", revenue: 580000, bookings: 165 },
+  { month: "May", revenue: 720000, bookings: 210 },
+  { month: "Jun", revenue: 890000, bookings: 260 },
+];
+
+const leadConversionsData = [
+  { name: "Corporate Leads", total: 85, converted: 42 },
+  { name: "Rental Leads", total: 190, converted: 110 },
+  { name: "Tour Inquiries", total: 115, converted: 65 },
+];
+
+export default function AdminDashboardPage() {
+  
+  // Dashboard counters
+  const cards = [
+    {
+      title: "Total Monthly Revenue",
+      value: "₹8,90,000",
+      change: "+24% vs last month",
+      icon: DollarSign,
+      color: "text-green-400"
+    },
+    {
+      title: "Active Fleet Bookings",
+      value: "260 Rides",
+      change: "45 scheduled today",
+      icon: Calendar,
+      color: "text-blue-400"
+    },
+    {
+      title: "Active Leads Captured",
+      value: "390 Inquiries",
+      change: "15 new leads received",
+      icon: TrendingUp,
+      color: "text-yellow-400"
+    },
+    {
+      title: "Fleet Vehicle Utilization",
+      value: "86% Active",
+      change: "42 cabs on trip right now",
+      icon: Car,
+      color: "text-purple-400"
+    }
+  ];
+
+  return (
+    <div className="bg-slate-950 min-h-screen text-slate-100 p-8 space-y-8">
+      {/* Title Header */}
+      <div className="flex justify-between items-center border-b border-white/5 pb-6">
+        <div>
+          <h1 className="text-3xl font-extrabold text-slate-50 tracking-tight">
+            Dashboard Overview
+          </h1>
+          <p className="text-xs text-slate-400 mt-1">Real-time operational summaries, billing statistics, and conversions pipelines.</p>
+        </div>
+      </div>
+
+      {/* Grid of counter cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {cards.map((c, i) => {
+          const Icon = c.icon;
+          return (
+            <div key={i} className="glassmorphism p-6 rounded-xl border border-white/5 space-y-4 shadow-md flex justify-between items-start">
+              <div className="space-y-2">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{c.title}</span>
+                <div className="text-2xl font-extrabold text-slate-50">{c.value}</div>
+                <div className="text-[10px] text-slate-500 font-semibold">{c.change}</div>
+              </div>
+              <div className={`p-3 bg-white/5 border border-white/5 rounded-lg ${c.color}`}>
+                <Icon className="w-5 h-5" />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Visual Analytics charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Revenue Line Chart */}
+        <div className="lg:col-span-8 glassmorphism p-6 rounded-xl border border-white/5 space-y-4">
+          <h2 className="text-lg font-bold text-slate-50 flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-accent" />
+            <span>Monthly Revenue & Rides Analytics</span>
+          </h2>
+          <div className="h-80 w-full text-xs">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={monthlyRevenueData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                <XAxis dataKey="month" stroke="#94a3b8" />
+                <YAxis stroke="#94a3b8" />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: "#0f172a", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "8px" }} 
+                  labelStyle={{ color: "#94a3b8", fontWeight: "bold" }}
+                />
+                <Line type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={3} name="Revenue (INR)" activeDot={{ r: 8 }} />
+                <Line type="monotone" dataKey="bookings" stroke="#f59e0b" strokeWidth={2} name="Total Rides" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Lead conversions Bar Chart */}
+        <div className="lg:col-span-4 glassmorphism p-6 rounded-xl border border-white/5 space-y-4">
+          <h2 className="text-lg font-bold text-slate-50 flex items-center gap-2">
+            <Users className="w-5 h-5 text-accent" />
+            <span>Lead Conversions Pipeline</span>
+          </h2>
+          <div className="h-80 w-full text-xs">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={leadConversionsData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                <XAxis dataKey="name" stroke="#94a3b8" />
+                <YAxis stroke="#94a3b8" />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: "#0f172a", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "8px" }}
+                />
+                <Legend wrapperStyle={{ fontSize: "10px", marginTop: "10px" }} />
+                <Bar dataKey="total" fill="#475569" name="Inquiries Received" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="converted" fill="#f59e0b" name="Converted Booking" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* Split: Recent Booking Dispatch vs Top drivers */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        {/* Recent Dispatch table */}
+        <div className="lg:col-span-8 glassmorphism p-6 rounded-xl border border-white/5 space-y-4 overflow-hidden">
+          <h2 className="text-lg font-bold text-slate-50">Recent Booking Dispatches</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-slate-900 border-b border-white/5 text-slate-400 font-semibold uppercase tracking-wider">
+                  <th className="p-3">Booking ID</th>
+                  <th className="p-3">Customer</th>
+                  <th className="p-3">Trip Details</th>
+                  <th className="p-3 text-right">Net Amount</th>
+                  <th className="p-3 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {[
+                  { id: "TT-GOA-9873", name: "Ananya Sen", route: "Mumbai to Goa Package", amount: "₹24,999", status: "CONFIRMED", color: "text-green-400 border-green-500/20 bg-green-500/10" },
+                  { id: "TT-MUM-4837", name: "Karan Johar", route: "Airport VIP Transfer (Sedan)", amount: "₹2,500", status: "DRIVER_ASSIGNED", color: "text-blue-400 border-blue-500/20 bg-blue-500/10" },
+                  { id: "TT-PUN-3829", name: "Infosys Employee", route: "Corporate Shuttle (Route-24)", amount: "₹1,800", status: "IN_TRANSIT", color: "text-green-400 border-green-500/20 bg-green-500/10" },
+                  { id: "TT-MAH-8927", name: "Sunita Vyas", route: "Mahabaleshwar Hills (3D/2N)", amount: "₹12,499", status: "PENDING", color: "text-yellow-400 border-yellow-500/20 bg-yellow-500/10" }
+                ].map((row, idx) => (
+                  <tr key={idx} className="hover:bg-white/5 transition-colors">
+                    <td className="p-3 font-mono font-bold text-slate-300">{row.id}</td>
+                    <td className="p-3 font-bold text-slate-200">{row.name}</td>
+                    <td className="p-3 text-slate-400">{row.route}</td>
+                    <td className="p-3 font-bold text-slate-300 text-right">{row.amount}</td>
+                    <td className="p-3 text-center">
+                      <span className={`text-[9px] font-bold py-0.5 px-2 rounded-full border ${row.color}`}>
+                        {row.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Dispatch Hub details */}
+        <div className="lg:col-span-4 glassmorphism p-6 rounded-xl border border-white/5 space-y-4">
+          <h2 className="text-lg font-bold text-slate-50">Active Dispatch Hubs</h2>
+          <div className="space-y-4">
+            {[
+              { city: "Mumbai Metro Hub", vehicles: "120 Active Cabs", rate: "92% Utilization" },
+              { city: "Pune Corporate Hub", vehicles: "85 Active Cabs", rate: "86% Utilization" },
+              { city: "Bangalore Tech Hub", vehicles: "50 Active Cabs", rate: "78% Utilization" },
+              { city: "Delhi VIP Transfer Hub", vehicles: "30 Active Cabs", rate: "65% Utilization" }
+            ].map((hub, idx) => (
+              <div key={idx} className="flex justify-between items-center bg-slate-950/45 p-3 rounded-lg border border-white/5 text-xs">
+                <div>
+                  <div className="font-bold text-slate-200">{hub.city}</div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">{hub.vehicles}</div>
+                </div>
+                <span className="font-bold text-accent">{hub.rate}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}

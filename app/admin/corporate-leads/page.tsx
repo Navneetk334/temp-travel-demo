@@ -1,0 +1,338 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { 
+  Building2, 
+  Search, 
+  Download, 
+  Trash2, 
+  Edit, 
+  FileText, 
+  CheckCircle, 
+  Clock, 
+  AlertCircle, 
+  ArrowRight,
+  MessageSquare,
+  Users,
+  MapPin
+} from "lucide-react";
+
+interface Lead {
+  id: string;
+  companyName: string;
+  contactName: string;
+  email: string;
+  phone: string;
+  employeeCount?: number | null;
+  pickupLocations?: string | null;
+  serviceType: string;
+  requirements?: string | null;
+  notes?: string | null;
+  status: "NEW" | "CONTACTED" | "QUALIFIED" | "LOST" | "ARCHIVED";
+  createdAt: string;
+}
+
+export default function AdminLeadsPage() {
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [activeLead, setActiveLead] = useState<Lead | null>(null);
+  
+  // Note edit state
+  const [noteText, setNoteText] = useState("");
+
+  const loadLeads = async () => {
+    try {
+      const url = `/api/corporate/lead?search=${encodeURIComponent(search)}${
+        statusFilter ? `&status=${statusFilter}` : ""
+      }`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        setLeads(data);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadLeads();
+  }, [search, statusFilter]);
+
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    try {
+      const target = leads.find(l => l.id === id);
+      const res = await fetch(`/api/corporate/lead/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: newStatus,
+          notes: target?.notes || "",
+        })
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setLeads(leads.map(l => l.id === id ? updated : l));
+        if (activeLead && activeLead.id === id) {
+          setActiveLead(updated);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleSaveNotes = async (id: string) => {
+    try {
+      const target = leads.find(l => l.id === id);
+      const res = await fetch(`/api/corporate/lead/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: target?.status || "NEW",
+          notes: noteText,
+        })
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setLeads(leads.map(l => l.id === id ? updated : l));
+        setActiveLead(updated);
+        alert("Follow-up notes updated successfully!");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this lead?")) return;
+    try {
+      const res = await fetch(`/api/corporate/lead/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setLeads(leads.filter(l => l.id !== id));
+        if (activeLead && activeLead.id === id) {
+          setActiveLead(null);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleExport = () => {
+    // Navigate directly to the download endpoint which returns a CSV attachment file stream
+    window.open("/api/corporate/lead/export", "_blank");
+  };
+
+  const openLeadDetails = (lead: Lead) => {
+    setActiveLead(lead);
+    setNoteText(lead.notes || "");
+  };
+
+  return (
+    <div className="bg-slate-950 min-h-screen text-slate-100 p-8 space-y-8">
+      {/* Title Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/5 pb-6 gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold text-slate-50 tracking-tight flex items-center gap-2.5">
+            <Building2 className="w-8 h-8 text-accent" />
+            <span>Corporate Lead Dashboard</span>
+          </h1>
+          <p className="text-xs text-slate-400 mt-1">Audit B2B shuttle inquiries, log sales follow-up notes, and export datasets.</p>
+        </div>
+        <button
+          onClick={handleExport}
+          className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold py-2.5 px-6 rounded-lg text-sm tracking-wide transition-all border border-white/10 shadow-lg"
+        >
+          <Download className="w-4 h-4 text-accent" />
+          <span>Export CSV</span>
+        </button>
+      </div>
+
+      {/* Grid: Search controls */}
+      <div className="glassmorphism p-6 rounded-xl border border-white/5 flex flex-col md:flex-row gap-6 items-center justify-between">
+        <div className="relative w-full md:w-80">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search company, SPOC, contact..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+          />
+        </div>
+
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
+        >
+          <option value="" className="bg-slate-900">All Statuses</option>
+          <option value="NEW" className="bg-slate-900 text-yellow-400">NEW</option>
+          <option value="CONTACTED" className="bg-slate-900 text-blue-400">CONTACTED</option>
+          <option value="QUALIFIED" className="bg-slate-900 text-green-400">QUALIFIED</option>
+          <option value="LOST" className="bg-slate-900 text-red-400">LOST</option>
+          <option value="ARCHIVED" className="bg-slate-900 text-slate-400">ARCHIVED</option>
+        </select>
+      </div>
+
+      {/* Main Split: Leads table vs Detail Inspection */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        {/* Leads Table */}
+        <div className="lg:col-span-8 glassmorphism rounded-xl border border-white/5 overflow-hidden">
+          {loading ? (
+            <div className="text-center py-12 text-slate-400">Loading B2B leads...</div>
+          ) : (
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-900 border-b border-white/5 text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                  <th className="p-4">Company & SPOC</th>
+                  <th className="p-4">Requested Service</th>
+                  <th className="p-4">Status</th>
+                  <th className="p-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5 text-sm">
+                {leads.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="text-center py-12 text-slate-500">
+                      No corporate leads matching criteria found.
+                    </td>
+                  </tr>
+                ) : (
+                  leads.map((lead) => (
+                    <tr 
+                      key={lead.id} 
+                      onClick={() => openLeadDetails(lead)}
+                      className={`hover:bg-white/5 cursor-pointer transition-colors ${
+                        activeLead?.id === lead.id ? "bg-white/5" : ""
+                      }`}
+                    >
+                      <td className="p-4">
+                        <div className="font-bold text-slate-200">{lead.companyName}</div>
+                        <div className="text-xs text-slate-500 mt-0.5">{lead.contactName} ({lead.phone})</div>
+                      </td>
+                      <td className="p-4 text-slate-300 text-xs font-medium">
+                        {lead.serviceType}
+                      </td>
+                      <td className="p-4">
+                        <span className={`text-[10px] font-bold py-1 px-2.5 rounded-full border ${
+                          lead.status === "NEW" 
+                            ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20" 
+                            : lead.status === "CONTACTED"
+                            ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
+                            : lead.status === "QUALIFIED"
+                            ? "bg-green-500/10 text-green-400 border-green-500/20"
+                            : lead.status === "LOST"
+                            ? "bg-red-500/10 text-red-400 border-red-500/20"
+                            : "bg-slate-500/10 text-slate-400 border-slate-500/20"
+                        }`}>
+                          {lead.status}
+                        </span>
+                      </td>
+                      <td className="p-4 text-right" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => handleDelete(lead.id)}
+                          className="inline-flex p-2 bg-slate-900 border border-white/5 rounded-lg text-slate-400 hover:text-destructive transition-colors"
+                        >
+                          <Trash2 className="w-4.5 h-4.5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        {/* Lead Inspection Dashboard Panel */}
+        <div className="lg:col-span-4">
+          {activeLead ? (
+            <div className="bg-slate-900 border border-white/5 p-6 rounded-2xl space-y-6 glassmorphism">
+              <div className="space-y-1">
+                <span className="text-[9px] font-bold text-accent uppercase tracking-widest block">Lead Inspector</span>
+                <h3 className="text-xl font-bold text-slate-50">{activeLead.companyName}</h3>
+                <p className="text-xs text-slate-400">Created: {new Date(activeLead.createdAt).toLocaleString()}</p>
+              </div>
+
+              {/* Status controller */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Update Lead Status</label>
+                <select
+                  value={activeLead.status}
+                  onChange={(e) => handleStatusChange(activeLead.id, e.target.value)}
+                  className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-primary appearance-none"
+                >
+                  <option value="NEW" className="bg-slate-900">NEW</option>
+                  <option value="CONTACTED" className="bg-slate-900">CONTACTED</option>
+                  <option value="QUALIFIED" className="bg-slate-900">QUALIFIED</option>
+                  <option value="LOST" className="bg-slate-900">LOST</option>
+                  <option value="ARCHIVED" className="bg-slate-900">ARCHIVED</option>
+                </select>
+              </div>
+
+              {/* Details specs */}
+              <div className="space-y-4 pt-2 border-t border-white/5 text-xs text-slate-300">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-accent" />
+                  <div>SPOC Name: <span className="font-bold text-slate-100">{activeLead.contactName}</span></div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-accent" />
+                  <div>Employee Count: <span className="font-bold text-slate-100">{activeLead.employeeCount || "Not Specified"}</span></div>
+                </div>
+                {activeLead.pickupLocations && (
+                  <div className="flex items-start gap-2">
+                    <MapPin className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                    <div>Pickup Points: <span className="font-bold text-slate-100 whitespace-pre-line">{activeLead.pickupLocations}</span></div>
+                  </div>
+                )}
+                {activeLead.requirements && (
+                  <div className="bg-slate-950/60 p-4 border border-white/5 rounded-lg space-y-1">
+                    <div className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Custom Requirements</div>
+                    <div className="text-slate-300 whitespace-pre-line leading-relaxed">{activeLead.requirements}</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Follow up Notes form */}
+              <div className="space-y-2 border-t border-white/5 pt-4">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                  <MessageSquare className="w-3.5 h-3.5 text-accent" />
+                  <span>Sales Follow-up Notes</span>
+                </label>
+                <textarea
+                  rows={4}
+                  value={noteText}
+                  onChange={(e) => setNoteText(e.target.value)}
+                  placeholder="Log calls, pricing proposal details, SPOC replies..."
+                  className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-primary resize-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleSaveNotes(activeLead.id)}
+                  className="w-full bg-primary hover:bg-blue-700 text-white font-bold py-2 rounded-lg text-xs tracking-wider uppercase transition-all shadow-md"
+                >
+                  Save Call Log Notes
+                </button>
+              </div>
+
+            </div>
+          ) : (
+            <div className="bg-slate-900/40 border border-white/5 p-12 rounded-2xl text-center text-slate-500 text-xs italic space-y-2">
+              <AlertCircle className="w-8 h-8 mx-auto text-slate-600 animate-pulse" />
+              <p>Select a corporate lead from the table to inspect details, log notes, and modify pipeline status.</p>
+            </div>
+          )}
+        </div>
+
+      </div>
+    </div>
+  );
+}
