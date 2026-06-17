@@ -165,67 +165,70 @@ export default function AdminContactLeadsPage() {
           {loading ? (
             <div className="text-center py-12 text-slate-400">Loading contact leads...</div>
           ) : (
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-900 border-b border-white/5 text-slate-400 text-xs font-semibold uppercase tracking-wider">
-                  <th className="p-4">Customer & Contact</th>
-                  <th className="p-4">Subject & Excerpt</th>
-                  <th className="p-4">Status</th>
-                  <th className="p-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5 text-sm">
-                {leads.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="text-center py-12 text-slate-500">
-                      No general inquiries matching criteria found.
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[600px] text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-900 border-b border-white/5 text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                    <th className="p-4">Customer & Contact</th>
+                    <th className="p-4">Subject & Excerpt</th>
+                    <th className="p-4">Status</th>
+                    <th className="p-4 text-right">Actions</th>
                   </tr>
-                ) : (
-                  leads.map((lead) => (
-                    <tr 
-                      key={lead.id} 
-                      onClick={() => setActiveLead(lead)}
-                      className={`hover:bg-white/5 cursor-pointer transition-colors ${
-                        activeLead?.id === lead.id ? "bg-white/5" : ""
-                      }`}
-                    >
-                      <td className="p-4">
-                        <div className="font-bold text-slate-200">{lead.name}</div>
-                        <div className="text-xs text-slate-500 mt-0.5">{lead.email} {lead.phone ? `(${lead.phone})` : ""}</div>
-                      </td>
-                      <td className="p-4">
-                        <div className="text-slate-300 font-bold text-xs truncate max-w-xs">{lead.subject || "No Subject"}</div>
-                        <div className="text-slate-500 text-xs truncate max-w-xs mt-0.5">{lead.message}</div>
-                      </td>
-                      <td className="p-4">
-                        <span className={`text-[10px] font-bold py-1 px-2.5 rounded-full border ${
-                          lead.status === "NEW" 
-                            ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20" 
-                            : lead.status === "CONTACTED"
-                            ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
-                            : lead.status === "QUALIFIED"
-                            ? "bg-green-500/10 text-green-400 border-green-500/20"
-                            : lead.status === "LOST"
-                            ? "bg-red-500/10 text-red-400 border-red-500/20"
-                            : "bg-slate-500/10 text-slate-400 border-slate-500/20"
-                        }`}>
-                          {lead.status}
-                        </span>
-                      </td>
-                      <td className="p-4 text-right" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          onClick={() => handleDelete(lead.id)}
-                          className="inline-flex p-2 bg-slate-900 border border-white/5 rounded-lg text-slate-400 hover:text-destructive transition-colors"
-                        >
-                          <Trash2 className="w-4.5 h-4.5" />
-                        </button>
+                </thead>
+                <tbody className="divide-y divide-white/5 text-sm">
+                  {leads.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="text-center py-12 text-slate-500">
+                        No general inquiries matching criteria found.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    leads.map((lead) => (
+                      <tr 
+                        key={lead.id} 
+                        onClick={() => setActiveLead(lead)}
+                        className={`hover:bg-white/5 cursor-pointer transition-colors ${
+                          activeLead?.id === lead.id ? "bg-white/5" : ""
+                        }`}
+                      >
+                        <td className="p-4">
+                          <div className="font-bold text-slate-200">{lead.name}</div>
+                          <div className="text-xs text-slate-500 mt-0.5">{lead.email}</div>
+                          {lead.phone && <div className="text-xs text-slate-500 mt-0.5">{lead.phone}</div>}
+                        </td>
+                        <td className="p-4">
+                          <div className="text-slate-300 font-bold text-xs truncate max-w-[180px]">{lead.subject || "No Subject"}</div>
+                          <div className="text-slate-500 text-xs truncate max-w-[180px] mt-0.5">{lead.message}</div>
+                        </td>
+                        <td className="p-4">
+                          <span className={`text-[10px] font-bold py-1 px-2.5 rounded-full border ${
+                            lead.status === "NEW" 
+                              ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20" 
+                              : lead.status === "CONTACTED"
+                              ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
+                              : lead.status === "QUALIFIED"
+                              ? "bg-green-500/10 text-green-400 border-green-500/20"
+                              : lead.status === "LOST"
+                              ? "bg-red-500/10 text-red-400 border-red-500/20"
+                              : "bg-slate-500/10 text-slate-400 border-slate-500/20"
+                          }`}>
+                            {lead.status}
+                          </span>
+                        </td>
+                        <td className="p-4 text-right" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            onClick={() => handleDelete(lead.id)}
+                            className="inline-flex p-2 bg-slate-900 border border-white/5 rounded-lg text-slate-400 hover:text-destructive transition-colors"
+                          >
+                            <Trash2 className="w-4.5 h-4.5" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
 
