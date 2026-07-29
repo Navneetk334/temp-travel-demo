@@ -32,7 +32,7 @@ async function main() {
     data: {
       name: "Navneet Kumar",
       email: "admin@temptravels.com",
-      passwordHash: "$2a$12$tD9Y59DqD784lXUvJ9L9XeR82R2gBfE8L9l6UeQ9qXbV8T9yT9nCq", // admin123
+      passwordHash: "$2a$12$m.wWAx.WlIOJaTxyDRn0ku14SJkcJYFIcu4OH8Tno2sWbHBC6ak86", // admin123
       role: AdminRole.SUPER_ADMIN,
       isActive: true,
     },
@@ -42,7 +42,7 @@ async function main() {
     data: {
       name: "Ramesh Sharma",
       email: "ramesh@temptravels.com",
-      passwordHash: "$2a$12$tD9Y59DqD784lXUvJ9L9XeR82R2gBfE8L9l6UeQ9qXbV8T9yT9nCq",
+      passwordHash: "$2a$12$m.wWAx.WlIOJaTxyDRn0ku14SJkcJYFIcu4OH8Tno2sWbHBC6ak86",
       role: AdminRole.MANAGER,
       isActive: true,
     },
@@ -60,7 +60,7 @@ async function main() {
         name,
         email,
         phone,
-        passwordHash: "$2a$12$tD9Y59DqD784lXUvJ9L9XeR82R2gBfE8L9l6UeQ9qXbV8T9yT9nCq",
+        passwordHash: "$2a$12$m.wWAx.WlIOJaTxyDRn0ku14SJkcJYFIcu4OH8Tno2sWbHBC6ak86",
         role: UserRole.DRIVER,
         isActive: true,
       },
@@ -80,7 +80,7 @@ async function main() {
         name,
         email,
         phone,
-        passwordHash: "$2a$12$tD9Y59DqD784lXUvJ9L9XeR82R2gBfE8L9l6UeQ9qXbV8T9yT9nCq",
+        passwordHash: "$2a$12$m.wWAx.WlIOJaTxyDRn0ku14SJkcJYFIcu4OH8Tno2sWbHBC6ak86",
         role: UserRole.CUSTOMER,
         isActive: true,
       },
