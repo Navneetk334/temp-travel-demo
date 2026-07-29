@@ -1,16 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { packageCategorySchema } from "@/lib/validations/tour";
-
-// Mocks Auth Role Checking (integrated with NextAuth v5 JWT session cookies)
-async function verifyAdmin(req: NextRequest): Promise<boolean> {
-  // Read session token and verify (mocked here, in production checks decodes token and verify role === 'ADMIN')
-  const token = req.cookies.get("next-auth.session-token")?.value || req.cookies.get("__Secure-next-auth.session-token")?.value || req.cookies.get("temp-travel-admin-session")?.value;
-  
-  if (!token) return false;
-  // Verify token is associated with an active Admin user
-  return true; 
-}
+import { verifyAdmin } from "@/lib/auth";
 
 export async function GET() {
   try {

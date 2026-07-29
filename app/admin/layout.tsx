@@ -38,16 +38,43 @@ export default function AdminLayout({
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  useEffect(() => {
-    document.cookie = "temp-travel-admin-session=mock-admin-token; path=/; max-age=86400; SameSite=Lax";
-  }, []);
-
-  // Mock Admin session (role can be SUPER_ADMIN, MANAGER, DISPATCHER)
-  const adminSession = {
-    name: "Navneet Kumar",
+  const [adminSession, setAdminSession] = useState({
+    name: "Admin User",
     email: "admin@temptravels.com",
-    role: "SUPER_ADMIN"
+    role: "SUPER_ADMIN",
+  });
+
+  useEffect(() => {
+    if (pathname === "/admin/login") return;
+
+    fetch("/api/admin/me")
+      .then((res) => {
+        if (res.ok) return res.json();
+        throw new Error("Unauthorized");
+      })
+      .then((data) => {
+        if (data?.admin) {
+          setAdminSession(data.admin);
+        }
+      })
+      .catch((err) => {
+        console.error("Session check error:", err);
+      });
+  }, [pathname]);
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/admin/logout", { method: "POST" });
+      window.location.href = "/admin/login";
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
   };
+
+  if (pathname === "/admin/login") {
+    return <>{children}</>;
+  }
+
 
   const navItems: SidebarItem[] = [
     { name: "Dashboard Overview", href: "/admin", icon: LayoutDashboard },
@@ -117,7 +144,7 @@ export default function AdminLayout({
               <div className="text-[9px] text-slate-500 font-semibold uppercase mt-0.5">{adminSession.role}</div>
             </div>
           </div>
-          <button className="text-slate-400 hover:text-slate-200">
+          <button onClick={handleLogout} className="text-slate-400 hover:text-slate-200" title="Sign Out">
             <LogOut className="w-4 h-4" />
           </button>
         </div>

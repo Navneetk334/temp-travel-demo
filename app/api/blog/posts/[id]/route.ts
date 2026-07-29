@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { blogPostSchema } from "@/lib/validations/blog";
-
-// Admin auth helper
-async function verifyAdmin(req: NextRequest): Promise<boolean> {
-  const token = req.cookies.get("next-auth.session-token")?.value || req.cookies.get("__Secure-next-auth.session-token")?.value || req.cookies.get("temp-travel-admin-session")?.value;
-  return !!token;
-}
+import { verifyAdmin } from "@/lib/auth";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
