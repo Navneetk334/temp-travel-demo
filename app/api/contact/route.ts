@@ -13,6 +13,11 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("search") || "";
     const status = searchParams.get("status") || "";
+    const sortBy = searchParams.get("sortBy") || "createdAt";
+    const sortOrder = searchParams.get("sortOrder") === "asc" ? "asc" : "desc";
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "10", 10);
+    const skip = (page - 1) * limit;
 
     const where: any = {};
     if (status) {
@@ -29,12 +34,51 @@ export async function GET(req: NextRequest) {
       ];
     }
 
+    let orderBy: any = { createdAt: sortOrder };
+    if (sortBy === "name") {
+      orderBy = { name: sortOrder };
+    } else if (sortBy === "createdAt") {
+      orderBy = { createdAt: sortOrder };
+    }
+
+    const totalCount = await prisma.contactLead.count({ where });
+
     const leads = await prisma.contactLead.findMany({
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy,
+      skip,
+      take: limit,
     });
 
-    return NextResponse.json(leads, { status: 200 });
+    const [newCount, readCount, contactedCount, qualifiedCount, lostCount, archivedCount] = await Promise.all([
+      prisma.contactLead.count({ where: { status: "NEW" } }),
+      prisma.contactLead.count({ where: { status: "READ" } }),
+      prisma.contactLead.count({ where: { status: "CONTACTED" } }),
+      prisma.contactLead.count({ where: { status: "QUALIFIED" } }),
+      prisma.contactLead.count({ where: { status: "LOST" } }),
+      prisma.contactLead.count({ where: { status: "ARCHIVED" } }),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit) || 1;
+
+    return NextResponse.json({
+      leads,
+      pagination: {
+        totalCount,
+        totalPages,
+        currentPage: page,
+        limit,
+      },
+      stats: {
+        total: newCount + readCount + contactedCount + qualifiedCount + lostCount + archivedCount,
+        NEW: newCount,
+        READ: readCount,
+        CONTACTED: contactedCount,
+        QUALIFIED: qualifiedCount,
+        LOST: lostCount,
+        ARCHIVED: archivedCount,
+      }
+    }, { status: 200 });
   } catch (error) {
     console.error("GET /api/contact error:", error);
     return NextResponse.json({ error: "Failed to fetch contact leads" }, { status: 500 });
@@ -59,6 +103,7 @@ export async function POST(req: NextRequest) {
         phone: phone || null,
         subject: subject || null,
         message,
+        status: "NEW",
       },
     });
 

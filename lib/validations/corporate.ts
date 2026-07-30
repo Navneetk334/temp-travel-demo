@@ -14,6 +14,6 @@ export const corporateLeadSchema = z.object({
 
 // Validates Admin updates to B2B leads (Status & Notes)
 export const leadAdminUpdateSchema = z.object({
-  status: z.enum(["NEW", "CONTACTED", "QUALIFIED", "LOST", "ARCHIVED"]),
+  status: z.enum(["NEW", "CONTACTED", "QUALIFIED", "NEGOTIATION", "WON", "LOST", "ARCHIVED"]),
   notes: z.string().optional().nullable(),
 });

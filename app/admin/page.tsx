@@ -67,13 +67,17 @@ export default async function AdminDashboardPage() {
 
   // 4. Fetch lead conversions counts for bar chart
   const corpTotal = await prisma.corporateLead.count();
-  const corpQualified = await prisma.corporateLead.count({ where: { status: "QUALIFIED" } });
+  const corpQualified = await prisma.corporateLead.count({ 
+    where: { status: { in: ["QUALIFIED", "NEGOTIATION", "WON"] } } 
+  });
 
   const rentalTotal = await prisma.rentalLead.count();
   const rentalContacted = await prisma.rentalLead.count({ where: { status: "CONTACTED" } });
 
   const contactTotal = await prisma.contactLead.count();
-  const contactContacted = await prisma.contactLead.count({ where: { status: "CONTACTED" } });
+  const contactContacted = await prisma.contactLead.count({ 
+    where: { status: { in: ["READ", "CONTACTED", "QUALIFIED"] } } 
+  });
 
   const leadConversionsData = [
     { name: "Corporate Leads", total: corpTotal, converted: corpQualified },

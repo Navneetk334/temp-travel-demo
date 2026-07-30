@@ -83,6 +83,12 @@ export async function PUT(
       data: {
         ...result.data,
         registrationNumber: registrationUpper,
+      },
+      include: {
+        category: true,
+        driver: {
+          select: { id: true, name: true, phone: true, email: true }
+        }
       }
     });
 
@@ -106,7 +112,7 @@ export async function DELETE(
 
     // Check if vehicle is assigned to active bookings
     const bookingsCount = await prisma.booking.count({
-      where: { vehicleId: id, status: { in: ["CONFIRMED", "DRIVER_ASSIGNED", "IN_TRANSIT"] } }
+      where: { vehicleId: id, status: { in: ["CONFIRMED", "DRIVER_ASSIGNED", "VEHICLE_ASSIGNED", "IN_PROGRESS", "IN_TRANSIT"] } }
     });
 
     if (bookingsCount > 0) {

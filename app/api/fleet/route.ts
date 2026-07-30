@@ -6,25 +6,82 @@ import { verifyAdmin } from "@/lib/auth";
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
+    const search = searchParams.get("search") || "";
     const categoryId = searchParams.get("categoryId") || "";
     const status = searchParams.get("status") || "";
+    const fuelType = searchParams.get("fuelType") || "";
+    const transmission = searchParams.get("transmission") || "";
+    const sortBy = searchParams.get("sortBy") || "createdAt";
+    const sortOrder = searchParams.get("sortOrder") === "asc" ? "asc" : "desc";
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "10", 10);
+    const skip = (page - 1) * limit;
 
     const where: any = {};
     if (categoryId) where.categoryId = categoryId;
     if (status) where.status = status;
+    if (fuelType) where.fuelType = fuelType;
+    if (transmission) where.transmission = transmission;
+
+    if (search) {
+      where.OR = [
+        { model: { contains: search, mode: "insensitive" } },
+        { make: { contains: search, mode: "insensitive" } },
+        { registrationNumber: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
+    let orderBy: any = { createdAt: sortOrder };
+    if (sortBy === "model") {
+      orderBy = { model: sortOrder };
+    } else if (sortBy === "registrationNumber") {
+      orderBy = { registrationNumber: sortOrder };
+    } else if (sortBy === "capacity") {
+      orderBy = { capacity: sortOrder };
+    } else if (sortBy === "createdAt") {
+      orderBy = { createdAt: sortOrder };
+    }
+
+    const totalCount = await prisma.fleetVehicle.count({ where });
 
     const vehicles = await prisma.fleetVehicle.findMany({
       where,
       include: {
         category: true,
         driver: {
-          select: { name: true, phone: true, email: true }
+          select: { id: true, name: true, phone: true, email: true }
         }
       },
-      orderBy: { createdAt: "desc" }
+      orderBy,
+      skip,
+      take: limit,
     });
 
-    return NextResponse.json(vehicles, { status: 200 });
+    const [availableCount, onTripCount, maintenanceCount, inactiveCount] = await Promise.all([
+      prisma.fleetVehicle.count({ where: { status: "AVAILABLE" } }),
+      prisma.fleetVehicle.count({ where: { status: "ON_TRIP" } }),
+      prisma.fleetVehicle.count({ where: { status: "MAINTENANCE" } }),
+      prisma.fleetVehicle.count({ where: { status: "INACTIVE" } }),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit) || 1;
+
+    return NextResponse.json({
+      vehicles,
+      pagination: {
+        totalCount,
+        totalPages,
+        currentPage: page,
+        limit,
+      },
+      stats: {
+        total: availableCount + onTripCount + maintenanceCount + inactiveCount,
+        AVAILABLE: availableCount,
+        ON_TRIP: onTripCount,
+        MAINTENANCE: maintenanceCount,
+        INACTIVE: inactiveCount,
+      }
+    }, { status: 200 });
   } catch (error) {
     console.error("GET /api/fleet error:", error);
     return NextResponse.json({ error: "Failed to fetch vehicles" }, { status: 500 });
@@ -45,7 +102,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: result.error.flatten() }, { status: 400 });
     }
 
-    // Check unique registration number
     const registrationUpper = result.data.registrationNumber.trim().toUpperCase();
     const existing = await prisma.fleetVehicle.findUnique({
       where: { registrationNumber: registrationUpper }
@@ -55,7 +111,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Vehicle with this registration number already exists" }, { status: 400 });
     }
 
-    // Check unique driver allocation (driverId must be unique on FleetVehicle if not null)
     if (result.data.driverId) {
       const driverAllocated = await prisma.fleetVehicle.findUnique({
         where: { driverId: result.data.driverId }
@@ -69,6 +124,12 @@ export async function POST(req: NextRequest) {
       data: {
         ...result.data,
         registrationNumber: registrationUpper,
+      },
+      include: {
+        category: true,
+        driver: {
+          select: { id: true, name: true, phone: true, email: true }
+        }
       }
     });
 

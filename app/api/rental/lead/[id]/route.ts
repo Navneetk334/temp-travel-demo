@@ -7,6 +7,37 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
+export async function GET(
+  req: NextRequest,
+  { params }: RouteParams
+) {
+  const { id } = await params;
+  try {
+    const isAdmin = await verifyAdmin(req);
+    if (!isAdmin) {
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+    }
+
+    const lead = await prisma.rentalLead.findUnique({
+      where: { id },
+      include: {
+        vehicleCategory: {
+          select: { id: true, name: true, slug: true }
+        }
+      }
+    });
+
+    if (!lead) {
+      return NextResponse.json({ error: "Rental lead not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(lead, { status: 200 });
+  } catch (error) {
+    console.error(`GET /api/rental/lead/${id} error:`, error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
+
 export async function PUT(
   req: NextRequest,
   { params }: RouteParams
@@ -28,6 +59,11 @@ export async function PUT(
     const updated = await prisma.rentalLead.update({
       where: { id: id },
       data: result.data,
+      include: {
+        vehicleCategory: {
+          select: { id: true, name: true, slug: true }
+        }
+      }
     });
 
     return NextResponse.json(updated, { status: 200 });

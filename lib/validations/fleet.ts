@@ -18,10 +18,14 @@ export const fleetVehicleSchema = z.object({
   model: z.string().min(2, "Model must be at least 2 characters"),
   make: z.string().min(2, "Make must be at least 2 characters"),
   registrationNumber: z.string()
-    .min(5, "Registration number must be at least 5 characters")
-    .regex(/^[A-Z]{2}[0-9a-zA-Z-]{3,10}$/, "Invalid registration number format (e.g. MH12PQ9999 or MH-12-PQ-9999)"),
+    .min(5, "Registration number must be at least 5 characters"),
   categoryId: z.string().uuid("Invalid category ID"),
   capacity: z.number().int().min(1, "Capacity must be at least 1 seat"),
+  fuelType: z.enum(["DIESEL", "PETROL", "ELECTRIC", "CNG", "HYBRID"]).default("DIESEL"),
+  transmission: z.enum(["MANUAL", "AUTOMATIC"]).default("MANUAL"),
+  imageUrl: z.string().url("Invalid image URL").optional().nullable().or(z.literal("")),
+  perKmRate: z.number().positive("Per km rate must be positive").optional().nullable(),
+  baseDailyRate: z.number().positive("Base daily rate must be positive").optional().nullable(),
   status: z.enum(["AVAILABLE", "ON_TRIP", "MAINTENANCE", "INACTIVE"]).default("AVAILABLE"),
   driverId: z.string().uuid("Invalid driver ID").optional().nullable(),
 });

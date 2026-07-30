@@ -19,36 +19,30 @@ export async function GET(req: NextRequest) {
     }
     if (search) {
       where.OR = [
-        { companyName: { contains: search, mode: "insensitive" } },
-        { contactName: { contains: search, mode: "insensitive" } },
+        { name: { contains: search, mode: "insensitive" } },
         { email: { contains: search, mode: "insensitive" } },
         { phone: { contains: search, mode: "insensitive" } },
+        { subject: { contains: search, mode: "insensitive" } },
+        { message: { contains: search, mode: "insensitive" } },
       ];
     }
 
-    // Fetch leads matching filters
-    const leads = await prisma.corporateLead.findMany({
+    const leads = await prisma.contactLead.findMany({
       where,
       orderBy: { createdAt: "desc" },
     });
 
-    // CSV Header
     const headers = [
       "ID",
-      "Company Name",
-      "Contact Person",
+      "Name",
       "Email",
       "Phone",
-      "Employee Count",
-      "Pickup Locations",
-      "Service Type",
-      "Requirements",
+      "Subject",
+      "Message",
       "Status",
-      "Notes",
-      "Created At"
+      "Submitted At"
     ];
 
-    // Helper to safely format values for CSV
     const escapeCSV = (val: any) => {
       if (val === null || val === undefined) return '""';
       let stringified = String(val).replace(/"/g, '""');
@@ -57,16 +51,12 @@ export async function GET(req: NextRequest) {
 
     const rows = leads.map(l => [
       escapeCSV(l.id),
-      escapeCSV(l.companyName),
-      escapeCSV(l.contactName),
+      escapeCSV(l.name),
       escapeCSV(l.email),
       escapeCSV(l.phone),
-      escapeCSV(l.employeeCount),
-      escapeCSV(l.pickupLocations),
-      escapeCSV(l.serviceType),
-      escapeCSV(l.requirements),
+      escapeCSV(l.subject),
+      escapeCSV(l.message),
       escapeCSV(l.status),
-      escapeCSV(l.notes),
       escapeCSV(l.createdAt.toISOString())
     ]);
 
@@ -75,7 +65,7 @@ export async function GET(req: NextRequest) {
       ...rows.map(r => r.join(","))
     ].join("\n");
 
-    const filename = status ? `corporate-leads-${status.toLowerCase()}.csv` : "corporate-leads.csv";
+    const filename = status ? `contact-messages-${status.toLowerCase()}.csv` : "contact-messages.csv";
 
     return new NextResponse(csvContent, {
       status: 200,
@@ -86,7 +76,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("GET /api/corporate/lead/export error:", error);
+    console.error("GET /api/contact/export error:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

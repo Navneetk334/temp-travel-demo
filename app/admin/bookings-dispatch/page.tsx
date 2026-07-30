@@ -15,8 +15,24 @@ import {
   AlertCircle,
   Truck,
   FileText,
-  DollarSign
+  DollarSign,
+  ChevronLeft,
+  ChevronRight,
+  ShieldCheck,
+  MessageSquare,
+  ArrowRight,
+  UserCheck
 } from "lucide-react";
+
+export type BookingStatus = 
+  | "PENDING" 
+  | "CONFIRMED" 
+  | "DRIVER_ASSIGNED" 
+  | "VEHICLE_ASSIGNED" 
+  | "IN_PROGRESS" 
+  | "IN_TRANSIT" 
+  | "COMPLETED" 
+  | "CANCELLED";
 
 interface Customer {
   name: string;
@@ -27,6 +43,7 @@ interface Customer {
 interface VehicleCategory {
   id: string;
   name: string;
+  slug?: string;
 }
 
 interface Driver {
@@ -46,13 +63,14 @@ interface Payment {
   status: string;
   gateway: string;
   amount: string;
+  razorpayOrderId?: string;
 }
 
 interface Booking {
   id: string;
   bookingNumber: string;
   type: string;
-  status: "PENDING" | "CONFIRMED" | "DRIVER_ASSIGNED" | "IN_TRANSIT" | "COMPLETED" | "CANCELLED";
+  status: BookingStatus;
   pickupDateTime: string;
   pickupLocation: string;
   dropLocation?: string | null;
@@ -71,37 +89,85 @@ interface Booking {
   createdAt: string;
 }
 
+interface Stats {
+  total: number;
+  PENDING: number;
+  CONFIRMED: number;
+  DRIVER_ASSIGNED: number;
+  VEHICLE_ASSIGNED: number;
+  IN_PROGRESS: number;
+  COMPLETED: number;
+  CANCELLED: number;
+}
+
 export default function BookingDispatchPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  
-  // Modals state
+  const [paymentFilter, setPaymentFilter] = useState("");
+  const [sortBy, setSortBy] = useState("createdAt");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [stats, setStats] = useState<Stats>({
+    total: 0,
+    PENDING: 0,
+    CONFIRMED: 0,
+    DRIVER_ASSIGNED: 0,
+    VEHICLE_ASSIGNED: 0,
+    IN_PROGRESS: 0,
+    COMPLETED: 0,
+    CANCELLED: 0,
+  });
+
+  // Modals & Active Inspector state
   const [activeBooking, setActiveBooking] = useState<Booking | null>(null);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
-  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [selectedVehicleId, setSelectedVehicleId] = useState("");
+  const [newNoteInput, setNewNoteInput] = useState("");
 
   const loadData = async () => {
+    setLoading(true);
     try {
-      const url = `/api/bookings?search=${encodeURIComponent(search)}${
-        statusFilter ? `&status=${statusFilter}` : ""
-      }`;
-      const bookingsRes = await fetch(url);
-      if (bookingsRes.ok) {
-        const data = await bookingsRes.json();
-        setBookings(data);
+      const queryParams = new URLSearchParams({
+        search,
+        status: statusFilter,
+        paymentStatus: paymentFilter,
+        sortBy,
+        sortOrder,
+        page: currentPage.toString(),
+        limit: pageSize.toString(),
+      });
+
+      const res = await fetch(`/api/bookings?${queryParams.toString()}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setBookings(data);
+          setTotalCount(data.length);
+          setTotalPages(1);
+        } else {
+          setBookings(data.bookings || []);
+          setTotalCount(data.pagination?.totalCount || 0);
+          setTotalPages(data.pagination?.totalPages || 1);
+          if (data.stats) {
+            setStats(data.stats);
+          }
+        }
       }
 
       // Fetch vehicles to use for dispatch assignments
       const vehiclesRes = await fetch("/api/fleet");
       if (vehiclesRes.ok) {
-        const data = await vehiclesRes.json();
-        setVehicles(data);
+        const fleetData = await vehiclesRes.json();
+        setVehicles(fleetData);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Failed to load bookings dispatch:", err);
     } finally {
       setLoading(false);
     }
@@ -109,418 +175,692 @@ export default function BookingDispatchPage() {
 
   useEffect(() => {
     loadData();
-  }, [search, statusFilter]);
+  }, [search, statusFilter, paymentFilter, sortBy, sortOrder, currentPage, pageSize]);
 
-  const handleStatusChange = async (id: string, newStatus: string) => {
+  const handleStatusChange = async (id: string, newStatus: BookingStatus) => {
     try {
+      const target = bookings.find((b) => b.id === id);
       const res = await fetch(`/api/bookings/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({
+          status: newStatus,
+          notes: target?.notes || "",
+        }),
       });
+
       if (res.ok) {
         const updated = await res.json();
-        setBookings(bookings.map(b => b.id === id ? { ...b, status: updated.status, vehicle: updated.vehicle } : b));
+        setBookings(bookings.map((b) => (b.id === id ? updated : b)));
         if (activeBooking && activeBooking.id === id) {
-          setActiveBooking({ ...activeBooking, status: updated.status, vehicle: updated.vehicle });
+          setActiveBooking(updated);
         }
+        loadData();
       }
     } catch (err) {
-      console.error(err);
+      console.error("Failed to update booking status:", err);
     }
   };
 
-  const handleVehicleAssign = async (bookingId: string, vehicleId: string | null) => {
+  const handleAssignVehicle = async () => {
+    if (!activeBooking) return;
     try {
-      const newStatus = vehicleId ? "DRIVER_ASSIGNED" : "CONFIRMED";
-      const res = await fetch(`/api/bookings/${bookingId}`, {
+      const res = await fetch(`/api/bookings/${activeBooking.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ vehicleId, status: newStatus })
+        body: JSON.stringify({
+          vehicleId: selectedVehicleId || null,
+          status: selectedVehicleId ? "VEHICLE_ASSIGNED" : activeBooking.status,
+        }),
       });
+
       if (res.ok) {
         const updated = await res.json();
-        setBookings(bookings.map(b => b.id === bookingId ? { ...b, vehicleId: updated.vehicleId, vehicle: updated.vehicle, status: updated.status } : b));
+        setBookings(bookings.map((b) => (b.id === activeBooking.id ? updated : b)));
+        setActiveBooking(updated);
         setAssignModalOpen(false);
-        setActiveBooking(null);
-        alert("Vehicle & Chauffeur dispatched successfully!");
+        loadData();
       }
     } catch (err) {
-      console.error(err);
+      console.error("Failed to assign vehicle:", err);
     }
   };
 
-  // Client-side CSV generation
-  const handleExport = () => {
-    const headers = ["Booking Number,Customer Name,Phone,Email,Trip Type,Vehicle Category,Pickup Location,Drop Location,Pickup Date & Time,Assigned Vehicle,Assigned Driver,Payment Status,Booking Status,Net Amount"];
-    const rows = bookings.map(b => [
-      b.bookingNumber,
-      b.customer.name,
-      b.customer.phone,
-      b.customer.email,
-      b.type,
-      b.vehicleCategory.name,
-      `"${b.pickupLocation}"`,
-      b.dropLocation ? `"${b.dropLocation}"` : "",
-      new Date(b.pickupDateTime).toLocaleString(),
-      b.vehicle ? b.vehicle.registrationNumber : "Unassigned",
-      b.vehicle?.driver ? b.vehicle.driver.name : "Unassigned",
-      b.payments?.[0]?.status || "PENDING",
-      b.status,
-      b.netAmount
-    ].join(","));
+  const handleAddNoteLog = async (id: string) => {
+    if (!newNoteInput.trim()) return;
 
-    const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `bookings_dispatch_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      const target = bookings.find((b) => b.id === id);
+      const timestamp = new Date().toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      const entry = `[${timestamp}] ${newNoteInput.trim()}`;
+      const existingNotes = target?.notes ? `${target.notes}\n${entry}` : entry;
+
+      const res = await fetch(`/api/bookings/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: target?.status || "PENDING",
+          notes: existingNotes,
+        }),
+      });
+
+      if (res.ok) {
+        const updated = await res.json();
+        setBookings(bookings.map((b) => (b.id === id ? updated : b)));
+        setActiveBooking(updated);
+        setNewNoteInput("");
+      }
+    } catch (err) {
+      console.error("Failed to save note:", err);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this booking record?")) return;
+    try {
+      const res = await fetch(`/api/bookings/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setBookings(bookings.filter((b) => b.id !== id));
+        if (activeBooking && activeBooking.id === id) {
+          setActiveBooking(null);
+        }
+        loadData();
+      }
+    } catch (e) {
+      console.error("Failed to delete booking:", e);
+    }
+  };
+
+  const handleExport = () => {
+    const query = new URLSearchParams({
+      search,
+      status: statusFilter,
+      paymentStatus: paymentFilter,
+    }).toString();
+    window.open(`/api/bookings/export?${query}`, "_blank");
+  };
+
+  const openBookingInspector = (booking: Booking) => {
+    setActiveBooking(booking);
+    setSelectedVehicleId(booking.vehicle?.id || "");
+    setNewNoteInput("");
+  };
+
+  const getStatusBadge = (status: BookingStatus) => {
+    switch (status) {
+      case "PENDING":
+        return "bg-yellow-500/10 text-yellow-400 border-yellow-500/20";
+      case "CONFIRMED":
+        return "bg-blue-500/10 text-blue-400 border-blue-500/20";
+      case "DRIVER_ASSIGNED":
+      case "VEHICLE_ASSIGNED":
+        return "bg-purple-500/10 text-purple-400 border-purple-500/20 font-bold";
+      case "IN_PROGRESS":
+      case "IN_TRANSIT":
+        return "bg-amber-500/20 text-amber-300 border-amber-500/40 animate-pulse font-extrabold";
+      case "COMPLETED":
+        return "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-black";
+      case "CANCELLED":
+        return "bg-rose-500/10 text-rose-400 border-rose-500/20";
+      default:
+        return "bg-slate-500/10 text-slate-400 border-slate-500/20";
+    }
+  };
+
+  const getStepIndex = (status: BookingStatus) => {
+    switch (status) {
+      case "PENDING": return 1;
+      case "CONFIRMED": return 2;
+      case "DRIVER_ASSIGNED":
+      case "VEHICLE_ASSIGNED": return 3;
+      case "IN_PROGRESS":
+      case "IN_TRANSIT": return 4;
+      case "COMPLETED": return 5;
+      case "CANCELLED": return 0;
+      default: return 1;
+    }
   };
 
   return (
     <div className="bg-slate-950 min-h-screen text-slate-100 p-8 space-y-8">
+      
       {/* Title Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/5 pb-6 gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-50 tracking-tight flex items-center gap-2.5">
-            <CalendarRange className="w-8 h-8 text-accent" />
-            <span>Bookings Dispatch Control</span>
+            <Truck className="w-8 h-8 text-accent" />
+            <span>Booking & Fleet Dispatch CRM</span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">Assign drivers, monitor routes, manage live trip dispatch statuses, and audit billing ledgers.</p>
+          <p className="text-xs text-slate-400 mt-1">
+            Dispatch fleet vehicles, assign drivers, track booking timelines, and monitor Razorpay payment statuses.
+          </p>
         </div>
         <button
           onClick={handleExport}
-          className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold py-2.5 px-6 rounded-lg text-sm tracking-wide transition-all border border-white/10 shadow-lg"
+          className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold py-2.5 px-6 rounded-lg text-xs tracking-wider uppercase transition-all border border-white/10 shadow-lg"
         >
           <Download className="w-4 h-4 text-accent" />
-          <span>Export CSV</span>
+          <span>Export Dispatch Report</span>
         </button>
       </div>
 
-      {/* Grid: Search controls */}
-      <div className="glassmorphism p-6 rounded-xl border border-white/5 flex flex-col md:flex-row gap-6 items-center justify-between">
+      {/* Stats Lifecycle Pipeline Counters */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+        <div 
+          onClick={() => { setStatusFilter(""); setCurrentPage(1); }}
+          className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
+            statusFilter === "" ? "border-accent bg-accent/10" : "border-white/5 hover:border-white/20"
+          }`}
+        >
+          <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Total Dispatches</div>
+          <div className="text-xl font-black text-slate-50 mt-1">{stats.total}</div>
+        </div>
+
+        <div 
+          onClick={() => { setStatusFilter("PENDING"); setCurrentPage(1); }}
+          className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
+            statusFilter === "PENDING" ? "border-yellow-400 bg-yellow-500/10" : "border-white/5 hover:border-white/20"
+          }`}
+        >
+          <div className="text-[10px] text-yellow-400 uppercase font-bold tracking-wider">PENDING</div>
+          <div className="text-xl font-black text-yellow-400 mt-1">{stats.PENDING}</div>
+        </div>
+
+        <div 
+          onClick={() => { setStatusFilter("CONFIRMED"); setCurrentPage(1); }}
+          className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
+            statusFilter === "CONFIRMED" ? "border-blue-400 bg-blue-500/10" : "border-white/5 hover:border-white/20"
+          }`}
+        >
+          <div className="text-[10px] text-blue-400 uppercase font-bold tracking-wider">CONFIRMED</div>
+          <div className="text-xl font-black text-blue-400 mt-1">{stats.CONFIRMED}</div>
+        </div>
+
+        <div 
+          onClick={() => { setStatusFilter("VEHICLE_ASSIGNED"); setCurrentPage(1); }}
+          className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
+            statusFilter === "VEHICLE_ASSIGNED" || statusFilter === "DRIVER_ASSIGNED" ? "border-purple-400 bg-purple-500/10" : "border-white/5 hover:border-white/20"
+          }`}
+        >
+          <div className="text-[10px] text-purple-400 uppercase font-bold tracking-wider">ASSIGNED</div>
+          <div className="text-xl font-black text-purple-400 mt-1">{stats.VEHICLE_ASSIGNED + stats.DRIVER_ASSIGNED}</div>
+        </div>
+
+        <div 
+          onClick={() => { setStatusFilter("IN_PROGRESS"); setCurrentPage(1); }}
+          className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
+            statusFilter === "IN_PROGRESS" ? "border-amber-400 bg-amber-500/10" : "border-white/5 hover:border-white/20"
+          }`}
+        >
+          <div className="text-[10px] text-amber-400 uppercase font-bold tracking-wider">IN PROGRESS</div>
+          <div className="text-xl font-black text-amber-400 mt-1">{stats.IN_PROGRESS}</div>
+        </div>
+
+        <div 
+          onClick={() => { setStatusFilter("COMPLETED"); setCurrentPage(1); }}
+          className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
+            statusFilter === "COMPLETED" ? "border-emerald-400 bg-emerald-500/10" : "border-white/5 hover:border-white/20"
+          }`}
+        >
+          <div className="text-[10px] text-emerald-400 uppercase font-bold tracking-wider">COMPLETED</div>
+          <div className="text-xl font-black text-emerald-400 mt-1">{stats.COMPLETED}</div>
+        </div>
+
+        <div 
+          onClick={() => { setStatusFilter("CANCELLED"); setCurrentPage(1); }}
+          className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
+            statusFilter === "CANCELLED" ? "border-rose-400 bg-rose-500/10" : "border-white/5 hover:border-white/20"
+          }`}
+        >
+          <div className="text-[10px] text-rose-400 uppercase font-bold tracking-wider">CANCELLED</div>
+          <div className="text-xl font-black text-rose-400 mt-1">{stats.CANCELLED}</div>
+        </div>
+      </div>
+
+      {/* Filter & Control Toolbar */}
+      <div className="glassmorphism p-6 rounded-xl border border-white/5 flex flex-col md:flex-row gap-4 items-center justify-between">
+        
+        {/* Search */}
         <div className="relative w-full md:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type="text"
-            placeholder="Search booking number, name, phone, route..."
+            placeholder="Search PNR, customer, driver, reg..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+            onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+            className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all"
           />
         </div>
 
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
-        >
-          <option value="" className="bg-slate-900">All Booking Statuses</option>
-          <option value="PENDING" className="bg-slate-900 text-yellow-400">PENDING</option>
-          <option value="CONFIRMED" className="bg-slate-900 text-blue-400">CONFIRMED</option>
-          <option value="DRIVER_ASSIGNED" className="bg-slate-900 text-cyan-400">DRIVER_ASSIGNED</option>
-          <option value="IN_TRANSIT" className="bg-slate-900 text-green-400">IN_TRANSIT</option>
-          <option value="COMPLETED" className="bg-slate-900 text-slate-400">COMPLETED</option>
-          <option value="CANCELLED" className="bg-slate-900 text-red-400">CANCELLED</option>
-        </select>
+        {/* Filter Dropdowns */}
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          
+          {/* Status Filter */}
+          <select
+            value={statusFilter}
+            onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
+            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+          >
+            <option value="" className="bg-slate-900">All Dispatch Statuses</option>
+            <option value="PENDING" className="bg-slate-900 text-yellow-400">PENDING</option>
+            <option value="CONFIRMED" className="bg-slate-900 text-blue-400">CONFIRMED</option>
+            <option value="VEHICLE_ASSIGNED" className="bg-slate-900 text-purple-400">ASSIGNED (DRIVER/VEHICLE)</option>
+            <option value="IN_PROGRESS" className="bg-slate-900 text-amber-400">IN PROGRESS</option>
+            <option value="COMPLETED" className="bg-slate-900 text-emerald-400">COMPLETED</option>
+            <option value="CANCELLED" className="bg-slate-900 text-rose-400">CANCELLED</option>
+          </select>
+
+          {/* Payment Filter */}
+          <select
+            value={paymentFilter}
+            onChange={(e) => { setPaymentFilter(e.target.value); setCurrentPage(1); }}
+            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+          >
+            <option value="" className="bg-slate-900">All Payment Statuses</option>
+            <option value="SUCCESS" className="bg-slate-900 text-emerald-400">PAID (SUCCESS)</option>
+            <option value="PENDING" className="bg-slate-900 text-yellow-400">PAYMENT PENDING</option>
+            <option value="REFUNDED" className="bg-slate-900 text-slate-400">REFUNDED</option>
+          </select>
+
+          {/* Sort By */}
+          <select
+            value={sortBy}
+            onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }}
+            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+          >
+            <option value="createdAt" className="bg-slate-900">Sort by Date</option>
+            <option value="pickupDateTime" className="bg-slate-900">Sort by Pickup Date</option>
+            <option value="netAmount" className="bg-slate-900">Sort by Net Amount</option>
+          </select>
+
+          {/* Sort Order */}
+          <button
+            onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs font-semibold text-slate-300 hover:text-slate-100 transition-colors"
+          >
+            {sortOrder === "desc" ? "↓ Newest / High" : "↑ Oldest / Low"}
+          </button>
+        </div>
+
       </div>
 
-      {/* Bookings Table */}
-      <div className="glassmorphism rounded-xl border border-white/5 overflow-hidden">
-        {loading ? (
-          <div className="text-center py-12 text-slate-400">Loading booking records...</div>
-        ) : (
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-900 border-b border-white/5 text-slate-400 text-xs font-semibold uppercase tracking-wider">
-                <th className="p-4">Booking ID</th>
-                <th className="p-4">Customer</th>
-                <th className="p-4">Trip details</th>
-                <th className="p-4">Category</th>
-                <th className="p-4">Assigned Chauffeur</th>
-                <th className="p-4">Payment</th>
-                <th className="p-4">Trip Status</th>
-                <th className="p-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5 text-sm">
-              {bookings.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="text-center py-12 text-slate-500">
-                    No booking records found matching current query filters.
-                    </td>
-                </tr>
-              ) : (
-                bookings.map((booking) => (
-                  <tr key={booking.id} className="hover:bg-white/5 transition-colors">
-                    <td className="p-4">
-                      <div className="font-mono font-bold text-slate-200">{booking.bookingNumber}</div>
-                      <div className="text-[10px] text-slate-500 mt-0.5">{booking.type}</div>
-                    </td>
-                    <td className="p-4">
-                      <div className="font-bold text-slate-200">{booking.customer.name}</div>
-                      <div className="text-xs text-slate-500 mt-0.5">{booking.customer.phone}</div>
-                    </td>
-                    <td className="p-4">
-                      <div className="text-slate-300 text-xs truncate max-w-xs">{booking.pickupLocation}</div>
-                      {booking.dropLocation && (
-                        <div className="text-slate-500 text-xs truncate max-w-xs mt-0.5">to {booking.dropLocation}</div>
-                      )}
-                      <div className="text-[10px] text-accent mt-1">{new Date(booking.pickupDateTime).toLocaleString("en-IN")}</div>
-                    </td>
-                    <td className="p-4 text-slate-300 font-medium text-xs">
-                      {booking.vehicleCategory.name}
-                    </td>
-                    <td className="p-4">
-                      {booking.vehicle ? (
-                        <div>
-                          <div className="font-bold text-slate-200 text-xs">{booking.vehicle.registrationNumber}</div>
-                          <div className="text-[10px] text-slate-400">{booking.vehicle.driver?.name || "No Driver Assigned"}</div>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => { setActiveBooking(booking); setAssignModalOpen(true); }}
-                          className="bg-accent/10 hover:bg-accent/20 border border-accent/20 text-accent font-bold py-1 px-2.5 rounded text-[10px] uppercase tracking-wider transition-all"
-                        >
-                          Assign Cab
-                        </button>
-                      )}
-                    </td>
-                    <td className="p-4">
-                      <span className={`text-[10px] font-bold py-0.5 px-2 rounded-full border ${
-                        booking.payments?.[0]?.status === "SUCCESS"
-                          ? "bg-green-500/10 text-green-400 border-green-500/20"
-                          : booking.payments?.[0]?.status === "REFUNDED"
-                          ? "bg-slate-500/10 text-slate-400 border-slate-500/20"
-                          : "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
-                      }`}>
-                        {booking.payments?.[0]?.status || "PENDING"}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <select
-                        value={booking.status}
-                        onChange={(e) => handleStatusChange(booking.id, e.target.value)}
-                        className={`text-[10px] font-bold bg-slate-950/60 border rounded py-1 px-2 focus:outline-none ${
-                          booking.status === "PENDING" ? "text-yellow-400 border-yellow-500/20" :
-                          booking.status === "CONFIRMED" ? "text-blue-400 border-blue-500/20" :
-                          booking.status === "DRIVER_ASSIGNED" ? "text-cyan-400 border-cyan-500/20" :
-                          booking.status === "IN_TRANSIT" ? "text-green-400 border-green-500/20" :
-                          booking.status === "COMPLETED" ? "text-slate-400 border-slate-500/20" :
-                          "text-red-400 border-red-500/20"
-                        }`}
-                      >
-                        <option value="PENDING" className="bg-slate-900 text-yellow-400">PENDING</option>
-                        <option value="CONFIRMED" className="bg-slate-900 text-blue-400">CONFIRMED</option>
-                        <option value="DRIVER_ASSIGNED" className="bg-slate-900 text-cyan-400">DRIVER_ASSIGNED</option>
-                        <option value="IN_TRANSIT" className="bg-slate-900 text-green-400">IN_TRANSIT</option>
-                        <option value="COMPLETED" className="bg-slate-900 text-slate-400">COMPLETED</option>
-                        <option value="CANCELLED" className="bg-slate-900 text-red-400">CANCELLED</option>
-                      </select>
-                    </td>
-                    <td className="p-4 text-right space-x-2">
-                      <button
-                        onClick={() => { setActiveBooking(booking); setDetailsModalOpen(true); }}
-                        className="bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold py-1 px-3 border border-white/5 rounded text-[10px] uppercase tracking-wider transition-all"
-                      >
-                        Inspect
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        )}
-      </div>
+      {/* Main Split: Bookings Table vs Lifecycle Inspector */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        {/* Bookings Table */}
+        <div className="lg:col-span-7 glassmorphism rounded-xl border border-white/5 overflow-hidden flex flex-col">
+          {loading ? (
+            <div className="text-center py-16 text-slate-400 text-xs">Loading dispatch bookings...</div>
+          ) : (
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-slate-900 border-b border-white/5 text-slate-400 font-semibold uppercase tracking-wider">
+                      <th className="p-4">PNR & Customer</th>
+                      <th className="p-4">Vehicle & Driver</th>
+                      <th className="p-4">Amount & Status</th>
+                      <th className="p-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {bookings.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="text-center py-16 text-slate-500 italic">
+                          No dispatch bookings matching selected criteria found.
+                        </td>
+                      </tr>
+                    ) : (
+                      bookings.map((booking) => {
+                        const isPaid = booking.payments?.some((p) => p.status === "SUCCESS");
+                        return (
+                          <tr 
+                            key={booking.id} 
+                            onClick={() => openBookingInspector(booking)}
+                            className={`hover:bg-white/5 cursor-pointer transition-colors ${
+                              activeBooking?.id === booking.id ? "bg-white/5" : ""
+                            }`}
+                          >
+                            <td className="p-4">
+                              <div className="font-mono font-bold text-accent text-sm">{booking.bookingNumber}</div>
+                              <div className="font-bold text-slate-200 mt-0.5">{booking.customer?.name}</div>
+                              <div className="text-[10px] text-slate-400 font-mono">{booking.customer?.phone}</div>
+                            </td>
+                            <td className="p-4">
+                              <div className="font-bold text-slate-200">{booking.vehicleCategory?.name}</div>
+                              {booking.vehicle ? (
+                                <div className="text-[10px] text-emerald-400 font-mono font-semibold flex items-center gap-1 mt-0.5">
+                                  <Car className="w-3 h-3" />
+                                  <span>{booking.vehicle.registrationNumber}</span>
+                                  {booking.vehicle.driver && (
+                                    <span className="text-slate-400">({booking.vehicle.driver.name})</span>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-[10px] text-yellow-500/80 font-mono italic block mt-0.5">Unassigned</span>
+                              )}
+                            </td>
+                            <td className="p-4">
+                              <div className="font-mono font-black text-slate-100 text-sm">₹{Number(booking.netAmount).toLocaleString("en-IN")}</div>
+                              <div className="flex items-center gap-1.5 mt-1">
+                                <span className={`text-[9px] font-extrabold py-0.5 px-2 rounded-full border uppercase ${getStatusBadge(booking.status)}`}>
+                                  {booking.status}
+                                </span>
+                                <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded border uppercase ${
+                                  isPaid ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
+                                }`}>
+                                  {isPaid ? "PAID" : "UNPAID"}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="p-4 text-right space-x-1" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                onClick={() => {
+                                  openBookingInspector(booking);
+                                  setAssignModalOpen(true);
+                                }}
+                                title="Assign Vehicle & Driver"
+                                className="inline-flex p-1.5 bg-slate-900 border border-white/5 rounded-lg text-slate-400 hover:text-accent transition-colors"
+                              >
+                                <UserCheck className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
 
-      {/* MODAL 1: Assign Vehicle */}
-      {assignModalOpen && activeBooking && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-white/10 rounded-2xl max-w-lg w-full p-6 space-y-6 glassmorphism relative">
-            <button 
-              onClick={() => { setAssignModalOpen(false); setActiveBooking(null); }}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-200"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold text-accent uppercase tracking-widest block">Dispatch allocation</span>
-              <h3 className="text-xl font-bold text-slate-50">Assign Cab for #{activeBooking.bookingNumber}</h3>
-              <p className="text-xs text-slate-400">Preferred Category: <span className="font-bold text-slate-200">{activeBooking.vehicleCategory.name}</span></p>
-            </div>
+              {/* Pagination Bar */}
+              <div className="p-4 bg-slate-900/60 border-t border-white/5 flex items-center justify-between text-xs text-slate-400">
+                <div>
+                  Showing <span className="font-bold text-slate-200">{totalCount > 0 ? (currentPage - 1) * pageSize + 1 : 0}</span> to <span className="font-bold text-slate-200">{Math.min(currentPage * pageSize, totalCount)}</span> of <span className="font-bold text-slate-200">{totalCount}</span> dispatches
+                </div>
 
-            {/* List category matching vehicles */}
-            <div className="space-y-3 max-h-80 overflow-y-auto pt-2">
-              <div className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-1">Available Category Fleet</div>
-              {vehicles
-                .filter(v => v.categoryId === activeBooking.vehicleCategory.id)
-                .map(v => (
-                  <div 
-                    key={v.id} 
-                    className="flex justify-between items-center bg-slate-950/60 p-4 border border-white/5 rounded-xl hover:border-accent/40 transition-all text-xs"
-                  >
-                    <div className="space-y-1">
-                      <div className="font-extrabold text-slate-200 flex items-center gap-1.5">
-                        <Truck className="w-4 h-4 text-accent" />
-                        <span>{v.registrationNumber} ({v.model})</span>
-                      </div>
-                      <div className="text-[10px] text-slate-400 flex items-center gap-1">
-                        <User className="w-3.5 h-3.5 text-slate-500" />
-                        <span>Chauffeur: {v.driver?.name || "No Driver Assigned"}</span>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleVehicleAssign(activeBooking.id, v.id)}
-                      className="bg-primary hover:bg-blue-700 text-white font-bold py-1.5 px-4 rounded text-[10px] uppercase tracking-wider transition-all"
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1">
+                    <span>Per page:</span>
+                    <select
+                      value={pageSize}
+                      onChange={(e) => { setPageSize(parseInt(e.target.value)); setCurrentPage(1); }}
+                      className="bg-slate-950 border border-white/10 rounded px-2 py-1 text-slate-200"
                     >
-                      Assign Trip
+                      <option value="5">5</option>
+                      <option value="10">10</option>
+                      <option value="25">25</option>
+                      <option value="50">50</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage(currentPage - 1)}
+                      className="p-1 bg-slate-950 border border-white/10 rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <span className="px-2 font-mono font-bold text-slate-200">{currentPage} / {totalPages}</span>
+                    <button
+                      disabled={currentPage >= totalPages}
+                      onClick={() => setCurrentPage(currentPage + 1)}
+                      className="p-1 bg-slate-950 border border-white/10 rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
+                    >
+                      <ChevronRight className="w-4 h-4" />
                     </button>
                   </div>
-                ))}
-
-              {vehicles.filter(v => v.categoryId === activeBooking.vehicleCategory.id).length === 0 && (
-                <div className="text-center p-8 bg-slate-950/40 rounded-xl border border-white/5 text-slate-500 text-xs italic space-y-2">
-                  <AlertCircle className="w-6 h-6 mx-auto text-slate-600" />
-                  <p>No active vehicles found in this category.</p>
                 </div>
-              )}
-            </div>
-
-            {/* Actions */}
-            {activeBooking.vehicle && (
-              <button
-                onClick={() => handleVehicleAssign(activeBooking.id, null)}
-                className="w-full bg-slate-950 hover:bg-slate-900 border border-red-500/20 text-red-400 font-bold py-2.5 rounded-lg text-xs uppercase tracking-wider transition-all"
-              >
-                Clear Allocated Vehicle
-              </button>
-            )}
-          </div>
+              </div>
+            </>
+          )}
         </div>
-      )}
 
-      {/* MODAL 2: Details Inspection */}
-      {detailsModalOpen && activeBooking && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-white/10 rounded-2xl max-w-2xl w-full p-6 space-y-6 glassmorphism relative">
-            <button 
-              onClick={() => { setDetailsModalOpen(false); setActiveBooking(null); }}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-200"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold text-accent uppercase tracking-widest block">Full Booking Manifest</span>
-              <h3 className="text-xl font-bold text-slate-50">Booking details: #{activeBooking.bookingNumber}</h3>
-              <p className="text-xs text-slate-400">Created At: {new Date(activeBooking.createdAt).toLocaleString()}</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-300">
+        {/* Dispatch & Lifecycle Inspection Dashboard Panel */}
+        <div className="lg:col-span-5">
+          {activeBooking ? (
+            <div className="bg-slate-900 border border-white/5 p-6 rounded-2xl space-y-6 glassmorphism">
               
-              {/* Left Column: Customer and Trip details */}
-              <div className="space-y-4">
-                <div className="bg-slate-950/60 p-4 border border-white/5 rounded-xl space-y-2.5">
-                  <h4 className="font-extrabold text-slate-100 flex items-center gap-1.5 uppercase tracking-wider text-[10px] text-slate-400">
-                    <User className="w-3.5 h-3.5 text-accent" />
-                    <span>Customer Details</span>
-                  </h4>
-                  <div className="space-y-1">
-                    <div>Name: <span className="font-bold text-slate-200">{activeBooking.customer.name}</span></div>
-                    <div>Phone: <span className="font-bold text-slate-200">{activeBooking.customer.phone}</span></div>
-                    <div>Email: <span className="font-bold text-slate-200">{activeBooking.customer.email}</span></div>
-                  </div>
+              {/* Header */}
+              <div className="flex justify-between items-start border-b border-white/5 pb-4">
+                <div>
+                  <span className="text-[9px] font-extrabold text-accent uppercase tracking-widest block font-mono">{activeBooking.bookingNumber}</span>
+                  <h3 className="text-xl font-extrabold text-slate-50 mt-0.5">{activeBooking.customer?.name}</h3>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Pickup: {new Date(activeBooking.pickupDateTime).toLocaleString("en-IN")}</p>
                 </div>
+                <span className={`text-[10px] font-extrabold py-1 px-3 rounded-full border uppercase ${getStatusBadge(activeBooking.status)}`}>
+                  {activeBooking.status}
+                </span>
+              </div>
 
-                <div className="bg-slate-950/60 p-4 border border-white/5 rounded-xl space-y-2.5">
-                  <h4 className="font-extrabold text-slate-100 flex items-center gap-1.5 uppercase tracking-wider text-[10px] text-slate-400">
-                    <MapPin className="w-3.5 h-3.5 text-accent" />
-                    <span>Route & Timing</span>
-                  </h4>
-                  <div className="space-y-1 leading-relaxed">
-                    <div>Trip Type: <span className="font-bold text-slate-200">{activeBooking.type}</span></div>
-                    <div>Pickup Address: <span className="font-bold text-slate-200">{activeBooking.pickupLocation}</span></div>
-                    {activeBooking.dropLocation && (
-                      <div>Drop Address: <span className="font-bold text-slate-200">{activeBooking.dropLocation}</span></div>
-                    )}
-                    <div>Pickup Date & Time: <span className="font-bold text-accent">{new Date(activeBooking.pickupDateTime).toLocaleString("en-IN")}</span></div>
-                    {activeBooking.returnDateTime && (
-                      <div>Return Timings: <span className="font-bold text-slate-200">{new Date(activeBooking.returnDateTime).toLocaleString()}</span></div>
-                    )}
-                  </div>
+              {/* Visual Booking Lifecycle Timeline */}
+              <div className="space-y-2 border-b border-white/5 pb-5">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-accent" />
+                  <span>Dispatch Lifecycle Timeline</span>
+                </div>
+                <div className="grid grid-cols-5 gap-1 pt-1">
+                  {[
+                    { title: "Created", step: 1 },
+                    { title: "Confirmed", step: 2 },
+                    { title: "Assigned", step: 3 },
+                    { title: "In Progress", step: 4 },
+                    { title: "Completed", step: 5 },
+                  ].map((s) => {
+                    const activeStep = getStepIndex(activeBooking.status);
+                    const isDone = activeStep >= s.step;
+                    const isCurrent = activeStep === s.step;
+                    return (
+                      <div key={s.step} className="text-center space-y-1">
+                        <div className={`h-1.5 rounded-full transition-all ${
+                          isDone ? "bg-emerald-400 shadow-sm" : "bg-slate-800"
+                        }`} />
+                        <span className={`text-[8px] font-extrabold uppercase tracking-tight block ${
+                          isCurrent ? "text-accent font-black" : isDone ? "text-slate-300" : "text-slate-600"
+                        }`}>
+                          {s.title}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Right Column: Pricing & Dispatch */}
-              <div className="space-y-4">
-                <div className="bg-slate-950/60 p-4 border border-white/5 rounded-xl space-y-2.5">
-                  <h4 className="font-extrabold text-slate-100 flex items-center gap-1.5 uppercase tracking-wider text-[10px] text-slate-400">
-                    <DollarSign className="w-3.5 h-3.5 text-accent" />
-                    <span>Billing Summary</span>
-                  </h4>
-                  <div className="space-y-1">
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Base Amount:</span>
-                      <span className="font-bold text-slate-200">₹{Number(activeBooking.totalAmount).toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Commercial Tax (GST):</span>
-                      <span className="font-bold text-slate-200">₹{Number(activeBooking.taxAmount).toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between border-t border-white/5 pt-1 mt-1 text-sm">
-                      <span className="text-slate-300 font-bold">Total Net Amount:</span>
-                      <span className="font-extrabold text-accent">₹{Number(activeBooking.netAmount).toLocaleString()}</span>
-                    </div>
+              {/* Status Update Pipeline Selector */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Update Dispatch Status</label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {(["PENDING", "CONFIRMED", "VEHICLE_ASSIGNED", "IN_PROGRESS", "COMPLETED", "CANCELLED"] as BookingStatus[]).map((st) => (
+                    <button
+                      key={st}
+                      type="button"
+                      onClick={() => handleStatusChange(activeBooking.id, st)}
+                      className={`py-1.5 px-2 rounded-lg text-[10px] font-extrabold tracking-wider border transition-all ${
+                        activeBooking.status === st
+                          ? "bg-accent text-slate-950 border-accent font-black shadow-md"
+                          : "bg-slate-950/60 text-slate-400 border-white/10 hover:border-white/20 hover:text-slate-200"
+                      }`}
+                    >
+                      {st === "VEHICLE_ASSIGNED" ? "ASSIGNED" : st}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Driver & Vehicle Assignment Card */}
+              <div className="bg-slate-950/60 p-4 rounded-xl border border-white/10 space-y-3">
+                <div className="flex justify-between items-center">
+                  <div className="text-[10px] font-extrabold text-accent uppercase tracking-wider flex items-center gap-1.5">
+                    <Car className="w-4 h-4" />
+                    <span>Assigned Vehicle & Driver</span>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => setAssignModalOpen(true)}
+                    className="text-[10px] font-bold text-slate-300 hover:text-white bg-slate-900 border border-white/10 px-2.5 py-1 rounded transition-colors"
+                  >
+                    Change Assignment
+                  </button>
                 </div>
 
-                <div className="bg-slate-950/60 p-4 border border-white/5 rounded-xl space-y-2.5">
-                  <h4 className="font-extrabold text-slate-100 flex items-center gap-1.5 uppercase tracking-wider text-[10px] text-slate-400">
-                    <Car className="w-3.5 h-3.5 text-accent" />
-                    <span>Dispatch Details</span>
-                  </h4>
-                  {activeBooking.vehicle ? (
-                    <div className="space-y-1">
-                      <div>Allocated Vehicle: <span className="font-bold text-slate-200">{activeBooking.vehicle.registrationNumber} ({activeBooking.vehicle.model})</span></div>
-                      <div>Driver Name: <span className="font-bold text-slate-200">{activeBooking.vehicle.driver?.name || "N/A"}</span></div>
-                      <div>Driver Phone: <span className="font-bold text-slate-200">{activeBooking.vehicle.driver?.phone || "N/A"}</span></div>
+                {activeBooking.vehicle ? (
+                  <div className="space-y-1 text-xs">
+                    <div className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                      <span>{activeBooking.vehicle.model}</span>
+                      <span className="font-mono text-emerald-400 text-xs px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
+                        {activeBooking.vehicle.registrationNumber}
+                      </span>
                     </div>
-                  ) : (
-                    <div className="text-slate-500 italic text-[11px]">No vehicle dispatched for this trip segment yet.</div>
-                  )}
+                    {activeBooking.vehicle.driver ? (
+                      <div className="text-slate-400 flex items-center gap-1.5 pt-1">
+                        <User className="w-3.5 h-3.5 text-accent" />
+                        <span>Driver: <strong className="text-slate-200">{activeBooking.vehicle.driver.name}</strong> ({activeBooking.vehicle.driver.phone})</span>
+                      </div>
+                    ) : (
+                      <div className="text-amber-400 text-[11px] italic">No driver linked to vehicle registration in fleet.</div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-yellow-400/90 text-xs italic">
+                    No vehicle assigned yet. Click &quot;Change Assignment&quot; to pick from fleet.
+                  </div>
+                )}
+              </div>
+
+              {/* Financial & Payment Breakdown */}
+              <div className="space-y-2 border-t border-white/5 pt-4 text-xs text-slate-300">
+                <div className="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-lg border border-white/5">
+                  <span className="text-slate-400">Pickup Location:</span>
+                  <span className="font-medium text-slate-100">{activeBooking.pickupLocation}</span>
+                </div>
+                {activeBooking.dropLocation && (
+                  <div className="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-lg border border-white/5">
+                    <span className="text-slate-400">Drop Location:</span>
+                    <span className="font-medium text-slate-100">{activeBooking.dropLocation}</span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-lg border border-white/5">
+                  <span className="text-slate-400">Net Amount / Tariff:</span>
+                  <span className="font-mono font-black text-accent text-sm">₹{Number(activeBooking.netAmount).toLocaleString("en-IN")}</span>
+                </div>
+
+                {/* Razorpay transaction badge */}
+                {activeBooking.payments && activeBooking.payments.length > 0 && (
+                  <div className="bg-slate-950/40 p-3 rounded-lg border border-white/5 space-y-1 font-mono text-[11px]">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase font-sans tracking-wider">Razorpay Payment Transaction</div>
+                    <div className="flex justify-between text-slate-300">
+                      <span>Order ID:</span>
+                      <span className="text-slate-100 font-bold">{activeBooking.payments[0].razorpayOrderId}</span>
+                    </div>
+                    <div className="flex justify-between text-slate-300">
+                      <span>Gateway Status:</span>
+                      <span className="text-emerald-400 font-extrabold uppercase">{activeBooking.payments[0].status}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Dispatch Trip Notes & History Log */}
+              <div className="space-y-3 border-t border-white/5 pt-4">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <MessageSquare className="w-3.5 h-3.5 text-accent" />
+                  <span>Dispatch Notes & Trip Log</span>
+                </label>
+
+                {activeBooking.notes ? (
+                  <div className="bg-slate-950/80 p-3 rounded-lg border border-white/10 text-xs font-mono text-slate-300 max-h-36 overflow-y-auto whitespace-pre-wrap leading-relaxed space-y-1 scrollbar-thin">
+                    {activeBooking.notes}
+                  </div>
+                ) : (
+                  <div className="text-[11px] text-slate-500 italic">No dispatch trip notes logged yet.</div>
+                )}
+
+                <div className="space-y-2">
+                  <textarea
+                    rows={3}
+                    value={newNoteInput}
+                    onChange={(e) => setNewNoteInput(e.target.value)}
+                    placeholder="Type dispatch comment or trip log entry..."
+                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent resize-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleAddNoteLog(activeBooking.id)}
+                    className="w-full bg-primary hover:bg-blue-600 text-white font-bold py-2 rounded-lg text-xs tracking-wider uppercase transition-all shadow-md"
+                  >
+                    Log Dispatch Note
+                  </button>
                 </div>
               </div>
 
             </div>
+          ) : (
+            <div className="bg-slate-900/40 border border-white/5 p-12 rounded-2xl text-center text-slate-500 text-xs italic space-y-2">
+              <AlertCircle className="w-8 h-8 mx-auto text-slate-600 animate-pulse" />
+              <p>Select a dispatch booking from the table to assign fleet vehicles, inspect timelines, and manage trip notes.</p>
+            </div>
+          )}
+        </div>
 
-            {/* Outstation details or Rental details */}
-            {(activeBooking.rentalDurationHrs || activeBooking.notes) && (
-              <div className="bg-slate-950/60 p-4 border border-white/5 rounded-xl text-xs space-y-1.5">
-                <h4 className="font-extrabold uppercase tracking-wider text-[10px] text-slate-500">Additional Rental Manifest Notes</h4>
-                {activeBooking.rentalDurationHrs && (
-                  <div className="text-slate-300">Package Duration Boundaries: <span className="font-bold text-slate-200">{activeBooking.rentalDurationHrs} Hrs / {activeBooking.rentalDurationKms} Kms</span></div>
-                )}
-                {activeBooking.notes && (
-                  <p className="text-slate-400 italic font-normal">"{activeBooking.notes}"</p>
-                )}
+      </div>
+
+      {/* Driver & Vehicle Assignment Modal */}
+      {assignModalOpen && activeBooking && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-white/10 rounded-2xl max-w-md w-full p-6 space-y-6 shadow-2xl">
+            <div className="flex justify-between items-center border-b border-white/5 pb-4">
+              <div>
+                <h3 className="text-lg font-bold text-slate-50">Assign Fleet Vehicle & Driver</h3>
+                <p className="text-xs text-slate-400 font-mono mt-0.5">{activeBooking.bookingNumber}</p>
               </div>
-            )}
-
-            {/* Actions */}
-            <div className="flex gap-2">
               <button
-                onClick={() => { setDetailsModalOpen(false); setAssignModalOpen(true); }}
-                className="flex-1 bg-primary hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5"
+                onClick={() => setAssignModalOpen(false)}
+                className="text-slate-400 hover:text-white p-1"
               >
-                <Car className="w-4 h-4" />
-                <span>Re-assign Dispatched Cab</span>
+                <X className="w-5 h-5" />
               </button>
             </div>
 
+            <div className="space-y-4">
+              <label className="text-xs font-bold text-slate-300 block">Select Vehicle from Active Fleet</label>
+              <select
+                value={selectedVehicleId}
+                onChange={(e) => setSelectedVehicleId(e.target.value)}
+                className="w-full bg-slate-950 border border-white/10 rounded-lg p-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+              >
+                <option value="">Unassign / No Vehicle</option>
+                {vehicles.map((v) => (
+                  <option key={v.id} value={v.id} className="bg-slate-900">
+                    {v.model} &bull; {v.registrationNumber} {v.driver ? `(Driver: ${v.driver.name})` : "(No Driver)"}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setAssignModalOpen(false)}
+                className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 rounded-lg text-xs tracking-wider uppercase transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleAssignVehicle}
+                className="flex-1 bg-accent hover:bg-yellow-500 text-slate-950 font-black py-2.5 rounded-lg text-xs tracking-wider uppercase transition-colors shadow-lg"
+              >
+                Confirm Assignment
+              </button>
+            </div>
           </div>
         </div>
       )}

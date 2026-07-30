@@ -41,6 +41,8 @@ enum BookingStatus {
   PENDING
   CONFIRMED
   DRIVER_ASSIGNED
+  VEHICLE_ASSIGNED
+  IN_PROGRESS
   IN_TRANSIT
   COMPLETED
   CANCELLED
@@ -65,8 +67,11 @@ enum MediaType {
 
 enum LeadStatus {
   NEW
+  READ
   CONTACTED
   QUALIFIED
+  NEGOTIATION
+  WON
   LOST
   ARCHIVED
 }
@@ -193,6 +198,11 @@ model FleetVehicle {
   categoryId         String
   category           VehicleCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   capacity           Int
+  fuelType           String?         @default("DIESEL")
+  transmission       String?         @default("MANUAL")
+  imageUrl           String?
+  perKmRate          Decimal?        @db.Decimal(10, 2)
+  baseDailyRate      Decimal?        @db.Decimal(10, 2)
   status             VehicleStatus   @default(AVAILABLE)
   driverId           String?         @unique
   driver             User?           @relation("DriverVehicle", fields: [driverId], references: [id], onDelete: SetNull)
