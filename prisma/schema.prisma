@@ -141,14 +141,17 @@ model TourPackage {
   title          String
   slug           String          @unique
   description    String          @db.Text
+  destination    String?
   itinerary      Json            // Array of days containing { day: number, title: string, description: string }
   durationDays   Int
   durationNights Int
   basePrice      Decimal         @db.Decimal(10, 2)
+  offerPrice     Decimal?        @db.Decimal(10, 2)
   inclusions     String[]
   exclusions     String[]
   images         String[]
-  status         String          @default("DRAFT") // DRAFT, ACTIVE, ARCHIVED
+  isFeatured     Boolean         @default(false)
+  status         String          @default("DRAFT") // DRAFT, PUBLISHED, ACTIVE, ARCHIVED
   categoryId     String
   category       PackageCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   seoTitle       String?

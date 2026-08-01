@@ -14,6 +14,7 @@ export const blogPostSchema = z.object({
   content: z.string().min(10, "Content must be at least 10 characters"),
   featuredImage: z.string().url("Invalid image URL").or(z.string().length(0)).optional().nullable(),
   published: z.boolean().default(false),
+  publishedAt: z.string().optional().nullable().refine((val) => !val || !isNaN(Date.parse(val)), { message: "Invalid published date format" }),
   categoryId: z.string().uuid("Please select a valid category"),
   tags: z.array(z.string().min(1, "Tag cannot be empty")).default([]),
   seoTitle: z.string().max(70, "SEO Title should not exceed 70 characters").optional().nullable(),

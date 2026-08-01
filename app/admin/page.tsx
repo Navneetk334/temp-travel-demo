@@ -22,6 +22,11 @@ export default async function AdminDashboardPage() {
   const totalCorporateLeads = await prisma.corporateLead.count();
   const totalRentalLeads = await prisma.rentalLead.count();
   const totalBookings = await prisma.booking.count();
+  const totalFleetVehicles = await prisma.fleetVehicle.count();
+  const totalTourPackages = await prisma.tourPackage.count();
+  const totalBlogPosts = await prisma.blogPost.count();
+  const totalGalleryMedia = await prisma.gallery.count();
+  const totalTestimonials = await prisma.testimonial.count();
   
   const paymentAggregation = await prisma.razorpayPayment.aggregate({
     _sum: { amount: true },
@@ -139,6 +144,22 @@ export default async function AdminDashboardPage() {
       icon: Calendar,
       color: "text-green-400",
       href: "/admin/bookings-dispatch"
+    },
+    {
+      title: "Fleet Vehicles",
+      value: totalFleetVehicles.toString(),
+      change: "Commercial fleet cars",
+      icon: Car,
+      color: "text-cyan-400",
+      href: "/admin/fleet"
+    },
+    {
+      title: "Tour Packages",
+      value: totalTourPackages.toString(),
+      change: "Travel & holiday tours",
+      icon: TrendingUp,
+      color: "text-amber-400",
+      href: "/admin/tours"
     },
     {
       title: "Total Payments",

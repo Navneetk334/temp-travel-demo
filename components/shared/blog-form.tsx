@@ -1,8 +1,28 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Plus, ArrowLeft, Save, Globe, Info } from "lucide-react";
+import { 
+  Loader2, 
+  Plus, 
+  ArrowLeft, 
+  Save, 
+  Globe, 
+  Info,
+  Heading1,
+  Heading2,
+  Heading3,
+  Bold,
+  Italic,
+  List,
+  Quote,
+  Link as LinkIcon,
+  Image as ImageIcon,
+  Calendar,
+  Tag,
+  CheckCircle,
+  Clock
+} from "lucide-react";
 
 interface Category {
   id: string;
@@ -17,6 +37,7 @@ interface BlogPostInput {
   content: string;
   featuredImage: string;
   published: boolean;
+  publishedAt?: string | null;
   categoryId: string;
   tags: string[];
   seoTitle: string;
@@ -31,7 +52,17 @@ interface BlogFormProps {
 
 export default function BlogForm({ initialData, isEdit = false }: BlogFormProps) {
   const router = useRouter();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   
+  // Format publishedAt for datetime-local input
+  const formatDateTimeLocal = (dateStr?: string | Date | null) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "";
+    const pad = (n: number) => (n < 10 ? "0" + n : n);
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
   const [formData, setFormData] = useState<BlogPostInput>({
     title: initialData?.title || "",
     slug: initialData?.slug || "",
@@ -39,6 +70,7 @@ export default function BlogForm({ initialData, isEdit = false }: BlogFormProps)
     content: initialData?.content || "",
     featuredImage: initialData?.featuredImage || "",
     published: initialData?.published || false,
+    publishedAt: formatDateTimeLocal(initialData?.publishedAt),
     categoryId: initialData?.categoryId || "",
     tags: initialData?.tags || [],
     seoTitle: initialData?.seoTitle || "",
@@ -47,18 +79,17 @@ export default function BlogForm({ initialData, isEdit = false }: BlogFormProps)
   });
 
   const [categories, setCategories] = useState<Category[]>([]);
-  const [tagInput, setTagInput] = useState(initialData?.tags.join(", ") || "");
+  const [tagInput, setTagInput] = useState(initialData?.tags ? initialData.tags.join(", ") : "");
   const [loading, setLoading] = useState(false);
   const [fetchingCategories, setFetchingCategories] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Category Quick Add State
+  // Quick Category Add State
   const [showQuickCategory, setShowQuickCategory] = useState(false);
   const [newCatName, setNewCatName] = useState("");
   const [newCatSlug, setNewCatSlug] = useState("");
   const [addingCategory, setAddingCategory] = useState(false);
 
-  // Load categories
   useEffect(() => {
     async function loadCategories() {
       try {
@@ -66,6 +97,9 @@ export default function BlogForm({ initialData, isEdit = false }: BlogFormProps)
         if (res.ok) {
           const data = await res.json();
           setCategories(data);
+          if (data.length > 0 && !formData.categoryId && !initialData?.categoryId) {
+            setFormData(prev => ({ ...prev, categoryId: data[0].id }));
+          }
         }
       } catch (err) {
         console.error("Failed to load categories:", err);
@@ -76,7 +110,6 @@ export default function BlogForm({ initialData, isEdit = false }: BlogFormProps)
     loadCategories();
   }, []);
 
-  // Sync title to slug automatically if not in edit mode
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const title = e.target.value;
     const slug = title
@@ -102,7 +135,27 @@ export default function BlogForm({ initialData, isEdit = false }: BlogFormProps)
     setFormData((prev) => ({ ...prev, [name]: checked }));
   };
 
-  // Quick Category Submission
+  // Rich Text Formatting Injection Toolbar
+  const insertFormatting = (tagStart: string, tagEnd: string = "") => {
+    if (!textareaRef.current) return;
+    const textarea = textareaRef.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = formData.content;
+
+    const selected = text.substring(start, end);
+    const replacement = `${tagStart}${selected || "Sample Text"}${tagEnd}`;
+    const newText = text.substring(0, start) + replacement + text.substring(end);
+
+    setFormData(prev => ({ ...prev, content: newText }));
+    
+    // Defer focus & selection restore
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + tagStart.length, start + tagStart.length + (selected || "Sample Text").length);
+    }, 0);
+  };
+
   const handleAddCategory = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (!newCatName.trim() || !newCatSlug.trim()) {
@@ -137,7 +190,6 @@ export default function BlogForm({ initialData, isEdit = false }: BlogFormProps)
     setLoading(true);
     setError(null);
 
-    // Parse tags array
     const tagsArray = tagInput
       .split(",")
       .map((t) => t.trim().toLowerCase())
@@ -147,6 +199,7 @@ export default function BlogForm({ initialData, isEdit = false }: BlogFormProps)
       ...formData,
       tags: tagsArray,
       featuredImage: formData.featuredImage.trim() || null,
+      publishedAt: formData.publishedAt ? new Date(formData.publishedAt).toISOString() : null,
       seoTitle: formData.seoTitle.trim() || null,
       seoDescription: formData.seoDescription.trim() || null,
       seoKeywords: formData.seoKeywords.trim() || null,
@@ -182,12 +235,13 @@ export default function BlogForm({ initialData, isEdit = false }: BlogFormProps)
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      {/* Top action row */}
+      
+      {/* Top Navigation Row */}
       <div className="flex justify-between items-center">
         <button
           type="button"
           onClick={() => router.push("/admin/blog")}
-          className="flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 transition-colors"
+          className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-slate-200 transition-colors uppercase tracking-wider"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Articles</span>
@@ -202,10 +256,10 @@ export default function BlogForm({ initialData, isEdit = false }: BlogFormProps)
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {/* Left main area (Post contents) */}
+        {/* Left Column (Content & Formatting Editor) */}
         <div className="lg:col-span-8 space-y-6">
           <div className="bg-slate-900/40 border border-white/5 rounded-2xl p-6 space-y-4 glassmorphism">
-            <h2 className="text-lg font-bold text-slate-50 border-b border-white/5 pb-2">Article Core Details</h2>
+            <h2 className="text-lg font-bold text-slate-50 border-b border-white/5 pb-2">Article Specifications & Content</h2>
             
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Article Title *</label>
@@ -215,29 +269,29 @@ export default function BlogForm({ initialData, isEdit = false }: BlogFormProps)
                 name="title"
                 value={formData.title}
                 onChange={handleTitleChange}
-                placeholder="e.g. 10 Scenic Routes in Mahabaleshwar"
-                className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-semibold"
+                placeholder="e.g. Top 10 Scenic Road Trips from Pune in Car Rentals"
+                className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-accent transition-all font-semibold"
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Slug Path *</label>
+                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">URL Slug Path *</label>
                 <input
                   type="text"
                   required
                   name="slug"
                   value={formData.slug}
                   onChange={handleInputChange}
-                  placeholder="e.g. scenic-mahabaleshwar-routes"
-                  className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"
+                  placeholder="scenic-road-trips-pune"
+                  className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all font-mono"
                 />
               </div>
 
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Category *</label>
                 {fetchingCategories ? (
-                  <div className="text-xs text-slate-500 py-3">Loading categories...</div>
+                  <div className="text-xs text-slate-500 py-2">Loading categories...</div>
                 ) : (
                   <div className="flex gap-2">
                     <select
@@ -245,7 +299,7 @@ export default function BlogForm({ initialData, isEdit = false }: BlogFormProps)
                       name="categoryId"
                       value={formData.categoryId}
                       onChange={handleInputChange}
-                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
+                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
                     >
                       <option value="">-- Select Category --</option>
                       {categories.map((cat) => (
@@ -257,7 +311,7 @@ export default function BlogForm({ initialData, isEdit = false }: BlogFormProps)
                     <button
                       type="button"
                       onClick={() => setShowQuickCategory(!showQuickCategory)}
-                      className="bg-slate-950 border border-white/10 hover:border-accent p-2.5 rounded-lg text-slate-400 hover:text-accent transition-colors"
+                      className="bg-slate-950 border border-white/10 hover:border-accent p-2 rounded-lg text-slate-400 hover:text-accent transition-colors"
                       title="Add category inline"
                     >
                       <Plus className="w-4 h-4" />
@@ -267,7 +321,7 @@ export default function BlogForm({ initialData, isEdit = false }: BlogFormProps)
               </div>
             </div>
 
-            {/* Quick category add block */}
+            {/* Quick Category Add */}
             {showQuickCategory && (
               <div className="bg-slate-950 border border-white/10 rounded-xl p-4 space-y-3">
                 <div className="text-xs font-bold text-accent">Quick Create Category</div>
@@ -310,55 +364,148 @@ export default function BlogForm({ initialData, isEdit = false }: BlogFormProps)
               </div>
             )}
 
-            <div className="space-y-1">
+            {/* Featured Image & Thumbnail Preview */}
+            <div className="space-y-2">
               <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Featured Image URL</label>
-              <input
-                type="url"
-                name="featuredImage"
-                value={formData.featuredImage}
-                onChange={handleInputChange}
-                placeholder="e.g. https://temptravels.com/images/blog/mahabaleshwar.jpg"
-                className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"
-              />
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="url"
+                  name="featuredImage"
+                  value={formData.featuredImage}
+                  onChange={handleInputChange}
+                  placeholder="https://images.unsplash.com/photo-..."
+                  className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-4 text-xs text-slate-100 focus:outline-none focus:border-accent font-mono"
+                />
+              </div>
+              {formData.featuredImage.trim() && (
+                <div className="relative rounded-xl overflow-hidden border border-white/10 h-40 bg-slate-950 max-w-sm mt-2">
+                  <img
+                    src={formData.featuredImage}
+                    alt="Featured Image Preview"
+                    className="w-full h-full object-cover"
+                    onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                  />
+                </div>
+              )}
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Summary *</label>
+              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Summary / Excerpt *</label>
               <textarea
                 required
                 name="summary"
                 rows={3}
                 value={formData.summary}
                 onChange={handleInputChange}
-                placeholder="Write a brief, catchy summary for the listing page..."
-                className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all resize-none"
+                placeholder="Write a catchy 2-3 sentence article summary for search cards..."
+                className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all resize-none"
               />
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Article Content *</label>
+            {/* Rich Text Editor Section */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Article Content *</label>
+                <div className="text-[10px] text-accent font-mono font-bold">Rich Text HTML Editor</div>
+              </div>
+
+              {/* Formatting Toolbar */}
+              <div className="bg-slate-950 p-2 rounded-t-xl border border-white/10 border-b-0 flex flex-wrap items-center gap-1.5 text-xs text-slate-300">
+                <button
+                  type="button"
+                  onClick={() => insertFormatting("<h2>", "</h2>")}
+                  className="p-1.5 bg-slate-900 border border-white/5 hover:border-accent rounded text-slate-300 hover:text-white font-bold"
+                  title="Heading 2"
+                >
+                  <Heading2 className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => insertFormatting("<h3>", "</h3>")}
+                  className="p-1.5 bg-slate-900 border border-white/5 hover:border-accent rounded text-slate-300 hover:text-white font-bold"
+                  title="Heading 3"
+                >
+                  <Heading3 className="w-3.5 h-3.5" />
+                </button>
+                <div className="h-4 w-px bg-white/10 mx-1" />
+                <button
+                  type="button"
+                  onClick={() => insertFormatting("<b>", "</b>")}
+                  className="p-1.5 bg-slate-900 border border-white/5 hover:border-accent rounded text-slate-300 hover:text-white"
+                  title="Bold"
+                >
+                  <Bold className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => insertFormatting("<i>", "</i>")}
+                  className="p-1.5 bg-slate-900 border border-white/5 hover:border-accent rounded text-slate-300 hover:text-white"
+                  title="Italic"
+                >
+                  <Italic className="w-3.5 h-3.5" />
+                </button>
+                <div className="h-4 w-px bg-white/10 mx-1" />
+                <button
+                  type="button"
+                  onClick={() => insertFormatting("<ul>\n  <li>", "</li>\n</ul>")}
+                  className="p-1.5 bg-slate-900 border border-white/5 hover:border-accent rounded text-slate-300 hover:text-white"
+                  title="Bullet List"
+                >
+                  <List className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => insertFormatting("<blockquote>", "</blockquote>")}
+                  className="p-1.5 bg-slate-900 border border-white/5 hover:border-accent rounded text-slate-300 hover:text-white"
+                  title="Blockquote"
+                >
+                  <Quote className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => insertFormatting('<a href="https://temptravels.com">', '</a>')}
+                  className="p-1.5 bg-slate-900 border border-white/5 hover:border-accent rounded text-slate-300 hover:text-white"
+                  title="Insert Link"
+                >
+                  <LinkIcon className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => insertFormatting('<img src="https://images.unsplash.com/photo-..." alt="Image description" className="rounded-xl w-full my-4" />')}
+                  className="p-1.5 bg-slate-900 border border-white/5 hover:border-accent rounded text-slate-300 hover:text-white"
+                  title="Embed Image"
+                >
+                  <ImageIcon className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
               <textarea
+                ref={textareaRef}
                 required
                 name="content"
-                rows={12}
+                rows={14}
                 value={formData.content}
                 onChange={handleInputChange}
-                placeholder="Write full HTML/markdown rich text blog content here..."
-                className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"
+                placeholder="Write full HTML/rich text article content..."
+                className="w-full bg-slate-950/50 border border-white/10 rounded-b-xl py-3 px-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all font-mono leading-relaxed resize-y"
               />
             </div>
+
           </div>
         </div>
 
-        {/* Right Sidebar (SEO & Publishing metadata) */}
+        {/* Right Column (Publishing, Scheduled Date, SEO) */}
         <div className="lg:col-span-4 space-y-6">
           
-          {/* Publish & Tags Card */}
+          {/* Publishing & Scheduled Date Card */}
           <div className="bg-slate-900/40 border border-white/5 rounded-2xl p-6 space-y-4 glassmorphism">
-            <h2 className="text-md font-bold text-slate-50 border-b border-white/5 pb-2">Publish Control</h2>
+            <h2 className="text-md font-bold text-slate-50 border-b border-white/5 pb-2 flex items-center gap-1.5">
+              <Clock className="w-4 h-4 text-accent" />
+              <span>Publish & Scheduling</span>
+            </h2>
             
-            <div className="flex items-center justify-between py-2">
-              <span className="text-sm font-semibold text-slate-300">Publish to Public</span>
+            <div className="flex items-center justify-between py-2 border-b border-white/5">
+              <span className="text-xs font-bold text-slate-200">Publish Article</span>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
@@ -367,91 +514,108 @@ export default function BlogForm({ initialData, isEdit = false }: BlogFormProps)
                   onChange={handleCheckboxChange}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-slate-950 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                <div className="w-11 h-6 bg-slate-950 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
               </label>
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tags (comma separated)</label>
+              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Scheduled Publish Date & Time</label>
+              <input
+                type="datetime-local"
+                name="publishedAt"
+                value={formData.publishedAt || ""}
+                onChange={handleInputChange}
+                className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all font-mono"
+              />
+              <span className="block text-[10px] text-slate-500 mt-1">Leave blank to publish immediately upon saving.</span>
+            </div>
+
+            <div className="space-y-1 pt-2">
+              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Tags (Comma Separated)</label>
               <input
                 type="text"
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
-                placeholder="e.g. road-trip, travel, cabs"
-                className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                placeholder="e.g. car-rentals, travel-tips, pune-cab"
+                className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all"
               />
-              <span className="block text-[10px] text-slate-500 mt-1">Separate multiple tags with a comma.</span>
+              {tagInput && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {tagInput.split(",").map((t, idx) => {
+                    const tagClean = t.trim();
+                    if (!tagClean) return null;
+                    return (
+                      <span key={idx} className="text-[9px] bg-accent/10 border border-accent/20 text-accent font-bold px-2 py-0.5 rounded-full">
+                        #{tagClean}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* SEO Details Card */}
+          {/* SEO Metadata Card */}
           <div className="bg-slate-900/40 border border-white/5 rounded-2xl p-6 space-y-4 glassmorphism">
             <h2 className="text-md font-bold text-slate-50 border-b border-white/5 pb-2 flex items-center gap-1.5">
               <Globe className="w-4 h-4 text-accent" />
-              <span>Search Engine Optimization</span>
+              <span>SEO Search Meta Tags</span>
             </h2>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">SEO Title Override</label>
+              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">SEO Title Override</label>
               <input
                 type="text"
                 name="seoTitle"
                 value={formData.seoTitle}
                 onChange={handleInputChange}
                 maxLength={70}
-                placeholder="Leave blank to use article title"
-                className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                placeholder="Max 70 chars"
+                className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all"
               />
-              <span className="block text-[10px] text-slate-500 mt-1">Ideal length: 50-60 characters. Max: 70.</span>
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">SEO Meta Description</label>
+              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">SEO Meta Description</label>
               <textarea
                 name="seoDescription"
                 rows={3}
                 value={formData.seoDescription}
                 onChange={handleInputChange}
                 maxLength={160}
-                placeholder="Summary describing the post search listing..."
-                className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all resize-none"
+                placeholder="Max 160 chars summary for search engines..."
+                className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all resize-none"
               />
-              <span className="block text-[10px] text-slate-500 mt-1">Ideal length: 120-150 characters. Max: 160.</span>
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">SEO Meta Keywords</label>
+              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">SEO Meta Keywords</label>
               <input
                 type="text"
                 name="seoKeywords"
                 value={formData.seoKeywords}
                 onChange={handleInputChange}
-                placeholder="e.g. cab service mumbai, lonavala travel guide"
-                className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                placeholder="e.g. cab service, travel guide"
+                className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all"
               />
-            </div>
-
-            <div className="bg-slate-950 border border-white/5 rounded-xl p-3 flex gap-2 text-[10px] text-slate-400">
-              <Info className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-              <span>We inject OpenGraph, Twitter Card summary links, and Canonical values automatically based on these SEO definitions.</span>
             </div>
           </div>
 
-          {/* Action Card */}
-          <div className="space-y-3">
+          {/* Submit Action */}
+          <div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-accent hover:bg-amber-600 disabled:bg-accent/50 text-slate-950 font-bold py-3 rounded-lg shadow-lg tracking-wider transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+              className="w-full flex items-center justify-center gap-2 bg-accent hover:bg-yellow-500 disabled:bg-accent/50 text-slate-950 font-black py-3 rounded-xl shadow-lg uppercase tracking-wider text-xs transition-all"
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                   <span>Saving Article...</span>
                 </>
               ) : (
                 <>
-                  <Save className="w-5 h-5" />
+                  <Save className="w-4 h-4" />
                   <span>{isEdit ? "Update Article" : "Publish Article"}</span>
                 </>
               )}

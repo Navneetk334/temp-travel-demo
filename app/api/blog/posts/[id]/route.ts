@@ -14,7 +14,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       where: { id },
       include: {
         category: {
-          select: { name: true, slug: true },
+          select: { id: true, name: true, slug: true },
         },
       },
     });
@@ -45,7 +45,6 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: result.error.flatten() }, { status: 400 });
     }
 
-    // Check if post exists
     const post = await prisma.blogPost.findUnique({
       where: { id },
     });
@@ -54,7 +53,6 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Blog post not found" }, { status: 404 });
     }
 
-    // Check if slug is taken by another post
     if (result.data.slug !== post.slug) {
       const slugDuplicate = await prisma.blogPost.findUnique({
         where: { slug: result.data.slug },
@@ -62,6 +60,13 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
       if (slugDuplicate) {
         return NextResponse.json({ error: "Blog slug already taken" }, { status: 400 });
       }
+    }
+
+    let publishedAtDate: Date | null = null;
+    if (result.data.published) {
+      publishedAtDate = result.data.publishedAt
+        ? new Date(result.data.publishedAt)
+        : (post.publishedAt || new Date());
     }
 
     const updated = await prisma.blogPost.update({
@@ -73,13 +78,16 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
         content: result.data.content,
         featuredImage: result.data.featuredImage || null,
         published: result.data.published,
-        publishedAt: result.data.published ? (post.publishedAt || new Date()) : null,
+        publishedAt: publishedAtDate,
         categoryId: result.data.categoryId,
         tags: result.data.tags,
         seoTitle: result.data.seoTitle || null,
         seoDescription: result.data.seoDescription || null,
         seoKeywords: result.data.seoKeywords || null,
       },
+      include: {
+        category: true,
+      }
     });
 
     return NextResponse.json(updated, { status: 200 });

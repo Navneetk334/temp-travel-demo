@@ -49,7 +49,6 @@ export async function PUT(
       return NextResponse.json({ error: result.error.flatten() }, { status: 400 });
     }
 
-    // Check slug uniqueness excluding this record
     const existing = await prisma.tourPackage.findFirst({
       where: { 
         slug: result.data.slug,
@@ -65,8 +64,12 @@ export async function PUT(
       data: {
         ...result.data,
         basePrice: result.data.basePrice.toString(),
+        offerPrice: result.data.offerPrice ? result.data.offerPrice.toString() : null,
         itinerary: result.data.itinerary as any,
       },
+      include: {
+        category: true,
+      }
     });
 
     return NextResponse.json(updated, { status: 200 });
@@ -87,7 +90,6 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
     }
 
-    // Check if package has active bookings
     const bookingsCount = await prisma.booking.count({
       where: { tourPackageId: id },
     });
