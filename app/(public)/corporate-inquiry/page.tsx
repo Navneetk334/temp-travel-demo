@@ -2,6 +2,28 @@
 
 import React, { useState } from "react";
 import { Building2, User, Mail, Phone, Users, MapPin, Layers, Send, CheckCircle2 } from "lucide-react";
+import LocationInput from "@/components/shared/location-input";
+
+function timeToMinutes(hourStr: string, minStr: string, ampm: string): number {
+  let hour = parseInt(hourStr, 10);
+  const min = parseInt(minStr, 10);
+  if (ampm === "PM" && hour !== 12) hour += 12;
+  if (ampm === "AM" && hour === 12) hour = 0;
+  return hour * 60 + min;
+}
+
+function validateName(name: string): boolean {
+  return /^[a-zA-Z\s.-]+$/.test(name.trim());
+}
+
+function validateEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+function validatePhone(phone: string): boolean {
+  const digitsOnly = phone.replace(/\D/g, "");
+  return digitsOnly.length === 10;
+}
 
 export default function CorporateInquiryPage() {
   const [formData, setFormData] = useState({
@@ -31,6 +53,42 @@ export default function CorporateInquiryPage() {
     setLoading(true);
     setError("");
 
+    // 1. Shift Time Validation
+    const startMins = timeToMinutes(formData.shiftStartHour, formData.shiftStartMinute, formData.shiftStartAmpm);
+    const endMins = timeToMinutes(formData.shiftEndHour, formData.shiftEndMinute, formData.shiftEndAmpm);
+    if (startMins === endMins) {
+      setError("Shift End Time cannot be equal to Shift Start Time.");
+      setLoading(false);
+      return;
+    }
+    if (startMins > endMins) {
+      setError("Shift End Time must be after Shift Start Time.");
+      setLoading(false);
+      return;
+    }
+
+    // 2. Contact Name Validation
+    if (!validateName(formData.contactName)) {
+      setError("Contact Name can only contain alphabetic characters.");
+      setLoading(false);
+      return;
+    }
+
+    // 3. Email Validation
+    if (!validateEmail(formData.email)) {
+      setError("Please enter a valid work email address.");
+      setLoading(false);
+      return;
+    }
+
+    // 4. Mobile Number Validation
+    const digitsPhone = formData.phone.replace(/\D/g, "");
+    if (digitsPhone.length !== 10) {
+      setError("Mobile number must be exactly 10 digits.");
+      setLoading(false);
+      return;
+    }
+
     const shiftIn = `${formData.shiftStartHour}:${formData.shiftStartMinute} ${formData.shiftStartAmpm}`;
     const shiftOut = `${formData.shiftEndHour}:${formData.shiftEndMinute} ${formData.shiftEndAmpm}`;
     const formattedReqs = `Gender: ${formData.gender}. Shift Timings: In at ${shiftIn}, Out at ${shiftOut}.${formData.requirements ? ` Notes: ${formData.requirements}` : ""}`;
@@ -39,7 +97,7 @@ export default function CorporateInquiryPage() {
       companyName: formData.companyName,
       contactName: formData.contactName,
       email: formData.email,
-      phone: formData.phone,
+      phone: `+91${digitsPhone}`,
       serviceType: `${formData.serviceType} (Shift In: ${shiftIn} | Out: ${shiftOut})`,
       employeeCount: formData.employeeCount ? Number(formData.employeeCount) : null,
       pickupLocations: formData.pickupLocations || null,
@@ -149,9 +207,9 @@ export default function CorporateInquiryPage() {
                     <input
                       type="text"
                       required
-                      placeholder="e.g. John Doe (HR Manager)"
+                      placeholder="e.g. John Doe"
                       value={formData.contactName}
-                      onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, contactName: e.target.value.replace(/[^a-zA-Z\s.-]/g, "") })}
                       className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
                     />
                   </div>
@@ -176,16 +234,17 @@ export default function CorporateInquiryPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mobile Number</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mobile Number (10 Digits)</label>
                   <div className="relative">
                     <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                     <input
                       type="tel"
                       required
-                      placeholder="e.g. +919999999999"
+                      maxLength={10}
+                      placeholder="e.g. 9999999999"
                       value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
+                      className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"
                     />
                   </div>
                 </div>
@@ -311,17 +370,12 @@ export default function CorporateInquiryPage() {
               {/* Pickup locations */}
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Primary Pickup / Drop Locations</label>
-                <div className="relative">
-                  <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Kandivali East, Andheri West, Thane, Vashi"
-                    value={formData.pickupLocations}
-                    onChange={(e) => setFormData({ ...formData, pickupLocations: e.target.value })}
-                    className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
-                  />
-                </div>
+                <LocationInput
+                  required
+                  placeholder="e.g. Airport, Hinjewadi, BKC, Connaught Place"
+                  value={formData.pickupLocations}
+                  onChange={(val) => setFormData({ ...formData, pickupLocations: val })}
+                />
               </div>
 
               {/* Requirements details */}

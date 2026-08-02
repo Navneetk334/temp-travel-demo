@@ -27,11 +27,32 @@ export default function ContactForm() {
     setError(null);
     setSuccess(false);
 
+    const nameTrim = formData.name.trim();
+    if (!/^[a-zA-Z\s.-]+$/.test(nameTrim)) {
+      setError("Name can only contain alphabetic characters.");
+      setLoading(false);
+      return;
+    }
+
+    const emailTrim = formData.email.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrim)) {
+      setError("Please enter a valid email address.");
+      setLoading(false);
+      return;
+    }
+
+    const phoneTrim = formData.phone.trim();
+    if (phoneTrim && phoneTrim.replace(/\D/g, "").length !== 10) {
+      setError("Mobile number must be exactly 10 digits.");
+      setLoading(false);
+      return;
+    }
+
     // Prepare payload
     const payload = {
-      name: formData.name.trim(),
-      email: formData.email.trim(),
-      phone: formData.phone.trim() || null,
+      name: nameTrim,
+      email: emailTrim,
+      phone: phoneTrim ? `+91${phoneTrim.replace(/\D/g, "")}` : null,
       subject: formData.subject.trim() || null,
       message: formData.message.trim(),
     };
@@ -110,7 +131,7 @@ export default function ContactForm() {
               name="name"
               required
               value={formData.name}
-              onChange={handleChange}
+              onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value.replace(/[^a-zA-Z\s.-]/g, "") }))}
               placeholder="e.g. John Doe"
               className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
             />
@@ -131,14 +152,15 @@ export default function ContactForm() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mobile Number (with country code)</label>
+            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mobile Number (10 Digits)</label>
             <input
               type="tel"
               name="phone"
+              maxLength={10}
               value={formData.phone}
-              onChange={handleChange}
-              placeholder="e.g. +919999999999"
-              className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+              onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value.replace(/\D/g, "").slice(0, 10) }))}
+              placeholder="e.g. 9999999999"
+              className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"
             />
           </div>
           <div className="space-y-1">

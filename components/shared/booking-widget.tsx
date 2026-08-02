@@ -16,7 +16,30 @@ import {
   Loader2
 } from "lucide-react";
 
+import LocationInput from "./location-input";
+
 type BookingTab = "corporate" | "local" | "outstation" | "tours";
+
+function timeToMinutes(hourStr: string, minStr: string, ampm: string): number {
+  let hour = parseInt(hourStr, 10);
+  const min = parseInt(minStr, 10);
+  if (ampm === "PM" && hour !== 12) hour += 12;
+  if (ampm === "AM" && hour === 12) hour = 0;
+  return hour * 60 + min;
+}
+
+function validateName(name: string): boolean {
+  return /^[a-zA-Z\s.-]+$/.test(name.trim());
+}
+
+function validateEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+function validatePhone(phone: string): boolean {
+  const digitsOnly = phone.replace(/\D/g, "");
+  return digitsOnly.length === 10;
+}
 
 export default function BookingWidget() {
   const [activeTab, setActiveTab] = useState<BookingTab>("corporate");
@@ -126,8 +149,33 @@ export default function BookingWidget() {
     try {
       if (activeTab === "corporate") {
         url = "/api/corporate/lead";
-        const rawPhone = corpData.phone.trim();
-        const formattedPhone = rawPhone.startsWith("+") ? rawPhone : `+91${rawPhone}`;
+
+        // 1. Shift Time Validation
+        const startMins = timeToMinutes(corpData.shiftStartHour, corpData.shiftStartMinute, corpData.shiftStartAmpm);
+        const endMins = timeToMinutes(corpData.shiftEndHour, corpData.shiftEndMinute, corpData.shiftEndAmpm);
+        if (startMins === endMins) {
+          throw new Error("Shift End Time cannot be equal to Shift Start Time.");
+        }
+        if (startMins > endMins) {
+          throw new Error("Shift End Time must be after Shift Start Time.");
+        }
+
+        // 2. Contact Name Validation
+        if (!validateName(corpData.contactName)) {
+          throw new Error("Contact Name can only contain alphabetic characters.");
+        }
+
+        // 3. Email Validation
+        if (!validateEmail(corpData.email)) {
+          throw new Error("Please enter a valid work email address.");
+        }
+
+        // 4. Mobile Number Validation
+        const digitsPhone = corpData.phone.replace(/\D/g, "");
+        if (digitsPhone.length !== 10) {
+          throw new Error("Mobile number must be exactly 10 digits.");
+        }
+        const formattedPhone = `+91${digitsPhone}`;
         const shiftIn = `${corpData.shiftStartHour}:${corpData.shiftStartMinute} ${corpData.shiftStartAmpm}`;
         const shiftOut = `${corpData.shiftEndHour}:${corpData.shiftEndMinute} ${corpData.shiftEndAmpm}`;
         
@@ -143,8 +191,18 @@ export default function BookingWidget() {
         };
       } else if (activeTab === "local") {
         url = "/api/rental/lead";
-        const rawPhone = localData.phone.trim();
-        const formattedPhone = rawPhone.startsWith("+") ? rawPhone : `+91${rawPhone}`;
+        
+        if (!validateName(localData.name)) {
+          throw new Error("Contact Name can only contain alphabetic characters.");
+        }
+        if (!validateEmail(localData.email)) {
+          throw new Error("Please enter a valid email address.");
+        }
+        const digitsPhone = localData.phone.replace(/\D/g, "");
+        if (digitsPhone.length !== 10) {
+          throw new Error("Mobile number must be exactly 10 digits.");
+        }
+        const formattedPhone = `+91${digitsPhone}`;
         
         payload = {
           customerName: localData.name.trim(),
@@ -159,8 +217,18 @@ export default function BookingWidget() {
         };
       } else if (activeTab === "outstation") {
         url = "/api/rental/lead";
-        const rawPhone = outstationData.phone.trim();
-        const formattedPhone = rawPhone.startsWith("+") ? rawPhone : `+91${rawPhone}`;
+
+        if (!validateName(outstationData.name)) {
+          throw new Error("Contact Name can only contain alphabetic characters.");
+        }
+        if (!validateEmail(outstationData.email)) {
+          throw new Error("Please enter a valid email address.");
+        }
+        const digitsPhone = outstationData.phone.replace(/\D/g, "");
+        if (digitsPhone.length !== 10) {
+          throw new Error("Mobile number must be exactly 10 digits.");
+        }
+        const formattedPhone = `+91${digitsPhone}`;
         
         payload = {
           customerName: outstationData.name.trim(),
@@ -177,8 +245,18 @@ export default function BookingWidget() {
         };
       } else if (activeTab === "tours") {
         url = "/api/bookings";
-        const rawPhone = tourData.phone.trim();
-        const formattedPhone = rawPhone.startsWith("+") ? rawPhone : `+91${rawPhone}`;
+
+        if (!validateName(tourData.name)) {
+          throw new Error("Contact Name can only contain alphabetic characters.");
+        }
+        if (!validateEmail(tourData.email)) {
+          throw new Error("Please enter a valid email address.");
+        }
+        const digitsPhone = tourData.phone.replace(/\D/g, "");
+        if (digitsPhone.length !== 10) {
+          throw new Error("Mobile number must be exactly 10 digits.");
+        }
+        const formattedPhone = `+91${digitsPhone}`;
         
         payload = {
           name: tourData.name.trim(),
@@ -431,32 +509,22 @@ export default function BookingWidget() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pickup Address *</label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <input
-                      type="text"
-                      required
-                      placeholder="Enter pickup location"
-                      value={corpData.pickup}
-                      onChange={(e) => setCorpData({ ...corpData, pickup: e.target.value })}
-                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
-                    />
-                  </div>
+                  <LocationInput
+                    required
+                    placeholder="Enter pickup location (e.g. Airport, Hinjewadi, BKC)"
+                    value={corpData.pickup}
+                    onChange={(val) => setCorpData({ ...corpData, pickup: val })}
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Drop Address *</label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <input
-                      type="text"
-                      required
-                      placeholder="Enter drop location"
-                      value={corpData.drop}
-                      onChange={(e) => setCorpData({ ...corpData, drop: e.target.value })}
-                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
-                    />
-                  </div>
+                  <LocationInput
+                    required
+                    placeholder="Enter drop location (e.g. Airport, Hinjewadi, BKC)"
+                    value={corpData.drop}
+                    onChange={(val) => setCorpData({ ...corpData, drop: val })}
+                  />
                 </div>
               </div>
 
@@ -469,7 +537,7 @@ export default function BookingWidget() {
                     required
                     placeholder="e.g. Amit Sharma"
                     value={corpData.contactName}
-                    onChange={(e) => setCorpData({ ...corpData, contactName: e.target.value })}
+                    onChange={(e) => setCorpData({ ...corpData, contactName: e.target.value.replace(/[^a-zA-Z\s.-]/g, "") })}
                     className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
                   />
                 </div>
@@ -485,14 +553,15 @@ export default function BookingWidget() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mobile Number *</label>
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mobile Number (10 Digits) *</label>
                   <input
                     type="tel"
                     required
+                    maxLength={10}
                     placeholder="e.g. 9999999999"
                     value={corpData.phone}
-                    onChange={(e) => setCorpData({ ...corpData, phone: e.target.value })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                    onChange={(e) => setCorpData({ ...corpData, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
+                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"
                   />
                 </div>
               </div>
@@ -565,7 +634,7 @@ export default function BookingWidget() {
                     required
                     placeholder="John Doe"
                     value={localData.name}
-                    onChange={(e) => setLocalData({ ...localData, name: e.target.value })}
+                    onChange={(e) => setLocalData({ ...localData, name: e.target.value.replace(/[^a-zA-Z\s.-]/g, "") })}
                     className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
                   />
                 </div>
@@ -581,29 +650,25 @@ export default function BookingWidget() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mobile Number *</label>
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mobile Number (10 Digits) *</label>
                   <input
                     type="tel"
                     required
+                    maxLength={10}
                     placeholder="e.g. 9999999999"
                     value={localData.phone}
-                    onChange={(e) => setLocalData({ ...localData, phone: e.target.value })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                    onChange={(e) => setLocalData({ ...localData, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
+                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pickup Address *</label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <input
-                      type="text"
-                      required
-                      placeholder="Enter pickup address"
-                      value={localData.pickupLocation}
-                      onChange={(e) => setLocalData({ ...localData, pickupLocation: e.target.value })}
-                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
-                    />
-                  </div>
+                  <LocationInput
+                    required
+                    placeholder="Enter pickup location"
+                    value={localData.pickupLocation}
+                    onChange={(val) => setLocalData({ ...localData, pickupLocation: val })}
+                  />
                 </div>
               </div>
             </div>
@@ -684,32 +749,22 @@ export default function BookingWidget() {
               <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 border-t border-white/5">
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">From City *</label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <input
-                      type="text"
-                      required
-                      placeholder="Pickup City (e.g. Mumbai)"
-                      value={outstationData.pickup}
-                      onChange={(e) => setOutstationData({ ...outstationData, pickup: e.target.value })}
-                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
-                    />
-                  </div>
+                  <LocationInput
+                    required
+                    placeholder="Pickup City (e.g. Mumbai, Pune, Delhi)"
+                    value={outstationData.pickup}
+                    onChange={(val) => setOutstationData({ ...outstationData, pickup: val })}
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">To City *</label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <input
-                      type="text"
-                      required
-                      placeholder="Drop City (e.g. Pune)"
-                      value={outstationData.drop}
-                      onChange={(e) => setOutstationData({ ...outstationData, drop: e.target.value })}
-                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
-                    />
-                  </div>
+                  <LocationInput
+                    required
+                    placeholder="Drop City (e.g. Pune, Lonavala, Mahabaleshwar)"
+                    value={outstationData.drop}
+                    onChange={(val) => setOutstationData({ ...outstationData, drop: val })}
+                  />
                 </div>
               </div>
 
@@ -722,7 +777,7 @@ export default function BookingWidget() {
                     required
                     placeholder="John Doe"
                     value={outstationData.name}
-                    onChange={(e) => setOutstationData({ ...outstationData, name: e.target.value })}
+                    onChange={(e) => setOutstationData({ ...outstationData, name: e.target.value.replace(/[^a-zA-Z\s.-]/g, "") })}
                     className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
                   />
                 </div>
@@ -738,14 +793,15 @@ export default function BookingWidget() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mobile Number *</label>
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mobile Number (10 Digits) *</label>
                   <input
                     type="tel"
                     required
+                    maxLength={10}
                     placeholder="e.g. 9999999999"
                     value={outstationData.phone}
-                    onChange={(e) => setOutstationData({ ...outstationData, phone: e.target.value })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                    onChange={(e) => setOutstationData({ ...outstationData, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
+                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"
                   />
                 </div>
               </div>
