@@ -12,6 +12,12 @@ export default function CorporateInquiryPage() {
     employeeCount: "",
     pickupLocations: "",
     serviceType: "Employee Transportation Shuttle",
+    shiftStartHour: "09",
+    shiftStartMinute: "00",
+    shiftStartAmpm: "AM",
+    shiftEndHour: "06",
+    shiftEndMinute: "00",
+    shiftEndAmpm: "PM",
     requirements: "",
   });
 
@@ -24,11 +30,19 @@ export default function CorporateInquiryPage() {
     setLoading(true);
     setError("");
 
+    const shiftIn = `${formData.shiftStartHour}:${formData.shiftStartMinute} ${formData.shiftStartAmpm}`;
+    const shiftOut = `${formData.shiftEndHour}:${formData.shiftEndMinute} ${formData.shiftEndAmpm}`;
+    const formattedReqs = `Shift Timings: In at ${shiftIn}, Out at ${shiftOut}.${formData.requirements ? ` Notes: ${formData.requirements}` : ""}`;
+
     const payload = {
-      ...formData,
+      companyName: formData.companyName,
+      contactName: formData.contactName,
+      email: formData.email,
+      phone: formData.phone,
+      serviceType: `${formData.serviceType} (Shift In: ${shiftIn} | Out: ${shiftOut})`,
       employeeCount: formData.employeeCount ? Number(formData.employeeCount) : null,
       pickupLocations: formData.pickupLocations || null,
-      requirements: formData.requirements || null,
+      requirements: formattedReqs,
     };
 
     try {
@@ -48,6 +62,12 @@ export default function CorporateInquiryPage() {
           employeeCount: "",
           pickupLocations: "",
           serviceType: "Employee Transportation Shuttle",
+          shiftStartHour: "09",
+          shiftStartMinute: "00",
+          shiftStartAmpm: "AM",
+          shiftEndHour: "06",
+          shiftEndMinute: "00",
+          shiftEndAmpm: "PM",
           requirements: "",
         });
       } else {
@@ -198,6 +218,73 @@ export default function CorporateInquiryPage() {
                       <option value="Executive Monthly Cabs" className="bg-slate-900">Executive Monthly Cabs</option>
                       <option value="Event Logistics Support" className="bg-slate-900">Event Logistics Support</option>
                       <option value="Airport VIP Transfers" className="bg-slate-900">Airport VIP Transfers</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Row 4: Shift Start Time (In) & Shift End Time (Out) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Shift Start Time (Shift In) *</label>
+                  <div className="flex gap-2">
+                    <select
+                      value={formData.shiftStartHour}
+                      onChange={(e) => setFormData({ ...formData, shiftStartHour: e.target.value })}
+                      className="flex-1 bg-slate-950/60 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
+                    >
+                      {["01","02","03","04","05","06","07","08","09","10","11","12"].map(h => (
+                        <option key={h} value={h} className="bg-slate-900">{h} Hour</option>
+                      ))}
+                    </select>
+                    <select
+                      value={formData.shiftStartMinute}
+                      onChange={(e) => setFormData({ ...formData, shiftStartMinute: e.target.value })}
+                      className="flex-1 bg-slate-950/60 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
+                    >
+                      {["00","15","30","45"].map(m => (
+                        <option key={m} value={m} className="bg-slate-900">{m} Min</option>
+                      ))}
+                    </select>
+                    <select
+                      value={formData.shiftStartAmpm}
+                      onChange={(e) => setFormData({ ...formData, shiftStartAmpm: e.target.value })}
+                      className="bg-slate-950/60 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-bold"
+                    >
+                      <option value="AM" className="bg-slate-900">AM</option>
+                      <option value="PM" className="bg-slate-900">PM</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Shift End Time (Shift Out) *</label>
+                  <div className="flex gap-2">
+                    <select
+                      value={formData.shiftEndHour}
+                      onChange={(e) => setFormData({ ...formData, shiftEndHour: e.target.value })}
+                      className="flex-1 bg-slate-950/60 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
+                    >
+                      {["01","02","03","04","05","06","07","08","09","10","11","12"].map(h => (
+                        <option key={h} value={h} className="bg-slate-900">{h} Hour</option>
+                      ))}
+                    </select>
+                    <select
+                      value={formData.shiftEndMinute}
+                      onChange={(e) => setFormData({ ...formData, shiftEndMinute: e.target.value })}
+                      className="flex-1 bg-slate-950/60 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
+                    >
+                      {["00","15","30","45"].map(m => (
+                        <option key={m} value={m} className="bg-slate-900">{m} Min</option>
+                      ))}
+                    </select>
+                    <select
+                      value={formData.shiftEndAmpm}
+                      onChange={(e) => setFormData({ ...formData, shiftEndAmpm: e.target.value })}
+                      className="bg-slate-950/60 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-bold"
+                    >
+                      <option value="AM" className="bg-slate-900">AM</option>
+                      <option value="PM" className="bg-slate-900">PM</option>
                     </select>
                   </div>
                 </div>
