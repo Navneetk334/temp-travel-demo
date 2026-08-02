@@ -56,14 +56,14 @@ export default function LocationInput({
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (value.trim().length > 0) {
-      const query = value.toLowerCase();
+    const query = value.trim().toLowerCase();
+    if (query.length >= 2) {
       const matches = POPULAR_LOCATIONS.filter((loc) =>
         loc.toLowerCase().includes(query)
       );
-      setFilteredLocations(matches.slice(0, 6));
+      setFilteredLocations(matches.slice(0, 5));
     } else {
-      setFilteredLocations(POPULAR_LOCATIONS.slice(0, 6));
+      setFilteredLocations([]);
     }
   }, [value]);
 
@@ -87,7 +87,9 @@ export default function LocationInput({
           required={required}
           placeholder={placeholder}
           value={value}
-          onFocus={() => setIsOpen(true)}
+          onFocus={() => {
+            if (value.trim().length >= 2) setIsOpen(true);
+          }}
           onChange={(e) => {
             onChange(e.target.value);
             setIsOpen(true);
@@ -96,10 +98,10 @@ export default function LocationInput({
         />
       </div>
 
-      {isOpen && filteredLocations.length > 0 && (
+      {isOpen && value.trim().length >= 2 && filteredLocations.length > 0 && (
         <div className="absolute z-50 left-0 right-0 mt-1 bg-slate-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden max-h-56 overflow-y-auto divide-y divide-white/5">
           <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-accent bg-slate-950/80">
-            Suggested Locations
+            Landmark Suggestions
           </div>
           {filteredLocations.map((loc, idx) => (
             <button
