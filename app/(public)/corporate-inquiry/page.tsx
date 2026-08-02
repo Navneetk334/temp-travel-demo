@@ -12,6 +12,7 @@ export default function CorporateInquiryPage() {
     employeeCount: "",
     pickupLocations: "",
     serviceType: "Employee Transportation Shuttle",
+    gender: "Male",
     shiftStartHour: "09",
     shiftStartMinute: "00",
     shiftStartAmpm: "AM",
@@ -32,7 +33,7 @@ export default function CorporateInquiryPage() {
 
     const shiftIn = `${formData.shiftStartHour}:${formData.shiftStartMinute} ${formData.shiftStartAmpm}`;
     const shiftOut = `${formData.shiftEndHour}:${formData.shiftEndMinute} ${formData.shiftEndAmpm}`;
-    const formattedReqs = `Shift Timings: In at ${shiftIn}, Out at ${shiftOut}.${formData.requirements ? ` Notes: ${formData.requirements}` : ""}`;
+    const formattedReqs = `Gender: ${formData.gender}. Shift Timings: In at ${shiftIn}, Out at ${shiftOut}.${formData.requirements ? ` Notes: ${formData.requirements}` : ""}`;
 
     const payload = {
       companyName: formData.companyName,
@@ -62,6 +63,7 @@ export default function CorporateInquiryPage() {
           employeeCount: "",
           pickupLocations: "",
           serviceType: "Employee Transportation Shuttle",
+          gender: "Male",
           shiftStartHour: "09",
           shiftStartMinute: "00",
           shiftStartAmpm: "AM",
@@ -189,8 +191,8 @@ export default function CorporateInquiryPage() {
                 </div>
               </div>
 
-              {/* Row 3: Employee Count & Service Type */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Row 3: Employee Count, Service Type, Gender */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Approx Employee Count</label>
                   <div className="relative">
@@ -218,6 +220,22 @@ export default function CorporateInquiryPage() {
                       <option value="Executive Monthly Cabs" className="bg-slate-900">Executive Monthly Cabs</option>
                       <option value="Event Logistics Support" className="bg-slate-900">Event Logistics Support</option>
                       <option value="Airport VIP Transfers" className="bg-slate-900">Airport VIP Transfers</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Passenger Gender</label>
+                  <div className="relative">
+                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <select
+                      value={formData.gender}
+                      onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                      className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
+                    >
+                      <option value="Male" className="bg-slate-900">Male</option>
+                      <option value="Female" className="bg-slate-900">Female</option>
+                      <option value="Other" className="bg-slate-900">Other</option>
                     </select>
                   </div>
                 </div>

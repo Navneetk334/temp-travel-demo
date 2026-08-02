@@ -9,6 +9,7 @@ import {
   Compass, 
   ArrowRight, 
   Users, 
+  User,
   ChevronRight,
   CheckCircle2,
   AlertCircle,
@@ -31,6 +32,7 @@ export default function BookingWidget() {
     email: "",
     phone: "",
     employeeId: "", 
+    gender: "Male",
     shiftStartHour: "09",
     shiftStartMinute: "00",
     shiftStartAmpm: "AM",
@@ -137,7 +139,7 @@ export default function BookingWidget() {
           employeeCount: 1,
           pickupLocations: corpData.pickup.trim(),
           serviceType: `Corporate Cab (Shift In: ${shiftIn} | Shift Out: ${shiftOut})`,
-          requirements: `Employee ID: ${corpData.employeeId.trim()}. Drop Address: ${corpData.drop.trim()}. Shift In: ${shiftIn}, Shift Out: ${shiftOut}.`
+          requirements: `Employee ID: ${corpData.employeeId.trim()}. Gender: ${corpData.gender}. Drop Address: ${corpData.drop.trim()}. Shift In: ${shiftIn}, Shift Out: ${shiftOut}.`
         };
       } else if (activeTab === "local") {
         url = "/api/rental/lead";
@@ -211,7 +213,7 @@ export default function BookingWidget() {
       }
       
       // Reset forms
-      setCorpData({ company: "", contactName: "", email: "", phone: "", employeeId: "", shiftStartHour: "09", shiftStartMinute: "00", shiftStartAmpm: "AM", shiftEndHour: "06", shiftEndMinute: "00", shiftEndAmpm: "PM", pickup: "", drop: "" });
+      setCorpData({ company: "", contactName: "", email: "", phone: "", employeeId: "", gender: "Male", shiftStartHour: "09", shiftStartMinute: "00", shiftStartAmpm: "AM", shiftEndHour: "06", shiftEndMinute: "00", shiftEndAmpm: "PM", pickup: "", drop: "" });
       setLocalData(prev => ({ ...prev, name: "", email: "", phone: "", pickupLocation: "", pickupDate: "", pickupTime: "" }));
       setOutstationData(prev => ({ ...prev, name: "", email: "", phone: "", pickup: "", drop: "", date: "", returnDate: "" }));
       setTourData(prev => ({ ...prev, name: "", email: "", phone: "", date: "", guests: "1" }));
@@ -308,104 +310,125 @@ export default function BookingWidget() {
 
           {/* Corporate Cab Tab */}
           {activeTab === "corporate" && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Company Name *</label>
-                <div className="relative">
-                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Google India"
-                    value={corpData.company}
-                    onChange={(e) => setCorpData({ ...corpData, company: e.target.value })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
-                  />
+            <div className="space-y-6">
+              {/* Row 1: Company Name, Employee ID, Gender */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Company Name *</label>
+                  <div className="relative">
+                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Google India"
+                      value={corpData.company}
+                      onChange={(e) => setCorpData({ ...corpData, company: e.target.value })}
+                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Employee ID *</label>
+                  <div className="relative">
+                    <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <input
+                      type="text"
+                      required
+                      placeholder="EMP-8973"
+                      value={corpData.employeeId}
+                      onChange={(e) => setCorpData({ ...corpData, employeeId: e.target.value })}
+                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Passenger Gender *</label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <select
+                      value={corpData.gender}
+                      onChange={(e) => setCorpData({ ...corpData, gender: e.target.value })}
+                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
+                    >
+                      <option value="Male" className="bg-slate-900">Male</option>
+                      <option value="Female" className="bg-slate-900">Female</option>
+                      <option value="Other" className="bg-slate-900">Other</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
-              {/* Shift Start Time (In) */}
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Shift Start Time (In) *</label>
-                <div className="flex gap-1.5">
-                  <select
-                    value={corpData.shiftStartHour}
-                    onChange={(e) => setCorpData({ ...corpData, shiftStartHour: e.target.value })}
-                    className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono"
-                  >
-                    {["01","02","03","04","05","06","07","08","09","10","11","12"].map(h => (
-                      <option key={h} value={h} className="bg-slate-900">{h}</option>
-                    ))}
-                  </select>
-                  <select
-                    value={corpData.shiftStartMinute}
-                    onChange={(e) => setCorpData({ ...corpData, shiftStartMinute: e.target.value })}
-                    className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono"
-                  >
-                    {["00","15","30","45"].map(m => (
-                      <option key={m} value={m} className="bg-slate-900">{m}</option>
-                    ))}
-                  </select>
-                  <select
-                    value={corpData.shiftStartAmpm}
-                    onChange={(e) => setCorpData({ ...corpData, shiftStartAmpm: e.target.value })}
-                    className="bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary font-bold"
-                  >
-                    <option value="AM" className="bg-slate-900">AM</option>
-                    <option value="PM" className="bg-slate-900">PM</option>
-                  </select>
+              {/* Row 2: Shift Start Time (In) & Shift End Time (Out) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Shift Start Time (Shift In) *</label>
+                  <div className="flex gap-2">
+                    <select
+                      value={corpData.shiftStartHour}
+                      onChange={(e) => setCorpData({ ...corpData, shiftStartHour: e.target.value })}
+                      className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
+                    >
+                      {["01","02","03","04","05","06","07","08","09","10","11","12"].map(h => (
+                        <option key={h} value={h} className="bg-slate-900">{h} Hour</option>
+                      ))}
+                    </select>
+                    <select
+                      value={corpData.shiftStartMinute}
+                      onChange={(e) => setCorpData({ ...corpData, shiftStartMinute: e.target.value })}
+                      className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
+                    >
+                      {["00","15","30","45"].map(m => (
+                        <option key={m} value={m} className="bg-slate-900">{m} Min</option>
+                      ))}
+                    </select>
+                    <select
+                      value={corpData.shiftStartAmpm}
+                      onChange={(e) => setCorpData({ ...corpData, shiftStartAmpm: e.target.value })}
+                      className="bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-bold"
+                    >
+                      <option value="AM" className="bg-slate-900">AM</option>
+                      <option value="PM" className="bg-slate-900">PM</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Shift End Time (Shift Out) *</label>
+                  <div className="flex gap-2">
+                    <select
+                      value={corpData.shiftEndHour}
+                      onChange={(e) => setCorpData({ ...corpData, shiftEndHour: e.target.value })}
+                      className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
+                    >
+                      {["01","02","03","04","05","06","07","08","09","10","11","12"].map(h => (
+                        <option key={h} value={h} className="bg-slate-900">{h} Hour</option>
+                      ))}
+                    </select>
+                    <select
+                      value={corpData.shiftEndMinute}
+                      onChange={(e) => setCorpData({ ...corpData, shiftEndMinute: e.target.value })}
+                      className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
+                    >
+                      {["00","15","30","45"].map(m => (
+                        <option key={m} value={m} className="bg-slate-900">{m} Min</option>
+                      ))}
+                    </select>
+                    <select
+                      value={corpData.shiftEndAmpm}
+                      onChange={(e) => setCorpData({ ...corpData, shiftEndAmpm: e.target.value })}
+                      className="bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-bold"
+                    >
+                      <option value="AM" className="bg-slate-900">AM</option>
+                      <option value="PM" className="bg-slate-900">PM</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
-              {/* Shift End Time (Out) */}
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Shift End Time (Out) *</label>
-                <div className="flex gap-1.5">
-                  <select
-                    value={corpData.shiftEndHour}
-                    onChange={(e) => setCorpData({ ...corpData, shiftEndHour: e.target.value })}
-                    className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono"
-                  >
-                    {["01","02","03","04","05","06","07","08","09","10","11","12"].map(h => (
-                      <option key={h} value={h} className="bg-slate-900">{h}</option>
-                    ))}
-                  </select>
-                  <select
-                    value={corpData.shiftEndMinute}
-                    onChange={(e) => setCorpData({ ...corpData, shiftEndMinute: e.target.value })}
-                    className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono"
-                  >
-                    {["00","15","30","45"].map(m => (
-                      <option key={m} value={m} className="bg-slate-900">{m}</option>
-                    ))}
-                  </select>
-                  <select
-                    value={corpData.shiftEndAmpm}
-                    onChange={(e) => setCorpData({ ...corpData, shiftEndAmpm: e.target.value })}
-                    className="bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary font-bold"
-                  >
-                    <option value="AM" className="bg-slate-900">AM</option>
-                    <option value="PM" className="bg-slate-900">PM</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Employee ID *</label>
-                <div className="relative">
-                  <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input
-                    type="text"
-                    required
-                    placeholder="EMP-8973"
-                    value={corpData.employeeId}
-                    onChange={(e) => setCorpData({ ...corpData, employeeId: e.target.value })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
-                  />
-                </div>
-              </div>
-
-              <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Row 3: Pickup & Drop Address */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pickup Address *</label>
                   <div className="relative">
@@ -437,8 +460,8 @@ export default function BookingWidget() {
                 </div>
               </div>
 
-              {/* Contact Information Row */}
-              <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6 pt-2 border-t border-white/5">
+              {/* Row 4: Contact Information */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2 border-t border-white/5">
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Contact Name *</label>
                   <input
