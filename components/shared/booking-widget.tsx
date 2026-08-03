@@ -366,7 +366,7 @@ export default function BookingWidget() {
             {activeTab === "tours" && bookingRef ? (
               <>Your tour booking request has been logged. Your Booking Reference number is <span className="text-accent font-extrabold font-mono">{bookingRef}</span>. Our coordinators will contact you shortly.</>
             ) : (
-              <>Your transit inquiry request has been successfully logged. Our logistics team will review availability and contact you within 15 minutes.</>
+              <>Your transit inquiry request has been successfully logged. Our team will review availability and contact you within 24 Hours.</>
             )}
           </p>
           <button

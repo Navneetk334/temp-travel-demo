@@ -84,27 +84,24 @@ export default function LocationInput({
     );
     setFilteredLocations(localMatches.slice(0, 5));
 
-    // 2. Live OpenStreetMap Place Search API for real house/locality lookup
+    // 2. Fetch live places from proxy endpoint (/api/places/autocomplete)
     setLoading(true);
     const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-            query
-          )}&countrycodes=in&limit=5&addressdetails=1`,
+          `/api/places/autocomplete?q=${encodeURIComponent(query)}`,
           { signal: controller.signal }
         );
         if (res.ok) {
           const data = await res.json();
-          const apiSuggestions = data.map((item: any) => {
-            const parts = item.display_name.split(", ");
-            // Take locality, area, city & state
-            return parts.slice(0, 4).join(", ");
-          });
-          const combined = Array.from(new Set([...apiSuggestions, ...localMatches])).slice(0, 6);
-          if (combined.length > 0) {
-            setFilteredLocations(combined);
+          if (data.suggestions && Array.isArray(data.suggestions)) {
+            const combined = Array.from(
+              new Set([...data.suggestions, ...localMatches])
+            ).slice(0, 7);
+            if (combined.length > 0) {
+              setFilteredLocations(combined);
+            }
           }
         }
       } catch (err: any) {
@@ -114,7 +111,7 @@ export default function LocationInput({
       } finally {
         setLoading(false);
       }
-    }, 350);
+    }, 250);
 
     return () => {
       clearTimeout(timer);

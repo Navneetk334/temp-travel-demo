@@ -116,7 +116,7 @@ export default function RentalInquiryPage() {
             <CheckCircle2 className="w-16 h-16 text-green-400 mx-auto animate-bounce" />
             <h2 className="text-2xl font-bold text-slate-50">Inquiry Received</h2>
             <p className="text-slate-300 text-sm leading-relaxed">
-              Thank you for choosing TEMP TRAVEL. Our dispatch operator will review vehicle availability and email/call you with a verified quote and booking reference details within 15 minutes.
+              Thank you for choosing TEMP TRAVEL. Our team will review availability and contact you within 24 Hours.
             </p>
             <button
               onClick={() => setSuccess(false)}
