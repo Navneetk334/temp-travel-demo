@@ -19,33 +19,16 @@ export const POPULAR_LOCATIONS = [
   "Powai, Hiranandani Gardens, Mumbai",
   "Thane West, Ghodbunder Road, Thane",
   "Vashi Sector 17, Navi Mumbai",
-  "Nerul LP, Navi Mumbai",
-  "Kharghar Sector 12, Navi Mumbai",
   "Hinjewadi Phase 1, IT Park, Pune",
-  "Hinjewadi Phase 2 & 3, Pune",
   "Baner, High Street, Pune",
   "Wakad, Dange Chowk, Pune",
   "Viman Nagar, Phoenix Mall Road, Pune",
-  "Kharadi, EON Free Zone, Pune",
-  "Hadapsar, Magarpatta City, Pune",
-  "Kothrud, Paud Road, Pune",
   "Connaught Place (CP), New Delhi",
   "Cyber City, DLF Phase 2, Gurugram",
-  "Golf Course Road, Sector 54, Gurugram",
   "Noida Sector 18 / Atta Market, Noida",
-  "Noida Sector 62, Electronic City, Noida",
-  "Dwarka Sector 21, New Delhi",
-  "Rohini Sector 7, New Delhi",
-  "Janakpuri District Centre, New Delhi",
   "Indiranagar, 100 Feet Road, Bangalore",
   "Koramangala 5th Block, Bangalore",
   "Whitefield, ITPL Main Road, Bangalore",
-  "Electronic City Phase 1, Bangalore",
-  "HSR Layout Sector 1, Bangalore",
-  "Bellandur, Outer Ring Road, Bangalore",
-  "BTM Layout 2nd Stage, Bangalore",
-  "Jayanagar 4th Block, Bangalore",
-  "Hebbal Flyover Area, Bangalore",
 ];
 
 interface LocationInputProps {
@@ -55,6 +38,12 @@ interface LocationInputProps {
   required?: boolean;
   className?: string;
   name?: string;
+}
+
+declare global {
+  interface Window {
+    google?: any;
+  }
 }
 
 export default function LocationInput({
@@ -69,6 +58,31 @@ export default function LocationInput({
   const [loading, setLoading] = useState(false);
   const [filteredLocations, setFilteredLocations] = useState<string[]>([]);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const autocompleteServiceRef = useRef<any>(null);
+
+  // Load Google Maps JS SDK dynamically on mount if API key exists
+  useEffect(() => {
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "AIzaSyBFu4RlB5ontZR997X45chVlauhB_i9sSI";
+    if (!apiKey) return;
+
+    if (window.google && window.google.maps && window.google.maps.places) {
+      autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
+      return;
+    }
+
+    if (!document.getElementById("google-maps-sdk")) {
+      const script = document.createElement("script");
+      script.id = "google-maps-sdk";
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+      script.async = true;
+      script.onload = () => {
+        if (window.google && window.google.maps && window.google.maps.places) {
+          autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
+        }
+      };
+      document.body.appendChild(script);
+    }
+  }, []);
 
   useEffect(() => {
     const query = value.trim();
@@ -78,44 +92,69 @@ export default function LocationInput({
       return;
     }
 
-    // 1. Instant local match
     const localMatches = POPULAR_LOCATIONS.filter((loc) =>
       loc.toLowerCase().includes(query.toLowerCase())
     );
-    setFilteredLocations(localMatches.slice(0, 5));
 
-    // 2. Fetch live places from proxy endpoint (/api/places/autocomplete)
+    // Initial fallback state
+    setFilteredLocations(Array.from(new Set([query, ...localMatches])).slice(0, 7));
+
     setLoading(true);
-    const controller = new AbortController();
-    const timer = setTimeout(async () => {
+    let isCancelled = false;
+
+    // 1. Try Google Maps JS SDK Autocomplete Service (Direct Client Side Google Maps Search)
+    if (window.google && window.google.maps && window.google.maps.places) {
+      if (!autocompleteServiceRef.current) {
+        autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
+      }
+
+      autocompleteServiceRef.current.getPlacePredictions(
+        {
+          input: query,
+          componentRestrictions: { country: "in" },
+        },
+        (predictions: any[], status: string) => {
+          if (isCancelled) return;
+          setLoading(false);
+
+          if (
+            status === window.google.maps.places.PlacesServiceStatus.OK &&
+            predictions &&
+            predictions.length > 0
+          ) {
+            const gResults = predictions.map((p) => p.description);
+            const combined = Array.from(new Set([query, ...gResults])).slice(0, 8);
+            setFilteredLocations(combined);
+            return;
+          }
+          // If Google Places status is not OK (e.g. API key not enabled for Places API yet), fallback to backend proxy API
+          fetchProxyApi(query, localMatches);
+        }
+      );
+    } else {
+      // 2. Proxy API fallback
+      fetchProxyApi(query, localMatches);
+    }
+
+    async function fetchProxyApi(q: string, fallbackMatches: string[]) {
       try {
-        const res = await fetch(
-          `/api/places/autocomplete?q=${encodeURIComponent(query)}`,
-          { signal: controller.signal }
-        );
-        if (res.ok) {
+        const res = await fetch(`/api/places/autocomplete?q=${encodeURIComponent(q)}`);
+        if (res.ok && !isCancelled) {
           const data = await res.json();
           if (data.suggestions && Array.isArray(data.suggestions)) {
-            const combined = Array.from(
-              new Set([...data.suggestions, ...localMatches])
-            ).slice(0, 7);
-            if (combined.length > 0) {
-              setFilteredLocations(combined);
-            }
+            const combined = Array.from(new Set([...data.suggestions, ...fallbackMatches])).slice(0, 8);
+            setFilteredLocations(combined);
           }
         }
-      } catch (err: any) {
-        if (err.name !== "AbortError") {
-          // Keep localMatches on fetch error
-        }
+      } catch (err) {
+        // Keep initial matches
       } finally {
-        setLoading(false);
+        if (!isCancelled) setLoading(false);
       }
-    }, 250);
+    }
 
     return () => {
-      clearTimeout(timer);
-      controller.abort();
+      isCancelled = true;
     };
   }, [value]);
 
