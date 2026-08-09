@@ -54,61 +54,45 @@ export default function LocationInput({
   className = "",
   name,
 }: LocationInputProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [filteredLocations, setFilteredLocations] = useState<string[]>([]);
-  const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
+  const autocompleteServiceRef = useRef<any>(null);
 
-  // Initialize native Google Places Autocomplete on input element
+  // Load Google Maps JS SDK silently in background for AutocompleteService
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "AIzaSyBFu4RlB5ontZR997X45chVlauhB_i9sSI";
     if (!apiKey) return;
 
-    function attachGoogleAutocomplete() {
-      if (window.google && window.google.maps && window.google.maps.places && inputRef.current) {
-        setIsGoogleLoaded(true);
+    function initService() {
+      if (window.google && window.google.maps && window.google.maps.places) {
         try {
-          const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
-            types: ["geocode", "establishment"],
-            componentRestrictions: { country: "in" },
-          });
-
-          autocomplete.addListener("place_changed", () => {
-            const place = autocomplete.getPlace();
-            if (place) {
-              const formatted = place.formatted_address || place.name || "";
-              if (formatted) {
-                onChange(formatted);
-                setIsOpen(false);
-              }
-            }
-          });
+          autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
         } catch (e) {
-          console.warn("Google Maps Autocomplete init warning:", e);
+          // Ignore SDK init errors safely
         }
       }
     }
 
     if (window.google && window.google.maps && window.google.maps.places) {
-      attachGoogleAutocomplete();
+      initService();
       return;
     }
 
-    if (!document.getElementById("google-maps-js-sdk")) {
+    if (!document.getElementById("google-maps-places-sdk")) {
       const script = document.createElement("script");
-      script.id = "google-maps-js-sdk";
+      script.id = "google-maps-places-sdk";
       script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
       script.async = true;
       script.onload = () => {
-        attachGoogleAutocomplete();
+        initService();
       };
       document.body.appendChild(script);
     }
   }, []);
 
-  // Fallback search when Google JS SDK is not loaded or for typed suggestions
+  // Fetch suggestions on typing without hijacking the input element
   useEffect(() => {
     const query = value.trim();
     if (query.length < 2) {
@@ -117,42 +101,81 @@ export default function LocationInput({
       return;
     }
 
-    if (isGoogleLoaded) {
-      // Native Google Places dropdown (.pac-container) handles search automatically
-      setFilteredLocations([]);
-      return;
-    }
-
     const localMatches = POPULAR_LOCATIONS.filter((loc) =>
       loc.toLowerCase().includes(query.toLowerCase())
     );
 
-    setFilteredLocations(Array.from(new Set([query, ...localMatches])).slice(0, 7));
-    setLoading(true);
+    // Always include the exact typed location as Option #1
+    const baseList = Array.from(new Set([query, ...localMatches])).slice(0, 7);
+    setFilteredLocations(baseList);
 
+    setLoading(true);
     let isCancelled = false;
-    const timer = setTimeout(async () => {
+
+    // 1. Try Client-side Google AutocompleteService
+    if (window.google && window.google.maps && window.google.maps.places) {
+      if (!autocompleteServiceRef.current) {
+        try {
+          autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
+        } catch (e) {}
+      }
+
+      if (autocompleteServiceRef.current) {
+        try {
+          autocompleteServiceRef.current.getPlacePredictions(
+            {
+              input: query,
+              componentRestrictions: { country: "in" },
+            },
+            (predictions: any[], status: string) => {
+              if (isCancelled) return;
+              if (
+                status === window.google.maps.places.PlacesServiceStatus.OK &&
+                predictions &&
+                predictions.length > 0
+              ) {
+                const gResults = predictions.map((p) => p.description);
+                const combined = Array.from(new Set([query, ...gResults, ...localMatches])).slice(0, 8);
+                setFilteredLocations(combined);
+                setLoading(false);
+                return;
+              }
+              // If Google Places status != OK, fallback to proxy API
+              fetchProxyApi(query, baseList);
+            }
+          );
+          return;
+        } catch (e) {
+          fetchProxyApi(query, baseList);
+          return;
+        }
+      }
+    }
+
+    // 2. Proxy API Fallback
+    fetchProxyApi(query, baseList);
+
+    async function fetchProxyApi(q: string, fallbackMatches: string[]) {
       try {
-        const res = await fetch(`/api/places/autocomplete?q=${encodeURIComponent(query)}`);
+        const res = await fetch(`/api/places/autocomplete?q=${encodeURIComponent(q)}`);
         if (res.ok && !isCancelled) {
           const data = await res.json();
           if (data.suggestions && Array.isArray(data.suggestions)) {
-            const combined = Array.from(new Set([...data.suggestions, ...localMatches])).slice(0, 8);
+            const combined = Array.from(new Set([q, ...data.suggestions, ...fallbackMatches])).slice(0, 8);
             setFilteredLocations(combined);
           }
         }
       } catch (err) {
-        // Keep initial matches
+        // Keep base matches
       } finally {
         if (!isCancelled) setLoading(false);
       }
-    }, 250);
+    }
 
     return () => {
       isCancelled = true;
-      clearTimeout(timer);
     };
-  }, [value, isGoogleLoaded]);
+  }, [value]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -169,7 +192,6 @@ export default function LocationInput({
       <div className="relative">
         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
         <input
-          ref={inputRef}
           type="text"
           name={name}
           required={required}
@@ -189,8 +211,8 @@ export default function LocationInput({
         )}
       </div>
 
-      {!isGoogleLoaded && isOpen && value.trim().length >= 2 && filteredLocations.length > 0 && (
-        <div className="absolute z-[100] left-0 right-0 mt-1.5 bg-slate-900 border border-white/15 rounded-xl shadow-2xl overflow-hidden max-h-52 overflow-y-auto divide-y divide-white/5 backdrop-blur-md">
+      {isOpen && value.trim().length >= 2 && filteredLocations.length > 0 && (
+        <div className="absolute z-[100] left-0 right-0 mt-1.5 bg-slate-900 border border-white/15 rounded-xl shadow-2xl overflow-hidden max-h-56 overflow-y-auto divide-y divide-white/5 backdrop-blur-md">
           <div className="px-3.5 py-2 text-[10px] font-bold uppercase tracking-wider text-accent bg-slate-950/90 flex items-center justify-between sticky top-0 z-10 border-b border-white/5">
             <span>Location Suggestions</span>
             {loading && <span className="text-[9px] text-slate-400 font-normal">Searching places...</span>}
