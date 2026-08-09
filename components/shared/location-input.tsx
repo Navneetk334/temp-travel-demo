@@ -154,25 +154,36 @@ export default function LocationInput({
       </div>
 
       {isOpen && value.trim().length >= 2 && filteredLocations.length > 0 && (
-        <div className="absolute z-50 left-0 right-0 mt-1 bg-slate-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden max-h-60 overflow-y-auto divide-y divide-white/5">
-          <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-accent bg-slate-950/80 flex items-center justify-between">
+        <div className="absolute z-[100] left-0 right-0 mt-1.5 bg-slate-900 border border-white/15 rounded-xl shadow-2xl overflow-hidden max-h-52 overflow-y-auto divide-y divide-white/5 backdrop-blur-md">
+          <div className="px-3.5 py-2 text-[10px] font-bold uppercase tracking-wider text-accent bg-slate-950/90 flex items-center justify-between sticky top-0 z-10 border-b border-white/5">
             <span>Location Suggestions</span>
-            {loading && <span className="text-[9px] text-slate-400 font-normal">Searching live places...</span>}
+            {loading && <span className="text-[9px] text-slate-400 font-normal">Searching places...</span>}
           </div>
-          {filteredLocations.map((loc, idx) => (
-            <button
-              key={idx}
-              type="button"
-              onClick={() => {
-                onChange(loc);
-                setIsOpen(false);
-              }}
-              className="w-full text-left px-3.5 py-2.5 text-xs text-slate-200 hover:bg-primary/20 hover:text-white flex items-center gap-2 transition-all"
-            >
-              <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
-              <span className="truncate">{loc}</span>
-            </button>
-          ))}
+          {filteredLocations.map((loc, idx) => {
+            const isExactTyped = loc.toLowerCase() === value.trim().toLowerCase();
+            return (
+              <button
+                key={idx}
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  onChange(loc);
+                  setIsOpen(false);
+                }}
+                className={`w-full text-left px-3.5 py-2.5 text-xs flex items-center gap-2.5 transition-all ${
+                  isExactTyped
+                    ? "bg-primary/30 text-white font-semibold"
+                    : "text-slate-200 hover:bg-primary/20 hover:text-white"
+                }`}
+              >
+                <MapPin className={`w-3.5 h-3.5 shrink-0 ${isExactTyped ? "text-accent" : "text-primary"}`} />
+                <span className="truncate">
+                  {loc}
+                  {isExactTyped && <span className="ml-2 text-[9px] text-accent font-normal italic">(Use Typed Location)</span>}
+                </span>
+              </button>
+            );
+          })}
         </div>
       )}
     </div>

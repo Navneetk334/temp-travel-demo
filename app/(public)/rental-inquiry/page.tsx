@@ -126,7 +126,7 @@ export default function RentalInquiryPage() {
             </button>
           </div>
         ) : (
-          <div className="glassmorphism rounded-2xl border border-white/5 overflow-hidden shadow-2xl p-6 md:p-10 max-w-3xl mx-auto">
+          <div className="glassmorphism rounded-2xl border border-white/5 shadow-2xl p-6 md:p-10 max-w-3xl mx-auto relative">
             <h2 className="text-xl font-bold text-slate-50 border-b border-white/5 pb-4 mb-6 flex items-center gap-2">
               <Car className="w-5 h-5 text-accent" />
               <span>Cab Rental Inquiry Form</span>

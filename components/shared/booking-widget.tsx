@@ -304,7 +304,7 @@ export default function BookingWidget() {
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto glassmorphism rounded-2xl shadow-2xl border border-white/10 overflow-hidden text-slate-100">
+    <div className="w-full max-w-5xl mx-auto glassmorphism rounded-2xl shadow-2xl border border-white/10 text-slate-100 relative">
       {/* Tabs */}
       <div className="grid grid-cols-2 md:grid-cols-4 bg-slate-950/80 border-b border-white/5">
         <button

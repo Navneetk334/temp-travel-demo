@@ -11,10 +11,35 @@ export async function GET(request: Request) {
   const query = q.trim();
   const suggestions: string[] = [];
 
+  // Always offer the exact typed location at the top of the suggestion list
+  suggestions.push(query);
+
+  // 1. Check if Google Places API Key is present in environment
+  const googleApiKey = process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  if (googleApiKey) {
+    try {
+      const googleRes = await fetch(
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query)}&components=country:in&key=${googleApiKey}`
+      );
+      if (googleRes.ok) {
+        const data = await googleRes.json();
+        if (data.predictions && Array.isArray(data.predictions)) {
+          for (const p of data.predictions) {
+            if (p.description && !suggestions.includes(p.description)) {
+              suggestions.push(p.description);
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Google Places API error:", err);
+    }
+  }
+
+  // 2. Fetch from Photon API (Komoot / OpenStreetMap POI & Street database for India)
   try {
-    // 1. Fetch from Photon API (OpenStreetMap + Google Places dataset, highly accurate for Indian streets, societies & landmarks)
     const photonRes = await fetch(
-      `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=8&bbox=68.0,6.0,97.0,37.0`,
+      `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=10&bbox=68.0,6.0,97.0,37.0`,
       { headers: { "User-Agent": "TempTravelCarRentals/1.0" }, cache: "no-store" }
     );
 
@@ -45,11 +70,11 @@ export async function GET(request: Request) {
     console.error("Photon Places API error:", err);
   }
 
-  // 2. Fallback to Nominatim if Photon yields < 3 results
-  if (suggestions.length < 3) {
+  // 3. Fallback / supplement from Nominatim OpenStreetMap Search
+  if (suggestions.length < 5) {
     try {
       const nomRes = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=in&limit=6&addressdetails=1`,
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=in&limit=8&addressdetails=1`,
         { headers: { "User-Agent": "TempTravelCarRentals/1.0 (info@temptravels.com)" }, cache: "no-store" }
       );
       if (nomRes.ok) {
@@ -67,5 +92,5 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.json({ suggestions: suggestions.slice(0, 7) });
+  return NextResponse.json({ suggestions: suggestions.slice(0, 8) });
 }
