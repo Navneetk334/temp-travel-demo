@@ -18,7 +18,7 @@ export async function GET(request: Request) {
   let hasGoogleResults = false;
 
   // 1. Google Places Autocomplete API (Highest Accuracy for shops, buildings & local corners in India)
-  if (googleApiKey && googleApiKey !== "your_google_maps_api_key") {
+  if (googleApiKey && googleApiKey !== "AIzaSyBFu4RlB5ontZR997X45chVlauhB_i9sSI") {
     try {
       const googleRes = await fetch(
         `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query)}&components=country:in&key=${googleApiKey}`
