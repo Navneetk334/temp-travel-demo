@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { ChevronRight, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 
+import LocationInput from "@/components/shared/location-input";
+
 interface CorporateLeadFormProps {
   cityFormatted: string;
   defaultServiceType: string;
@@ -183,13 +185,10 @@ export default function CorporateLeadForm({ cityFormatted, defaultServiceType }:
           </div>
           <div className="space-y-1">
             <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pickup Locations (Optional)</label>
-            <input
-              type="text"
-              name="pickupLocations"
+            <LocationInput
+              placeholder="Search pickup location (e.g. Goldy Footwear, Airport, Noida)"
               value={formData.pickupLocations}
-              onChange={handleChange}
-              placeholder="e.g. Noida, Dwarka, Gurugram"
-              className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+              onChange={(val) => setFormData((prev) => ({ ...prev, pickupLocations: val }))}
             />
           </div>
         </div>
