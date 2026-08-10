@@ -518,7 +518,7 @@ export default function BookingWidget() {
                       {corpMode === "bulk"
                         ? "Bulk Fleet Transport / Multiple Vehicles (8+ Passengers)"
                         : corpMode === "team"
-                        ? `Team Cab Sharing (${passengers.length} Staff — ${passengers.length >= 5 ? "7-Seater SUV Allocated" : "5-Seater Car Allocated"})`
+                        ? "Team Cab Share — 5 & 7-Seater Car Options (2 to 7 Passengers)"
                         : "Solo Staff Cab — 5-Seater Car (1 to 4 Passengers)"}
                     </span>
                     <p className="text-xs text-slate-400 mt-0.5">
