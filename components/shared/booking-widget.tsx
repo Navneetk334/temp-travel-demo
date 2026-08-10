@@ -508,30 +508,40 @@ export default function BookingWidget() {
               </div>
 
               {/* Dynamic Vehicle Allocation Banner */}
-              <div className="bg-slate-950/70 border border-white/10 rounded-lg p-2.5 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="text-base">
-                    {corpMode === "bulk" || passengers.length >= 8 ? "🚌" : passengers.length >= 5 ? "🚙" : "🚗"}
+              <div className="bg-slate-950/70 border border-white/10 rounded-lg p-3 flex items-center justify-between text-xs transition-all">
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">
+                    {corpMode === "bulk" ? "🚌" : corpMode === "team" ? "🚙" : "🚗"}
                   </span>
                   <div>
-                    <span className="font-bold text-slate-100">
-                      {corpMode === "bulk" || passengers.length >= 8
+                    <span className="font-bold text-slate-100 block text-sm">
+                      {corpMode === "bulk"
                         ? "Bulk Fleet Transport / Multiple Vehicles (8+ Passengers)"
-                        : passengers.length >= 5
-                        ? "7-Seater Executive SUV (5 to 7 Passengers)"
-                        : "5-Seater Car - Hatchback / Sedan (1 to 4 Passengers)"}
+                        : corpMode === "team"
+                        ? `Team Cab Sharing (${passengers.length} Staff — ${passengers.length >= 5 ? "7-Seater SUV Allocated" : "5-Seater Car Allocated"})`
+                        : "Solo Staff Cab — 5-Seater Car (1 to 4 Passengers)"}
                     </span>
-                    <p className="text-[10px] text-slate-400">
-                      {corpMode === "bulk" || passengers.length >= 8
-                        ? "Multiple cabs & shuttles dispatched based on employee roster count."
-                        : passengers.length >= 5
-                        ? "5 to 7 passengers require a 7-seater SUV (Ertiga / Innova Crysta)."
-                        : "1 to 4 passengers fit comfortably in a 5-seater Hatchback / Sedan (Dzire, Etios)."}
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      {corpMode === "bulk"
+                        ? "Multiple cabs & shuttles dispatched based on total employee roster count."
+                        : corpMode === "team"
+                        ? `Shared corporate cab booking for 2 to 7 staff. Currently allocated: ${
+                            passengers.length >= 5
+                              ? `7-Seater Executive SUV (Ertiga / Innova Crysta) for ${passengers.length} staff.`
+                              : `5-Seater Hatchback/Sedan (Dzire, Etios) for ${passengers.length} staff. (Add 5+ staff for SUV).`
+                          }`
+                        : "Dedicated single employee pickup/drop in a 5-Seater Hatchback / Sedan (Dzire, Etios)."}
                     </p>
                   </div>
                 </div>
-                <span className="text-[9px] font-mono font-bold uppercase tracking-wider bg-accent/20 text-accent px-2 py-0.5 rounded border border-accent/30 shrink-0">
-                  {corpMode === "bulk" || passengers.length >= 8 ? "8+ Staff" : passengers.length >= 5 ? "7-Seater SUV" : "5-Seater Car"}
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider bg-accent/20 text-accent px-2.5 py-1 rounded-md border border-accent/30 shrink-0 ml-2">
+                  {corpMode === "bulk"
+                    ? "8+ STAFF BULK"
+                    : corpMode === "team"
+                    ? passengers.length >= 5
+                      ? "7-SEATER SUV"
+                      : "5-SEATER CAR"
+                    : "SOLO (5-SEATER)"}
                 </span>
               </div>
 
