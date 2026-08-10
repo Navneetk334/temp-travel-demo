@@ -31,7 +31,7 @@ export async function GET(request: Request) {
 
   const googleApiKey = process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-  // 1. Google Places Autocomplete API (Web Service API)
+  // 1. Google Places Autocomplete API (Requires a valid Google Maps API Key)
   if (googleApiKey && !googleApiKey.includes("placeholder")) {
     try {
       const googleUrl = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query)}&components=country:in&key=${googleApiKey}`;
@@ -51,7 +51,7 @@ export async function GET(request: Request) {
     }
   }
 
-  // 2. OpenStreetMap Nominatim POI & Address Search (Supports Shops, POIs, Corners, Local Landmarks)
+  // 2. OpenStreetMap Nominatim POI & Address Search
   try {
     const nomUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=in&limit=10&addressdetails=1&extratags=1`;
     const nomRes = await fetch(nomUrl, {
@@ -62,7 +62,6 @@ export async function GET(request: Request) {
       const nomData = await nomRes.json();
       for (const item of nomData) {
         const address = item.address || {};
-        // Find best primary name (e.g. shop name, amenity, building, corner name)
         const mainName = item.name ||
           address.shop ||
           address.amenity ||
@@ -91,7 +90,7 @@ export async function GET(request: Request) {
     console.error("[Nominatim API Exception]:", err);
   }
 
-  // 3. Photon Engine (Komoot OSM Geocoder for local places and landmarks)
+  // 3. Photon Engine (Komoot OSM Geocoder)
   try {
     const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=10&bbox=68.0,6.0,97.0,37.0`;
     const photonRes = await fetch(photonUrl, {
@@ -123,11 +122,11 @@ export async function GET(request: Request) {
     console.error("[Photon API Exception]:", err);
   }
 
-  // Always offer typed query as a structured option if not exact match
+  // Always offer the exact typed location as Option #1 with clear landmark label
   if (!addedFullTexts.has(query.toLowerCase())) {
     suggestions.unshift({
       mainText: query,
-      secondaryText: "Custom Address Input",
+      secondaryText: "Confirm as exact pickup / drop address",
       fullText: query,
     });
   }

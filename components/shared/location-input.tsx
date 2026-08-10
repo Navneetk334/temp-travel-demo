@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { MapPin, Navigation, Loader2, Check } from "lucide-react";
+import { MapPin, Navigation, Loader2, Check, Search } from "lucide-react";
 
 export const POPULAR_LOCATIONS = [
   { mainText: "Mumbai Airport (BOM T2 / T1)", secondaryText: "Andheri East, Mumbai, Maharashtra", fullText: "Mumbai Airport (BOM T2 / T1), Andheri East, Mumbai" },
@@ -71,7 +71,7 @@ export default function LocationInput({
       } finally {
         setLoading(false);
       }
-    }, 300);
+    }, 250);
 
     return () => clearTimeout(timer);
   }, [value]);
@@ -179,7 +179,7 @@ export default function LocationInput({
       </div>
 
       {isOpen && (
-        <div className="absolute z-[100] left-0 right-0 mt-1.5 bg-slate-900 border border-white/15 rounded-xl shadow-2xl overflow-hidden max-h-64 overflow-y-auto divide-y divide-white/5 backdrop-blur-md">
+        <div className="absolute z-[100] left-0 right-0 mt-1.5 bg-slate-900 border border-white/15 rounded-xl shadow-2xl overflow-hidden max-h-72 overflow-y-auto divide-y divide-white/5 backdrop-blur-md">
           {/* Header & Use Current Location Button */}
           <div className="p-2 bg-slate-950/90 sticky top-0 z-10 border-b border-white/5 space-y-1">
             <button
@@ -205,8 +205,8 @@ export default function LocationInput({
 
           {/* Suggestions Header */}
           <div className="px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-400 bg-slate-950/40 flex items-center justify-between">
-            <span>{value.trim().length >= 2 ? "Search Results" : "Popular Locations"}</span>
-            {loading && <span className="text-[8px] text-accent animate-pulse">Updating...</span>}
+            <span>{value.trim().length >= 2 ? "Place Suggestions" : "Popular Locations"}</span>
+            {loading && <span className="text-[8px] text-accent animate-pulse">Searching...</span>}
           </div>
 
           {/* Location Suggestions List */}
