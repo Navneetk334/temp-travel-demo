@@ -29,7 +29,9 @@ export async function GET(request: Request) {
     });
   }
 
-  const googleApiKey = process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const googleApiKey = process.env.GOOGLE_MAPS_API_KEY ||
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ||
+    "AIzaSyBFu4RlB5ontZR997X45chVlauhB_i9sSI";
 
   // 1. Google Places API (New v1 Endpoint - Supports All Indian POIs, shops, corners, landmarks)
   if (googleApiKey) {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { MapPin, Navigation, Loader2, Check, Search } from "lucide-react";
+import { MapPin, Navigation, Loader2, Check } from "lucide-react";
 
 export const POPULAR_LOCATIONS = [
   { mainText: "Mumbai Airport (BOM T2 / T1)", secondaryText: "Andheri East, Mumbai, Maharashtra", fullText: "Mumbai Airport (BOM T2 / T1), Andheri East, Mumbai" },
@@ -71,7 +71,7 @@ export default function LocationInput({
       } finally {
         setLoading(false);
       }
-    }, 250);
+    }, 200);
 
     return () => clearTimeout(timer);
   }, [value]);
@@ -179,7 +179,7 @@ export default function LocationInput({
       </div>
 
       {isOpen && (
-        <div className="absolute z-[100] left-0 right-0 mt-1.5 bg-slate-900 border border-white/15 rounded-xl shadow-2xl overflow-hidden max-h-72 overflow-y-auto divide-y divide-white/5 backdrop-blur-md">
+        <div className="absolute z-[100] left-0 right-0 mt-1.5 bg-slate-900 border border-white/15 rounded-xl shadow-2xl overflow-hidden max-h-80 overflow-y-auto divide-y divide-white/5 backdrop-blur-md">
           {/* Header & Use Current Location Button */}
           <div className="p-2 bg-slate-950/90 sticky top-0 z-10 border-b border-white/5 space-y-1">
             <button
@@ -205,8 +205,8 @@ export default function LocationInput({
 
           {/* Suggestions Header */}
           <div className="px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-400 bg-slate-950/40 flex items-center justify-between">
-            <span>{value.trim().length >= 2 ? "Place Suggestions" : "Popular Locations"}</span>
-            {loading && <span className="text-[8px] text-accent animate-pulse">Searching...</span>}
+            <span>{value.trim().length >= 2 ? "Google Map Suggestions" : "Popular Locations"}</span>
+            {loading && <span className="text-[8px] text-accent animate-pulse">Searching Google Maps...</span>}
           </div>
 
           {/* Location Suggestions List */}
@@ -237,12 +237,12 @@ export default function LocationInput({
                 >
                   <MapPin className={`w-4 h-4 shrink-0 mt-0.5 ${isSelected || isExactValue ? "text-accent" : "text-primary"}`} />
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-slate-100 truncate flex items-center gap-1.5">
+                    <div className="font-bold text-slate-100 flex items-center gap-1.5">
                       <span>{item.mainText}</span>
                       {isExactValue && <Check className="w-3 h-3 text-emerald-400 shrink-0" />}
                     </div>
                     {item.secondaryText && (
-                      <div className="text-[11px] text-slate-400 truncate mt-0.5">
+                      <div className="text-[11px] text-slate-400 break-words leading-tight mt-0.5">
                         {item.secondaryText}
                       </div>
                     )}
