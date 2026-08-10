@@ -13,7 +13,9 @@ import {
   ChevronRight,
   CheckCircle2,
   AlertCircle,
-  Loader2
+  Loader2,
+  Plus,
+  Trash2
 } from "lucide-react";
 
 import LocationInput from "./location-input";
@@ -41,12 +43,59 @@ function validatePhone(phone: string): boolean {
   return digitsOnly.length === 10;
 }
 
+function formatCategorySeating(catName: string): string {
+  const lower = catName.toLowerCase();
+  if (lower.includes("suv") || lower.includes("innova") || lower.includes("ertiga")) {
+    return `${catName} (7-Seater: 5-7 Persons)`;
+  }
+  if (lower.includes("sedan") || lower.includes("hatchback") || lower.includes("dzire") || lower.includes("etios") || lower.includes("premium")) {
+    return `${catName} (5-Seater: 1-4 Persons)`;
+  }
+  if (lower.includes("bus") || lower.includes("tempo") || lower.includes("traveller")) {
+    return `${catName} (13-26 Seater: 8+ Persons)`;
+  }
+  return `${catName} (5-Seater: 1-4 Persons)`;
+}
+
+export interface CorporatePassenger {
+  id: string;
+  employeeId: string;
+  name: string;
+  gender: string;
+}
+
 export default function BookingWidget() {
   const [activeTab, setActiveTab] = useState<BookingTab>("corporate");
 
   // Dynamic lists from DB
   const [categories, setCategories] = useState<any[]>([]);
   const [tours, setTours] = useState<any[]>([]);
+
+  // State for Corporate Passengers & Form Modes
+  const [corpMode, setCorpMode] = useState<"individual" | "team" | "bulk">("individual");
+  const [bulkCount, setBulkCount] = useState<string>("10");
+  const [passengers, setPassengers] = useState<CorporatePassenger[]>([
+    { id: "1", employeeId: "", name: "", gender: "Male" }
+  ]);
+
+  const addPassenger = () => {
+    if (passengers.length >= 7) return;
+    setPassengers((prev) => [
+      ...prev,
+      { id: String(Date.now()), employeeId: "", name: "", gender: "Male" }
+    ]);
+  };
+
+  const removePassenger = (id: string) => {
+    if (passengers.length <= 1) return;
+    setPassengers((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const updatePassenger = (id: string, field: keyof CorporatePassenger, val: string) => {
+    setPassengers((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, [field]: val } : p))
+    );
+  };
 
   // State for forms
   const [corpData, setCorpData] = useState({ 
@@ -178,16 +227,36 @@ export default function BookingWidget() {
         const formattedPhone = `+91${digitsPhone}`;
         const shiftIn = `${corpData.shiftStartHour}:${corpData.shiftStartMinute} ${corpData.shiftStartAmpm}`;
         const shiftOut = `${corpData.shiftEndHour}:${corpData.shiftEndMinute} ${corpData.shiftEndAmpm}`;
+
+        let totalCount = 1;
+        let passengerSummary = "";
+        let vehicleRecommendation = "5-Seater Car (1-4 Persons)";
+
+        if (corpMode === "bulk") {
+          totalCount = parseInt(bulkCount, 10) || 10;
+          vehicleRecommendation = totalCount <= 7 ? "7-Seater Executive SUV (5-7 Persons)" : "Bulk Fleet Transport (8+ Staff)";
+          const mainEmp = passengers[0]?.employeeId?.trim() || "N/A";
+          passengerSummary = `Bulk Shift Commute: ${totalCount} Staff. Vehicle: ${vehicleRecommendation}. Primary SPOC Employee ID: ${mainEmp}.`;
+        } else {
+          totalCount = passengers.length;
+          vehicleRecommendation = totalCount <= 4 ? "5-Seater Hatchback/Sedan (1-4 Persons)" : "7-Seater Executive SUV (5-7 Persons)";
+          const pDetails = passengers.map((p, idx) => {
+            const eId = p.employeeId.trim() || `EMP-${idx + 1}`;
+            const nameStr = p.name.trim() ? ` (${p.name.trim()})` : "";
+            return `Passenger ${idx + 1}: ${eId}${nameStr} [${p.gender}]`;
+          }).join("; ");
+          passengerSummary = `Headcount: ${totalCount} Staff. Vehicle: ${vehicleRecommendation}. Roster: ${pDetails}.`;
+        }
         
         payload = {
           companyName: corpData.company.trim(),
           contactName: corpData.contactName.trim(),
           email: corpData.email.trim(),
           phone: formattedPhone,
-          employeeCount: 1,
+          employeeCount: totalCount,
           pickupLocations: corpData.pickup.trim(),
-          serviceType: `Corporate Cab (Shift In: ${shiftIn} | Shift Out: ${shiftOut})`,
-          requirements: `Employee ID: ${corpData.employeeId.trim()}. Gender: ${corpData.gender}. Drop Address: ${corpData.drop.trim()}. Shift In: ${shiftIn}, Shift Out: ${shiftOut}.`
+          serviceType: `Corporate Cab (${vehicleRecommendation} | Count: ${totalCount} | Shift In: ${shiftIn} | Shift Out: ${shiftOut})`,
+          requirements: `${passengerSummary} Drop Address: ${corpData.drop.trim()}. Shift In: ${shiftIn}, Shift Out: ${shiftOut}.`
         };
       } else if (activeTab === "local") {
         url = "/api/rental/lead";
@@ -389,8 +458,85 @@ export default function BookingWidget() {
           {/* Corporate Cab Tab */}
           {activeTab === "corporate" && (
             <div className="space-y-6">
-              {/* Row 1: Company Name, Employee ID, Gender */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Row 0: Booking Scope / Mode Selector */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Booking Type / Staff Capacity Scope</label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCorpMode("individual");
+                      if (passengers.length > 1) setPassengers([passengers[0]]);
+                    }}
+                    className={`py-2 px-3 rounded-lg text-xs font-bold transition-all border flex flex-col items-center gap-0.5 ${
+                      corpMode === "individual"
+                        ? "bg-primary text-white border-primary shadow-md"
+                        : "bg-slate-950/50 text-slate-400 border-white/10 hover:border-white/20"
+                    }`}
+                  >
+                    <span>Solo Staff</span>
+                    <span className="text-[9px] opacity-80 font-normal">1 Person (5-Seater)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCorpMode("team");
+                      if (passengers.length === 1) addPassenger();
+                    }}
+                    className={`py-2 px-3 rounded-lg text-xs font-bold transition-all border flex flex-col items-center gap-0.5 ${
+                      corpMode === "team"
+                        ? "bg-primary text-white border-primary shadow-md"
+                        : "bg-slate-950/50 text-slate-400 border-white/10 hover:border-white/20"
+                    }`}
+                  >
+                    <span>Team Cab Share</span>
+                    <span className="text-[9px] opacity-80 font-normal">2 to 7 Staff (5 or 7 Seater)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCorpMode("bulk")}
+                    className={`py-2 px-3 rounded-lg text-xs font-bold transition-all border flex flex-col items-center gap-0.5 ${
+                      corpMode === "bulk"
+                        ? "bg-primary text-white border-primary shadow-md"
+                        : "bg-slate-950/50 text-slate-400 border-white/10 hover:border-white/20"
+                    }`}
+                  >
+                    <span>Bulk Roster</span>
+                    <span className="text-[9px] opacity-80 font-normal">8+ Staff (Multiple Cabs)</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Dynamic Vehicle Allocation Banner */}
+              <div className="bg-slate-950/70 border border-white/10 rounded-lg p-2.5 flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">
+                    {corpMode === "bulk" || passengers.length >= 8 ? "🚌" : passengers.length >= 5 ? "🚙" : "🚗"}
+                  </span>
+                  <div>
+                    <span className="font-bold text-slate-100">
+                      {corpMode === "bulk" || passengers.length >= 8
+                        ? "Bulk Fleet Transport / Multiple Vehicles (8+ Passengers)"
+                        : passengers.length >= 5
+                        ? "7-Seater Executive SUV (5 to 7 Passengers)"
+                        : "5-Seater Car - Hatchback / Sedan (1 to 4 Passengers)"}
+                    </span>
+                    <p className="text-[10px] text-slate-400">
+                      {corpMode === "bulk" || passengers.length >= 8
+                        ? "Multiple cabs & shuttles dispatched based on employee roster count."
+                        : passengers.length >= 5
+                        ? "5 to 7 passengers require a 7-seater SUV (Ertiga / Innova Crysta)."
+                        : "1 to 4 passengers fit comfortably in a 5-seater Hatchback / Sedan (Dzire, Etios)."}
+                    </p>
+                  </div>
+                </div>
+                <span className="text-[9px] font-mono font-bold uppercase tracking-wider bg-accent/20 text-accent px-2 py-0.5 rounded border border-accent/30 shrink-0">
+                  {corpMode === "bulk" || passengers.length >= 8 ? "8+ Staff" : passengers.length >= 5 ? "7-Seater SUV" : "5-Seater Car"}
+                </span>
+              </div>
+
+              {/* Row 1: Company Name */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Company Name *</label>
                   <div className="relative">
@@ -398,7 +544,7 @@ export default function BookingWidget() {
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Google India"
+                      placeholder="e.g. Google India / TCS / Wipro"
                       value={corpData.company}
                       onChange={(e) => setCorpData({ ...corpData, company: e.target.value })}
                       className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
@@ -406,37 +552,125 @@ export default function BookingWidget() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Employee ID *</label>
-                  <div className="relative">
-                    <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <input
-                      type="text"
-                      required
-                      placeholder="EMP-8973"
-                      value={corpData.employeeId}
-                      onChange={(e) => setCorpData({ ...corpData, employeeId: e.target.value })}
-                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
-                    />
+                {corpMode === "bulk" ? (
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Bulk Employee Count *</label>
+                    <div className="relative">
+                      <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-accent" />
+                      <input
+                        type="number"
+                        min={8}
+                        max={1000}
+                        required
+                        placeholder="e.g. 25"
+                        value={bulkCount}
+                        onChange={(e) => setBulkCount(e.target.value)}
+                        className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"
+                      />
+                    </div>
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Passenger Gender *</label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <select
-                      value={corpData.gender}
-                      onChange={(e) => setCorpData({ ...corpData, gender: e.target.value })}
-                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
-                    >
-                      <option value="Male" className="bg-slate-900">Male</option>
-                      <option value="Female" className="bg-slate-900">Female</option>
-                      <option value="Other" className="bg-slate-900">Other</option>
-                    </select>
+                ) : (
+                  <div className="flex items-end justify-between">
+                    <div className="text-xs text-slate-400 pb-2">
+                      <span className="font-bold text-slate-200">{passengers.length}</span> Employee(s) registered ({passengers.length <= 4 ? "5-Seater Cab" : "7-Seater SUV"}).
+                    </div>
+                    {corpMode === "team" && passengers.length < 7 && (
+                      <button
+                        type="button"
+                        onClick={addPassenger}
+                        className="mb-1 inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent/20 hover:bg-accent/30 text-accent border border-accent/30 rounded-lg text-xs font-bold transition-all"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add Passenger ({passengers.length}/7)</span>
+                      </button>
+                    )}
                   </div>
-                </div>
+                )}
               </div>
+
+              {/* Dynamic Employee Roster List */}
+              {corpMode !== "bulk" && (
+                <div className="space-y-3 bg-slate-950/40 p-4 rounded-xl border border-white/5">
+                  <div className="text-[10px] font-extrabold text-accent uppercase tracking-wider flex items-center justify-between">
+                    <span>Passenger Details ({passengers.length} Total)</span>
+                    <span className="text-[9px] text-slate-400 font-normal">Enter Employee ID & Gender for each passenger</span>
+                  </div>
+
+                  <div className="space-y-3">
+                    {passengers.map((p, idx) => (
+                      <div key={p.id} className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center bg-slate-900/60 p-3 rounded-lg border border-white/5">
+                        <div className="md:col-span-4 space-y-1">
+                          <label className="text-[10px] font-semibold text-slate-400 uppercase">
+                            Employee ID #{idx + 1} *
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            placeholder={`EMP-${8900 + idx + 1}`}
+                            value={p.employeeId}
+                            onChange={(e) => updatePassenger(p.id, "employeeId", e.target.value)}
+                            className="w-full bg-slate-950/80 border border-white/10 rounded-lg py-1.5 px-3 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono"
+                          />
+                        </div>
+
+                        <div className="md:col-span-4 space-y-1">
+                          <label className="text-[10px] font-semibold text-slate-400 uppercase">
+                            Full Name (Optional)
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Rahul Sharma"
+                            value={p.name}
+                            onChange={(e) => updatePassenger(p.id, "name", e.target.value)}
+                            className="w-full bg-slate-950/80 border border-white/10 rounded-lg py-1.5 px-3 text-xs text-slate-100 focus:outline-none focus:border-primary"
+                          />
+                        </div>
+
+                        <div className="md:col-span-3 space-y-1">
+                          <label className="text-[10px] font-semibold text-slate-400 uppercase">
+                            Gender *
+                          </label>
+                          <select
+                            value={p.gender}
+                            onChange={(e) => updatePassenger(p.id, "gender", e.target.value)}
+                            className="w-full bg-slate-950/80 border border-white/10 rounded-lg py-1.5 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary appearance-none"
+                          >
+                            <option value="Male" className="bg-slate-900">Male</option>
+                            <option value="Female" className="bg-slate-900">Female</option>
+                            <option value="Other" className="bg-slate-900">Other</option>
+                          </select>
+                        </div>
+
+                        <div className="md:col-span-1 flex items-end justify-center pt-4 md:pt-0">
+                          {passengers.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removePassenger(p.id)}
+                              title="Remove Employee"
+                              className="p-1.5 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-lg transition-all"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {corpMode === "team" && passengers.length < 7 && (
+                    <div className="pt-1 text-center">
+                      <button
+                        type="button"
+                        onClick={addPassenger}
+                        className="inline-flex items-center gap-1.5 text-xs text-accent hover:underline font-semibold"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add Another Passenger to Cab Share (Up to 7 Staff)</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Row 2: Shift Start Time (In) & Shift End Time (Out) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -579,7 +813,7 @@ export default function BookingWidget() {
                   className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
                 >
                   {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id} className="bg-slate-900">{cat.name}</option>
+                    <option key={cat.id} value={cat.id} className="bg-slate-900">{formatCategorySeating(cat.name)}</option>
                   ))}
                 </select>
               </div>
@@ -711,7 +945,7 @@ export default function BookingWidget() {
                   className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
                 >
                   {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id} className="bg-slate-900">{cat.name}</option>
+                    <option key={cat.id} value={cat.id} className="bg-slate-900">{formatCategorySeating(cat.name)}</option>
                   ))}
                 </select>
               </div>
