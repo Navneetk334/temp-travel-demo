@@ -328,7 +328,7 @@ export default function BookingWidget() {
           }`}
         >
           <Building2 className="w-4 h-4" />
-          <span>Corporate Cab</span>
+          <span>Pickup & Drop</span>
         </button>
 
         <button
