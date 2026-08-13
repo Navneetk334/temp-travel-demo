@@ -873,7 +873,7 @@ export default function BookingWidget() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Car Category *</label>
+                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Vehicle Category *</label>
                 <div className="relative">
                   <select
                     value={outstationData.vehicleCategoryId}
@@ -889,7 +889,7 @@ export default function BookingWidget() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Outstation Date *</label>
+                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Booking Date *</label>
                 <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                   <input
@@ -920,20 +920,20 @@ export default function BookingWidget() {
 
               <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 border-t border-white/5">
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">From City *</label>
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pickup Address *</label>
                   <LocationInput
                     required
-                    placeholder="Pickup City (e.g. Mumbai, Pune, Delhi)"
+                    placeholder="Enter pickup location (e.g. Airport, Hinjewadi, BKC)"
                     value={outstationData.pickup}
                     onChange={(val) => setOutstationData({ ...outstationData, pickup: val })}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">To City *</label>
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Drop Address *</label>
                   <LocationInput
                     required
-                    placeholder="Drop City (e.g. Pune, Lonavala, Mahabaleshwar)"
+                    placeholder="Enter drop location (e.g. Airport, Hinjewadi, BKC)"
                     value={outstationData.drop}
                     onChange={(val) => setOutstationData({ ...outstationData, drop: val })}
                   />
