@@ -62,6 +62,9 @@ export default function BookingWidget() {
   const [categories, setCategories] = useState<any[]>([]);
   const [tours, setTours] = useState<any[]>([]);
 
+  // State for Pickup & Drop Category (Individual vs Working)
+  const [bookingCategory, setBookingCategory] = useState<"individual" | "working">("individual");
+
   // State for forms
   const [corpData, setCorpData] = useState({ 
     company: "", 
@@ -162,7 +165,12 @@ export default function BookingWidget() {
       if (activeTab === "corporate") {
         url = "/api/corporate/lead";
 
-        // 1. Time Validation
+        // 1. Working Company Validation
+        if (bookingCategory === "working" && !corpData.company.trim()) {
+          throw new Error("Please enter your Company Name.");
+        }
+
+        // 2. Time Validation
         const startMins = timeToMinutes(corpData.shiftStartHour, corpData.shiftStartMinute, corpData.shiftStartAmpm);
         const endMins = timeToMinutes(corpData.shiftEndHour, corpData.shiftEndMinute, corpData.shiftEndAmpm);
         if (startMins === endMins) {
@@ -172,17 +180,17 @@ export default function BookingWidget() {
           throw new Error("Drop Off Time must be after Pickup Time.");
         }
 
-        // 2. Contact Name Validation
+        // 3. Contact Name Validation
         if (!validateName(corpData.contactName)) {
           throw new Error("Contact Name can only contain alphabetic characters.");
         }
 
-        // 3. Email Validation
+        // 4. Email Validation
         if (!validateEmail(corpData.email)) {
-          throw new Error("Please enter a valid work email address.");
+          throw new Error(`Please enter a valid ${bookingCategory === "working" ? "work email" : "email"} address.`);
         }
 
-        // 4. Mobile Number Validation
+        // 5. Mobile Number Validation
         const digitsPhone = corpData.phone.replace(/\D/g, "");
         if (digitsPhone.length !== 10) {
           throw new Error("Mobile number must be exactly 10 digits.");
@@ -190,16 +198,17 @@ export default function BookingWidget() {
         const formattedPhone = `+91${digitsPhone}`;
         const shiftIn = `${corpData.shiftStartHour}:${corpData.shiftStartMinute} ${corpData.shiftStartAmpm}`;
         const shiftOut = `${corpData.shiftEndHour}:${corpData.shiftEndMinute} ${corpData.shiftEndAmpm}`;
+        const companyNameVal = bookingCategory === "working" ? corpData.company.trim() : "Individual Passenger";
 
         payload = {
-          companyName: corpData.company.trim(),
+          companyName: companyNameVal,
           contactName: corpData.contactName.trim(),
           email: corpData.email.trim(),
           phone: formattedPhone,
           employeeCount: 1,
           pickupLocations: corpData.pickup.trim(),
-          serviceType: `Pickup & Drop (Pickup Time: ${shiftIn} | Drop Off Time: ${shiftOut})`,
-          requirements: `Drop Address: ${corpData.drop.trim()}. Pickup Time: ${shiftIn}, Drop Off Time: ${shiftOut}.`
+          serviceType: `Pickup & Drop (${bookingCategory === "working" ? "Working" : "Individual"} | Pickup: ${shiftIn} | Drop Off: ${shiftOut})`,
+          requirements: `Category: ${bookingCategory === "working" ? `Working (${companyNameVal})` : "Individual"}. Drop Address: ${corpData.drop.trim()}. Pickup Time: ${shiftIn}, Drop Off Time: ${shiftOut}.`
         };
       } else if (activeTab === "local") {
         url = "/api/rental/lead";
@@ -398,24 +407,57 @@ export default function BookingWidget() {
             </div>
           )}
 
-          {/* Corporate Cab Tab */}
+          {/* Pickup & Drop Tab */}
           {activeTab === "corporate" && (
             <div className="space-y-6">
-              {/* Row 1: Company Name */}
+              {/* Row 0: Category Selector (Individual vs Working) */}
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Company Name *</label>
-                <div className="relative">
-                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Google India / TCS / Wipro"
-                    value={corpData.company}
-                    onChange={(e) => setCorpData({ ...corpData, company: e.target.value })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
-                  />
+                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Booking Category *</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setBookingCategory("individual")}
+                    className={`py-2.5 px-4 rounded-lg text-xs font-bold transition-all border flex items-center justify-center gap-2 ${
+                      bookingCategory === "individual"
+                        ? "bg-primary text-white border-primary shadow-md"
+                        : "bg-slate-950/50 text-slate-400 border-white/10 hover:border-white/20"
+                    }`}
+                  >
+                    <User className="w-4 h-4" />
+                    <span>Individual</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBookingCategory("working")}
+                    className={`py-2.5 px-4 rounded-lg text-xs font-bold transition-all border flex items-center justify-center gap-2 ${
+                      bookingCategory === "working"
+                        ? "bg-primary text-white border-primary shadow-md"
+                        : "bg-slate-950/50 text-slate-400 border-white/10 hover:border-white/20"
+                    }`}
+                  >
+                    <Building2 className="w-4 h-4" />
+                    <span>Working</span>
+                  </button>
                 </div>
               </div>
+
+              {/* Company Name (Shown first only if Working is selected) */}
+              {bookingCategory === "working" && (
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Company Name *</label>
+                  <div className="relative">
+                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Google India / TCS / Wipro"
+                      value={corpData.company}
+                      onChange={(e) => setCorpData({ ...corpData, company: e.target.value })}
+                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Row 2: Pickup Time & Drop Off Time */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -521,11 +563,13 @@ export default function BookingWidget() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Work Email *</label>
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                    {bookingCategory === "working" ? "Work Email *" : "Email *"}
+                  </label>
                   <input
                     type="email"
                     required
-                    placeholder="e.g. amit@company.com"
+                    placeholder={bookingCategory === "working" ? "e.g. amit@company.com" : "e.g. amit@gmail.com"}
                     value={corpData.email}
                     onChange={(e) => setCorpData({ ...corpData, email: e.target.value })}
                     className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
