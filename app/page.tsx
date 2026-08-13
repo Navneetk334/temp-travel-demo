@@ -200,8 +200,8 @@ export default function Homepage() {
                   <p className="text-slate-300 text-sm leading-relaxed">{pkg.description}</p>
                   <div className="pt-4 flex items-center justify-between border-t border-white/5">
                     <span className="text-xs font-medium text-slate-400">Includes hotel & transport</span>
-                    <a href="#book-widget" className="text-accent flex items-center gap-1 text-sm font-semibold hover:underline">
-                      <span>Book Package</span>
+                    <a href="/tours" className="text-accent flex items-center gap-1 text-sm font-semibold hover:underline">
+                      <span>Explore Package</span>
                       <ArrowUpRight className="w-4 h-4" />
                     </a>
                   </div>

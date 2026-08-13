@@ -18,7 +18,7 @@ import {
 
 import LocationInput from "./location-input";
 
-type BookingTab = "corporate" | "local" | "outstation" | "tours";
+type BookingTab = "corporate" | "local" | "outstation";
 
 function timeToMinutes(hourStr: string, minStr: string, ampm: string): number {
   let hour = parseInt(hourStr, 10);
@@ -379,7 +379,7 @@ export default function BookingWidget() {
   return (
     <div className="w-full max-w-5xl mx-auto glassmorphism rounded-2xl shadow-2xl border border-white/10 text-slate-100 relative">
       {/* Tabs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 bg-slate-950/80 border-b border-white/5">
+      <div className="grid grid-cols-3 bg-slate-950/80 border-b border-white/5">
         <button
           onClick={() => { setActiveTab("corporate"); setError(null); setSuccess(false); }}
           className={`flex items-center justify-center gap-2 py-4 px-3 text-sm font-semibold tracking-wide transition-all ${
@@ -415,18 +415,6 @@ export default function BookingWidget() {
           <Compass className="w-4 h-4" />
           <span>Outstation</span>
         </button>
-
-        <button
-          onClick={() => { setActiveTab("tours"); setError(null); setSuccess(false); }}
-          className={`flex items-center justify-center gap-2 py-4 px-3 text-sm font-semibold tracking-wide transition-all ${
-            activeTab === "tours"
-              ? "bg-primary text-primary-foreground border-b-2 border-accent"
-              : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
-          }`}
-        >
-          <Compass className="w-4 h-4" />
-          <span>Tour Packages</span>
-        </button>
       </div>
 
       {success ? (
@@ -436,8 +424,8 @@ export default function BookingWidget() {
           </div>
           <h3 className="text-xl font-bold text-slate-50">Request Submitted Successfully!</h3>
           <p className="text-sm text-slate-300 max-w-md mx-auto leading-relaxed">
-            {activeTab === "tours" && bookingRef ? (
-              <>Your tour booking request has been logged. Your Booking Reference number is <span className="text-accent font-extrabold font-mono">{bookingRef}</span>. Our coordinators will contact you shortly.</>
+            {bookingRef ? (
+              <>Your booking request has been logged. Your Reference number is <span className="text-accent font-extrabold font-mono">{bookingRef}</span>. Our coordinators will contact you shortly.</>
             ) : (
               <>Your transit inquiry request has been successfully logged. Our team will review availability and contact you within 24 Hours.</>
             )}
@@ -952,88 +940,6 @@ export default function BookingWidget() {
                     value={outstationData.phone}
                     onChange={(e) => setOutstationData({ ...outstationData, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
                     className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Tour Package Tab */}
-          {activeTab === "tours" && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Select Package *</label>
-                <select
-                  value={tourData.tourPackageId}
-                  onChange={(e) => setTourData({ ...tourData, tourPackageId: e.target.value })}
-                  className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
-                >
-                  {tours.map((tour) => (
-                    <option key={tour.id} value={tour.id} className="bg-slate-900">{tour.title} ({tour.durationDays}D/{tour.durationNights}N)</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Travel Date *</label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input
-                    type="date"
-                    required
-                    value={tourData.date}
-                    onChange={(e) => setTourData({ ...tourData, date: e.target.value })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Guests / Passengers *</label>
-                <input
-                  type="number"
-                  min="1"
-                  required
-                  value={tourData.guests}
-                  onChange={(e) => setTourData({ ...tourData, guests: e.target.value })}
-                  className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
-                />
-              </div>
-
-              <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6 pt-2 border-t border-white/5">
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Full Name *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="John Doe"
-                    value={tourData.name}
-                    onChange={(e) => setTourData({ ...tourData, name: e.target.value })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Email Address *</label>
-                  <input
-                    type="email"
-                    required
-                    placeholder="john@example.com"
-                    value={tourData.email}
-                    onChange={(e) => setTourData({ ...tourData, email: e.target.value })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mobile Number *</label>
-                  <input
-                    type="tel"
-                    required
-                    placeholder="e.g. 9999999999"
-                    value={tourData.phone}
-                    onChange={(e) => setTourData({ ...tourData, phone: e.target.value })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
                   />
                 </div>
               </div>
