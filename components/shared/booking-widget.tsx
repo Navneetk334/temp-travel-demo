@@ -11,6 +11,7 @@ import {
   Users, 
   User,
   ChevronRight,
+  ChevronDown,
   CheckCircle2,
   AlertCircle,
   Loader2
@@ -504,64 +505,82 @@ export default function BookingWidget() {
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Pickup Time *</label>
                   <div className="flex gap-2">
-                    <select
-                      value={corpData.shiftStartHour}
-                      onChange={(e) => setCorpData({ ...corpData, shiftStartHour: e.target.value })}
-                      className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
-                    >
-                      {["01","02","03","04","05","06","07","08","09","10","11","12"].map(h => (
-                        <option key={h} value={h} className="bg-slate-900">{h}</option>
-                      ))}
-                    </select>
-                    <select
-                      value={corpData.shiftStartMinute}
-                      onChange={(e) => setCorpData({ ...corpData, shiftStartMinute: e.target.value })}
-                      className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
-                    >
-                      {["00","15","30","45"].map(m => (
-                        <option key={m} value={m} className="bg-slate-900">{m}</option>
-                      ))}
-                    </select>
-                    <select
-                      value={corpData.shiftStartAmpm}
-                      onChange={(e) => setCorpData({ ...corpData, shiftStartAmpm: e.target.value })}
-                      className="bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-bold"
-                    >
-                      <option value="AM" className="bg-slate-900">AM</option>
-                      <option value="PM" className="bg-slate-900">PM</option>
-                    </select>
+                    <div className="relative flex-1">
+                      <select
+                        value={corpData.shiftStartHour}
+                        onChange={(e) => setCorpData({ ...corpData, shiftStartHour: e.target.value })}
+                        className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-3 pr-7 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono appearance-none cursor-pointer"
+                      >
+                        {["01","02","03","04","05","06","07","08","09","10","11","12"].map(h => (
+                          <option key={h} value={h} className="bg-slate-900">{h}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                    </div>
+                    <div className="relative flex-1">
+                      <select
+                        value={corpData.shiftStartMinute}
+                        onChange={(e) => setCorpData({ ...corpData, shiftStartMinute: e.target.value })}
+                        className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-3 pr-7 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono appearance-none cursor-pointer"
+                      >
+                        {["00","15","30","45"].map(m => (
+                          <option key={m} value={m} className="bg-slate-900">{m}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                    </div>
+                    <div className="relative w-20">
+                      <select
+                        value={corpData.shiftStartAmpm}
+                        onChange={(e) => setCorpData({ ...corpData, shiftStartAmpm: e.target.value })}
+                        className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-3 pr-6 text-sm text-slate-100 focus:outline-none focus:border-primary font-bold appearance-none cursor-pointer"
+                      >
+                        <option value="AM" className="bg-slate-900">AM</option>
+                        <option value="PM" className="bg-slate-900">PM</option>
+                      </select>
+                      <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                    </div>
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Drop Off Time *</label>
                   <div className="flex gap-2">
-                    <select
-                      value={corpData.shiftEndHour}
-                      onChange={(e) => setCorpData({ ...corpData, shiftEndHour: e.target.value })}
-                      className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
-                    >
-                      {["01","02","03","04","05","06","07","08","09","10","11","12"].map(h => (
-                        <option key={h} value={h} className="bg-slate-900">{h}</option>
-                      ))}
-                    </select>
-                    <select
-                      value={corpData.shiftEndMinute}
-                      onChange={(e) => setCorpData({ ...corpData, shiftEndMinute: e.target.value })}
-                      className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
-                    >
-                      {["00","15","30","45"].map(m => (
-                        <option key={m} value={m} className="bg-slate-900">{m}</option>
-                      ))}
-                    </select>
-                    <select
-                      value={corpData.shiftEndAmpm}
-                      onChange={(e) => setCorpData({ ...corpData, shiftEndAmpm: e.target.value })}
-                      className="bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-bold"
-                    >
-                      <option value="AM" className="bg-slate-900">AM</option>
-                      <option value="PM" className="bg-slate-900">PM</option>
-                    </select>
+                    <div className="relative flex-1">
+                      <select
+                        value={corpData.shiftEndHour}
+                        onChange={(e) => setCorpData({ ...corpData, shiftEndHour: e.target.value })}
+                        className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-3 pr-7 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono appearance-none cursor-pointer"
+                      >
+                        {["01","02","03","04","05","06","07","08","09","10","11","12"].map(h => (
+                          <option key={h} value={h} className="bg-slate-900">{h}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                    </div>
+                    <div className="relative flex-1">
+                      <select
+                        value={corpData.shiftEndMinute}
+                        onChange={(e) => setCorpData({ ...corpData, shiftEndMinute: e.target.value })}
+                        className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-3 pr-7 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono appearance-none cursor-pointer"
+                      >
+                        {["00","15","30","45"].map(m => (
+                          <option key={m} value={m} className="bg-slate-900">{m}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                    </div>
+                    <div className="relative w-20">
+                      <select
+                        value={corpData.shiftEndAmpm}
+                        onChange={(e) => setCorpData({ ...corpData, shiftEndAmpm: e.target.value })}
+                        className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-3 pr-6 text-sm text-slate-100 focus:outline-none focus:border-primary font-bold appearance-none cursor-pointer"
+                      >
+                        <option value="AM" className="bg-slate-900">AM</option>
+                        <option value="PM" className="bg-slate-900">PM</option>
+                      </select>
+                      <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -652,69 +671,78 @@ export default function BookingWidget() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Vehicle Category *</label>
-                    <select
-                      value={currentCatName}
-                      onChange={(e) => {
-                        const newCatName = e.target.value;
-                        const targetCat = categories.find(c => {
-                          const cn = c.name.toLowerCase();
-                          if (newCatName === "MPV/MUV") return cn.includes("mpv") || cn.includes("muv") || cn.includes("bus") || cn.includes("tempo") || cn.includes("suv");
-                          if (newCatName === "SUV") return cn.includes("suv");
-                          if (newCatName === "Sedan") return cn.includes("sedan") || cn.includes("hatchback") || cn.includes("premium");
-                          return false;
-                        });
-                        const catId = targetCat ? targetCat.id : (categories[0]?.id || "");
-                        const newSubmap = getSubcategoriesForCategory(newCatName);
-                        const firstSub = Object.keys(newSubmap)[0] || "";
-                        const firstModel = newSubmap[firstSub]?.[0] || "";
-                        setLocalData({ 
-                          ...localData, 
-                          selectedCatName: newCatName,
-                          vehicleCategoryId: catId,
-                          subCategory: firstSub,
-                          vehicleModel: firstModel
-                        });
-                      }}
-                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
-                    >
-                      <option value="Sedan" className="bg-slate-900">Sedan</option>
-                      <option value="SUV" className="bg-slate-900">SUV</option>
-                      <option value="MPV/MUV" className="bg-slate-900">MPV/MUV</option>
-                    </select>
+                    <div className="relative">
+                      <select
+                        value={currentCatName}
+                        onChange={(e) => {
+                          const newCatName = e.target.value;
+                          const targetCat = categories.find(c => {
+                            const cn = c.name.toLowerCase();
+                            if (newCatName === "MPV/MUV") return cn.includes("mpv") || cn.includes("muv") || cn.includes("bus") || cn.includes("tempo") || cn.includes("suv");
+                            if (newCatName === "SUV") return cn.includes("suv");
+                            if (newCatName === "Sedan") return cn.includes("sedan") || cn.includes("hatchback") || cn.includes("premium");
+                            return false;
+                          });
+                          const catId = targetCat ? targetCat.id : (categories[0]?.id || "");
+                          const newSubmap = getSubcategoriesForCategory(newCatName);
+                          const firstSub = Object.keys(newSubmap)[0] || "";
+                          const firstModel = newSubmap[firstSub]?.[0] || "";
+                          setLocalData({ 
+                            ...localData, 
+                            selectedCatName: newCatName,
+                            vehicleCategoryId: catId,
+                            subCategory: firstSub,
+                            vehicleModel: firstModel
+                          });
+                        }}
+                        className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
+                      >
+                        <option value="Sedan" className="bg-slate-900">Sedan</option>
+                        <option value="SUV" className="bg-slate-900">SUV</option>
+                        <option value="MPV/MUV" className="bg-slate-900">MPV/MUV</option>
+                      </select>
+                      <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    </div>
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Vehicle Subcategory *</label>
-                    <select
-                      value={selectedSubcat}
-                      onChange={(e) => {
-                        const newSub = e.target.value;
-                        const newModels = subcatMap[newSub] || [];
-                        setLocalData({
-                          ...localData,
-                          subCategory: newSub,
-                          vehicleModel: newModels[0] || ""
-                        });
-                      }}
-                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
-                    >
-                      {availableSubcats.map((sub) => (
-                        <option key={sub} value={sub} className="bg-slate-900">{sub}</option>
-                      ))}
-                    </select>
+                    <div className="relative">
+                      <select
+                        value={selectedSubcat}
+                        onChange={(e) => {
+                          const newSub = e.target.value;
+                          const newModels = subcatMap[newSub] || [];
+                          setLocalData({
+                            ...localData,
+                            subCategory: newSub,
+                            vehicleModel: newModels[0] || ""
+                          });
+                        }}
+                        className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
+                      >
+                        {availableSubcats.map((sub) => (
+                          <option key={sub} value={sub} className="bg-slate-900">{sub}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    </div>
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Vehicle Model *</label>
-                    <select
-                      value={selectedModel}
-                      onChange={(e) => setLocalData({ ...localData, vehicleModel: e.target.value })}
-                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
-                    >
-                      {availableModels.map((mod) => (
-                        <option key={mod} value={mod} className="bg-slate-900">{mod}</option>
-                      ))}
-                    </select>
+                    <div className="relative">
+                      <select
+                        value={selectedModel}
+                        onChange={(e) => setLocalData({ ...localData, vehicleModel: e.target.value })}
+                        className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
+                      >
+                        {availableModels.map((mod) => (
+                          <option key={mod} value={mod} className="bg-slate-900">{mod}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    </div>
                   </div>
                 </div>
 
@@ -722,15 +750,18 @@ export default function BookingWidget() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Rental Package *</label>
-                    <select
-                      value={localData.duration}
-                      onChange={(e) => setLocalData({ ...localData, duration: e.target.value })}
-                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
-                    >
-                      <option value="8hr_80km" className="bg-slate-900">8 Hrs / 80 Kms</option>
-                      <option value="12hr_120km" className="bg-slate-900">12 Hrs / 120 Kms</option>
-                      <option value="4hr_40km" className="bg-slate-900">4 Hrs / 40 Kms</option>
-                    </select>
+                    <div className="relative">
+                      <select
+                        value={localData.duration}
+                        onChange={(e) => setLocalData({ ...localData, duration: e.target.value })}
+                        className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
+                      >
+                        <option value="8hr_80km" className="bg-slate-900">8 Hrs / 80 Kms</option>
+                        <option value="12hr_120km" className="bg-slate-900">12 Hrs / 120 Kms</option>
+                        <option value="4hr_40km" className="bg-slate-900">4 Hrs / 40 Kms</option>
+                      </select>
+                      <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -843,15 +874,18 @@ export default function BookingWidget() {
 
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Car Category *</label>
-                <select
-                  value={outstationData.vehicleCategoryId}
-                  onChange={(e) => setOutstationData({ ...outstationData, vehicleCategoryId: e.target.value })}
-                  className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
-                >
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id} className="bg-slate-900">{formatCategorySeating(cat.name)}</option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    value={outstationData.vehicleCategoryId}
+                    onChange={(e) => setOutstationData({ ...outstationData, vehicleCategoryId: e.target.value })}
+                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
+                  >
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id} className="bg-slate-900">{formatCategorySeating(cat.name)}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                </div>
               </div>
 
               <div className="space-y-2">
