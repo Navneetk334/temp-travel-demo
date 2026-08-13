@@ -42,44 +42,35 @@ function validatePhone(phone: string): boolean {
 }
 
 const VEHICLE_DATA: Record<string, Record<string, string[]>> = {
-  SEDAN: {
-    "Compact Sedan (4 Seater)": ["Maruti Swift Dzire", "Hyundai Aura", "Honda Amaze", "Tata Tigor"],
-    "Executive Sedan (4 Seater)": ["Honda City", "Hyundai Verna", "Maruti Ciaz", "Skoda Slavia"],
-    "Luxury Premium Sedan": ["Toyota Camry", "Mercedes-Benz E-Class", "BMW 5 Series", "Audi A6"]
-  },
-  HATCHBACK: {
-    "Standard Hatchback (4 Seater)": ["Maruti WagonR", "Maruti Swift", "Hyundai i20", "Tata Tiago"]
+  Sedan: {
+    "Compact": ["Maruti Swift Dzire", "Hyundai Aura", "Honda Amaze", "Tata Tigor"],
+    "Executive": ["Honda City", "Hyundai Verna", "Maruti Ciaz", "Skoda Slavia"],
+    "Premium Executive": ["Toyota Camry", "Skoda Superb", "Volkswagen Passat"],
+    "Luxury": ["Mercedes-Benz E-Class", "BMW 5 Series", "Audi A6", "Jaguar XF"]
   },
   SUV: {
-    "Compact SUV (5 Seater)": ["Hyundai Creta", "Kia Seltos", "Maruti Brezza", "Tata Nexon"],
-    "Executive SUV (6-7 Seater)": ["Toyota Ertiga", "Kia Carens", "Toyota Rumion", "Mahindra XUV700"],
-    "Luxury Premium SUV": ["Toyota Innova Crysta", "Toyota Innova Hycross", "Toyota Fortuner", "MG Gloster"]
+    "Subcompact/Urban": ["Tata Nexon", "Maruti Brezza", "Hyundai Venue", "Kia Sonet"],
+    "Mid-Premium": ["Hyundai Creta", "Kia Seltos", "Mahindra Scorpio-N", "Tata Harrier"],
+    "Premium": ["Mahindra XUV700", "Tata Safari", "MG Hector Plus", "Jeep Compass"],
+    "Luxury": ["Toyota Fortuner", "MG Gloster", "BMW X3/X5", "Mercedes-Benz GLE"]
   },
-  PREMIUM: {
-    "Luxury Executive Sedan": ["Mercedes-Benz E-Class", "BMW 5 Series", "Audi A6"],
-    "Luxury Premium SUV": ["Toyota Innova Hycross", "Toyota Fortuner", "Mercedes-Benz GLE"]
-  },
-  BUS: {
-    "Mini Tempo Traveller (13 Seater)": ["Force Tempo Traveller (13 Seater)", "Force Urbania (13 Seater)"],
-    "Executive Luxury Coach (17-26 Seater)": ["Force Tempo Traveller (17 Seater)", "Force Tempo Traveller (26 Seater)", "Volvo Luxury Bus"]
-  },
-  TEMPO: {
-    "Tempo Traveller (13-17 Seater)": ["Force Tempo Traveller (13 Seater)", "Force Tempo Traveller (17 Seater)", "Force Urbania"]
+  "MPV/MUV": {
+    "Value/Family": ["Maruti Triber", "Maruti Ertiga", "Renault Triber"],
+    "Business": ["Kia Carens", "Toyota Rumion", "Mahindra Marazzo"],
+    "Premium": ["Toyota Innova Crysta", "Toyota Innova Hycross"],
+    "Luxury": ["Kia Carnival", "Toyota Vellfire", "Mercedes-Benz V-Class"]
   }
 };
 
 function getSubcategoriesForCategory(catNameOrSlug: string): Record<string, string[]> {
   const upper = (catNameOrSlug || "").toUpperCase();
-  for (const key of Object.keys(VEHICLE_DATA)) {
-    if (upper.includes(key)) {
-      return VEHICLE_DATA[key];
-    }
+  if (upper.includes("MPV") || upper.includes("MUV") || upper.includes("BUS") || upper.includes("TEMPO")) {
+    return VEHICLE_DATA["MPV/MUV"];
   }
-  return {
-    "Standard Fleet": ["Standard Model"],
-    "Executive Fleet": ["Executive Model"],
-    "Luxury Fleet": ["Luxury Model"]
-  };
+  if (upper.includes("SUV")) {
+    return VEHICLE_DATA["SUV"];
+  }
+  return VEHICLE_DATA["Sedan"];
 }
 
 function formatCategorySeating(catName: string): string {
@@ -128,8 +119,9 @@ export default function BookingWidget() {
     phone: "",
     pickupLocation: "",
     vehicleCategoryId: "", 
-    subCategory: "",
-    vehicleModel: "",
+    selectedCatName: "Sedan",
+    subCategory: "Compact",
+    vehicleModel: "Maruti Swift Dzire",
     duration: "8hr_80km", 
     pickupDate: "", 
     pickupTime: "" 
@@ -268,8 +260,16 @@ export default function BookingWidget() {
         }
         const formattedPhone = `+91${digitsPhone}`;
         
-        const selCat = categories.find(c => c.id === localData.vehicleCategoryId);
-        const catName = selCat ? selCat.name : "";
+        const catName = localData.selectedCatName || "Sedan";
+        const targetCat = categories.find(c => {
+          const cn = c.name.toLowerCase();
+          if (catName === "MPV/MUV") return cn.includes("mpv") || cn.includes("muv") || cn.includes("bus") || cn.includes("tempo") || cn.includes("suv");
+          if (catName === "SUV") return cn.includes("suv");
+          if (catName === "Sedan") return cn.includes("sedan") || cn.includes("hatchback") || cn.includes("premium");
+          return false;
+        });
+        const vCatId = targetCat ? targetCat.id : (localData.vehicleCategoryId || categories[0]?.id || "");
+
         const subcatMap = getSubcategoriesForCategory(catName);
         const availSubcats = Object.keys(subcatMap);
         const subCatVal = availSubcats.includes(localData.subCategory) ? localData.subCategory : (availSubcats[0] || "");
@@ -284,9 +284,9 @@ export default function BookingWidget() {
           dropLocation: null,
           pickupDateTime: new Date(`${localData.pickupDate}T${localData.pickupTime}`).toISOString(),
           returnDateTime: null,
-          vehicleCategoryId: localData.vehicleCategoryId,
-          tripType: `Local Hourly Rental (${localData.duration}) - ${subCatVal} [${modelVal}]`,
-          notes: `Vehicle Subcategory: ${subCatVal}. Vehicle Model: ${modelVal}. Package: ${localData.duration}.`
+          vehicleCategoryId: vCatId,
+          tripType: `Local Hourly Rental (${localData.duration}) - ${catName} ${subCatVal} [${modelVal}]`,
+          notes: `Vehicle Category: ${catName}. Subcategory: ${subCatVal}. Vehicle Model: ${modelVal}. Package: ${localData.duration}.`
         };
       } else if (activeTab === "outstation") {
         url = "/api/rental/lead";
@@ -645,9 +645,8 @@ export default function BookingWidget() {
 
           {/* Local Rentals Tab */}
           {activeTab === "local" && (() => {
-            const activeLocalCategory = categories.find(c => c.id === localData.vehicleCategoryId);
-            const activeCatName = activeLocalCategory ? activeLocalCategory.name : "";
-            const subcatMap = getSubcategoriesForCategory(activeCatName);
+            const currentCatName = localData.selectedCatName || "Sedan";
+            const subcatMap = getSubcategoriesForCategory(currentCatName);
             const availableSubcats = Object.keys(subcatMap);
 
             const selectedSubcat = availableSubcats.includes(localData.subCategory) 
@@ -666,26 +665,33 @@ export default function BookingWidget() {
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Vehicle Category *</label>
                     <select
-                      value={localData.vehicleCategoryId}
+                      value={currentCatName}
                       onChange={(e) => {
-                        const newCatId = e.target.value;
-                        const catObj = categories.find(c => c.id === newCatId);
-                        const catName = catObj ? catObj.name : "";
-                        const newSubmap = getSubcategoriesForCategory(catName);
+                        const newCatName = e.target.value;
+                        const targetCat = categories.find(c => {
+                          const cn = c.name.toLowerCase();
+                          if (newCatName === "MPV/MUV") return cn.includes("mpv") || cn.includes("muv") || cn.includes("bus") || cn.includes("tempo") || cn.includes("suv");
+                          if (newCatName === "SUV") return cn.includes("suv");
+                          if (newCatName === "Sedan") return cn.includes("sedan") || cn.includes("hatchback") || cn.includes("premium");
+                          return false;
+                        });
+                        const catId = targetCat ? targetCat.id : (categories[0]?.id || "");
+                        const newSubmap = getSubcategoriesForCategory(newCatName);
                         const firstSub = Object.keys(newSubmap)[0] || "";
                         const firstModel = newSubmap[firstSub]?.[0] || "";
                         setLocalData({ 
                           ...localData, 
-                          vehicleCategoryId: newCatId,
+                          selectedCatName: newCatName,
+                          vehicleCategoryId: catId,
                           subCategory: firstSub,
                           vehicleModel: firstModel
                         });
                       }}
                       className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
                     >
-                      {categories.map((cat) => (
-                        <option key={cat.id} value={cat.id} className="bg-slate-900">{formatCategorySeating(cat.name)}</option>
-                      ))}
+                      <option value="Sedan" className="bg-slate-900">Sedan</option>
+                      <option value="SUV" className="bg-slate-900">SUV</option>
+                      <option value="MPV/MUV" className="bg-slate-900">MPV/MUV</option>
                     </select>
                   </div>
 
