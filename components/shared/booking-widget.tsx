@@ -162,14 +162,14 @@ export default function BookingWidget() {
       if (activeTab === "corporate") {
         url = "/api/corporate/lead";
 
-        // 1. Shift Time Validation
+        // 1. Time Validation
         const startMins = timeToMinutes(corpData.shiftStartHour, corpData.shiftStartMinute, corpData.shiftStartAmpm);
         const endMins = timeToMinutes(corpData.shiftEndHour, corpData.shiftEndMinute, corpData.shiftEndAmpm);
         if (startMins === endMins) {
-          throw new Error("Shift End Time cannot be equal to Shift Start Time.");
+          throw new Error("Drop Off Time cannot be equal to Pickup Time.");
         }
         if (startMins > endMins) {
-          throw new Error("Shift End Time must be after Shift Start Time.");
+          throw new Error("Drop Off Time must be after Pickup Time.");
         }
 
         // 2. Contact Name Validation
@@ -198,8 +198,8 @@ export default function BookingWidget() {
           phone: formattedPhone,
           employeeCount: 1,
           pickupLocations: corpData.pickup.trim(),
-          serviceType: `Corporate Cab (Shift In: ${shiftIn} | Shift Out: ${shiftOut})`,
-          requirements: `Drop Address: ${corpData.drop.trim()}. Shift In: ${shiftIn}, Shift Out: ${shiftOut}.`
+          serviceType: `Pickup & Drop (Pickup Time: ${shiftIn} | Drop Off Time: ${shiftOut})`,
+          requirements: `Drop Address: ${corpData.drop.trim()}. Pickup Time: ${shiftIn}, Drop Off Time: ${shiftOut}.`
         };
       } else if (activeTab === "local") {
         url = "/api/rental/lead";
@@ -417,10 +417,10 @@ export default function BookingWidget() {
                 </div>
               </div>
 
-              {/* Row 2: Shift Start Time (In) & Shift End Time (Out) */}
+              {/* Row 2: Pickup Time & Drop Off Time */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Shift Start Time (Shift In) *</label>
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Pickup Time *</label>
                   <div className="flex gap-2">
                     <select
                       value={corpData.shiftStartHour}
@@ -452,7 +452,7 @@ export default function BookingWidget() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Shift End Time (Shift Out) *</label>
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Drop Off Time *</label>
                   <div className="flex gap-2">
                     <select
                       value={corpData.shiftEndHour}
