@@ -95,7 +95,7 @@ export default async function FleetPage({ searchParams }: PageProps) {
                 {/* Fallback Image */}
                 <div className="relative h-48 bg-slate-950 flex items-center justify-center">
                   <img
-                    src={v.category.imageUrl || "/images/fleet-suv.png"}
+                    src={v.imageUrl || v.category.imageUrl || "/images/fleet-suv.png"}
                     alt={v.model}
                     className="w-full h-full object-cover opacity-80 group-hover:scale-[1.02] transition-all"
                   />

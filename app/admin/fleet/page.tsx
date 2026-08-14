@@ -68,6 +68,7 @@ interface Vehicle {
   category?: {
     id: string;
     name: string;
+    imageUrl?: string | null;
   } | null;
   driverId?: string | null;
   driver?: {
@@ -718,11 +719,22 @@ export default function AdminFleetPage() {
                     vehicles.map((v) => (
                       <tr key={v.id} className="hover:bg-white/5 transition-colors">
                         <td className="p-4">
-                          <div className="font-extrabold text-slate-100 text-sm flex items-center gap-2">
-                            <span>{v.make} {v.model}</span>
-                          </div>
-                          <div className="font-mono text-emerald-400 text-[11px] mt-1 font-bold">
-                            {v.registrationNumber}
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-lg bg-slate-950 border border-white/10 overflow-hidden shrink-0 relative flex items-center justify-center">
+                              <img
+                                src={v.imageUrl || v.category?.imageUrl || "/images/fleet-suv.png"}
+                                alt={v.model}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div>
+                              <div className="font-extrabold text-slate-100 text-sm flex items-center gap-2">
+                                <span>{v.make} {v.model}</span>
+                              </div>
+                              <div className="font-mono text-emerald-400 text-[11px] mt-0.5 font-bold">
+                                {v.registrationNumber}
+                              </div>
+                            </div>
                           </div>
                         </td>
                         <td className="p-4">
@@ -1103,6 +1115,55 @@ export default function AdminFleetPage() {
                     onChange={(e) => setFormData({ ...formData, baseDailyRate: e.target.value })}
                     className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
                   />
+                </div>
+              </div>
+
+              {/* Step 9: Vehicle Image / Photo Link */}
+              <div className="space-y-2 border-t border-white/5 pt-3">
+                <label className="text-xs font-bold text-slate-300 block mb-1">Vehicle Image / Photo URL</label>
+                <div className="flex gap-3 items-center">
+                  <div className="w-14 h-14 rounded-lg bg-slate-950 border border-white/10 overflow-hidden shrink-0 flex items-center justify-center relative">
+                    <img
+                      src={formData.imageUrl.trim() || "/images/fleet-suv.png"}
+                      alt="Vehicle preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 space-y-1.5">
+                    <input
+                      type="url"
+                      placeholder="https://example.com/photo.jpg (or leave empty for category default)"
+                      value={formData.imageUrl}
+                      onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent font-mono"
+                    />
+                    <div className="text-[10px] text-slate-400 flex items-center gap-2">
+                      <span>Quick Presets:</span>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, imageUrl: "/images/fleet-suv.png" })}
+                        className="text-accent hover:underline font-semibold"
+                      >
+                        SUV Photo
+                      </button>
+                      <span>&bull;</span>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, imageUrl: "/images/categories/sedan.jpg" })}
+                        className="text-accent hover:underline font-semibold"
+                      >
+                        Sedan Photo
+                      </button>
+                      <span>&bull;</span>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, imageUrl: "/images/categories/luxury.jpg" })}
+                        className="text-accent hover:underline font-semibold"
+                      >
+                        Luxury Photo
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
