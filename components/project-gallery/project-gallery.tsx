@@ -7,40 +7,54 @@ import { GALLERY_PROJECTS, GalleryProject } from "@/data/projects";
 import { gsap } from "@/lib/gsap";
 import { usePageTransition } from "@/components/transition-canvas/transition-canvas";
 import styles from "./project-gallery.module.css";
-import { ArrowUpRight, Sparkles, Layers } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
 export default function ProjectGallery() {
-  const [filter, setFilter] = useState<"featured" | "full">("featured");
+  const [filter, setFilter] = useState<"featured" | "all">("featured");
   const [hoveredId, setHoveredId] = useState<string | null>(null);
-  const [activeCover, setActiveCover] = useState<GalleryProject | null>(null);
+  const [activeProject, setActiveProject] = useState<GalleryProject | null>(null);
 
   const previewRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const { startTransition } = usePageTransition();
 
-  // Filtered project list
+  // Mouse velocity physics variables
+  const mousePos = useRef({ x: 0, y: 0, lastX: 0, lastY: 0, vx: 0, vy: 0 });
+  const xTo = useRef<any>(null);
+  const yTo = useRef<any>(null);
+  const rotateTo = useRef<any>(null);
+
   const projects = filter === "featured"
     ? GALLERY_PROJECTS.filter((p) => p.featured)
     : GALLERY_PROJECTS;
 
-  // Set up cursor-following GSAP quickTo
-  const xTo = useRef<any>(null);
-  const yTo = useRef<any>(null);
-
   useEffect(() => {
     if (!previewRef.current) return;
-
-    // Check reduced motion
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    // Center cursor offset
-    xTo.current = gsap.quickTo(previewRef.current, "x", { duration: 0.45, ease: "power3.out" });
-    yTo.current = gsap.quickTo(previewRef.current, "y", { duration: 0.45, ease: "power3.out" });
+    xTo.current = gsap.quickTo(previewRef.current, "x", { duration: 0.35, ease: "power3.out" });
+    yTo.current = gsap.quickTo(previewRef.current, "y", { duration: 0.35, ease: "power3.out" });
+    rotateTo.current = gsap.quickTo(previewRef.current, "rotation", { duration: 0.4, ease: "power2.out" });
 
     const handleMouseMove = (e: MouseEvent) => {
+      const { clientX, clientY } = e;
+      const m = mousePos.current;
+
+      m.vx = clientX - m.lastX;
+      m.vy = clientY - m.lastY;
+      m.lastX = clientX;
+      m.lastY = clientY;
+
+      // Position relative to viewport center offset
       if (xTo.current && yTo.current) {
-        xTo.current(e.clientX - 140);
-        yTo.current(e.clientY - 180);
+        xTo.current(clientX - 160);
+        yTo.current(clientY - 210);
+      }
+
+      // Dynamic tilt rotation based on mouse movement speed
+      if (rotateTo.current) {
+        const tilt = Math.max(-12, Math.min(12, m.vx * 0.4));
+        rotateTo.current(tilt);
       }
     };
 
@@ -50,10 +64,9 @@ export default function ProjectGallery() {
     };
   }, []);
 
-  // Handle Mouse Enter on Row
-  const handleRowMouseEnter = (project: GalleryProject) => {
+  const handleMouseEnterRow = (project: GalleryProject) => {
     setHoveredId(project.id);
-    setActiveCover(project);
+    setActiveProject(project);
 
     if (previewRef.current && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       gsap.to(previewRef.current, {
@@ -66,12 +79,11 @@ export default function ProjectGallery() {
     }
   };
 
-  // Handle Mouse Leave on Row
-  const handleRowMouseLeave = () => {
+  const handleMouseLeaveRow = () => {
     setHoveredId(null);
     if (previewRef.current) {
       gsap.to(previewRef.current, {
-        scale: 0.7,
+        scale: 0.6,
         opacity: 0,
         duration: 0.3,
         ease: "power2.in",
@@ -80,17 +92,16 @@ export default function ProjectGallery() {
     }
   };
 
-  // Handle Filter Change with Stagger Animation
-  const handleFilterChange = (newFilter: "featured" | "full") => {
+  const handleFilterToggle = (newFilter: "featured" | "all") => {
     if (newFilter === filter) return;
 
     if (listRef.current) {
       const rows = listRef.current.children;
       gsap.to(rows, {
         opacity: 0,
-        y: -10,
+        y: -12,
         stagger: 0.02,
-        duration: 0.25,
+        duration: 0.2,
         ease: "power2.in",
         onComplete: () => {
           setFilter(newFilter);
@@ -99,12 +110,12 @@ export default function ProjectGallery() {
               const newRows = listRef.current.children;
               gsap.fromTo(
                 newRows,
-                { opacity: 0, y: 15 },
+                { opacity: 0, y: 16 },
                 {
                   opacity: 1,
                   y: 0,
                   stagger: 0.03,
-                  duration: 0.4,
+                  duration: 0.45,
                   ease: "power3.out",
                 }
               );
@@ -117,108 +128,115 @@ export default function ProjectGallery() {
     }
   };
 
-  // Handle Click with WebGL Shader Transition
-  const handleProjectClick = (e: React.MouseEvent, project: GalleryProject) => {
+  const handleRowClick = (e: React.MouseEvent, project: GalleryProject) => {
     e.preventDefault();
     const targetUrl = project.category === "fleet" ? "/fleet" : project.category === "tours" ? "/tours" : "/corporate-inquiry";
     startTransition(targetUrl, project.coverImage);
   };
 
   return (
-    <section className={styles.galleryContainer}>
+    <div className={styles.galleryWrapper}>
       
-      {/* 1. Header Navigation & Filter Bar */}
-      <div className={styles.galleryHeader}>
-        <div>
-          <span className={styles.brandTitle}>TEMP TRAVEL</span>
-          <span className={styles.brandSub}>Jesper Landberg Visual Showcase</span>
-        </div>
-
-        {/* Featured / Full Toggle */}
-        <div className={styles.filterBar}>
-          <button
-            onClick={() => handleFilterChange("featured")}
-            className={`${styles.filterBtn} ${filter === "featured" ? styles.filterBtnActive : ""}`}
-          >
-            <Sparkles className="w-3 h-3 inline-block mr-1 -mt-0.5" />
-            Featured ({GALLERY_PROJECTS.filter((p) => p.featured).length})
-          </button>
-
-          <button
-            onClick={() => handleFilterChange("full")}
-            className={`${styles.filterBtn} ${filter === "full" ? styles.filterBtnActive : ""}`}
-          >
-            <Layers className="w-3 h-3 inline-block mr-1 -mt-0.5" />
-            Full Catalog ({GALLERY_PROJECTS.length})
-          </button>
-        </div>
+      {/* Background Subtle Grid Lines */}
+      <div className={styles.gridOverlay}>
+        <div className={styles.gridLine} />
+        <div className={styles.gridLine} />
+        <div className={styles.gridLine} />
+        <div className={styles.gridLine} />
       </div>
 
-      {/* 2. Vertical Project Title List */}
-      <div ref={listRef} className={styles.galleryList}>
-        {projects.map((project) => {
+      {/* 1. Header Bar */}
+      <header className={styles.navHeader}>
+        <div className={styles.brandBlock}>
+          <span className={styles.brandLogo}>TEMP TRAVEL</span>
+          <span className={styles.brandSub}>Jesper Landberg Visual Catalogue</span>
+        </div>
+
+        <div className={styles.controlsBlock}>
+          <div className={styles.toggleContainer}>
+            <button
+              onClick={() => handleFilterToggle("featured")}
+              className={`${styles.toggleBtn} ${filter === "featured" ? styles.toggleBtnActive : ""}`}
+            >
+              Selected ({GALLERY_PROJECTS.filter((p) => p.featured).length})
+            </button>
+            <button
+              onClick={() => handleFilterToggle("all")}
+              className={`${styles.toggleBtn} ${filter === "all" ? styles.toggleBtnActive : ""}`}
+            >
+              All Index ({GALLERY_PROJECTS.length})
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* 2. Vertical Project List */}
+      <div ref={listRef} className={styles.listContainer}>
+        {projects.map((project, idx) => {
           const isHovered = hoveredId === project.id;
           const isDimmed = hoveredId !== null && !isHovered;
+          const indexStr = (idx + 1).toString().padStart(2, "0");
 
           return (
             <Link
               key={project.id}
-              href={`/fleet`}
-              onClick={(e) => handleProjectClick(e, project)}
-              onMouseEnter={() => handleRowMouseEnter(project)}
-              onMouseLeave={handleRowMouseLeave}
-              className={`${styles.projectRow} ${isDimmed ? styles.dimmedRow : ""} ${isHovered ? styles.hoveredRow : ""}`}
+              href="/fleet"
+              onClick={(e) => handleRowClick(e, project)}
+              onMouseEnter={() => handleMouseEnterRow(project)}
+              onMouseLeave={handleMouseLeaveRow}
+              className={`${styles.projectRow} ${isDimmed ? styles.dimmed : ""} ${isHovered ? styles.activeRow : ""}`}
             >
-              <div className="flex items-center gap-3">
+              <div className={styles.rowLeft}>
+                <span className={styles.indexNum}>{indexStr}</span>
                 <span className={styles.projectTitle}>{project.title}</span>
-                <ArrowUpRight className={`w-6 h-6 transition-transform duration-300 ${isHovered ? "translate-x-1 -translate-y-1 text-yellow-400 opacity-100" : "opacity-0"}`} />
               </div>
 
-              <div className={styles.projectMeta}>
-                <span className={styles.projectTag}>{project.category}</span>
+              <div className={styles.rowRight}>
+                <span className={styles.categoryTag}>{project.category}</span>
                 <span>{project.location}</span>
                 <span>{project.year}</span>
+                <ArrowUpRight className={`w-5 h-5 transition-transform duration-300 ${isHovered ? "text-yellow-400 translate-x-1 -translate-y-1 opacity-100" : "opacity-0"}`} />
               </div>
             </Link>
           );
         })}
       </div>
 
-      {/* 3. Cursor-Following Floating Cover Image Preview */}
-      <div ref={previewRef} className={styles.cursorPreviewContainer}>
-        {activeCover && (
+      {/* 3. Floating Preview Image Box with Mouse Velocity Rotation */}
+      <div ref={previewRef} className={styles.floatingPreview}>
+        {activeProject && (
           <>
             <Image
-              src={activeCover.coverImage}
-              alt={activeCover.title}
+              src={activeProject.coverImage}
+              alt={activeProject.title}
               fill
-              sizes="280px"
-              className={styles.cursorPreviewImg}
+              sizes="320px"
+              className={styles.previewImage}
               priority
             />
-            <div className={styles.previewOverlay}>
-              <span className={styles.previewTitle}>{activeCover.title}</span>
-              <span className={styles.previewSub}>{activeCover.subtitle}</span>
+            <div className={styles.previewInfo}>
+              <span className={styles.previewTitle}>{activeProject.title}</span>
+              <span className={styles.previewSubtitle}>{activeProject.subtitle}</span>
             </div>
           </>
         )}
       </div>
 
-      {/* 4. Minimal Footer Bar */}
-      <div className={styles.galleryFooter}>
-        <div className={styles.socialLinks}>
-          <a href="tel:+919999999999" className={styles.socialLink}>24/7 Dispatch</a>
+      {/* 4. Footer Status Bar */}
+      <footer className={styles.footerSection}>
+        <div className={styles.footerLeft}>
+          <span>24/7 Dispatch Control</span>
           <span>&bull;</span>
-          <a href="mailto:info@temptravels.com" className={styles.socialLink}>Corporate Desk</a>
+          <span>ISO 9001:2015 Fleet</span>
           <span>&bull;</span>
-          <span className="text-slate-500">ISO 9001:2015 Certified</span>
+          <span>New Delhi, India</span>
         </div>
 
-        <div className={styles.taglineText}>
-          <span>Interactive Shader Wipes &bull; Lenis Motion Engine</span>
+        <div className={styles.footerRight}>
+          <span>OGL WebGL Shader Wipes &bull; GSAP Motion</span>
         </div>
-      </div>
+      </footer>
 
-    </section>
+    </div>
   );
 }

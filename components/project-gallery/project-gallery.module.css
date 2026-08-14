@@ -1,229 +1,285 @@
-.galleryContainer {
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+.galleryWrapper {
   position: relative;
-  width: 100%;
+  width: 100vw;
   min-height: 100dvh;
-  background-color: #020617;
-  color: #f8fafc;
+  background-color: #0a0a0a;
+  color: #f1f5f9;
+  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 2.5rem 3rem;
-  overflow-x: hidden;
+  padding: 3rem 4rem;
   box-sizing: border-box;
+  overflow-x: hidden;
+  user-select: none;
 }
 
-.galleryHeader {
+/* Background Subtle Grid Lines */
+.gridOverlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.gridLine {
+  border-right: 1px solid rgba(255, 255, 255, 0.03);
+  height: 100%;
+}
+
+/* Header Navbar */
+.navHeader {
+  position: relative;
+  z-index: 10;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   width: 100%;
-  z-index: 20;
 }
 
-.brandTitle {
-  font-size: 1.125rem;
+.brandBlock {
+  display: flex;
+  flex-direction: column;
+}
+
+.brandLogo {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.25rem;
   font-weight: 800;
-  letter-spacing: 0.05em;
+  letter-spacing: -0.01em;
   text-transform: uppercase;
-  color: #f8fafc;
+  color: #ffffff;
 }
 
 .brandSub {
-  display: block;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.25em;
   color: #eab308;
   text-transform: uppercase;
-  margin-top: -0.2rem;
+  margin-top: 0.1rem;
 }
 
-.filterBar {
+.controlsBlock {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(12px);
-  padding: 0.25rem 0.5rem;
-  border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 1.5rem;
 }
 
-.filterBtn {
+.toggleContainer {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.25rem;
+  border-radius: 100px;
+}
+
+.toggleBtn {
   background: transparent;
   border: none;
-  color: #94a3b8;
-  font-size: 0.75rem;
-  font-weight: 700;
+  color: #64748b;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  padding: 0.4rem 1rem;
-  border-radius: 9999px;
+  letter-spacing: 0.15em;
+  padding: 0.45rem 1.2rem;
+  border-radius: 100px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.filterBtnActive {
-  background: #2563eb;
-  color: #ffffff;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+.toggleBtnActive {
+  background: #ffffff;
+  color: #0a0a0a;
+  font-weight: 700;
 }
 
-.galleryList {
+/* Main Gallery List */
+.listContainer {
+  position: relative;
+  z-index: 10;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-  margin: 4rem 0;
-  z-index: 10;
+  margin: 5rem 0;
   width: 100%;
 }
 
 .projectRow {
   position: relative;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
+  padding: 1.75rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   text-decoration: none;
-  color: #f8fafc;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #ffffff;
   cursor: pointer;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+}
+
+.rowLeft {
+  display: flex;
+  align-items: baseline;
+  gap: 2.5rem;
+}
+
+.indexNum {
+  font-family: 'Space Grotesk', monospace;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #475569;
+  letter-spacing: 0.05em;
+  transition: color 0.3s ease;
 }
 
 .projectTitle {
-  font-size: clamp(2rem, 4.5vw, 4.5rem);
-  font-weight: 300;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  transition: color 0.3s ease, font-weight 0.3s ease;
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2.2rem, 5vw, 5.5rem);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  text-transform: uppercase;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s ease;
 }
 
-.projectMeta {
+.rowRight {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  font-size: 0.85rem;
+  gap: 3rem;
+  font-size: 0.82rem;
   color: #64748b;
-  font-family: var(--font-mono, monospace);
-  font-weight: 600;
-}
-
-.projectTag {
-  background: rgba(234, 179, 8, 0.1);
-  color: #eab308;
-  padding: 0.2rem 0.6rem;
-  border-radius: 4px;
-  font-size: 0.7rem;
-  text-transform: uppercase;
   letter-spacing: 0.1em;
-  font-weight: 700;
-}
-
-.dimmedRow {
-  opacity: 0.25;
-}
-
-.hoveredRow .projectTitle {
-  color: #eab308;
+  text-transform: uppercase;
   font-weight: 500;
 }
 
-.cursorPreviewContainer {
+.categoryTag {
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.25rem 0.75rem;
+  border-radius: 100px;
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+/* Hover States (Jespar Landberg Signature Spotlight) */
+.dimmed {
+  opacity: 0.18;
+}
+
+.activeRow .projectTitle {
+  color: #ffffff;
+  transform: translateX(1.5rem);
+}
+
+.activeRow .indexNum {
+  color: #eab308;
+}
+
+.activeRow .categoryTag {
+  border-color: #eab308;
+  color: #eab308;
+  background: rgba(234, 179, 8, 0.08);
+}
+
+/* Floating Physics Preview Container */
+.floatingPreview {
   position: fixed;
   top: 0;
   left: 0;
-  width: 280px;
-  height: 360px;
-  border-radius: 12px;
+  width: 320px;
+  height: 420px;
+  border-radius: 6px;
   overflow: hidden;
   pointer-events: none;
-  z-index: 50;
+  z-index: 40;
   opacity: 0;
-  transform: scale(0.7);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.15);
-  background: #090d16;
+  transform: scale(0.6);
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.12);
+  background: #121212;
+  will-change: transform, opacity;
 }
 
-.cursorPreviewImg {
+.previewImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.previewOverlay {
+.previewInfo {
   position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(2, 6, 23, 0.9) 0%, transparent 60%);
-  padding: 1.25rem;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.5rem;
+  background: linear-gradient(to top, rgba(10, 10, 10, 0.95) 0%, transparent 100%);
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  gap: 0.2rem;
 }
 
 .previewTitle {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
   color: #ffffff;
-  font-size: 0.95rem;
-  font-weight: 800;
-  line-height: 1.2;
-}
-
-.previewSub {
-  color: #eab308;
-  font-size: 0.75rem;
-  font-weight: 600;
-  margin-top: 0.2rem;
-}
-
-.galleryFooter {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  width: 100%;
-  padding-top: 2rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  z-index: 20;
-}
-
-.socialLinks {
-  display: flex;
-  gap: 1.5rem;
-  font-size: 0.75rem;
-  color: #64748b;
-  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
 }
 
-.socialLink {
-  color: #94a3b8;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.socialLink:hover {
-  color: #eab308;
-}
-
-.taglineText {
-  text-align: right;
+.previewSubtitle {
   font-size: 0.75rem;
-  color: #64748b;
+  color: #eab308;
   font-weight: 600;
   letter-spacing: 0.05em;
 }
 
-@media (max-width: 768px) {
-  .galleryContainer {
-    padding: 1.5rem;
+/* Footer Section */
+.footerSection {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  width: 100%;
+  padding-top: 2.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.footerLeft {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  font-size: 0.75rem;
+  color: #64748b;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.footerRight {
+  font-size: 0.75rem;
+  color: #475569;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: right;
+}
+
+@media (max-width: 900px) {
+  .galleryWrapper {
+    padding: 2rem 1.5rem;
   }
-  .projectTitle {
-    font-size: 1.75rem;
-  }
-  .projectMeta {
+  .rowRight {
     display: none;
   }
-  .cursorPreviewContainer {
+  .projectTitle {
+    font-size: 2.2rem;
+  }
+  .floatingPreview {
     display: none;
   }
 }

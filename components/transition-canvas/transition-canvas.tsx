@@ -27,48 +27,34 @@ const VERTEX_SHADER = /* glsl */ `
   }
 `;
 
-const FRAGMENT_SHADER = /* glsl */ `
+const LIQUID_WAVE_FRAGMENT_SHADER = /* glsl */ `
   precision highp float;
   uniform sampler2D uTexture;
   uniform float uProgress;
   uniform vec2 uResolution;
   varying vec2 vUv;
 
-  // Simple pseudo random
-  float random(vec2 st) {
-    return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
-  }
-
   void main() {
     vec2 uv = vUv;
 
-    // 1. Grid Tile Snap Stagger
-    vec2 grid = vec2(12.0, 8.0);
-    vec2 cell = floor(uv * grid);
-    float cellNoise = random(cell);
+    // Liquid Ripple Distortion Peak at mid-transition (sin curve 0 -> 1 -> 0)
+    float waveAmp = sin(uProgress * 3.14159265);
+    
+    // Multi-frequency wave formula
+    float waveX = sin(uv.y * 15.0 + uProgress * 8.0) * 0.04 * waveAmp;
+    float waveY = cos(uv.x * 15.0 + uProgress * 8.0) * 0.04 * waveAmp;
 
-    // Stagger progress across cells
-    float tileThreshold = clamp((uProgress * 1.4) - (cellNoise * 0.4), 0.0, 1.0);
+    vec2 distortedUv = clamp(uv + vec2(waveX, waveY), 0.0, 1.0);
 
-    if (tileThreshold <= 0.001) {
-      discard;
-    }
-
-    // 2. Mid-transition Warp Noise Peak
-    float warpIntensity = sin(uProgress * 3.14159265);
-    vec2 offset = vec2(
-      sin(uv.y * 20.0 + uProgress * 10.0) * 0.03 * warpIntensity,
-      cos(uv.x * 20.0 + uProgress * 10.0) * 0.03 * warpIntensity
-    );
-
-    vec2 distortedUv = clamp(uv + offset, 0.0, 1.0);
-
-    // 3. Chromatic Aberration RGB Channel Split
-    float shift = 0.02 * warpIntensity;
+    // RGB Chromatic Aberration Split
+    float shift = 0.025 * waveAmp;
     float r = texture2D(uTexture, distortedUv + vec2(shift, 0.0)).r;
     float g = texture2D(uTexture, distortedUv).g;
     float b = texture2D(uTexture, distortedUv - vec2(shift, 0.0)).b;
-    float alpha = texture2D(uTexture, distortedUv).a * tileThreshold;
+
+    // Directional Wipe Mask
+    float wipe = step(uv.y, uProgress * 1.2);
+    float alpha = wipe * clamp(waveAmp * 1.5 + 0.2, 0.0, 1.0);
 
     gl_FragColor = vec4(r, g, b, alpha);
   }
@@ -89,8 +75,6 @@ export default function TransitionCanvasProvider({ children }: { children: React
 
   useEffect(() => {
     if (!canvasRef.current) return;
-
-    // Check reduced motion
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     try {
@@ -108,7 +92,7 @@ export default function TransitionCanvasProvider({ children }: { children: React
 
       const program = new Program(gl, {
         vertex: VERTEX_SHADER,
-        fragment: FRAGMENT_SHADER,
+        fragment: LIQUID_WAVE_FRAGMENT_SHADER,
         uniforms: {
           uTexture: { value: texture },
           uProgress: { value: 0 },
@@ -133,7 +117,7 @@ export default function TransitionCanvasProvider({ children }: { children: React
         window.removeEventListener("resize", handleResize);
       };
     } catch (e) {
-      console.warn("WebGL initialization failed, falling back to instant transitions:", e);
+      console.warn("WebGL initialization skipped:", e);
     }
   }, []);
 
@@ -142,7 +126,6 @@ export default function TransitionCanvasProvider({ children }: { children: React
       if (transitioningRef.current) return;
       transitioningRef.current = true;
 
-      // Fallback for reduced motion or WebGL failure
       if (!oglRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         router.push(href);
         transitioningRef.current = false;
@@ -151,7 +134,6 @@ export default function TransitionCanvasProvider({ children }: { children: React
 
       const { renderer, program, mesh, texture } = oglRef.current;
 
-      // Load cover image as target texture
       const img = new Image();
       img.crossOrigin = "anonymous";
       img.src = coverImageUrl || "/images/fleet-suv.png";
@@ -169,7 +151,7 @@ export default function TransitionCanvasProvider({ children }: { children: React
 
         gsap.to(state, {
           progress: 1,
-          duration: 0.9,
+          duration: 0.95,
           ease: "power3.inOut",
           onUpdate: () => {
             program.uniforms.uProgress.value = state.progress;
@@ -178,10 +160,9 @@ export default function TransitionCanvasProvider({ children }: { children: React
           onComplete: () => {
             router.push(href);
 
-            // Fade out canvas after routing
             gsap.to(containerRef.current, {
               opacity: 0,
-              duration: 0.4,
+              duration: 0.35,
               ease: "power2.out",
               onComplete: () => {
                 program.uniforms.uProgress.value = 0;
