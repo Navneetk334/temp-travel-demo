@@ -46,9 +46,6 @@ export default function Footer() {
               <Link href="/tours" className="hover:text-accent transition-colors">Tour Packages</Link>
             </li>
             <li>
-              <Link href="/gallery" className="hover:text-accent transition-colors">Gallery</Link>
-            </li>
-            <li>
               <Link href="/blog" className="hover:text-accent transition-colors">Blog & Guides</Link>
             </li>
             <li>

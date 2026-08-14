@@ -42,10 +42,17 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
       where: { id },
       data: {
         title: result.data.title || null,
+        description: result.data.description || null,
         imageUrl: result.data.imageUrl,
         mediaType: result.data.mediaType,
         category: result.data.category ? result.data.category.toLowerCase() : "fleet",
-        sortOrder: result.data.sortOrder,
+        location: result.data.location || null,
+        year: result.data.year || null,
+        isFeatured: Boolean(result.data.isFeatured),
+        isActive: Boolean(result.data.isActive),
+        altText: result.data.altText || null,
+        caption: result.data.caption || null,
+        sortOrder: Number(result.data.sortOrder) || 0,
       },
     });
 

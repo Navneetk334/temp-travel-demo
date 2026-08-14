@@ -377,15 +377,24 @@ model Testimonial {
 // ==========================================
 
 model Gallery {
-  id        String    @id @default(uuid())
-  title     String?
-  imageUrl  String
-  mediaType MediaType @default(IMAGE)
-  category  String?   // e.g. fleet, tours, corporate
-  sortOrder Int       @default(0)
-  createdAt DateTime  @default(now())
+  id          String    @id @default(uuid())
+  title       String?
+  description String?   @db.Text
+  imageUrl    String
+  mediaType   MediaType @default(IMAGE)
+  category    String?   // e.g. fleet, corporate, airport transfer, outstation, tours, destinations, events, lifestyle
+  location    String?   // e.g. Delhi NCR, Rajasthan, Mumbai
+  year        String?   // e.g. 2026
+  isFeatured  Boolean   @default(false)
+  isActive    Boolean   @default(true)
+  altText     String?
+  caption     String?   @db.Text
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
 
-  @@index([category, sortOrder])
+  @@index([category, isFeatured, sortOrder])
+  @@index([isActive])
 }
 
 // ==========================================
