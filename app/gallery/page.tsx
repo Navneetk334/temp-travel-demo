@@ -10,7 +10,8 @@ import {
   Calendar, 
   Sparkles, 
   ArrowRight,
-  Car
+  Car,
+  ArrowLeft
 } from "lucide-react";
 
 interface GalleryItem {
@@ -41,7 +42,7 @@ const CATEGORIES = [
   { label: "LIFESTYLE", value: "lifestyle" },
 ];
 
-export default function PublicGalleryPage() {
+export default function StandaloneGalleryPage() {
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -61,14 +62,12 @@ export default function PublicGalleryPage() {
   const dragStartXRef = useRef(0);
   const dragStartScrollRef = useRef(0);
 
-  // Mouse Position & Hover Card Tilt State
+  // Custom Hand Cursor Position State
   const [mousePos, setMousePos] = useState({ x: -100, y: -100 });
   const [isPointerVisible, setIsPointerVisible] = useState(false);
-  const [hoveredCardIndex, setHoveredCardIndex] = useState<number | null>(null);
-  const [cardTilt, setCardTilt] = useState({ x: 0, y: 0 });
   const [activeCardIndex, setActiveCardIndex] = useState(0);
 
-  // Check reduced motion preference
+  // Accessibility check for reduced motion
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     setReducedMotion(mediaQuery.matches);
@@ -102,19 +101,6 @@ export default function PublicGalleryPage() {
     fetchGallery(activeCategory);
   }, [activeCategory]);
 
-  // Global Window Wheel Scroll Handler (Enables full-screen mouse wheel scrolling everywhere)
-  useEffect(() => {
-    const handleGlobalWheel = (e: WheelEvent) => {
-      if (lightboxIndex !== null) return;
-      // Convert vertical deltaY or horizontal deltaX into horizontal cylinder scroll
-      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-      targetScrollRef.current += delta * 1.35;
-    };
-
-    window.addEventListener("wheel", handleGlobalWheel, { passive: true });
-    return () => window.removeEventListener("wheel", handleGlobalWheel);
-  }, [lightboxIndex]);
-
   // Smooth Lerp & Concave Curved Screen Animation Loop Engine
   useEffect(() => {
     if (loading || items.length === 0) return;
@@ -127,12 +113,12 @@ export default function PublicGalleryPage() {
 
       // Lerp smooth scroll calculation
       const prevScroll = currentScrollRef.current;
-      currentScrollRef.current += (targetScrollRef.current - currentScrollRef.current) * 0.08;
+      currentScrollRef.current += (targetScrollRef.current - currentScrollRef.current) * 0.075;
       velocityRef.current = currentScrollRef.current - prevScroll;
 
       const viewportWidth = window.innerWidth;
       const cardWidth = viewportWidth < 640 ? 320 : viewportWidth < 1024 ? 540 : 640;
-      const cardGap = viewportWidth < 640 ? 20 : 44;
+      const cardGap = viewportWidth < 640 ? 20 : 40;
       const cardSpacing = cardWidth + cardGap;
       const totalWidth = items.length * cardSpacing;
 
@@ -161,21 +147,13 @@ export default function PublicGalleryPage() {
 
           if (!reducedMotion) {
             // Concave Curved Screen Monitor Perspective Transformation
-            let rotateY = Math.max(-32, Math.min(32, normalizedDist * -26));
-            let rotateX = 0;
+            const rotateY = Math.max(-30, Math.min(30, normalizedDist * -24));
+            const translateZ = (1 - Math.pow(Math.abs(normalizedDist), 2)) * 60 - 80;
+            const scale = Math.max(0.7, 1 - Math.pow(Math.abs(normalizedDist), 1.8) * 0.3);
+            const opacity = Math.max(0.35, 1 - Math.abs(normalizedDist) * 0.55);
+            const skewX = Math.max(-10, Math.min(10, velocityRef.current * 0.12));
 
-            // Apply interactive card mouse hover tilt if this card is currently hovered
-            if (hoveredCardIndex === i) {
-              rotateY += cardTilt.x;
-              rotateX = cardTilt.y;
-            }
-
-            const translateZ = (1 - Math.pow(Math.abs(normalizedDist), 2)) * 70 - 80;
-            const scale = Math.max(0.72, 1 - Math.pow(Math.abs(normalizedDist), 1.8) * 0.28);
-            const opacity = Math.max(0.35, 1 - Math.abs(normalizedDist) * 0.5);
-            const skewX = Math.max(-10, Math.min(10, velocityRef.current * 0.14));
-
-            cardEl.style.transform = `translate3d(${itemX}px, 0px, ${translateZ}px) rotateY(${rotateY}deg) rotateX(${rotateX}deg) skewX(${skewX}deg) scale(${scale})`;
+            cardEl.style.transform = `translate3d(${itemX}px, 0px, ${translateZ}px) rotateY(${rotateY}deg) skewX(${skewX}deg) scale(${scale})`;
             cardEl.style.opacity = `${opacity}`;
             cardEl.style.zIndex = `${30 - Math.round(Math.abs(normalizedDist) * 10)}`;
           } else {
@@ -194,7 +172,14 @@ export default function PublicGalleryPage() {
     return () => {
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
     };
-  }, [loading, items.length, reducedMotion, hoveredCardIndex, cardTilt]);
+  }, [loading, items.length, reducedMotion]);
+
+  // Trackpad & Mouse Wheel Handler
+  const handleWheel = (e: React.WheelEvent) => {
+    if (lightboxIndex !== null) return;
+    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    targetScrollRef.current += delta * 1.25;
+  };
 
   // Mouse Drag Handlers
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -215,24 +200,6 @@ export default function PublicGalleryPage() {
 
   const handleMouseUp = () => {
     isDraggingRef.current = false;
-  };
-
-  // Card Mouse Hover Tilt Calculation
-  const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>, index: number) => {
-    const cardEl = e.currentTarget;
-    const rect = cardEl.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width / 2;
-    const y = e.clientY - rect.top - rect.height / 2;
-    setCardTilt({
-      x: (x / (rect.width / 2)) * 8, // rotateY tilt
-      y: -(y / (rect.height / 2)) * 8, // rotateX tilt
-    });
-    setHoveredCardIndex(index);
-  };
-
-  const handleCardMouseLeave = () => {
-    setHoveredCardIndex(null);
-    setCardTilt({ x: 0, y: 0 });
   };
 
   // Touch Swipe Handlers (Mobile)
@@ -288,13 +255,15 @@ export default function PublicGalleryPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [lightboxIndex, items, activeCardIndex]);
 
+  const activeItem = items[activeCardIndex];
   const lightboxItem = lightboxIndex !== null ? items[lightboxIndex] : null;
 
   return (
     <div 
+      onWheel={handleWheel}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
-      className="bg-black h-full w-full text-slate-100 selection:bg-accent selection:text-slate-950 overflow-hidden relative cursor-none select-none"
+      className="fixed inset-0 w-screen h-screen bg-black text-slate-100 selection:bg-accent selection:text-slate-950 overflow-hidden z-50 cursor-none select-none"
     >
       
       {/* SVG CONCAVE CURVED MONITOR SCREEN MASK DEFINITION */}
@@ -321,8 +290,26 @@ export default function PublicGalleryPage() {
         </div>
       )}
 
-      {/* MINIMAL CATEGORY FILTER RIBBON (TOP BAR) */}
-      <div className="absolute top-4 left-0 right-0 z-40 px-6 sm:px-12 flex justify-center pointer-events-auto">
+      {/* TOP HEADER */}
+      <header className="fixed top-0 left-0 right-0 z-40 px-6 sm:px-12 py-6 flex items-center justify-between pointer-events-auto">
+        <div className="font-mono text-xs font-bold tracking-widest text-slate-300 uppercase flex items-center gap-2">
+          <Car className="w-4 h-4 text-accent" />
+          <span>TEMP TRAVEL &bull; VISUAL JOURNAL</span>
+        </div>
+
+        <div className="flex items-center gap-6 text-xs font-mono font-bold tracking-widest text-slate-400">
+          <Link href="/" className="hover:text-white transition-colors uppercase flex items-center gap-1.5">
+            <ArrowLeft className="w-3.5 h-3.5 text-accent" />
+            <span>BACK TO HOME</span>
+          </Link>
+          <Link href="/contact" className="hover:text-accent transition-colors uppercase hidden sm:inline-block">
+            RESERVE RIDE &rarr;
+          </Link>
+        </div>
+      </header>
+
+      {/* MINIMAL CATEGORY FILTER RIBBON */}
+      <div className="fixed top-20 left-0 right-0 z-40 px-6 sm:px-12 flex justify-center pointer-events-auto">
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1 text-[11px] font-mono bg-slate-950/80 p-1.5 rounded-full border border-white/10 backdrop-blur-md">
           {CATEGORIES.map((cat) => {
             const isActive = activeCategory === cat.value;
@@ -345,28 +332,28 @@ export default function PublicGalleryPage() {
 
       {/* MAIN JESPER LANDBERG 3D CURVED SCREEN CAROUSEL */}
       {loading ? (
-        <div className="h-full flex flex-col items-center justify-center space-y-4 text-center">
+        <div className="h-screen flex flex-col items-center justify-center space-y-4 text-center">
           <div className="w-10 h-10 rounded-full border-2 border-accent border-t-transparent animate-spin" />
           <div className="text-xs font-mono tracking-widest text-accent uppercase font-bold">
             LOADING 3D CANVAS...
           </div>
         </div>
       ) : error ? (
-        <div className="h-full flex items-center justify-center text-center p-6">
+        <div className="h-screen flex items-center justify-center text-center p-6">
           <div className="space-y-2">
             <h3 className="text-base font-bold text-slate-200">Unable to load journal media</h3>
             <p className="text-xs text-slate-400">Please refresh or check back shortly.</p>
           </div>
         </div>
       ) : items.length === 0 ? (
-        <div className="h-full flex items-center justify-center text-center p-6">
+        <div className="h-screen flex items-center justify-center text-center p-6">
           <div className="space-y-2">
             <h3 className="text-xl font-extrabold text-slate-200">More journeys coming soon.</h3>
             <p className="text-xs text-slate-400">No media assets found matching the selected category.</p>
           </div>
         </div>
       ) : (
-        <div className="relative h-full w-full flex items-center justify-center overflow-hidden">
+        <div className="relative h-screen w-full flex items-center justify-center overflow-hidden">
           
           {/* 3D CAROUSEL CONTAINER */}
           <div 
@@ -383,8 +370,6 @@ export default function PublicGalleryPage() {
               return (
                 <div
                   key={item.id}
-                  onMouseMove={(e) => handleCardMouseMove(e, index)}
-                  onMouseLeave={handleCardMouseLeave}
                   onClick={() => {
                     if (isCurrent) setLightboxIndex(index);
                     else {
@@ -392,12 +377,12 @@ export default function PublicGalleryPage() {
                       targetScrollRef.current = index * cardWidth;
                     }
                   }}
-                  className="absolute top-1/2 -translate-y-1/2 left-0 w-[320px] sm:w-[540px] md:w-[620px] h-[380px] sm:h-[480px] md:h-[520px] transition-all duration-200 group"
+                  className="absolute top-1/2 -translate-y-1/2 left-0 w-[320px] sm:w-[540px] md:w-[620px] h-[360px] sm:h-[460px] md:h-[500px] transition-opacity duration-300 group"
                 >
                   {/* JESPER LANDBERG CONCAVE CURVED MONITOR SCREEN PANEL */}
                   <div 
                     style={{ clipPath: "url(#concave-screen-clip)" }}
-                    className="relative w-full h-full bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col justify-between p-6 sm:p-8 transition-transform duration-200 ease-out"
+                    className="relative w-full h-full bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col justify-between p-6 sm:p-8"
                   >
                     
                     {/* Background Full-Bleed Image */}
@@ -462,7 +447,7 @@ export default function PublicGalleryPage() {
           {/* JESPER LANDBERG 3D PERSPECTIVE FLOOR GRID */}
           <div className="absolute bottom-0 inset-x-0 h-64 pointer-events-none z-10 overflow-hidden">
             <div 
-              className="w-full h-full opacity-[0.22]"
+              className="w-full h-full opacity-[0.18]"
               style={{
                 backgroundImage: `linear-gradient(to right, rgba(255, 255, 255, 0.4) 1px, transparent 1px),
                                   linear-gradient(to bottom, rgba(255, 255, 255, 0.4) 1px, transparent 1px)`,
@@ -475,6 +460,43 @@ export default function PublicGalleryPage() {
 
         </div>
       )}
+
+      {/* BOTTOM CONTROL TOOLBAR (NO SITE FOOTER) */}
+      <footer className="fixed bottom-0 left-0 right-0 z-40 px-6 sm:px-12 py-5 flex items-center justify-between pointer-events-auto border-t border-white/5 bg-black/80 backdrop-blur-md">
+        
+        {/* Active Index Counter */}
+        <div className="font-mono text-xs font-bold text-slate-300 flex items-center gap-2">
+          <span className="text-accent text-sm font-black">{String(activeCardIndex + 1).padStart(2, "0")}</span>
+          <span>/</span>
+          <span>{String(items.length).padStart(2, "0")}</span>
+        </div>
+
+        {/* Center Navigation Arrows */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={scrollPrev}
+            className="p-2.5 bg-slate-900 hover:bg-slate-800 text-slate-200 rounded-full border border-white/10 transition-all hover:scale-105 active:scale-95"
+            title="Previous (Left Arrow)"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button
+            onClick={scrollNext}
+            className="p-2.5 bg-slate-900 hover:bg-slate-800 text-slate-200 rounded-full border border-white/10 transition-all hover:scale-105 active:scale-95"
+            title="Next (Right Arrow)"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Keyboard Hints */}
+        <div className="hidden sm:flex items-center gap-2 text-[10px] font-mono text-slate-500">
+          <span className="px-1.5 py-0.5 bg-slate-900 border border-white/10 rounded text-slate-300">←</span>
+          <span className="px-1.5 py-0.5 bg-slate-900 border border-white/10 rounded text-slate-300">→</span>
+          <span>Drag / Scroll</span>
+        </div>
+
+      </footer>
 
       {/* FULLSCREEN INTERACTIVE LIGHTBOX MODAL */}
       {lightboxItem && (
