@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { 
   ChevronLeft, 
@@ -9,12 +9,8 @@ import {
   MapPin, 
   Calendar, 
   Sparkles, 
-  Maximize2,
   ArrowRight,
-  ShieldCheck,
-  Compass,
-  Car,
-  MoveHorizontal
+  Car
 } from "lucide-react";
 
 interface GalleryItem {
@@ -53,25 +49,24 @@ export default function PublicGalleryPage() {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
 
-  // Smooth Lerp Physics & Scroll Refs
+  // Motion Lerp Engine Refs
   const containerRef = useRef<HTMLDivElement>(null);
   const targetScrollRef = useRef(0);
   const currentScrollRef = useRef(0);
   const velocityRef = useRef(0);
   const animationFrameRef = useRef<number | null>(null);
 
-  // Dragging & Interaction State
+  // Dragging Ref
   const isDraggingRef = useRef(false);
   const dragStartXRef = useRef(0);
   const dragStartScrollRef = useRef(0);
 
-  // Custom Follower Cursor State
+  // Custom Hand Cursor Position State
   const [mousePos, setMousePos] = useState({ x: -100, y: -100 });
-  const [cursorText, setCursorText] = useState("DRAG");
-  const [isHoveringCard, setIsHoveringCard] = useState(false);
+  const [isPointerVisible, setIsPointerVisible] = useState(false);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
 
-  // Check reduced motion preference
+  // Accessibility check for reduced motion
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     setReducedMotion(mediaQuery.matches);
@@ -105,7 +100,7 @@ export default function PublicGalleryPage() {
     fetchGallery(activeCategory);
   }, [activeCategory]);
 
-  // Smooth Lerp & Parabolic Animation Loop Engine
+  // Smooth Lerp & Concave Curved Screen Animation Loop Engine
   useEffect(() => {
     if (loading || items.length === 0) return;
 
@@ -115,19 +110,17 @@ export default function PublicGalleryPage() {
       const delta = Math.min((time - prevTime) / 1000, 0.1);
       prevTime = time;
 
-      // Smooth lerp scroll interpolation
+      // Lerp smooth scroll calculation
       const prevScroll = currentScrollRef.current;
-      currentScrollRef.current += (targetScrollRef.current - currentScrollRef.current) * 0.08;
+      currentScrollRef.current += (targetScrollRef.current - currentScrollRef.current) * 0.075;
       velocityRef.current = currentScrollRef.current - prevScroll;
 
-      // Card Dimensions & Spacing Math
       const viewportWidth = window.innerWidth;
-      const cardWidth = viewportWidth < 640 ? 320 : viewportWidth < 1024 ? 520 : 640;
-      const cardGap = viewportWidth < 640 ? 24 : 48;
+      const cardWidth = viewportWidth < 640 ? 320 : viewportWidth < 1024 ? 540 : 640;
+      const cardGap = viewportWidth < 640 ? 20 : 40;
       const cardSpacing = cardWidth + cardGap;
       const totalWidth = items.length * cardSpacing;
 
-      // Calculate which card is closest to screen center
       let closestIdx = 0;
       let minCenterDist = Infinity;
 
@@ -137,12 +130,11 @@ export default function PublicGalleryPage() {
           const cardEl = cards[i] as HTMLElement;
           if (!cardEl) continue;
 
-          // Infinite wrapping position math
+          // Wrap scroll position infinitely
           let itemX = (i * cardSpacing - currentScrollRef.current) % totalWidth;
           if (itemX < -cardSpacing) itemX += totalWidth;
           if (itemX > totalWidth - cardSpacing) itemX -= totalWidth;
 
-          // Center relative calculation
           const centerPos = itemX + cardWidth / 2;
           const distFromCenter = centerPos - viewportWidth / 2;
           const normalizedDist = distFromCenter / (viewportWidth / 2);
@@ -152,15 +144,15 @@ export default function PublicGalleryPage() {
             closestIdx = i;
           }
 
-          // 3D Parabolic Curve & Velocity Skew Transformations
           if (!reducedMotion) {
-            const rotateY = Math.max(-35, Math.min(35, normalizedDist * -24));
-            const translateY = Math.pow(normalizedDist, 2) * 52;
-            const scale = Math.max(0.68, 1 - Math.pow(Math.abs(normalizedDist), 1.8) * 0.32);
-            const skewX = Math.max(-12, Math.min(12, velocityRef.current * 0.15));
-            const opacity = Math.max(0.25, 1 - Math.abs(normalizedDist) * 0.55);
+            // Concave Curved Screen Monitor Perspective Transformation
+            const rotateY = Math.max(-30, Math.min(30, normalizedDist * -24));
+            const translateZ = (1 - Math.pow(Math.abs(normalizedDist), 2)) * 60 - 80;
+            const scale = Math.max(0.7, 1 - Math.pow(Math.abs(normalizedDist), 1.8) * 0.3);
+            const opacity = Math.max(0.3, 1 - Math.abs(normalizedDist) * 0.55);
+            const skewX = Math.max(-10, Math.min(10, velocityRef.current * 0.12));
 
-            cardEl.style.transform = `translate3d(${itemX}px, ${translateY}px, 0px) rotateY(${rotateY}deg) skewX(${skewX}deg) scale(${scale})`;
+            cardEl.style.transform = `translate3d(${itemX}px, 0px, ${translateZ}px) rotateY(${rotateY}deg) skewX(${skewX}deg) scale(${scale})`;
             cardEl.style.opacity = `${opacity}`;
             cardEl.style.zIndex = `${30 - Math.round(Math.abs(normalizedDist) * 10)}`;
           } else {
@@ -185,7 +177,7 @@ export default function PublicGalleryPage() {
   const handleWheel = (e: React.WheelEvent) => {
     if (lightboxIndex !== null) return;
     const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    targetScrollRef.current += delta * 1.2;
+    targetScrollRef.current += delta * 1.25;
   };
 
   // Mouse Drag Handlers
@@ -194,11 +186,11 @@ export default function PublicGalleryPage() {
     isDraggingRef.current = true;
     dragStartXRef.current = e.clientX;
     dragStartScrollRef.current = targetScrollRef.current;
-    setCursorText("DRAG");
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     setMousePos({ x: e.clientX, y: e.clientY });
+    if (!isPointerVisible) setIsPointerVisible(true);
 
     if (!isDraggingRef.current) return;
     const walk = (e.clientX - dragStartXRef.current) * 1.8;
@@ -227,14 +219,13 @@ export default function PublicGalleryPage() {
     isDraggingRef.current = false;
   };
 
-  // Manual Prev / Next Navigation
   const scrollPrev = () => {
-    const cardWidth = window.innerWidth < 640 ? 344 : 688;
+    const cardWidth = window.innerWidth < 640 ? 340 : 580;
     targetScrollRef.current -= cardWidth;
   };
 
   const scrollNext = () => {
-    const cardWidth = window.innerWidth < 640 ? 344 : 688;
+    const cardWidth = window.innerWidth < 640 ? 340 : 580;
     targetScrollRef.current += cardWidth;
   };
 
@@ -271,237 +262,242 @@ export default function PublicGalleryPage() {
       onWheel={handleWheel}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
-      className="bg-slate-950 min-h-screen text-slate-100 selection:bg-accent selection:text-slate-950 overflow-x-hidden relative cursor-default"
+      className="bg-black min-h-screen text-slate-100 selection:bg-accent selection:text-slate-950 overflow-hidden relative cursor-none select-none"
     >
       
-      {/* CUSTOM FLOATING CURSOR FOLLOWER */}
-      {!reducedMotion && (
+      {/* SVG CONCAVE CURVED MONITOR SCREEN MASK DEFINITION */}
+      <svg width="0" height="0" className="absolute pointer-events-none">
+        <defs>
+          <clipPath id="concave-screen-clip" clipPathUnits="objectBoundingBox">
+            <path d="M 0 0 C 0.22 0.035, 0.78 0.035, 1 0 L 1 1 C 0.78 0.965, 0.22 0.965, 0 1 Z" />
+          </clipPath>
+        </defs>
+      </svg>
+
+      {/* FLOATING JESPER LANDBERG WHITE HAND CURSOR POINTER */}
+      {!reducedMotion && isPointerVisible && (
         <div
           style={{
-            transform: `translate3d(${mousePos.x - 36}px, ${mousePos.y - 36}px, 0px) scale(${isHoveringCard ? 1.25 : isDraggingRef.current ? 0.9 : 1})`,
-            opacity: mousePos.x > 0 ? 1 : 0,
+            transform: `translate3d(${mousePos.x - 14}px, ${mousePos.y - 14}px, 0px) scale(${isDraggingRef.current ? 0.9 : 1})`,
           }}
-          className="fixed w-18 h-18 rounded-full bg-accent text-slate-950 font-mono font-black text-[10px] tracking-widest pointer-events-none z-50 flex items-center justify-center shadow-2xl shadow-accent/40 transition-transform duration-100 ease-out uppercase"
+          className="fixed pointer-events-none z-50 transition-transform duration-75 ease-out text-white drop-shadow-lg"
         >
-          {isHoveringCard ? "VIEW" : cursorText}
+          {/* White Hand Icon */}
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" className="text-white">
+            <path d="M9 11.25V4.5C9 3.67157 9.67157 3 10.5 3C11.3284 3 12 3.67157 12 4.5V10.25M12 4.5C12 3.67157 12.6716 3 13.5 3C14.3284 3 15 3.67157 15 4.5V10.25M15 4.5C15 3.67157 15.6716 3 16.5 3C17.3284 3 18 3.67157 18 4.5V14.25C18 17.5637 15.3137 20.25 12 20.25H11.25C8.35051 20.25 5.86178 18.3976 5.06836 15.6033L4.17937 12.4674C3.89668 11.4704 4.54518 10.4578 5.53982 10.2603C6.30939 10.1074 7.08643 10.4907 7.42938 11.1912L9 14.4074V11.25Z" />
+          </svg>
         </div>
       )}
 
-      {/* BACKGROUND AMBIENT ENVIRONMENT */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-primary/10 rounded-full blur-[150px] opacity-70" />
-        <div className="absolute bottom-10 right-1/4 w-[600px] h-[500px] bg-accent/5 rounded-full blur-[140px] opacity-50" />
-        {/* Subtle Perspective Floor Grid */}
-        <div 
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: `linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)`,
-            backgroundSize: "60px 60px",
-            transform: "perspective(800px) rotateX(60deg) translateY(200px)",
-          }}
-        />
-      </div>
-
-      <div className="relative z-10 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14 space-y-8 flex flex-col justify-between min-h-screen">
-        
-        {/* HEADER SECTION */}
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-          <div className="space-y-3 max-w-2xl">
-            <div className="flex items-center gap-2 text-accent text-xs font-mono font-bold tracking-widest uppercase">
-              <Sparkles className="w-4 h-4" />
-              <span>TEMP TRAVEL &bull; VISUAL JOURNAL</span>
-            </div>
-            <h1 className="text-4xl sm:text-6xl font-black text-slate-50 tracking-tight leading-none">
-              Travel, In Motion.
-            </h1>
-            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed font-light">
-              A visual collection of our journeys, vehicles, destinations and transportation experiences across India.
-            </p>
-          </div>
-
-          {/* Minimal Controls */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={scrollPrev}
-              className="p-3 bg-slate-900/80 hover:bg-slate-800 text-slate-200 rounded-full border border-white/10 transition-all hover:scale-105 active:scale-95"
-              title="Previous (Left Arrow)"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              onClick={scrollNext}
-              className="p-3 bg-slate-900/80 hover:bg-slate-800 text-slate-200 rounded-full border border-white/10 transition-all hover:scale-105 active:scale-95"
-              title="Next (Right Arrow)"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
-        </header>
-
-        {/* MINIMAL CATEGORY FILTER RIBBON */}
-        <div className="border-b border-white/10 pb-4">
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1 text-xs">
-            {CATEGORIES.map((cat) => {
-              const isActive = activeCategory === cat.value;
-              return (
-                <button
-                  key={cat.value}
-                  onClick={() => setActiveCategory(cat.value)}
-                  className={`px-4 py-2 rounded-full font-extrabold uppercase tracking-wider transition-all duration-300 whitespace-nowrap border ${
-                    isActive
-                      ? "bg-accent text-slate-950 border-accent shadow-lg shadow-accent/20 scale-105"
-                      : "bg-slate-900/60 text-slate-400 border-white/5 hover:border-white/20 hover:text-slate-200"
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              );
-            })}
-          </div>
+      {/* TOP HEADER */}
+      <header className="fixed top-0 left-0 right-0 z-40 px-6 sm:px-12 py-6 flex items-center justify-between pointer-events-auto">
+        <div className="font-mono text-xs font-bold tracking-widest text-slate-300 uppercase flex items-center gap-2">
+          <Car className="w-4 h-4 text-accent" />
+          <span>TEMP TRAVEL &bull; VISUAL JOURNAL</span>
         </div>
 
-        {/* MAIN JESPER LANDBERG-INSPIRED INFINITE CANVAS */}
-        {loading ? (
-          <div className="h-[55vh] flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="w-12 h-12 rounded-full border-2 border-accent border-t-transparent animate-spin" />
-            <div className="text-xs font-mono tracking-widest text-accent uppercase font-bold">
-              TEMP TRAVEL &bull; VISUAL JOURNAL
-            </div>
+        <div className="flex items-center gap-6 text-xs font-mono font-bold tracking-widest text-slate-400">
+          <span className="hidden sm:inline-block uppercase">3D CYLINDER GALLERY</span>
+          <Link href="/contact" className="hover:text-accent transition-colors uppercase">
+            RESERVE RIDE &rarr;
+          </Link>
+        </div>
+      </header>
+
+      {/* MINIMAL CATEGORY FILTER RIBBON */}
+      <div className="fixed top-20 left-0 right-0 z-40 px-6 sm:px-12 flex justify-center pointer-events-auto">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1 text-[11px] font-mono bg-slate-950/80 p-1.5 rounded-full border border-white/10 backdrop-blur-md">
+          {CATEGORIES.map((cat) => {
+            const isActive = activeCategory === cat.value;
+            return (
+              <button
+                key={cat.value}
+                onClick={() => setActiveCategory(cat.value)}
+                className={`px-3.5 py-1.5 rounded-full font-bold uppercase tracking-wider transition-all duration-300 whitespace-nowrap ${
+                  isActive
+                    ? "bg-accent text-slate-950 shadow-md font-extrabold"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                {cat.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* MAIN JESPER LANDBERG 3D CURVED SCREEN CAROUSEL */}
+      {loading ? (
+        <div className="h-screen flex flex-col items-center justify-center space-y-4 text-center">
+          <div className="w-10 h-10 rounded-full border-2 border-accent border-t-transparent animate-spin" />
+          <div className="text-xs font-mono tracking-widest text-accent uppercase font-bold">
+            LOADING 3D CANVAS...
           </div>
-        ) : error ? (
-          <div className="glassmorphism p-12 rounded-2xl border border-rose-500/20 text-center space-y-4">
-            <h3 className="text-lg font-bold text-slate-200">Unable to load journal media</h3>
-            <p className="text-xs text-slate-400">Please refresh the page or check back shortly.</p>
+        </div>
+      ) : error ? (
+        <div className="h-screen flex items-center justify-center text-center p-6">
+          <div className="space-y-2">
+            <h3 className="text-base font-bold text-slate-200">Unable to load journal media</h3>
+            <p className="text-xs text-slate-400">Please refresh or check back shortly.</p>
           </div>
-        ) : items.length === 0 ? (
-          <div className="glassmorphism p-16 rounded-2xl border border-white/5 text-center space-y-4">
-            <Car className="w-12 h-12 text-slate-600 mx-auto" />
+        </div>
+      ) : items.length === 0 ? (
+        <div className="h-screen flex items-center justify-center text-center p-6">
+          <div className="space-y-2">
             <h3 className="text-xl font-extrabold text-slate-200">More journeys coming soon.</h3>
             <p className="text-xs text-slate-400">No media assets found matching the selected category.</p>
           </div>
-        ) : (
-          <div className="relative h-[62vh] sm:h-[68vh] w-full overflow-hidden flex items-center">
-            
-            <div 
-              ref={containerRef}
-              onMouseDown={handleMouseDown}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-              className="absolute inset-0 flex items-center perspective-[1200px] touch-pan-x"
-            >
-              {items.map((item, index) => {
-                const formattedIndex = String(index + 1).padStart(2, "0");
+        </div>
+      ) : (
+        <div className="relative h-screen w-full flex items-center justify-center overflow-hidden">
+          
+          {/* 3D CAROUSEL CONTAINER */}
+          <div 
+            ref={containerRef}
+            onMouseDown={handleMouseDown}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            className="absolute inset-0 flex items-center perspective-[1200px] touch-pan-x z-20 pointer-events-auto"
+          >
+            {items.map((item, index) => {
+              const isCurrent = index === activeCardIndex;
 
-                return (
-                  <div
-                    key={item.id}
-                    onMouseEnter={() => setIsHoveringCard(true)}
-                    onMouseLeave={() => setIsHoveringCard(false)}
-                    onClick={() => setLightboxIndex(index)}
-                    className="absolute top-0 left-0 w-[320px] sm:w-[520px] md:w-[600px] lg:w-[640px] h-[55vh] sm:h-[62vh] rounded-3xl overflow-hidden glassmorphism border border-white/10 hover:border-accent/60 transition-colors duration-500 shadow-2xl group cursor-pointer flex flex-col justify-between p-6 sm:p-8"
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => {
+                    if (isCurrent) setLightboxIndex(index);
+                    else {
+                      const cardWidth = window.innerWidth < 640 ? 340 : 580;
+                      targetScrollRef.current = index * cardWidth;
+                    }
+                  }}
+                  className="absolute top-1/2 -translate-y-1/2 left-0 w-[320px] sm:w-[540px] md:w-[620px] h-[360px] sm:h-[460px] md:h-[500px] transition-opacity duration-300 group"
+                >
+                  {/* JESPER LANDBERG CONCAVE CURVED MONITOR SCREEN PANEL */}
+                  <div 
+                    style={{ clipPath: "url(#concave-screen-clip)" }}
+                    className="relative w-full h-full bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col justify-between p-6 sm:p-8"
                   >
                     
-                    {/* Background Outline Editorial Number */}
-                    <div className="absolute top-4 right-6 font-black text-7xl sm:text-9xl text-transparent stroke-white/10 opacity-30 select-none pointer-events-none font-mono">
-                      {formattedIndex}
-                    </div>
-
-                    {/* Card Media Background */}
-                    <div className="absolute inset-0 bg-slate-950 overflow-hidden z-0">
+                    {/* Background Full-Bleed Image */}
+                    <div className="absolute inset-0 bg-slate-950 overflow-hidden">
                       <img
                         src={item.imageUrl}
                         alt={item.altText || item.title || "TEMP TRAVEL Gallery"}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-75"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80"
                         loading={index <= 2 ? "eager" : "lazy"}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+                      {/* 3D Screen Surface Glare Gradient */}
+                      <div 
+                        className="absolute inset-0 pointer-events-none"
+                        style={{
+                          background: `linear-gradient(110deg, rgba(255, 255, 255, 0.15) 0%, transparent 45%, rgba(0, 0, 0, 0.5) 100%)`
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
                     </div>
 
-                    {/* Card Top Category Tag */}
+                    {/* Top Left Category Pill Tag */}
                     <div className="relative z-10 flex items-center justify-between">
-                      <span className="px-3.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-slate-950/80 text-accent border border-white/10 backdrop-blur-md">
+                      <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest bg-slate-950/80 text-accent border border-white/10 backdrop-blur-md">
                         {item.category || "FLEET"}
                       </span>
                       {item.isFeatured && (
-                        <span className="px-3 py-1 rounded-full text-[10px] font-extrabold bg-accent text-slate-950 flex items-center gap-1 shadow-md">
+                        <span className="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-accent text-slate-950 flex items-center gap-1 shadow-md">
                           <Sparkles className="w-3 h-3" />
                           <span>FEATURED</span>
                         </span>
                       )}
                     </div>
 
-                    {/* Card Bottom Editorial Metadata */}
-                    <div className="relative z-10 space-y-3">
-                      <div className="flex items-center gap-3 text-xs text-accent font-mono font-semibold">
-                        {item.location && (
-                          <span className="flex items-center gap-1">
-                            <MapPin className="w-3.5 h-3.5" />
-                            {item.location}
-                          </span>
-                        )}
-                        {item.location && item.year && <span>&bull;</span>}
-                        {item.year && (
-                          <span className="flex items-center gap-1">
-                            <Calendar className="w-3.5 h-3.5" />
-                            {item.year}
-                          </span>
-                        )}
+                    {/* Bottom Content Overlays */}
+                    <div className="relative z-10 flex items-end justify-between gap-4">
+                      
+                      {/* Bottom Left Title & Location */}
+                      <div className="space-y-1 max-w-xs sm:max-w-md">
+                        <h3 className="text-xl sm:text-3xl font-extrabold text-slate-50 leading-tight group-hover:text-accent transition-colors">
+                          {item.title || "Untitled Journal Asset"}
+                        </h3>
+                        <div className="flex items-center gap-2 text-xs text-slate-300 font-mono">
+                          {item.location && <span>{item.location}</span>}
+                          {item.location && item.year && <span>&bull;</span>}
+                          {item.year && <span>{item.year}</span>}
+                        </div>
                       </div>
 
-                      <h2 className="text-2xl sm:text-4xl font-black text-slate-50 group-hover:text-accent transition-colors leading-tight">
-                        {item.title || "Untitled Journal Asset"}
-                      </h2>
+                      {/* Bottom Right Circular Arrow Button (Jesper Landberg style) */}
+                      <div className="w-10 h-10 rounded-full bg-slate-950/80 border border-white/20 flex items-center justify-center text-white group-hover:bg-accent group-hover:text-slate-950 transition-all shrink-0">
+                        <ArrowRight className="w-4 h-4" />
+                      </div>
 
-                      {item.description && (
-                        <p className="text-xs text-slate-300 font-light line-clamp-2 max-w-xl">
-                          {item.description}
-                        </p>
-                      )}
                     </div>
 
                   </div>
-                );
-              })}
-            </div>
-
-          </div>
-        )}
-
-        {/* GALLERY FOOTER TOOLBAR */}
-        <div className="flex items-center justify-between border-t border-white/10 pt-6 text-xs text-slate-400">
-          
-          {/* Active Counter */}
-          <div className="font-mono font-bold text-slate-300 flex items-center gap-2">
-            <span className="text-accent text-base font-black">{String(activeCardIndex + 1).padStart(2, "0")}</span>
-            <span>/</span>
-            <span>{String(items.length).padStart(2, "0")}</span>
+                </div>
+              );
+            })}
           </div>
 
-          {/* Active Item Title Preview */}
-          {activeItem && (
-            <div className="hidden sm:block font-mono text-xs text-slate-300 uppercase tracking-widest truncate max-w-md">
-              &bull; {activeItem.title || "TEMP TRAVEL MOBILITY"}
-            </div>
-          )}
-
-          {/* Keyboard Guidance Hint */}
-          <div className="flex items-center gap-2 text-[11px] font-mono text-slate-500">
-            <span className="px-2 py-0.5 bg-slate-900 border border-white/10 rounded text-slate-300">←</span>
-            <span className="px-2 py-0.5 bg-slate-900 border border-white/10 rounded text-slate-300">→</span>
-            <span>Navigate</span>
-            <span className="hidden sm:inline-block ml-2 px-2 py-0.5 bg-slate-900 border border-white/10 rounded text-slate-300">Space</span>
-            <span className="hidden sm:inline-block">Zoom</span>
+          {/* JESPER LANDBERG 3D PERSPECTIVE FLOOR GRID */}
+          <div className="absolute bottom-0 inset-x-0 h-64 pointer-events-none z-10 overflow-hidden">
+            <div 
+              className="w-full h-full opacity-[0.18]"
+              style={{
+                backgroundImage: `linear-gradient(to right, rgba(255, 255, 255, 0.4) 1px, transparent 1px),
+                                  linear-gradient(to bottom, rgba(255, 255, 255, 0.4) 1px, transparent 1px)`,
+                backgroundSize: "80px 80px",
+                transform: "perspective(900px) rotateX(76deg) translateY(180px)",
+                transformOrigin: "center top",
+              }}
+            />
           </div>
 
         </div>
+      )}
 
-      </div>
+      {/* BOTTOM FOOTER CONTROLS */}
+      <footer className="fixed bottom-0 left-0 right-0 z-40 px-6 sm:px-12 py-5 flex items-center justify-between pointer-events-auto border-t border-white/5 bg-black/60 backdrop-blur-md">
+        
+        {/* Active Index Counter */}
+        <div className="font-mono text-xs font-bold text-slate-300 flex items-center gap-2">
+          <span className="text-accent text-sm font-black">{String(activeCardIndex + 1).padStart(2, "0")}</span>
+          <span>/</span>
+          <span>{String(items.length).padStart(2, "0")}</span>
+        </div>
+
+        {/* Center Arrows */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={scrollPrev}
+            className="p-2.5 bg-slate-900 hover:bg-slate-800 text-slate-200 rounded-full border border-white/10 transition-all hover:scale-105 active:scale-95"
+            title="Previous (Left Arrow)"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button
+            onClick={scrollNext}
+            className="p-2.5 bg-slate-900 hover:bg-slate-800 text-slate-200 rounded-full border border-white/10 transition-all hover:scale-105 active:scale-95"
+            title="Next (Right Arrow)"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Keyboard Hints */}
+        <div className="hidden sm:flex items-center gap-2 text-[10px] font-mono text-slate-500">
+          <span className="px-1.5 py-0.5 bg-slate-900 border border-white/10 rounded text-slate-300">←</span>
+          <span className="px-1.5 py-0.5 bg-slate-900 border border-white/10 rounded text-slate-300">→</span>
+          <span>Drag / Scroll</span>
+        </div>
+
+      </footer>
 
       {/* FULLSCREEN INTERACTIVE LIGHTBOX MODAL */}
       {lightboxItem && (
         <div 
-          className="fixed inset-0 bg-black/95 backdrop-blur-xl z-50 flex items-center justify-center p-4 sm:p-6"
+          className="fixed inset-0 bg-black/95 backdrop-blur-xl z-50 flex items-center justify-center p-4 sm:p-6 cursor-default"
           onClick={() => setLightboxIndex(null)}
         >
           <div 
@@ -543,11 +539,11 @@ export default function PublicGalleryPage() {
             <div className="lg:w-1/3 p-6 sm:p-8 space-y-6 flex flex-col justify-between bg-slate-900 border-t lg:border-t-0 lg:border-l border-white/10 overflow-y-auto">
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-accent/10 text-accent border border-accent/20">
+                  <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest bg-accent/10 text-accent border border-accent/20">
                     {lightboxItem.category || "FLEET"}
                   </span>
                   {lightboxItem.isFeatured && (
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-accent text-slate-950">
+                    <span className="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-accent text-slate-950">
                       FEATURED
                     </span>
                   )}
