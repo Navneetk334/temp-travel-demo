@@ -1,0 +1,229 @@
+.galleryContainer {
+  position: relative;
+  width: 100%;
+  min-height: 100dvh;
+  background-color: #020617;
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2.5rem 3rem;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.galleryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  z-index: 20;
+}
+
+.brandTitle {
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #f8fafc;
+}
+
+.brandSub {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #eab308;
+  text-transform: uppercase;
+  margin-top: -0.2rem;
+}
+
+.filterBar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(12px);
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.filterBtn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.4rem 1rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filterBtnActive {
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+}
+
+.galleryList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin: 4rem 0;
+  z-index: 10;
+  width: 100%;
+}
+
+.projectRow {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  text-decoration: none;
+  color: #f8fafc;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.projectTitle {
+  font-size: clamp(2rem, 4.5vw, 4.5rem);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  transition: color 0.3s ease, font-weight 0.3s ease;
+}
+
+.projectMeta {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  font-size: 0.85rem;
+  color: #64748b;
+  font-family: var(--font-mono, monospace);
+  font-weight: 600;
+}
+
+.projectTag {
+  background: rgba(234, 179, 8, 0.1);
+  color: #eab308;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+
+.dimmedRow {
+  opacity: 0.25;
+}
+
+.hoveredRow .projectTitle {
+  color: #eab308;
+  font-weight: 500;
+}
+
+.cursorPreviewContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 360px;
+  border-radius: 12px;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0;
+  transform: scale(0.7);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.15);
+  background: #090d16;
+}
+
+.cursorPreviewImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.previewOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(2, 6, 23, 0.9) 0%, transparent 60%);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.previewTitle {
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.previewSub {
+  color: #eab308;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 0.2rem;
+}
+
+.galleryFooter {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  width: 100%;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  z-index: 20;
+}
+
+.socialLinks {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.socialLink {
+  color: #94a3b8;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.socialLink:hover {
+  color: #eab308;
+}
+
+.taglineText {
+  text-align: right;
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 768px) {
+  .galleryContainer {
+    padding: 1.5rem;
+  }
+  .projectTitle {
+    font-size: 1.75rem;
+  }
+  .projectMeta {
+    display: none;
+  }
+  .cursorPreviewContainer {
+    display: none;
+  }
+}
