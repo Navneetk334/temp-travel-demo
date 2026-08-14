@@ -20,6 +20,8 @@ export const fleetVehicleSchema = z.object({
   registrationNumber: z.string()
     .min(5, "Registration number must be at least 5 characters"),
   categoryId: z.string().uuid("Invalid category ID"),
+  subCategory: z.string().optional().nullable(),
+  vehicleType: z.string().optional().nullable(),
   capacity: z.number().int().min(1, "Capacity must be at least 1 seat"),
   fuelType: z.enum(["DIESEL", "PETROL", "ELECTRIC", "CNG", "HYBRID"]).default("DIESEL"),
   transmission: z.enum(["MANUAL", "AUTOMATIC"]).default("MANUAL"),

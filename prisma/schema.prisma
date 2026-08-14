@@ -190,8 +190,30 @@ model VehicleCategory {
 }
 
 // ==========================================
-// MODULE 5: Fleet Vehicles
+// MODULE 5: Vehicle Models & Fleet Vehicles
 // ==========================================
+
+model VehicleModel {
+  id                         String         @id @default(uuid())
+  brand                      String         // e.g. Toyota, Maruti Suzuki, Hyundai, Honda, Mercedes-Benz, BMW, Mahindra, Tata, Kia, Force
+  modelName                  String         // e.g. Innova Hycross, Swift Dzire, City, Fortuner, Ertiga, Camry
+  category                   String         // e.g. Sedan, SUV, MPV/MUV
+  subcategory                String         // e.g. Compact, Executive, Premium Executive, Luxury, Subcompact/Urban, Mid-Premium, Premium, Value/Family, Business
+  minSeats                   Int            @default(4)
+  maxSeats                   Int            @default(7)
+  supportedFuelTypes         String[]       // e.g. ["PETROL", "DIESEL", "HYBRID", "CNG", "ELECTRIC"]
+  supportedTransmissionTypes String[]       // e.g. ["AUTOMATIC", "MANUAL"]
+  isElectric                 Boolean        @default(false)
+  isActive                   Boolean        @default(true)
+  sortOrder                  Int            @default(0)
+  createdAt                  DateTime       @default(now())
+  updatedAt                  DateTime       @updatedAt
+  vehicles                   FleetVehicle[]
+
+  @@unique([brand, modelName])
+  @@index([category, subcategory])
+  @@index([brand])
+}
 
 model FleetVehicle {
   id                 String          @id @default(uuid())
@@ -200,6 +222,10 @@ model FleetVehicle {
   registrationNumber String          @unique
   categoryId         String
   category           VehicleCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  vehicleModelId     String?
+  vehicleModel       VehicleModel?   @relation(fields: [vehicleModelId], references: [id], onDelete: SetNull)
+  subCategory        String?         @default("Executive")
+  vehicleType        String?         @default("Standard Fleet")
   capacity           Int
   fuelType           String?         @default("DIESEL")
   transmission       String?         @default("MANUAL")
@@ -214,6 +240,7 @@ model FleetVehicle {
   bookings           Booking[]
 
   @@index([categoryId])
+  @@index([vehicleModelId])
   @@index([status])
 }
 

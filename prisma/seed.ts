@@ -91,6 +91,107 @@ async function main() {
   console.log("Users and Admins seeded.");
 
   // ==========================================
+  // 1.5 Vehicle Model Master Catalogue (Idempotent Seed)
+  // ==========================================
+  const vehicleModelsData = [
+    // SEDAN - Compact
+    { brand: "Maruti Suzuki", modelName: "Swift Dzire", category: "Sedan", subcategory: "Compact", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "CNG"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Hyundai", modelName: "Aura", category: "Sedan", subcategory: "Compact", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "CNG"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Honda", modelName: "Amaze", category: "Sedan", subcategory: "Compact", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Tata", modelName: "Tigor", category: "Sedan", subcategory: "Compact", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "CNG", "ELECTRIC"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: true },
+
+    // SEDAN - Executive
+    { brand: "Honda", modelName: "City", category: "Sedan", subcategory: "Executive", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "HYBRID"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Hyundai", modelName: "Verna", category: "Sedan", subcategory: "Executive", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Maruti Suzuki", modelName: "Ciaz", category: "Sedan", subcategory: "Executive", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Skoda", modelName: "Slavia", category: "Sedan", subcategory: "Executive", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+
+    // SEDAN - Premium Executive
+    { brand: "Toyota", modelName: "Camry", category: "Sedan", subcategory: "Premium Executive", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["HYBRID", "PETROL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+    { brand: "Skoda", modelName: "Superb", category: "Sedan", subcategory: "Premium Executive", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+    { brand: "Volkswagen", modelName: "Passat", category: "Sedan", subcategory: "Premium Executive", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+
+    // SEDAN - Luxury
+    { brand: "Mercedes-Benz", modelName: "E-Class", category: "Sedan", subcategory: "Luxury", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["DIESEL", "PETROL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+    { brand: "BMW", modelName: "5 Series", category: "Sedan", subcategory: "Luxury", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+    { brand: "Audi", modelName: "A6", category: "Sedan", subcategory: "Luxury", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+    { brand: "Jaguar", modelName: "XF", category: "Sedan", subcategory: "Luxury", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+
+    // SUV - Subcompact/Urban
+    { brand: "Tata", modelName: "Nexon", category: "SUV", subcategory: "Subcompact/Urban", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "DIESEL", "ELECTRIC"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: true },
+    { brand: "Maruti Suzuki", modelName: "Brezza", category: "SUV", subcategory: "Subcompact/Urban", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "CNG"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Hyundai", modelName: "Venue", category: "SUV", subcategory: "Subcompact/Urban", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Kia", modelName: "Sonet", category: "SUV", subcategory: "Subcompact/Urban", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+
+    // SUV - Mid-Premium
+    { brand: "Hyundai", modelName: "Creta", category: "SUV", subcategory: "Mid-Premium", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Kia", modelName: "Seltos", category: "SUV", subcategory: "Mid-Premium", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Mahindra", modelName: "Scorpio-N", category: "SUV", subcategory: "Mid-Premium", minSeats: 6, maxSeats: 7, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Tata", modelName: "Harrier", category: "SUV", subcategory: "Mid-Premium", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+
+    // SUV - Premium
+    { brand: "Mahindra", modelName: "XUV700", category: "SUV", subcategory: "Premium", minSeats: 5, maxSeats: 7, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Tata", modelName: "Safari", category: "SUV", subcategory: "Premium", minSeats: 6, maxSeats: 7, supportedFuelTypes: ["DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "MG", modelName: "Hector Plus", category: "SUV", subcategory: "Premium", minSeats: 6, maxSeats: 7, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Jeep", modelName: "Compass", category: "SUV", subcategory: "Premium", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["DIESEL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+
+    // SUV - Luxury
+    { brand: "Toyota", modelName: "Fortuner", category: "SUV", subcategory: "Luxury", minSeats: 6, maxSeats: 7, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Mercedes-Benz", modelName: "GLE", category: "SUV", subcategory: "Luxury", minSeats: 5, maxSeats: 7, supportedFuelTypes: ["DIESEL", "PETROL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+    { brand: "BMW", modelName: "X5", category: "SUV", subcategory: "Luxury", minSeats: 5, maxSeats: 7, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+
+    // MPV/MUV - Value/Family
+    { brand: "Maruti Suzuki", modelName: "Ertiga", category: "MPV/MUV", subcategory: "Value/Family", minSeats: 6, maxSeats: 7, supportedFuelTypes: ["PETROL", "CNG"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Renault", modelName: "Triber", category: "MPV/MUV", subcategory: "Value/Family", minSeats: 5, maxSeats: 7, supportedFuelTypes: ["PETROL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+
+    // MPV/MUV - Business
+    { brand: "Toyota", modelName: "Innova Hycross", category: "MPV/MUV", subcategory: "Business", minSeats: 7, maxSeats: 8, supportedFuelTypes: ["HYBRID", "PETROL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+    { brand: "Kia", modelName: "Carens", category: "MPV/MUV", subcategory: "Business", minSeats: 6, maxSeats: 7, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Mahindra", modelName: "Marazzo", category: "MPV/MUV", subcategory: "Business", minSeats: 7, maxSeats: 8, supportedFuelTypes: ["DIESEL"], supportedTransmissionTypes: ["MANUAL"], isElectric: false },
+
+    // MPV/MUV - Premium
+    { brand: "Toyota", modelName: "Innova Crysta", category: "MPV/MUV", subcategory: "Premium", minSeats: 7, maxSeats: 8, supportedFuelTypes: ["DIESEL"], supportedTransmissionTypes: ["MANUAL"], isElectric: false },
+
+    // MPV/MUV - Luxury
+    { brand: "Kia", modelName: "Carnival", category: "MPV/MUV", subcategory: "Luxury", minSeats: 7, maxSeats: 9, supportedFuelTypes: ["DIESEL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+    { brand: "Toyota", modelName: "Vellfire", category: "MPV/MUV", subcategory: "Luxury", minSeats: 7, maxSeats: 7, supportedFuelTypes: ["HYBRID"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+    { brand: "Mercedes-Benz", modelName: "V-Class", category: "MPV/MUV", subcategory: "Luxury", minSeats: 6, maxSeats: 7, supportedFuelTypes: ["DIESEL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+  ];
+
+  for (const item of vehicleModelsData) {
+    await prisma.vehicleModel.upsert({
+      where: {
+        brand_modelName: {
+          brand: item.brand,
+          modelName: item.modelName,
+        },
+      },
+      update: {
+        category: item.category,
+        subcategory: item.subcategory,
+        minSeats: item.minSeats,
+        maxSeats: item.maxSeats,
+        supportedFuelTypes: item.supportedFuelTypes,
+        supportedTransmissionTypes: item.supportedTransmissionTypes,
+        isElectric: item.isElectric,
+      },
+      create: {
+        brand: item.brand,
+        modelName: item.modelName,
+        category: item.category,
+        subcategory: item.subcategory,
+        minSeats: item.minSeats,
+        maxSeats: item.maxSeats,
+        supportedFuelTypes: item.supportedFuelTypes,
+        supportedTransmissionTypes: item.supportedTransmissionTypes,
+        isElectric: item.isElectric,
+      },
+    });
+  }
+
+  console.log("Vehicle Model Masters seeded (Idempotent).");
+
+  // ==========================================
   // 2. Vehicle Categories & Fleet Vehicles
   // ==========================================
   const categoriesData = [
