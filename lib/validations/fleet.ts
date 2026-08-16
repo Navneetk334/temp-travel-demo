@@ -26,6 +26,8 @@ export const fleetVehicleSchema = z.object({
   imageUrl: z.string().url("Invalid image URL").optional().nullable().or(z.literal("")),
   perKmRate: z.number().positive("Per km rate must be positive").optional().nullable(),
   baseDailyRate: z.number().positive("Base daily rate must be positive").optional().nullable(),
+  extraKmRate: z.number().positive("Extra km rate must be positive").optional().nullable(),
+  extraHrRate: z.number().positive("Extra hour rate must be positive").optional().nullable(),
   status: z.enum(["AVAILABLE", "ON_TRIP", "MAINTENANCE", "INACTIVE"]).default("AVAILABLE"),
   driverId: z.string().uuid("Invalid driver ID").optional().nullable(),
 });

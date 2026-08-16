@@ -85,11 +85,11 @@ export default async function VehicleDetailPage({ params }: PageProps) {
                 </div>
                 <div className="bg-slate-900/60 p-4 border border-white/5 rounded-xl space-y-1">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Extra Hour Surcharge</span>
-                  <span className="font-bold text-slate-200 text-sm">₹{Number(vehicle.category.extraHrRate)} / Hr</span>
+                  <span className="font-bold text-slate-200 text-sm">₹{Number(vehicle.extraHrRate ?? vehicle.category.extraHrRate)} / Hr</span>
                 </div>
                 <div className="bg-slate-900/60 p-4 border border-white/5 rounded-xl space-y-1">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Extra Distance Surcharge</span>
-                  <span className="font-bold text-slate-200 text-sm">₹{Number(vehicle.category.extraKmRate)} / Km</span>
+                  <span className="font-bold text-slate-200 text-sm">₹{Number(vehicle.extraKmRate ?? vehicle.category.extraKmRate)} / Km</span>
                 </div>
               </div>
             </div>
