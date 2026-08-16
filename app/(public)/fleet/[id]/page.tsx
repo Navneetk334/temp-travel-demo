@@ -77,20 +77,31 @@ export default async function VehicleDetailPage({ params }: PageProps) {
 
             {/* Specifications Cards */}
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-slate-50 border-b border-white/5 pb-2">Vehicle Specifications</h2>
+              <h2 className="text-2xl font-bold text-slate-50 border-b border-white/5 pb-2">Vehicle Specifications & Tariff Rules</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-slate-900/60 p-4 border border-white/5 rounded-xl space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Local Package Base</span>
-                  <span className="font-bold text-slate-200 text-sm">8 Hrs / 80 Kms</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Included Allowance</span>
+                  <span className="font-bold text-slate-200 text-sm">Base Kms & Agreed Drop Time</span>
                 </div>
                 <div className="bg-slate-900/60 p-4 border border-white/5 rounded-xl space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Extra Hour Surcharge</span>
-                  <span className="font-bold text-slate-200 text-sm">₹{Number(vehicle.category.extraHrRate)} / Hr</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Extra Hour Rate</span>
+                  <span className="font-bold text-accent text-sm">₹{vehicle.extraHourRate ? Number(vehicle.extraHourRate) : Number(vehicle.category.extraHrRate)} / Extra Hr</span>
                 </div>
                 <div className="bg-slate-900/60 p-4 border border-white/5 rounded-xl space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Extra Distance Surcharge</span>
-                  <span className="font-bold text-slate-200 text-sm">₹{Number(vehicle.category.extraKmRate)} / Km</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Extra Distance Rate</span>
+                  <span className="font-bold text-accent text-sm">₹{vehicle.extraKmRate ? Number(vehicle.extraKmRate) : Number(vehicle.category.extraKmRate)} / Extra Km</span>
                 </div>
+              </div>
+
+              {/* Overage Policy Box */}
+              <div className="bg-slate-900/90 border border-amber-500/20 p-5 rounded-xl space-y-2">
+                <div className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-amber-400" />
+                  <span>Extra Distance & Waiting Time Policy</span>
+                </div>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Your quoted fare covers the specified pickup-to-drop route or base package allowance. If your trip extends beyond the agreed drop time or route distance (e.g. extra stops, waiting, or detours), additional charges apply at <strong className="text-amber-300">₹{vehicle.extraKmRate ? Number(vehicle.extraKmRate) : Number(vehicle.category.extraKmRate)}/extra km</strong> and <strong className="text-amber-300">₹{vehicle.extraHourRate ? Number(vehicle.extraHourRate) : Number(vehicle.category.extraHrRate)}/extra hour</strong>. Tolls and parking are payable at actuals.
+                </p>
               </div>
             </div>
 

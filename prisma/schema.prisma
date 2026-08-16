@@ -206,6 +206,8 @@ model FleetVehicle {
   imageUrl           String?
   perKmRate          Decimal?        @db.Decimal(10, 2)
   baseDailyRate      Decimal?        @db.Decimal(10, 2)
+  extraKmRate        Decimal?        @db.Decimal(10, 2)
+  extraHourRate      Decimal?        @db.Decimal(10, 2)
   status             VehicleStatus   @default(AVAILABLE)
   driverId           String?         @unique
   driver             User?           @relation("DriverVehicle", fields: [driverId], references: [id], onDelete: SetNull)
