@@ -1,8 +1,14 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
-import { Car, MapPin, Phone, Mail } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Car, MapPin, Phone, Mail, Award } from "lucide-react";
 
 export default function Footer() {
+  const pathname = usePathname();
+  if (pathname === "/gallery") return null;
+
   return (
     <footer className="bg-slate-950 border-t border-white/5 text-slate-400 pt-16 pb-8 text-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
@@ -20,6 +26,10 @@ export default function Footer() {
           <p className="text-slate-400 leading-relaxed">
             TEMP TRAVEL CAR RENTALS PVT LTD is India's leading corporate transit and leisure travel management partner, specializing in compliant, safe, and efficient mobility.
           </p>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-[10px] font-semibold text-accent uppercase tracking-wider backdrop-blur-sm">
+            <Award className="w-4 h-4 text-accent shrink-0" />
+            <span>ISO 9001:2015 Certified Fleet</span>
+          </div>
         </div>
 
         {/* Quick Links Column */}

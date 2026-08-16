@@ -75,11 +75,6 @@ export default function Homepage() {
 
         {/* Hero Content */}
         <div className="relative z-10 w-full max-w-7xl mx-auto text-center space-y-8 mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-semibold text-accent uppercase tracking-wider backdrop-blur-sm animate-pulse">
-            <Award className="w-3.5 h-3.5" />
-            <span>ISO 9001:2015 Certified Fleet</span>
-          </div>
-
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-50 tracking-tight leading-tight max-w-5xl mx-auto">
             Redefining <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-primary to-accent">Corporate Mobility</span> & Premium Tours
           </h1>
@@ -200,8 +195,8 @@ export default function Homepage() {
                   <p className="text-slate-300 text-sm leading-relaxed">{pkg.description}</p>
                   <div className="pt-4 flex items-center justify-between border-t border-white/5">
                     <span className="text-xs font-medium text-slate-400">Includes hotel & transport</span>
-                    <a href="#book-widget" className="text-accent flex items-center gap-1 text-sm font-semibold hover:underline">
-                      <span>Book Package</span>
+                    <a href="/tours" className="text-accent flex items-center gap-1 text-sm font-semibold hover:underline">
+                      <span>Explore Package</span>
                       <ArrowUpRight className="w-4 h-4" />
                     </a>
                   </div>

@@ -98,8 +98,8 @@ export default function AdminLayout({
 
   return (
     <div className="min-h-screen bg-slate-950 flex">
-      {/* 1. Sidebar Panel for Desktop */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-64 bg-slate-900 border-r border-white/5 shrink-0">
+      {/* 1. Sidebar Panel for Desktop (Fixed) */}
+      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-slate-900 border-r border-white/5 z-30 shrink-0">
         {/* Brand identity */}
         <div className="h-20 px-6 border-b border-white/5 flex items-center gap-2">
           <div className="bg-primary p-1.5 rounded-lg text-primary-foreground">
@@ -150,8 +150,8 @@ export default function AdminLayout({
         </div>
       </aside>
 
-      {/* 2. Main content area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
+      {/* 2. Main content area (Padded for fixed sidebar) */}
+      <div className="flex-1 flex flex-col min-w-0 lg:pl-64 overflow-x-hidden min-h-screen">
         
         {/* Header toolbar */}
         <header className="h-20 bg-slate-900 border-b border-white/5 flex items-center justify-between px-4 sm:px-6 lg:px-8">

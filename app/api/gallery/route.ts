@@ -8,29 +8,44 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("search") || "";
     const category = searchParams.get("category") || "";
-    const sortBy = searchParams.get("sortBy") || "sortOrder";
-    const sortOrder = searchParams.get("sortOrder") === "desc" ? "desc" : "asc";
+    const sortBy = searchParams.get("sortBy") || "featured";
+    const isAdminView = searchParams.get("admin") === "true";
     const page = parseInt(searchParams.get("page") || "1", 10);
-    const limit = parseInt(searchParams.get("limit") || "12", 10);
+    const limit = parseInt(searchParams.get("limit") || "24", 10);
     const skip = (page - 1) * limit;
 
     const where: any = {};
-    if (category && category !== "all") {
+
+    // Public view only sees isActive = true items
+    if (!isAdminView) {
+      where.isActive = true;
+    }
+
+    if (category && category.toLowerCase() !== "all") {
       where.category = { equals: category, mode: "insensitive" };
     }
 
     if (search) {
       where.OR = [
         { title: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+        { location: { contains: search, mode: "insensitive" } },
         { category: { contains: search, mode: "insensitive" } },
       ];
     }
 
-    let orderBy: any = { sortOrder: sortOrder };
+    let orderBy: any[] = [];
     if (sortBy === "createdAt") {
-      orderBy = { createdAt: sortOrder };
+      orderBy = [{ createdAt: "desc" }];
     } else if (sortBy === "title") {
-      orderBy = { title: sortOrder };
+      orderBy = [{ title: "asc" }];
+    } else {
+      // Default featured & sortOrder ordering
+      orderBy = [
+        { isFeatured: "desc" },
+        { sortOrder: "asc" },
+        { createdAt: "desc" },
+      ];
     }
 
     const totalCount = await prisma.gallery.count({ where });
@@ -76,10 +91,17 @@ export async function POST(req: NextRequest) {
     const item = await prisma.gallery.create({
       data: {
         title: result.data.title || null,
+        description: result.data.description || null,
         imageUrl: result.data.imageUrl,
         mediaType: result.data.mediaType,
         category: result.data.category ? result.data.category.toLowerCase() : "fleet",
-        sortOrder: result.data.sortOrder,
+        location: result.data.location || null,
+        year: result.data.year || null,
+        isFeatured: Boolean(result.data.isFeatured),
+        isActive: Boolean(result.data.isActive),
+        altText: result.data.altText || null,
+        caption: result.data.caption || null,
+        sortOrder: Number(result.data.sortOrder) || 0,
       },
     });
 

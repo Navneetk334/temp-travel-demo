@@ -91,6 +91,107 @@ async function main() {
   console.log("Users and Admins seeded.");
 
   // ==========================================
+  // 1.5 Vehicle Model Master Catalogue (Idempotent Seed)
+  // ==========================================
+  const vehicleModelsData = [
+    // SEDAN - Compact
+    { brand: "Maruti Suzuki", modelName: "Swift Dzire", category: "Sedan", subcategory: "Compact", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "CNG"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Hyundai", modelName: "Aura", category: "Sedan", subcategory: "Compact", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "CNG"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Honda", modelName: "Amaze", category: "Sedan", subcategory: "Compact", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Tata", modelName: "Tigor", category: "Sedan", subcategory: "Compact", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "CNG", "ELECTRIC"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: true },
+
+    // SEDAN - Executive
+    { brand: "Honda", modelName: "City", category: "Sedan", subcategory: "Executive", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "HYBRID"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Hyundai", modelName: "Verna", category: "Sedan", subcategory: "Executive", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Maruti Suzuki", modelName: "Ciaz", category: "Sedan", subcategory: "Executive", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Skoda", modelName: "Slavia", category: "Sedan", subcategory: "Executive", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+
+    // SEDAN - Premium Executive
+    { brand: "Toyota", modelName: "Camry", category: "Sedan", subcategory: "Premium Executive", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["HYBRID", "PETROL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+    { brand: "Skoda", modelName: "Superb", category: "Sedan", subcategory: "Premium Executive", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+    { brand: "Volkswagen", modelName: "Passat", category: "Sedan", subcategory: "Premium Executive", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+
+    // SEDAN - Luxury
+    { brand: "Mercedes-Benz", modelName: "E-Class", category: "Sedan", subcategory: "Luxury", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["DIESEL", "PETROL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+    { brand: "BMW", modelName: "5 Series", category: "Sedan", subcategory: "Luxury", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+    { brand: "Audi", modelName: "A6", category: "Sedan", subcategory: "Luxury", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+    { brand: "Jaguar", modelName: "XF", category: "Sedan", subcategory: "Luxury", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+
+    // SUV - Subcompact/Urban
+    { brand: "Tata", modelName: "Nexon", category: "SUV", subcategory: "Subcompact/Urban", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "DIESEL", "ELECTRIC"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: true },
+    { brand: "Maruti Suzuki", modelName: "Brezza", category: "SUV", subcategory: "Subcompact/Urban", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "CNG"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Hyundai", modelName: "Venue", category: "SUV", subcategory: "Subcompact/Urban", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Kia", modelName: "Sonet", category: "SUV", subcategory: "Subcompact/Urban", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+
+    // SUV - Mid-Premium
+    { brand: "Hyundai", modelName: "Creta", category: "SUV", subcategory: "Mid-Premium", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Kia", modelName: "Seltos", category: "SUV", subcategory: "Mid-Premium", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Mahindra", modelName: "Scorpio-N", category: "SUV", subcategory: "Mid-Premium", minSeats: 6, maxSeats: 7, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Tata", modelName: "Harrier", category: "SUV", subcategory: "Mid-Premium", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+
+    // SUV - Premium
+    { brand: "Mahindra", modelName: "XUV700", category: "SUV", subcategory: "Premium", minSeats: 5, maxSeats: 7, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Tata", modelName: "Safari", category: "SUV", subcategory: "Premium", minSeats: 6, maxSeats: 7, supportedFuelTypes: ["DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "MG", modelName: "Hector Plus", category: "SUV", subcategory: "Premium", minSeats: 6, maxSeats: 7, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Jeep", modelName: "Compass", category: "SUV", subcategory: "Premium", minSeats: 4, maxSeats: 5, supportedFuelTypes: ["DIESEL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+
+    // SUV - Luxury
+    { brand: "Toyota", modelName: "Fortuner", category: "SUV", subcategory: "Luxury", minSeats: 6, maxSeats: 7, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Mercedes-Benz", modelName: "GLE", category: "SUV", subcategory: "Luxury", minSeats: 5, maxSeats: 7, supportedFuelTypes: ["DIESEL", "PETROL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+    { brand: "BMW", modelName: "X5", category: "SUV", subcategory: "Luxury", minSeats: 5, maxSeats: 7, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+
+    // MPV/MUV - Value/Family
+    { brand: "Maruti Suzuki", modelName: "Ertiga", category: "MPV/MUV", subcategory: "Value/Family", minSeats: 6, maxSeats: 7, supportedFuelTypes: ["PETROL", "CNG"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Renault", modelName: "Triber", category: "MPV/MUV", subcategory: "Value/Family", minSeats: 5, maxSeats: 7, supportedFuelTypes: ["PETROL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+
+    // MPV/MUV - Business
+    { brand: "Toyota", modelName: "Innova Hycross", category: "MPV/MUV", subcategory: "Business", minSeats: 7, maxSeats: 8, supportedFuelTypes: ["HYBRID", "PETROL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+    { brand: "Kia", modelName: "Carens", category: "MPV/MUV", subcategory: "Business", minSeats: 6, maxSeats: 7, supportedFuelTypes: ["PETROL", "DIESEL"], supportedTransmissionTypes: ["MANUAL", "AUTOMATIC"], isElectric: false },
+    { brand: "Mahindra", modelName: "Marazzo", category: "MPV/MUV", subcategory: "Business", minSeats: 7, maxSeats: 8, supportedFuelTypes: ["DIESEL"], supportedTransmissionTypes: ["MANUAL"], isElectric: false },
+
+    // MPV/MUV - Premium
+    { brand: "Toyota", modelName: "Innova Crysta", category: "MPV/MUV", subcategory: "Premium", minSeats: 7, maxSeats: 8, supportedFuelTypes: ["DIESEL"], supportedTransmissionTypes: ["MANUAL"], isElectric: false },
+
+    // MPV/MUV - Luxury
+    { brand: "Kia", modelName: "Carnival", category: "MPV/MUV", subcategory: "Luxury", minSeats: 7, maxSeats: 9, supportedFuelTypes: ["DIESEL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+    { brand: "Toyota", modelName: "Vellfire", category: "MPV/MUV", subcategory: "Luxury", minSeats: 7, maxSeats: 7, supportedFuelTypes: ["HYBRID"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+    { brand: "Mercedes-Benz", modelName: "V-Class", category: "MPV/MUV", subcategory: "Luxury", minSeats: 6, maxSeats: 7, supportedFuelTypes: ["DIESEL"], supportedTransmissionTypes: ["AUTOMATIC"], isElectric: false },
+  ];
+
+  for (const item of vehicleModelsData) {
+    await prisma.vehicleModel.upsert({
+      where: {
+        brand_modelName: {
+          brand: item.brand,
+          modelName: item.modelName,
+        },
+      },
+      update: {
+        category: item.category,
+        subcategory: item.subcategory,
+        minSeats: item.minSeats,
+        maxSeats: item.maxSeats,
+        supportedFuelTypes: item.supportedFuelTypes,
+        supportedTransmissionTypes: item.supportedTransmissionTypes,
+        isElectric: item.isElectric,
+      },
+      create: {
+        brand: item.brand,
+        modelName: item.modelName,
+        category: item.category,
+        subcategory: item.subcategory,
+        minSeats: item.minSeats,
+        maxSeats: item.maxSeats,
+        supportedFuelTypes: item.supportedFuelTypes,
+        supportedTransmissionTypes: item.supportedTransmissionTypes,
+        isElectric: item.isElectric,
+      },
+    });
+  }
+
+  console.log("Vehicle Model Masters seeded (Idempotent).");
+
+  // ==========================================
   // 2. Vehicle Categories & Fleet Vehicles
   // ==========================================
   const categoriesData = [
@@ -748,24 +849,228 @@ async function main() {
   console.log("15 Corporate clients seeded as SiteSettings.");
 
   // ==========================================
-  // 7. Gallery (90 entries)
+  // 7. Gallery (Curated Master Visual Journal)
   // ==========================================
-  const mediaCategories = ["fleet", "corporate", "tours"];
-  for (const cat of mediaCategories) {
-    for (let i = 1; i <= 30; i++) {
-      await prisma.gallery.create({
-        data: {
-          title: `${cat.charAt(0).toUpperCase() + cat.slice(1)} Gallery Item ${i}`,
-          imageUrl: `/images/gallery/${cat}-${i}.jpg`,
-          mediaType: MediaType.IMAGE,
-          category: cat,
-          sortOrder: i,
-        },
-      });
-    }
+  const curatedGalleryItems = [
+    {
+      title: "Toyota Innova Hycross Hybrid",
+      description: "Our flagship 7-seater hybrid MPV fleet for corporate executive commuting and airport transfers.",
+      imageUrl: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=1200&auto=format&fit=crop&q=80",
+      mediaType: MediaType.IMAGE,
+      category: "fleet",
+      location: "Delhi NCR",
+      year: "2026",
+      isFeatured: true,
+      isActive: true,
+      altText: "Toyota Innova Hycross Hybrid Executive MPV",
+      caption: "Spacious ergonomic seating with hybrid mileage for corporate transit.",
+      sortOrder: 1,
+    },
+    {
+      title: "Mercedes-Benz E-Class VIP Ride",
+      description: "Ultra-luxury sedan fleet for visiting international delegates, corporate C-suite, and VIP hospitality.",
+      imageUrl: "https://images.unsplash.com/photo-1563720223185-11003d516935?w=1200&auto=format&fit=crop&q=80",
+      mediaType: MediaType.IMAGE,
+      category: "fleet",
+      location: "Mumbai",
+      year: "2026",
+      isFeatured: true,
+      isActive: true,
+      altText: "Mercedes-Benz E-Class Luxury Sedan",
+      caption: "Chauffeur-driven luxury mobility for executive travel.",
+      sortOrder: 2,
+    },
+    {
+      title: "Mahindra XUV700 AWD Cruiser",
+      description: "All-Wheel Drive premium SUV designed for long-distance corporate retreats and outstation routes.",
+      imageUrl: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=1200&auto=format&fit=crop&q=80",
+      mediaType: MediaType.IMAGE,
+      category: "fleet",
+      location: "Gurugram",
+      year: "2026",
+      isFeatured: false,
+      isActive: true,
+      altText: "Mahindra XUV700 Premium SUV",
+      caption: "Advanced safety features and panoramic comfort.",
+      sortOrder: 3,
+    },
+    {
+      title: "Corporate Commuter Roster",
+      description: "Daily employee commuter transport service operating across major IT parks in Electronic City.",
+      imageUrl: "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=1200&auto=format&fit=crop&q=80",
+      mediaType: MediaType.IMAGE,
+      category: "corporate",
+      location: "Bengaluru IT Hub",
+      year: "2026",
+      isFeatured: true,
+      isActive: true,
+      altText: "Corporate Commuter Bus & Cab Fleet",
+      caption: "Fixed-route shuttle logistics with real-time GPS tracking.",
+      sortOrder: 4,
+    },
+    {
+      title: "Executive Summit Fleet Convoy",
+      description: "Coordinated fleet convoy for multi-point corporate delegate transfers during annual business summits.",
+      imageUrl: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&auto=format&fit=crop&q=80",
+      mediaType: MediaType.IMAGE,
+      category: "corporate",
+      location: "New Delhi",
+      year: "2026",
+      isFeatured: false,
+      isActive: true,
+      altText: "Executive Summit Fleet Convoy",
+      caption: "Seamless fleet dispatch for high-volume delegates.",
+      sortOrder: 5,
+    },
+    {
+      title: "IGI Terminal 3 Executive Paging",
+      description: "24/7 dedicated flight-tracked airport arrivals paging and transfer service at Terminal 3.",
+      imageUrl: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1200&auto=format&fit=crop&q=80",
+      mediaType: MediaType.IMAGE,
+      category: "airport transfer",
+      location: "IGI Airport, Delhi",
+      year: "2026",
+      isFeatured: true,
+      isActive: true,
+      altText: "IGI Airport Executive Transfer",
+      caption: "Chauffeur paging gate meet & greet service.",
+      sortOrder: 6,
+    },
+    {
+      title: "KIA Terminal 2 Express Transit",
+      description: "Fast-track terminal 2 airport rides connecting business travelers directly to Whitefield CBD.",
+      imageUrl: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&auto=format&fit=crop&q=80",
+      mediaType: MediaType.IMAGE,
+      category: "airport transfer",
+      location: "KIA Airport, Bengaluru",
+      year: "2026",
+      isFeatured: false,
+      isActive: true,
+      altText: "Kempegowda Airport Cab Transfer",
+      caption: "Zero-wait pre-booked airport cabs.",
+      sortOrder: 7,
+    },
+    {
+      title: "Delhi to Jaipur Expressway Cruise",
+      description: "Smooth outstation highway transit along the Delhi-Jaipur Expressway with experienced chauffeurs.",
+      imageUrl: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&auto=format&fit=crop&q=80",
+      mediaType: MediaType.IMAGE,
+      category: "outstation",
+      location: "NH 48, Rajasthan",
+      year: "2026",
+      isFeatured: true,
+      isActive: true,
+      altText: "Delhi to Jaipur Highway Route",
+      caption: "Comfortable highway journeys with verified drivers.",
+      sortOrder: 8,
+    },
+    {
+      title: "Western Ghats Highway Express",
+      description: "Scenic mountain highway journey through lush green passes of Western Ghats.",
+      imageUrl: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200&auto=format&fit=crop&q=80",
+      mediaType: MediaType.IMAGE,
+      category: "outstation",
+      location: "Western Ghats, Maharashtra",
+      year: "2026",
+      isFeatured: false,
+      isActive: true,
+      altText: "Western Ghats Scenic Highway Drive",
+      caption: "Smooth rides through mountain passes.",
+      sortOrder: 9,
+    },
+    {
+      title: "Goa Sun & Sand Coastal Expedition",
+      description: "Custom private cab packages exploring heritage churches, spice plantations, and Fort Aguada.",
+      imageUrl: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=1200&auto=format&fit=crop&q=80",
+      mediaType: MediaType.IMAGE,
+      category: "tours",
+      location: "North Goa",
+      year: "2026",
+      isFeatured: true,
+      isActive: true,
+      altText: "Goa Beach Sightseeing Tour Cabs",
+      caption: "Explore coastal highways with dedicated chauffeurs.",
+      sortOrder: 10,
+    },
+    {
+      title: "Solang Valley Snow Expedition",
+      description: "Safe 4x4 SUV and Tempo Traveller family excursions to Solang Valley and Atal Tunnel.",
+      imageUrl: "https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?w=1200&auto=format&fit=crop&q=80",
+      mediaType: MediaType.IMAGE,
+      category: "tours",
+      location: "Manali, Himachal Pradesh",
+      year: "2026",
+      isFeatured: false,
+      isActive: true,
+      altText: "Manali Solang Valley Snow Tour",
+      caption: "Mountain trained hill driver squad.",
+      sortOrder: 11,
+    },
+    {
+      title: "Taj Mahal Heritage Excursion",
+      description: "Same-day luxury Agra tour from Delhi via Yamuna Expressway with doorstep pickup.",
+      imageUrl: "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=1200&auto=format&fit=crop&q=80",
+      mediaType: MediaType.IMAGE,
+      category: "destinations",
+      location: "Agra, Uttar Pradesh",
+      year: "2026",
+      isFeatured: true,
+      isActive: true,
+      altText: "Taj Mahal Agra Heritage Tour",
+      caption: "Unforgettable world heritage day trips.",
+      sortOrder: 12,
+    },
+    {
+      title: "Udaipur Royal Lakes Excursion",
+      description: "Explore the City of Lakes with private premium cabs and local heritage guides.",
+      imageUrl: "https://images.unsplash.com/photo-1599661046289-e31897846e41?w=1200&auto=format&fit=crop&q=80",
+      mediaType: MediaType.IMAGE,
+      category: "destinations",
+      location: "Udaipur, Rajasthan",
+      year: "2026",
+      isFeatured: false,
+      isActive: true,
+      altText: "Udaipur City of Lakes Heritage Tour",
+      caption: "Royal heritage palace travel experiences.",
+      sortOrder: 13,
+    },
+    {
+      title: "Destination Wedding Caravan",
+      description: "Flawlessly coordinated multi-vehicle luxury car fleet for wedding guests and family delegates.",
+      imageUrl: "https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&auto=format&fit=crop&q=80",
+      mediaType: MediaType.IMAGE,
+      category: "events",
+      location: "Jaipur Palace",
+      year: "2026",
+      isFeatured: true,
+      isActive: true,
+      altText: "Destination Wedding Luxury Fleet",
+      caption: "Coordinated luxury fleet for celebrations.",
+      sortOrder: 14,
+    },
+    {
+      title: "Marine Drive Coastal Evening Cruise",
+      description: "Unwinding on an evening coastal cruise across Queen's Necklace in Mumbai.",
+      imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&auto=format&fit=crop&q=80",
+      mediaType: MediaType.IMAGE,
+      category: "lifestyle",
+      location: "Marine Drive, Mumbai",
+      year: "2026",
+      isFeatured: false,
+      isActive: true,
+      altText: "Marine Drive Mumbai Sunset Drive",
+      caption: "Comfortable urban lifestyle travel.",
+      sortOrder: 15,
+    },
+  ];
+
+  for (const item of curatedGalleryItems) {
+    await prisma.gallery.create({
+      data: item,
+    });
   }
 
-  console.log("90 Gallery records seeded.");
+  console.log(`${curatedGalleryItems.length} curated master gallery records seeded.`);
 
   // ==========================================
   // 8. Site Settings (Company Info, Home, FAQs)

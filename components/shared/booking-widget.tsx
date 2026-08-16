@@ -890,17 +890,6 @@ export default function BookingWidget() {
             </div>
           )}
 
-          {/* Extra Distance & Waiting Time Fare Rules Notice */}
-          <div className="bg-slate-900/90 border border-amber-500/20 p-4 rounded-xl space-y-1">
-            <div className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber-400" />
-              <span>Overage & Extra Usage Fare Rules:</span>
-            </div>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              Base quotes include the agreed route distance and pickup-to-drop timeframe. Extra distance beyond agreed km limits is billed per additional km, and waiting time beyond finalized drop time is billed per additional hour. Tolls and parking are charged at actuals.
-            </p>
-          </div>
-
           {/* Submit Button */}
           <div className="flex justify-end pt-4 border-t border-white/5">
             <button

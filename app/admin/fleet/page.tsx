@@ -36,8 +36,6 @@ interface Vehicle {
   imageUrl?: string | null;
   perKmRate?: number | string | null;
   baseDailyRate?: number | string | null;
-  extraKmRate?: number | string | null;
-  extraHourRate?: number | string | null;
   status: VehicleStatus;
   categoryId: string;
   category?: {
@@ -111,8 +109,6 @@ export default function AdminFleetPage() {
     imageUrl: "",
     perKmRate: "",
     baseDailyRate: "",
-    extraKmRate: "",
-    extraHourRate: "",
     status: "AVAILABLE" as VehicleStatus,
     categoryId: "",
     driverId: "",
@@ -192,8 +188,6 @@ export default function AdminFleetPage() {
         imageUrl: vehicle.imageUrl || "",
         perKmRate: vehicle.perKmRate ? String(vehicle.perKmRate) : "",
         baseDailyRate: vehicle.baseDailyRate ? String(vehicle.baseDailyRate) : "",
-        extraKmRate: vehicle.extraKmRate ? String(vehicle.extraKmRate) : "",
-        extraHourRate: vehicle.extraHourRate ? String(vehicle.extraHourRate) : "",
         status: vehicle.status,
         categoryId: vehicle.categoryId,
         driverId: vehicle.driverId || "",
@@ -210,8 +204,6 @@ export default function AdminFleetPage() {
         imageUrl: "",
         perKmRate: "",
         baseDailyRate: "",
-        extraKmRate: "",
-        extraHourRate: "",
         status: "AVAILABLE",
         categoryId: categories.length > 0 ? categories[0].id : "",
         driverId: "",
@@ -241,8 +233,6 @@ export default function AdminFleetPage() {
       if (formData.imageUrl.trim()) payload.imageUrl = formData.imageUrl.trim();
       if (formData.perKmRate) payload.perKmRate = Number(formData.perKmRate);
       if (formData.baseDailyRate) payload.baseDailyRate = Number(formData.baseDailyRate);
-      if (formData.extraKmRate) payload.extraKmRate = Number(formData.extraKmRate);
-      if (formData.extraHourRate) payload.extraHourRate = Number(formData.extraHourRate);
 
       const url = editingVehicle ? `/api/fleet/${editingVehicle.id}` : "/api/fleet";
       const method = editingVehicle ? "PUT" : "POST";
@@ -731,32 +721,6 @@ export default function AdminFleetPage() {
                     placeholder="e.g. 3500.00"
                     value={formData.baseDailyRate}
                     onChange={(e) => setFormData({ ...formData, baseDailyRate: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Extra KM Rate (₹/extra km)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    placeholder="e.g. 12.00"
-                    value={formData.extraKmRate}
-                    onChange={(e) => setFormData({ ...formData, extraKmRate: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Extra Hour Rate (₹/extra hour)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    placeholder="e.g. 150.00"
-                    value={formData.extraHourRate}
-                    onChange={(e) => setFormData({ ...formData, extraHourRate: e.target.value })}
                     className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
                   />
                 </div>

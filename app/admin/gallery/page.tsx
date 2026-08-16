@@ -13,15 +13,30 @@ import {
   ChevronLeft,
   ChevronRight,
   ZoomIn,
-  AlertCircle
+  AlertCircle,
+  Star,
+  CheckCircle2,
+  Edit,
+  MapPin,
+  Calendar,
+  Sparkles,
+  ToggleLeft,
+  ToggleRight
 } from "lucide-react";
 
 interface Media {
   id: string;
   title?: string | null;
+  description?: string | null;
   imageUrl: string;
   mediaType: "IMAGE" | "VIDEO";
   category?: string | null;
+  location?: string | null;
+  year?: string | null;
+  isFeatured: boolean;
+  isActive: boolean;
+  altText?: string | null;
+  caption?: string | null;
   sortOrder: number;
   createdAt: string;
 }
@@ -30,6 +45,7 @@ export default function AdminGalleryPage() {
   const [mediaList, setMediaList] = useState<Media[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingMedia, setEditingMedia] = useState<Media | null>(null);
   const [lightboxImage, setLightboxImage] = useState<Media | null>(null);
 
   // Filters & Pagination State
@@ -43,9 +59,17 @@ export default function AdminGalleryPage() {
   // Form State
   const [formData, setFormData] = useState({
     title: "",
+    description: "",
     imageUrl: "",
+    mediaType: "IMAGE" as "IMAGE" | "VIDEO",
     category: "fleet",
-    sortOrder: 1,
+    location: "Delhi NCR",
+    year: "2026",
+    isFeatured: false,
+    isActive: true,
+    altText: "",
+    caption: "",
+    sortOrder: 0,
   });
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,6 +80,7 @@ export default function AdminGalleryPage() {
       const queryParams = new URLSearchParams({
         search,
         category: categoryFilter,
+        admin: "true",
         page: currentPage.toString(),
         limit: pageSize.toString(),
       });
@@ -78,14 +103,41 @@ export default function AdminGalleryPage() {
     loadMedia();
   }, [search, categoryFilter, currentPage, pageSize]);
 
-  const openModal = () => {
+  const openModal = (mediaItem: Media | null = null) => {
     setFormError("");
-    setFormData({
-      title: "",
-      imageUrl: "",
-      category: "fleet",
-      sortOrder: mediaList.length + 1,
-    });
+    if (mediaItem) {
+      setEditingMedia(mediaItem);
+      setFormData({
+        title: mediaItem.title || "",
+        description: mediaItem.description || "",
+        imageUrl: mediaItem.imageUrl || "",
+        mediaType: mediaItem.mediaType || "IMAGE",
+        category: mediaItem.category || "fleet",
+        location: mediaItem.location || "Delhi NCR",
+        year: mediaItem.year || "2026",
+        isFeatured: mediaItem.isFeatured ?? false,
+        isActive: mediaItem.isActive ?? true,
+        altText: mediaItem.altText || "",
+        caption: mediaItem.caption || "",
+        sortOrder: mediaItem.sortOrder ?? 0,
+      });
+    } else {
+      setEditingMedia(null);
+      setFormData({
+        title: "",
+        description: "",
+        imageUrl: "",
+        mediaType: "IMAGE",
+        category: "fleet",
+        location: "Delhi NCR",
+        year: "2026",
+        isFeatured: false,
+        isActive: true,
+        altText: "",
+        caption: "",
+        sortOrder: mediaList.length + 1,
+      });
+    }
     setIsModalOpen(true);
   };
 
@@ -97,14 +149,24 @@ export default function AdminGalleryPage() {
     try {
       const payload = {
         title: formData.title.trim() || null,
+        description: formData.description.trim() || null,
         imageUrl: formData.imageUrl.trim(),
+        mediaType: formData.mediaType,
         category: formData.category.toLowerCase(),
-        sortOrder: Number(formData.sortOrder),
-        mediaType: "IMAGE",
+        location: formData.location.trim() || null,
+        year: formData.year.trim() || null,
+        isFeatured: formData.isFeatured,
+        isActive: formData.isActive,
+        altText: formData.altText.trim() || null,
+        caption: formData.caption.trim() || null,
+        sortOrder: Number(formData.sortOrder) || 0,
       };
 
-      const res = await fetch("/api/gallery", {
-        method: "POST",
+      const url = editingMedia ? `/api/gallery/${editingMedia.id}` : "/api/gallery";
+      const method = editingMedia ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
@@ -112,13 +174,14 @@ export default function AdminGalleryPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setFormError(data.error || "Failed to add media item");
+        setFormError(typeof data.error === "string" ? data.error : JSON.stringify(data.error));
         return;
       }
 
       setIsModalOpen(false);
       loadMedia();
     } catch (err) {
+      console.error("Save gallery media error:", err);
       setFormError("Server connection error");
     } finally {
       setIsSubmitting(false);
@@ -139,39 +202,74 @@ export default function AdminGalleryPage() {
     }
   };
 
+  const handleToggleFeatured = async (item: Media) => {
+    try {
+      const res = await fetch(`/api/gallery/${item.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...item,
+          isFeatured: !item.isFeatured,
+        }),
+      });
+      if (res.ok) loadMedia();
+    } catch (e) {
+      console.error("Toggle featured error:", e);
+    }
+  };
+
+  const handleToggleActive = async (item: Media) => {
+    try {
+      const res = await fetch(`/api/gallery/${item.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...item,
+          isActive: !item.isActive,
+        }),
+      });
+      if (res.ok) loadMedia();
+    } catch (e) {
+      console.error("Toggle active error:", e);
+    }
+  };
+
   const categoryOptions = [
     { label: "All Categories", value: "" },
     { label: "Fleet Vehicles", value: "fleet" },
+    { label: "Corporate Mobility", value: "corporate" },
+    { label: "Airport Transfers", value: "airport transfer" },
+    { label: "Outstation Journeys", value: "outstation" },
     { label: "Tour Packages", value: "tours" },
-    { label: "Corporate Trips", value: "corporate" },
-    { label: "Events & Outings", value: "events" },
-    { label: "Customer Reviews", value: "customers" },
+    { label: "Destinations", value: "destinations" },
+    { label: "Events & Lifestyle", value: "events" },
+    { label: "Lifestyle", value: "lifestyle" },
   ];
 
   return (
-    <div className="bg-slate-950 min-h-screen text-slate-100 p-8 space-y-8">
+    <div className="bg-slate-950 min-h-screen text-slate-100 p-6 sm:p-8 space-y-8">
       
-      {/* Title Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/5 pb-6 gap-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-6 gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-50 tracking-tight flex items-center gap-2.5">
             <ImageIcon className="w-8 h-8 text-accent" />
-            <span>Gallery Media & Photo Catalog</span>
+            <span>Gallery Catalog CMS</span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Manage web graphics, vehicle photos, tour destination shots, and corporate event photo highlights.
+            Manage public media journal items, featured flags, display orders, locations, and descriptions for the /gallery page.
           </p>
         </div>
         <button
-          onClick={openModal}
+          onClick={() => openModal()}
           className="flex items-center gap-1.5 bg-accent hover:bg-yellow-500 text-slate-950 font-extrabold py-2.5 px-6 rounded-lg text-xs tracking-wider uppercase transition-all shadow-lg"
         >
           <Plus className="w-4 h-4" />
-          <span>Upload / Add Media</span>
+          <span>Add Media Item</span>
         </button>
       </div>
 
-      {/* Filter & Control Toolbar */}
+      {/* Filter & Toolbar */}
       <div className="glassmorphism p-6 rounded-xl border border-white/5 flex flex-col md:flex-row gap-4 items-center justify-between">
         
         {/* Search */}
@@ -179,153 +277,201 @@ export default function AdminGalleryPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type="text"
-            placeholder="Search photo title, category..."
+            placeholder="Search titles, locations, tags..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
             className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all"
           />
         </div>
 
-        {/* Category Buttons */}
-        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-          {categoryOptions.map((cat) => (
-            <button
-              key={cat.value}
-              onClick={() => { setCategoryFilter(cat.value); setCurrentPage(1); }}
-              className={`py-1.5 px-3 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all border ${
-                categoryFilter === cat.value
-                  ? "bg-accent text-slate-950 border-accent font-black"
-                  : "bg-slate-900 text-slate-400 border-white/5 hover:border-white/20"
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
+        {/* Filter Bar */}
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <select
+            value={categoryFilter}
+            onChange={(e) => { setCategoryFilter(e.target.value); setCurrentPage(1); }}
+            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent capitalize"
+          >
+            {categoryOptions.map((c) => (
+              <option key={c.value} value={c.value} className="bg-slate-900">{c.label}</option>
+            ))}
+          </select>
         </div>
 
       </div>
 
-      {/* Gallery Grid */}
+      {/* Media Grid Display */}
       {loading ? (
-        <div className="text-center py-20 text-slate-400 text-xs">Loading media catalog...</div>
+        <div className="text-center py-20 text-slate-400 text-xs">Loading media journal database...</div>
       ) : mediaList.length === 0 ? (
-        <div className="glassmorphism p-16 text-center rounded-xl border border-white/5 text-slate-500 italic text-xs">
-          No gallery images found matching the selected category.
+        <div className="glassmorphism p-12 rounded-2xl border border-white/5 text-center space-y-4">
+          <ImageIcon className="w-12 h-12 text-slate-600 mx-auto" />
+          <h3 className="text-lg font-bold text-slate-300">No Gallery Items Found</h3>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            No gallery images found matching the selected category. Click &quot;Add Media Item&quot; to add new photos.
+          </p>
         </div>
       ) : (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {mediaList.map((m) => (
-              <div 
-                key={m.id} 
-                className="bg-slate-900 border border-white/5 rounded-xl overflow-hidden shadow-lg flex flex-col group hover:border-accent/40 transition-all"
-              >
-                <div 
-                  onClick={() => setLightboxImage(m)}
-                  className="relative h-48 bg-slate-950 flex items-center justify-center cursor-pointer overflow-hidden"
-                >
-                  <img
-                    src={m.imageUrl}
-                    alt={m.title || "Gallery Item"}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1548013146-72479768bada";
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <div className="p-2 bg-slate-900/80 rounded-full border border-white/20 text-white">
-                      <ZoomIn className="w-5 h-5" />
-                    </div>
-                  </div>
-                  <span className="absolute top-3 right-3 bg-slate-950/80 border border-white/10 py-0.5 px-2 rounded text-[9px] font-bold font-mono text-accent">
-                    Order #{m.sortOrder}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {mediaList.map((item) => (
+            <div 
+              key={item.id}
+              className={`bg-slate-900/60 border rounded-2xl overflow-hidden flex flex-col justify-between transition-all group hover:border-white/20 ${
+                item.isFeatured ? "border-accent/40 bg-accent/5 shadow-xl" : "border-white/5"
+              }`}
+            >
+              {/* Media Preview Box */}
+              <div className="relative h-48 bg-slate-950 overflow-hidden group">
+                <img
+                  src={item.imageUrl}
+                  alt={item.altText || item.title || "Gallery image"}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                
+                {/* Badges Overlay */}
+                <div className="absolute top-3 left-3 flex flex-col gap-1 z-10">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-950/80 text-accent border border-white/10 backdrop-blur-md">
+                    {item.category || "fleet"}
                   </span>
-                </div>
-
-                <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
-                  <div>
-                    <h3 className="font-bold text-slate-200 text-xs line-clamp-1">{m.title || "Untitled Media"}</h3>
-                    <span className="text-[9px] bg-slate-950 text-slate-400 font-bold uppercase tracking-wider px-2 py-0.5 rounded border border-white/5 inline-block mt-1">
-                      {m.category || "General"}
+                  {item.isFeatured && (
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-accent text-slate-950 flex items-center gap-1 shadow-md">
+                      <Sparkles className="w-3 h-3" />
+                      <span>FEATURED</span>
                     </span>
-                  </div>
-
-                  <div className="flex justify-end gap-2 border-t border-white/5 pt-3">
-                    <button
-                      onClick={() => setLightboxImage(m)}
-                      className="p-1.5 bg-slate-950 border border-white/5 rounded-lg text-slate-400 hover:text-accent transition-colors"
-                      title="View Image Lightbox"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(m.id)}
-                      className="p-1.5 bg-slate-950 border border-white/5 rounded-lg text-slate-400 hover:text-red-400 transition-colors"
-                      title="Delete Image"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                  )}
                 </div>
 
-              </div>
-            ))}
-          </div>
+                <div className="absolute top-3 right-3 z-10">
+                  <button
+                    onClick={() => handleToggleActive(item)}
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold border transition-colors ${
+                      item.isActive ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40" : "bg-rose-500/20 text-rose-300 border-rose-500/40"
+                    }`}
+                  >
+                    {item.isActive ? "ACTIVE" : "DISABLED"}
+                  </button>
+                </div>
 
-          {/* Pagination Bar */}
-          <div className="p-4 bg-slate-900/60 rounded-xl border border-white/5 flex items-center justify-between text-xs text-slate-400">
-            <div>
-              Showing <span className="font-bold text-slate-200">{totalCount > 0 ? (currentPage - 1) * pageSize + 1 : 0}</span> to <span className="font-bold text-slate-200">{Math.min(currentPage * pageSize, totalCount)}</span> of <span className="font-bold text-slate-200">{totalCount}</span> media items
+                {/* Quick Action Overlay */}
+                <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                  <button
+                    onClick={() => setLightboxImage(item)}
+                    className="p-2 bg-slate-900 text-slate-100 rounded-full border border-white/20 hover:bg-slate-800 transition-colors"
+                    title="Zoom Preview"
+                  >
+                    <ZoomIn className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => openModal(item)}
+                    className="p-2 bg-accent text-slate-950 rounded-full hover:bg-yellow-500 transition-colors"
+                    title="Edit Item"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    className="p-2 bg-rose-500 text-white rounded-full hover:bg-rose-600 transition-colors"
+                    title="Delete Item"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Item Info Box */}
+              <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="font-extrabold text-slate-100 text-sm line-clamp-1">
+                    {item.title || "Untitled Journal Asset"}
+                  </h3>
+                  {item.description && (
+                    <p className="text-xs text-slate-400 line-clamp-2 mt-1">
+                      {item.description}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between text-[11px] text-slate-400 border-t border-white/5 pt-2 font-mono">
+                  <div className="flex items-center gap-1">
+                    <MapPin className="w-3 h-3 text-accent" />
+                    <span>{item.location || "India"}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleToggleFeatured(item)}
+                      className={`p-1 rounded transition-colors ${
+                        item.isFeatured ? "text-accent hover:text-white" : "text-slate-600 hover:text-slate-300"
+                      }`}
+                      title={item.isFeatured ? "Featured item" : "Mark as featured"}
+                    >
+                      <Star className={`w-3.5 h-3.5 ${item.isFeatured ? "fill-accent" : ""}`} />
+                    </button>
+                    <span>Order: #{item.sortOrder}</span>
+                  </div>
+                </div>
+              </div>
+
             </div>
-
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1">
-                <span>Per page:</span>
-                <select
-                  value={pageSize}
-                  onChange={(e) => { setPageSize(parseInt(e.target.value)); setCurrentPage(1); }}
-                  className="bg-slate-950 border border-white/10 rounded px-2 py-1 text-slate-200"
-                >
-                  <option value="8">8</option>
-                  <option value="12">12</option>
-                  <option value="24">24</option>
-                  <option value="48">48</option>
-                </select>
-              </div>
-
-              <div className="flex items-center gap-1">
-                <button
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(currentPage - 1)}
-                  className="p-1 bg-slate-950 border border-white/10 rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <span className="px-2 font-mono font-bold text-slate-200">{currentPage} / {totalPages}</span>
-                <button
-                  disabled={currentPage >= totalPages}
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                  className="p-1 bg-slate-950 border border-white/10 rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       )}
 
-      {/* Add Media Modal */}
+      {/* Pagination Controls */}
+      <div className="glassmorphism p-4 rounded-xl border border-white/5 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-4">
+        <div>
+          Showing <span className="font-bold text-slate-200">{mediaList.length}</span> of <span className="font-bold text-slate-200">{totalCount}</span> gallery media items
+        </div>
+        
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span>Page Size:</span>
+            <select
+              value={pageSize}
+              onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
+              className="bg-slate-950 border border-white/10 rounded px-2 py-1 text-slate-200 focus:outline-none"
+            >
+              <option value="12">12</option>
+              <option value="24">24</option>
+              <option value="48">48</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(currentPage - 1)}
+              className="p-1 bg-slate-950 border border-white/10 rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <span className="px-2 font-mono font-bold text-slate-200">{currentPage} / {totalPages}</span>
+            <button
+              disabled={currentPage >= totalPages}
+              onClick={() => setCurrentPage(currentPage + 1)}
+              className="p-1 bg-slate-950 border border-white/10 rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ADD / EDIT MEDIA MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-white/10 rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-2xl">
+          <div className="bg-slate-900 border border-white/10 rounded-2xl max-w-xl w-full p-6 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-thin">
             
             <div className="flex justify-between items-center border-b border-white/5 pb-4">
               <div>
-                <h3 className="text-lg font-bold text-slate-50">Upload / Add Gallery Media</h3>
-                <p className="text-xs text-slate-400 mt-0.5">Add photo catalog items with title, image URL, category, and display order.</p>
+                <h3 className="text-lg font-extrabold text-slate-50 flex items-center gap-2">
+                  <ImageIcon className="w-5 h-5 text-accent" />
+                  <span>{editingMedia ? "Edit Gallery Item" : "Add Gallery Journal Asset"}</span>
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">Control image URL, category tag, location, description, and display order.</p>
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-white p-1">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-slate-400 hover:text-white p-1"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -337,84 +483,143 @@ export default function AdminGalleryPage() {
               </div>
             )}
 
-            <form onSubmit={handleSaveMedia} className="space-y-4">
+            <form onSubmit={handleSaveMedia} className="space-y-4 text-xs">
+              
               <div>
-                <label className="text-xs font-bold text-slate-300 block mb-1">Image Title / Description</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Executive Sedan Fleet at Airport"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                <label className="font-bold text-slate-300 block mb-1">Image / Media URL *</label>
+                <div className="flex gap-3 items-center">
+                  <div className="w-14 h-14 bg-slate-950 border border-white/10 rounded-lg overflow-hidden shrink-0 flex items-center justify-center">
+                    <img
+                      src={formData.imageUrl.trim() || "/images/fleet-suv.png"}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <input
+                    type="url"
+                    required
+                    placeholder="https://images.unsplash.com/photo-..."
+                    value={formData.imageUrl}
+                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="font-bold text-slate-300 block mb-1">Title / Caption Headline *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Executive Commute"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent font-semibold"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-300 block mb-1">Category Tag *</label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent font-bold"
+                  >
+                    <option value="fleet" className="bg-slate-900">Fleet Vehicles</option>
+                    <option value="corporate" className="bg-slate-900">Corporate Mobility</option>
+                    <option value="airport transfer" className="bg-slate-900">Airport Transfer</option>
+                    <option value="outstation" className="bg-slate-900">Outstation</option>
+                    <option value="tours" className="bg-slate-900">Tours</option>
+                    <option value="destinations" className="bg-slate-900">Destinations</option>
+                    <option value="events" className="bg-slate-900">Events</option>
+                    <option value="lifestyle" className="bg-slate-900">Lifestyle</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="font-bold text-slate-300 block mb-1">Location</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Delhi NCR or Jaipur"
+                    value={formData.location}
+                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-300 block mb-1">Year / Date</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 2026"
+                    value={formData.year}
+                    onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-300 block mb-1">Display Order</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={formData.sortOrder}
+                    onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value, 10) || 0 })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-300 block mb-1">Short Description</label>
+                <textarea
+                  rows={2}
+                  placeholder="A visual snapshot of our executive corporate cab fleet in motion..."
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                 />
               </div>
 
-              <div>
-                <label className="text-xs font-bold text-slate-300 block mb-1">Image URL *</label>
-                <input
-                  type="url"
-                  required
-                  placeholder="https://images.unsplash.com/photo-..."
-                  value={formData.imageUrl}
-                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
-                />
-              </div>
-
-              {formData.imageUrl.trim() && (
-                <div className="relative rounded-xl overflow-hidden border border-white/10 h-36 bg-slate-950">
-                  <img
-                    src={formData.imageUrl}
-                    alt="Preview"
-                    className="w-full h-full object-cover"
-                    onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
-                  />
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Category *</label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
-                  >
-                    <option value="fleet" className="bg-slate-900">Fleet Vehicles</option>
-                    <option value="tours" className="bg-slate-900">Tour Packages</option>
-                    <option value="corporate" className="bg-slate-900">Corporate Trips</option>
-                    <option value="events" className="bg-slate-900">Events & Outings</option>
-                    <option value="customers" className="bg-slate-900">Customer Reviews</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Sort Order *</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-white/5 pt-3">
+                <label className="flex items-center gap-2 cursor-pointer">
                   <input
-                    type="number"
-                    min={0}
-                    required
-                    value={formData.sortOrder}
-                    onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value, 10) || 0 })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                    type="checkbox"
+                    checked={formData.isFeatured}
+                    onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
+                    className="w-4 h-4 rounded text-accent focus:ring-accent bg-slate-950 border-white/10"
                   />
-                </div>
+                  <span className="font-bold text-slate-200">Featured Item (Prioritize on Public Gallery)</span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.isActive}
+                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                    className="w-4 h-4 rounded text-accent focus:ring-accent bg-slate-950 border-white/10"
+                  />
+                  <span className="font-bold text-slate-200">Active (Visible on Public /gallery)</span>
+                </label>
               </div>
 
-              <div className="flex gap-3 pt-4 border-t border-white/5">
+              <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 rounded-lg text-xs tracking-wider uppercase"
+                  className="px-5 py-2.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 bg-accent hover:bg-yellow-500 text-slate-950 font-black py-2.5 rounded-lg text-xs tracking-wider uppercase shadow-lg disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-lg text-xs font-extrabold bg-accent text-slate-950 hover:bg-yellow-500 transition-all uppercase tracking-wider shadow-lg disabled:opacity-50"
                 >
-                  {isSubmitting ? "Saving..." : "Add Media"}
+                  {isSubmitting ? "Saving Asset..." : editingMedia ? "Update Gallery Item" : "Save Gallery Item"}
                 </button>
               </div>
 
@@ -423,28 +628,53 @@ export default function AdminGalleryPage() {
         </div>
       )}
 
-      {/* Lightbox Modal */}
+      {/* LIGHTBOX ZOOM MODAL */}
       {lightboxImage && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center justify-center">
+          <div className="relative max-w-4xl w-full bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row">
             <button
               onClick={() => setLightboxImage(null)}
-              className="absolute -top-10 right-0 text-white hover:text-accent p-2 font-bold flex items-center gap-1"
+              className="absolute top-4 right-4 p-2 bg-slate-950/80 text-white rounded-full hover:bg-slate-800 z-10"
             >
-              <X className="w-6 h-6" />
-              <span className="text-xs uppercase">Close</span>
+              <X className="w-5 h-5" />
             </button>
-            
-            <img
-              src={lightboxImage.imageUrl}
-              alt={lightboxImage.title || "Gallery Preview"}
-              className="max-w-full max-h-[75vh] object-contain rounded-xl border border-white/10 shadow-2xl"
-            />
-            
-            <div className="mt-4 text-center">
-              <h3 className="text-sm font-bold text-slate-100">{lightboxImage.title || "Media Preview"}</h3>
-              <div className="text-[10px] text-slate-400 font-mono mt-1">
-                Category: <span className="text-accent font-bold uppercase">{lightboxImage.category}</span> &bull; Order #{lightboxImage.sortOrder}
+
+            <div className="md:w-2/3 h-80 md:h-[500px] bg-black flex items-center justify-center">
+              <img
+                src={lightboxImage.imageUrl}
+                alt={lightboxImage.title || "Gallery Zoom"}
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
+
+            <div className="md:w-1/3 p-6 space-y-4 flex flex-col justify-between bg-slate-900 border-l border-white/5">
+              <div className="space-y-3">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-accent/20 text-accent border border-accent/30 inline-block">
+                  {lightboxImage.category}
+                </span>
+                <h3 className="text-xl font-extrabold text-slate-50">{lightboxImage.title || "Untitled Asset"}</h3>
+                {lightboxImage.description && (
+                  <p className="text-xs text-slate-300 leading-relaxed">{lightboxImage.description}</p>
+                )}
+                
+                <div className="space-y-1.5 text-xs text-slate-400 font-mono border-t border-white/5 pt-3">
+                  {lightboxImage.location && (
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-3.5 h-3.5 text-accent" />
+                      <span>{lightboxImage.location}</span>
+                    </div>
+                  )}
+                  {lightboxImage.year && (
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-3.5 h-3.5 text-accent" />
+                      <span>{lightboxImage.year}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="text-[10px] text-slate-500 font-mono border-t border-white/5 pt-3">
+                ID: {lightboxImage.id}
               </div>
             </div>
           </div>
