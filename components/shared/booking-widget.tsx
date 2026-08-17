@@ -340,6 +340,7 @@ export default function BookingWidget() {
     pickup: "",
     drop: "",
     date: "",
+    pickupTime: "",
     returnDate: "",
     vehicleCategory: "",
     vehicleCategoryId: "",
@@ -715,18 +716,19 @@ export default function BookingWidget() {
         }
         const formattedPhone = `+91${digitsPhone}`;
 
+        const pickupTimePart = outstationData.pickupTime || "06:00";
         payload = {
           customerName: outstationData.name.trim(),
           email: outstationData.email.trim(),
           phone: formattedPhone,
           pickupLocation: outstationData.pickup.trim(),
           dropLocation: outstationData.drop.trim(),
-          pickupDateTime: new Date(`${outstationData.date}T06:00:00`).toISOString(),
+          pickupDateTime: new Date(`${outstationData.date}T${pickupTimePart}:00`).toISOString(),
           returnDateTime: outstationData.type === "ROUND_TRIP" && outstationData.returnDate
             ? new Date(`${outstationData.returnDate}T23:59:00`).toISOString()
             : null,
-          vehicleCategoryId: outstationData.vehicleCategoryId,
-          tripType: `Outstation ${outstationData.type === "ROUND_TRIP" ? "Round Trip" : "One Way"}`
+          vehicleCategoryId: outstationData.vehicleCategoryId || (categories[0]?.id || ""),
+          tripType: `Outstation ${outstationData.type === "ROUND_TRIP" ? "Round Trip" : "One Way"}${outstationData.vehicleCategory ? ` - ${outstationData.vehicleCategory}` : ""}${outstationData.vehicleClass ? ` (${outstationData.vehicleClass})` : ""}${outstationData.vehicleModel ? `, Model: ${outstationData.vehicleModel}` : ""}`
         };
       } else if (activeTab === "tours") {
         url = "/api/bookings";
@@ -1419,8 +1421,8 @@ export default function BookingWidget() {
           {/* Outstation Tab */}
           {activeTab === "outstation" && (
             <div className="space-y-6">
-              {/* Row 1: Trip Type Tabs & Dates in 1 line */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+              {/* Row 1: Trip Type Tabs, Pickup Date, Pickup Time, (and Return Date if Round Trip) in 1 line */}
+              <div className={`grid grid-cols-1 md:grid-cols-2 ${outstationData.type === "ROUND_TRIP" ? "lg:grid-cols-4" : "lg:grid-cols-3"} gap-6 items-start`}>
                 {/* Column 1: Trip Type Segmented Tabs */}
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Trip Type *</label>
@@ -1467,8 +1469,25 @@ export default function BookingWidget() {
                   </div>
                 </div>
 
-                {/* Column 3: Return Date (Conditional for Round Trip) */}
-                {outstationData.type === "ROUND_TRIP" ? (
+                {/* Column 3: Pickup Time */}
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Pickup Time *</label>
+                  <div className="relative h-[42px]">
+                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-400 pointer-events-none" />
+                    <input
+                      type="time"
+                      required
+                      value={outstationData.pickupTime}
+                      onClick={(e) => e.currentTarget.showPicker?.()}
+                      onChange={(e) => setOutstationData({ ...outstationData, pickupTime: e.target.value })}
+                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all cursor-pointer [color-scheme:dark]"
+                    />
+                    <Clock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* Column 4: Return Date (Conditional for Round Trip) */}
+                {outstationData.type === "ROUND_TRIP" && (
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Return Date *</label>
                     <div className="relative h-[42px]">
@@ -1484,8 +1503,6 @@ export default function BookingWidget() {
                       <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
                     </div>
                   </div>
-                ) : (
-                  <div className="hidden md:block" />
                 )}
               </div>
 
