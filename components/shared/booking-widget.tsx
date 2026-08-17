@@ -341,7 +341,10 @@ export default function BookingWidget() {
     drop: "",
     date: "",
     returnDate: "",
-    vehicleCategoryId: ""
+    vehicleCategory: "",
+    vehicleCategoryId: "",
+    vehicleClass: "",
+    vehicleModel: ""
   });
 
   const [tourData, setTourData] = useState({
@@ -503,6 +506,116 @@ export default function BookingWidget() {
 
     return [];
   }, [localData.vehicleCategory, localData.vehicleClass, dbModels]);
+
+  const availableOutstationModels = React.useMemo(() => {
+    if (!outstationData.vehicleCategory) return [];
+
+    const catLower = outstationData.vehicleCategory.toLowerCase();
+    const classLower = (outstationData.vehicleClass || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
+    // 1. Filter models uploaded in the Admin Panel DB Catalogue
+    if (dbModels && dbModels.length > 0) {
+      const matched = dbModels.filter((m: any) => {
+        const mCat = (m.category || "").toLowerCase();
+        const mSub = (m.subcategory || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
+        const catMatches = mCat.includes(catLower) || catLower.includes(mCat);
+        const classMatches = !classLower || mSub.includes(classLower) || classLower.includes(mSub);
+
+        return catMatches && classMatches;
+      });
+
+      if (matched.length > 0) {
+        return matched.map((m: any) => ({
+          value: `${m.brand} ${m.modelName}`,
+          label: `${m.brand} ${m.modelName}`
+        }));
+      }
+    }
+
+    // 2. Default Seeded catalogue fallbacks per category & class
+    if (outstationData.vehicleCategory === "Sedan") {
+      if (outstationData.vehicleClass === "Compact") {
+        return [
+          { value: "Maruti Suzuki Swift Dzire", label: "Maruti Suzuki Swift Dzire" },
+          { value: "Hyundai Aura", label: "Hyundai Aura" },
+          { value: "Honda Amaze", label: "Honda Amaze" },
+          { value: "Tata Tigor", label: "Tata Tigor" }
+        ];
+      }
+      if (outstationData.vehicleClass === "Executive") {
+        return [
+          { value: "Honda City", label: "Honda City" },
+          { value: "Hyundai Verna", label: "Hyundai Verna" },
+          { value: "Maruti Suzuki Ciaz", label: "Maruti Suzuki Ciaz" },
+          { value: "Skoda Slavia", label: "Skoda Slavia" }
+        ];
+      }
+      if (outstationData.vehicleClass === "Premium Executive") {
+        return [
+          { value: "Toyota Camry", label: "Toyota Camry" },
+          { value: "Skoda Superb", label: "Skoda Superb" },
+          { value: "Volkswagen Passat", label: "Volkswagen Passat" }
+        ];
+      }
+      if (outstationData.vehicleClass === "Luxury") {
+        return [
+          { value: "Mercedes-Benz E-Class", label: "Mercedes-Benz E-Class" },
+          { value: "BMW 5 Series", label: "BMW 5 Series" },
+          { value: "Audi A6", label: "Audi A6" },
+          { value: "Jaguar XF", label: "Jaguar XF" }
+        ];
+      }
+      return [
+        { value: "Maruti Suzuki Swift Dzire", label: "Maruti Suzuki Swift Dzire" },
+        { value: "Honda City", label: "Honda City" },
+        { value: "Toyota Camry", label: "Toyota Camry" },
+        { value: "Mercedes-Benz E-Class", label: "Mercedes-Benz E-Class" }
+      ];
+    }
+
+    if (outstationData.vehicleCategory === "SUV") {
+      if (outstationData.vehicleClass === "Subcompact / Urban") {
+        return [
+          { value: "Tata Nexon", label: "Tata Nexon" },
+          { value: "Maruti Suzuki Brezza", label: "Maruti Suzuki Brezza" },
+          { value: "Hyundai Venue", label: "Hyundai Venue" },
+          { value: "Kia Sonet", label: "Kia Sonet" }
+        ];
+      }
+      if (outstationData.vehicleClass === "Mid-Premium") {
+        return [
+          { value: "Hyundai Creta", label: "Hyundai Creta" },
+          { value: "Kia Seltos", label: "Kia Seltos" },
+          { value: "Mahindra Scorpio-N", label: "Mahindra Scorpio-N" },
+          { value: "Tata Harrier", label: "Tata Harrier" }
+        ];
+      }
+      if (outstationData.vehicleClass === "Premium") {
+        return [
+          { value: "Mahindra XUV700", label: "Mahindra XUV700" },
+          { value: "Tata Safari", label: "Tata Safari" },
+          { value: "MG Hector Plus", label: "MG Hector Plus" },
+          { value: "Jeep Compass", label: "Jeep Compass" }
+        ];
+      }
+      if (outstationData.vehicleClass === "Luxury") {
+        return [
+          { value: "Toyota Fortuner", label: "Toyota Fortuner" },
+          { value: "Mercedes-Benz GLE", label: "Mercedes-Benz GLE" },
+          { value: "BMW X5", label: "BMW X5" }
+        ];
+      }
+      return [
+        { value: "Tata Nexon", label: "Tata Nexon" },
+        { value: "Hyundai Creta", label: "Hyundai Creta" },
+        { value: "Mahindra XUV700", label: "Mahindra XUV700" },
+        { value: "Toyota Fortuner", label: "Toyota Fortuner" }
+      ];
+    }
+
+    return [];
+  }, [outstationData.vehicleCategory, outstationData.vehicleClass, dbModels]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1305,132 +1418,103 @@ export default function BookingWidget() {
 
           {/* Outstation Tab */}
           {activeTab === "outstation" && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Trip Type *</label>
-                <div className="flex gap-4 mt-2">
-                  <label className="flex items-center gap-2 cursor-pointer text-sm">
-                    <input
-                      type="radio"
-                      name="outstationType"
-                      checked={outstationData.type === "ONE_WAY"}
-                      onChange={() => setOutstationData({ ...outstationData, type: "ONE_WAY" })}
-                      className="accent-accent text-slate-900 border-white/15 bg-slate-950"
-                    />
-                    <span>One Way</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer text-sm">
-                    <input
-                      type="radio"
-                      name="outstationType"
-                      checked={outstationData.type === "ROUND_TRIP"}
-                      onChange={() => setOutstationData({ ...outstationData, type: "ROUND_TRIP" })}
-                      className="accent-accent text-slate-900 border-white/15 bg-slate-950"
-                    />
-                    <span>Round Trip</span>
-                  </label>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Car Category *</label>
-                <div className="relative">
-                  <select
-                    value={outstationData.vehicleCategoryId}
-                    onChange={(e) => setOutstationData({ ...outstationData, vehicleCategoryId: e.target.value })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
-                  >
-                    <option value="" disabled className="bg-slate-900">- Please Select -</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id} className="bg-slate-900">{cat.name}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Outstation Date *</label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-400 pointer-events-none" />
-                  <input
-                    type="date"
-                    required
-                    value={outstationData.date}
-                    onClick={(e) => e.currentTarget.showPicker?.()}
-                    onChange={(e) => setOutstationData({ ...outstationData, date: e.target.value })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all cursor-pointer [color-scheme:dark]"
-                  />
-                  <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
-                </div>
-              </div>
-
-              {outstationData.type === "ROUND_TRIP" && (
+            <div className="space-y-6">
+              {/* Row 1: Trip Type Tabs & Dates in 1 line */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+                {/* Column 1: Trip Type Segmented Tabs */}
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Return Date *</label>
-                  <div className="relative">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Trip Type *</label>
+                  <div className="flex h-[42px] bg-slate-950/80 p-1 border border-white/10 rounded-lg shrink-0 items-center">
+                    <button
+                      type="button"
+                      onClick={() => setOutstationData({ ...outstationData, type: "ONE_WAY" })}
+                      className={`flex-1 h-full text-xs font-bold rounded-md transition-all flex items-center justify-center ${
+                        outstationData.type === "ONE_WAY"
+                          ? "bg-amber-500 text-slate-950 shadow-md"
+                          : "text-slate-400 hover:text-slate-200"
+                      }`}
+                    >
+                      One Way
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setOutstationData({ ...outstationData, type: "ROUND_TRIP" })}
+                      className={`flex-1 h-full text-xs font-bold rounded-md transition-all flex items-center justify-center ${
+                        outstationData.type === "ROUND_TRIP"
+                          ? "bg-amber-500 text-slate-950 shadow-md"
+                          : "text-slate-400 hover:text-slate-200"
+                      }`}
+                    >
+                      Round Trip
+                    </button>
+                  </div>
+                </div>
+
+                {/* Column 2: Pickup Date */}
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Pickup Date *</label>
+                  <div className="relative h-[42px]">
                     <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-400 pointer-events-none" />
                     <input
                       type="date"
                       required
-                      value={outstationData.returnDate}
+                      value={outstationData.date}
                       onClick={(e) => e.currentTarget.showPicker?.()}
-                      onChange={(e) => setOutstationData({ ...outstationData, returnDate: e.target.value })}
-                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all cursor-pointer [color-scheme:dark]"
+                      onChange={(e) => setOutstationData({ ...outstationData, date: e.target.value })}
+                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all cursor-pointer [color-scheme:dark]"
                     />
                     <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
                   </div>
                 </div>
-              )}
 
-              <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 border-t border-white/5">
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">From City *</label>
-                  <LocationInput
-                    required
-                    placeholder="Pickup City (e.g. Mumbai, Pune, Delhi)"
-                    value={outstationData.pickup}
-                    onChange={(val) => setOutstationData({ ...outstationData, pickup: val })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">To City *</label>
-                  <LocationInput
-                    required
-                    placeholder="Drop City (e.g. Pune, Lonavala, Mahabaleshwar)"
-                    value={outstationData.drop}
-                    onChange={(val) => setOutstationData({ ...outstationData, drop: val })}
-                  />
-                </div>
+                {/* Column 3: Return Date (Conditional for Round Trip) */}
+                {outstationData.type === "ROUND_TRIP" ? (
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Return Date *</label>
+                    <div className="relative h-[42px]">
+                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-400 pointer-events-none" />
+                      <input
+                        type="date"
+                        required
+                        value={outstationData.returnDate}
+                        onClick={(e) => e.currentTarget.showPicker?.()}
+                        onChange={(e) => setOutstationData({ ...outstationData, returnDate: e.target.value })}
+                        className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all cursor-pointer [color-scheme:dark]"
+                      />
+                      <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="hidden md:block" />
+                )}
               </div>
 
-              {/* Customer Contact Row */}
-              <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6 pt-2 border-t border-white/5">
+              {/* Row 2: Full Name, Email, Mobile Number in 1 line */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Full Name *</label>
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Full Name *</label>
                   <input
                     type="text"
                     required
-                    placeholder="John Doe"
+                    placeholder="e.g. Amit Sharma"
                     value={outstationData.name}
                     onChange={(e) => setOutstationData({ ...outstationData, name: e.target.value.replace(/[^a-zA-Z\s.-]/g, "") })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                    className="w-full h-[42px] bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Email Address *</label>
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Email Address *</label>
                   <input
                     type="email"
                     required
-                    placeholder="john@example.com"
+                    placeholder="e.g. john@example.com"
                     value={outstationData.email}
                     onChange={(e) => setOutstationData({ ...outstationData, email: e.target.value })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                    className="w-full h-[42px] bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mobile Number (10 Digits) *</label>
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Mobile Number (10 Digits) *</label>
                   <input
                     type="tel"
                     required
@@ -1438,7 +1522,126 @@ export default function BookingWidget() {
                     placeholder="e.g. 9999999999"
                     value={outstationData.phone}
                     onChange={(e) => setOutstationData({ ...outstationData, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"
+                    className="w-full h-[42px] bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"
+                  />
+                </div>
+              </div>
+
+              {/* Row 3: Vehicle Category, Vehicle Class, Vehicle Model in 1 line */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Column 1: Vehicle Category (Sedan & SUV only) */}
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Vehicle Category *</label>
+                  <div className="relative h-[42px]">
+                    <select
+                      value={outstationData.vehicleCategory || ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const matchedCat = categories.find(c => c.name.toLowerCase().includes(val.toLowerCase()));
+                        setOutstationData({
+                          ...outstationData,
+                          vehicleCategory: val,
+                          vehicleCategoryId: matchedCat ? matchedCat.id : (categories[0]?.id || ""),
+                          vehicleClass: "",
+                          vehicleModel: ""
+                        });
+                      }}
+                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="" disabled className="bg-slate-900">- Please Select -</option>
+                      <option value="Sedan" className="bg-slate-900">Sedan</option>
+                      <option value="SUV" className="bg-slate-900">SUV</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* Column 2: Vehicle Class (Dynamic based on Category) */}
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Vehicle Class *</label>
+                  <div className="relative h-[42px]">
+                    <select
+                      value={outstationData.vehicleClass || ""}
+                      onChange={(e) => setOutstationData({ ...outstationData, vehicleClass: e.target.value })}
+                      disabled={!outstationData.vehicleCategory}
+                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <option value="" disabled className="bg-slate-900">
+                        {outstationData.vehicleCategory ? "- Please Select -" : "- Select Category First -"}
+                      </option>
+                      {outstationData.vehicleCategory === "Sedan" && (
+                        <>
+                          <option value="Compact" className="bg-slate-900">Compact</option>
+                          <option value="Executive" className="bg-slate-900">Executive</option>
+                          <option value="Premium Executive" className="bg-slate-900">Premium Executive</option>
+                          <option value="Luxury" className="bg-slate-900">Luxury</option>
+                        </>
+                      )}
+                      {outstationData.vehicleCategory === "SUV" && (
+                        <>
+                          <option value="Subcompact / Urban" className="bg-slate-900">Subcompact / Urban</option>
+                          <option value="Mid-Premium" className="bg-slate-900">Mid-Premium</option>
+                          <option value="Premium" className="bg-slate-900">Premium</option>
+                          <option value="Luxury" className="bg-slate-900">Luxury</option>
+                        </>
+                      )}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* Column 3: Vehicle Model (Dynamic based on Admin Catalogue Uploads & Category / Class selection) */}
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Vehicle Model *</label>
+                  <div className="relative h-[42px]">
+                    <select
+                      value={outstationData.vehicleModel || ""}
+                      onChange={(e) => setOutstationData({ ...outstationData, vehicleModel: e.target.value })}
+                      disabled={!outstationData.vehicleCategory}
+                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <option value="" disabled className="bg-slate-900">
+                        {!outstationData.vehicleCategory
+                          ? "- Select Category First -"
+                          : !outstationData.vehicleClass
+                            ? "- Select Class First -"
+                            : "- Please Select -"}
+                      </option>
+                      {availableOutstationModels.map((item, idx) => (
+                        <option key={idx} value={item.value} className="bg-slate-900">
+                          {item.label}
+                        </option>
+                      ))}
+                      {outstationData.vehicleCategory && (
+                        <option value={`Any Available ${outstationData.vehicleCategory}`} className="bg-slate-900">
+                          Any Available {outstationData.vehicleCategory}
+                        </option>
+                      )}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Row 4: Pickup Address & Drop Address in 1 line */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Pickup Address *</label>
+                  <LocationInput
+                    required
+                    placeholder="Enter pickup address or city (e.g. Mumbai, Pune)"
+                    value={outstationData.pickup}
+                    onChange={(val) => setOutstationData({ ...outstationData, pickup: val })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Drop Address *</label>
+                  <LocationInput
+                    required
+                    placeholder="Enter drop address or destination city (e.g. Pune, Goa)"
+                    value={outstationData.drop}
+                    onChange={(val) => setOutstationData({ ...outstationData, drop: val })}
                   />
                 </div>
               </div>
