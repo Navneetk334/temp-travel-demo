@@ -323,7 +323,9 @@ export default function BookingWidget() {
     phone: "",
     pickupLocation: "",
     vehicleCategoryId: "",
-    duration: "",
+    vehicleClass: "",
+    vehicleModel: "",
+    duration: "8hr_80km",
     pickupDate: "",
     pickupTime: ""
   });
@@ -461,7 +463,7 @@ export default function BookingWidget() {
           pickupDateTime: new Date(`${localData.pickupDate}T${localData.pickupTime}`).toISOString(),
           returnDateTime: null,
           vehicleCategoryId: localData.vehicleCategoryId,
-          tripType: `Local Hourly Rental (${localData.duration})`
+          tripType: `Local Hourly Rental (${localData.duration})${localData.vehicleClass ? ` - Class: ${localData.vehicleClass}` : ""}${localData.vehicleModel ? `, Model: ${localData.vehicleModel}` : ""}`
         };
       } else if (activeTab === "outstation") {
         url = "/api/rental/lead";
@@ -960,89 +962,33 @@ export default function BookingWidget() {
 
           {/* Local Rentals Tab */}
           {activeTab === "local" && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Car Category *</label>
-                <select
-                  value={localData.vehicleCategoryId}
-                  onChange={(e) => setLocalData({ ...localData, vehicleCategoryId: e.target.value })}
-                  className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
-                >
-                  <option value="" disabled className="bg-slate-900">- Please Select -</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id} className="bg-slate-900">{cat.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Rental Package *</label>
-                <select
-                  value={localData.duration}
-                  onChange={(e) => setLocalData({ ...localData, duration: e.target.value })}
-                  className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
-                >
-                  <option value="" disabled className="bg-slate-900">- Please Select -</option>
-                  <option value="8hr_80km" className="bg-slate-900">8 Hrs / 80 Kms</option>
-                  <option value="12hr_120km" className="bg-slate-900">12 Hrs / 120 Kms</option>
-                  <option value="4hr_40km" className="bg-slate-900">4 Hrs / 40 Kms</option>
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pickup Date *</label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input
-                    type="date"
-                    required
-                    value={localData.pickupDate}
-                    onChange={(e) => setLocalData({ ...localData, pickupDate: e.target.value })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pickup Time *</label>
-                <div className="relative">
-                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input
-                    type="time"
-                    required
-                    value={localData.pickupTime}
-                    onChange={(e) => setLocalData({ ...localData, pickupTime: e.target.value })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
-                  />
-                </div>
-              </div>
-
-              {/* Customer Contact & Pickup address row */}
-              <div className="md:col-span-4 grid grid-cols-1 md:grid-cols-4 gap-6 pt-2 border-t border-white/5">
+            <div className="space-y-6">
+              {/* Row 1: Full Name, Email Address, Mobile Number in 1 line */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Full Name *</label>
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Full Name *</label>
                   <input
                     type="text"
                     required
-                    placeholder="John Doe"
+                    placeholder="e.g. Amit Sharma"
                     value={localData.name}
                     onChange={(e) => setLocalData({ ...localData, name: e.target.value.replace(/[^a-zA-Z\s.-]/g, "") })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                    className="w-full h-[42px] bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Email Address *</label>
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Email Address *</label>
                   <input
                     type="email"
                     required
-                    placeholder="john@example.com"
+                    placeholder="e.g. john@example.com"
                     value={localData.email}
                     onChange={(e) => setLocalData({ ...localData, email: e.target.value })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                    className="w-full h-[42px] bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mobile Number (10 Digits) *</label>
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Mobile Number (10 Digits) *</label>
                   <input
                     type="tel"
                     required
@@ -1050,17 +996,124 @@ export default function BookingWidget() {
                     placeholder="e.g. 9999999999"
                     value={localData.phone}
                     onChange={(e) => setLocalData({ ...localData, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"
+                    className="w-full h-[42px] bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"
                   />
                 </div>
+              </div>
+
+              {/* Row 2: Pickup Address, Pickup Date, Pickup Time in 1 line */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pickup Address *</label>
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Pickup Address *</label>
                   <LocationInput
                     required
                     placeholder="Enter pickup location"
                     value={localData.pickupLocation}
                     onChange={(val) => setLocalData({ ...localData, pickupLocation: val })}
                   />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Pickup Date *</label>
+                  <div className="relative h-[42px]">
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+                    <input
+                      type="date"
+                      required
+                      value={localData.pickupDate}
+                      onChange={(e) => setLocalData({ ...localData, pickupDate: e.target.value })}
+                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Pickup Time *</label>
+                  <div className="relative h-[42px]">
+                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+                    <input
+                      type="time"
+                      required
+                      value={localData.pickupTime}
+                      onChange={(e) => setLocalData({ ...localData, pickupTime: e.target.value })}
+                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Row 3: Vehicle Category, Vehicle Class, Vehicle Model in 1 line */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Vehicle Category *</label>
+                  <select
+                    value={localData.vehicleCategoryId}
+                    onChange={(e) => setLocalData({ ...localData, vehicleCategoryId: e.target.value })}
+                    className="w-full h-[42px] bg-slate-950/50 border border-white/10 rounded-lg px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="" disabled className="bg-slate-900">- Please Select -</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id} className="bg-slate-900">{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Vehicle Class *</label>
+                  <select
+                    value={localData.vehicleClass || ""}
+                    onChange={(e) => setLocalData({ ...localData, vehicleClass: e.target.value })}
+                    className="w-full h-[42px] bg-slate-950/50 border border-white/10 rounded-lg px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="" disabled className="bg-slate-900">- Please Select -</option>
+                    <option value="Executive" className="bg-slate-900">Executive Class</option>
+                    <option value="Premium" className="bg-slate-900">Premium Class</option>
+                    <option value="Luxury" className="bg-slate-900">Luxury Class</option>
+                    <option value="Economy" className="bg-slate-900">Economy Class</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Vehicle Model *</label>
+                  <select
+                    value={localData.vehicleModel || ""}
+                    onChange={(e) => setLocalData({ ...localData, vehicleModel: e.target.value })}
+                    className="w-full h-[42px] bg-slate-950/50 border border-white/10 rounded-lg px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="" disabled className="bg-slate-900">- Please Select -</option>
+                    <option value="Swift Dzire / Etios" className="bg-slate-900">Swift Dzire / Etios (Sedan)</option>
+                    <option value="Ertiga / XL6" className="bg-slate-900">Ertiga / XL6 (SUV)</option>
+                    <option value="Innova Crysta" className="bg-slate-900">Innova Crysta (Premium SUV)</option>
+                    <option value="Innova Hycross" className="bg-slate-900">Innova Hycross (Hybrid SUV)</option>
+                    <option value="Toyota Fortuner" className="bg-slate-900">Toyota Fortuner (Luxury SUV)</option>
+                    <option value="BMW 5 / Mercedes E-Class" className="bg-slate-900">BMW 5 / Mercedes E-Class (Luxury Sedan)</option>
+                    <option value="Tempo Traveller" className="bg-slate-900">Tempo Traveller (Minibus)</option>
+                    <option value="Any Available" className="bg-slate-900">Any Available Model</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Rental Package Selection */}
+              <div className="space-y-2 pt-2 border-t border-white/5">
+                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Rental Package *</label>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { id: "8hr_80km", label: "8 Hrs / 80 Kms", desc: "Full Day Standard" },
+                    { id: "12hr_120km", label: "12 Hrs / 120 Kms", desc: "Extended Full Day" },
+                    { id: "4hr_40km", label: "4 Hrs / 40 Kms", desc: "Half Day Express" }
+                  ].map((pkg) => (
+                    <button
+                      key={pkg.id}
+                      type="button"
+                      onClick={() => setLocalData({ ...localData, duration: pkg.id })}
+                      className={`py-2 px-3 rounded-lg border text-center transition-all ${
+                        localData.duration === pkg.id || (!localData.duration && pkg.id === "8hr_80km")
+                          ? "bg-accent/20 border-accent text-amber-400 font-bold shadow-md"
+                          : "bg-slate-950/40 border-white/10 text-slate-300 hover:bg-white/5"
+                      }`}
+                    >
+                      <div className="text-xs font-bold">{pkg.label}</div>
+                      <div className="text-[10px] text-slate-400">{pkg.desc}</div>
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
