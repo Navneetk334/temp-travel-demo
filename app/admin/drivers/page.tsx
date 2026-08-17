@@ -80,8 +80,10 @@ export default function AdminDriversPage() {
     return d.toISOString().split("T")[0];
   };
 
-  const loadDrivers = async () => {
-    setLoading(true);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const loadDrivers = async (showSpinner = true) => {
+    if (showSpinner) setLoading(true);
     try {
       const res = await fetch(`/api/admin/drivers?search=${encodeURIComponent(search)}`);
       if (res.ok) {
@@ -91,13 +93,28 @@ export default function AdminDriversPage() {
     } catch (err) {
       console.error("Failed to load drivers:", err);
     } finally {
-      setLoading(false);
+      if (showSpinner) setLoading(false);
     }
   };
 
   useEffect(() => {
     loadDrivers();
+    setSelectedIds([]);
   }, [search]);
+
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedIds(drivers.map((d) => d.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectOne = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
 
   const openModal = (driver: Driver | null = null) => {
     setFormError("");
@@ -157,7 +174,7 @@ export default function AdminDriversPage() {
       }
 
       setIsModalOpen(false);
-      loadDrivers();
+      loadDrivers(false);
     } catch (err: any) {
       setFormError(err.message || "Operation failed");
     } finally {
@@ -168,16 +185,40 @@ export default function AdminDriversPage() {
   const handleDeleteDriver = async (id: string, name: string) => {
     if (!confirm(`Are you sure you want to remove driver "${name}"?`)) return;
 
+    // Optimistic delete - instant feedback with no full page loading spinner!
+    setDrivers((prev) => prev.filter((d) => d.id !== id));
+    setSelectedIds((prev) => prev.filter((i) => i !== id));
+
     try {
       const res = await fetch(`/api/admin/drivers/${id}`, { method: "DELETE" });
-      if (res.ok) {
-        loadDrivers();
-      } else {
+      if (!res.ok) {
         const data = await res.json();
         alert(data.error || "Failed to delete driver");
+        loadDrivers(false);
+      } else {
+        loadDrivers(false);
       }
     } catch (err) {
       console.error("Failed to delete driver:", err);
+      loadDrivers(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    if (!confirm(`Are you sure you want to delete ${selectedIds.length} selected chauffeur(s)?`)) return;
+
+    const idsToDelete = [...selectedIds];
+    // Optimistic bulk remove
+    setDrivers((prev) => prev.filter((d) => !idsToDelete.includes(d.id)));
+    setSelectedIds([]);
+
+    try {
+      await Promise.all(idsToDelete.map((id) => fetch(`/api/admin/drivers/${id}`, { method: "DELETE" })));
+      loadDrivers(false);
+    } catch (err) {
+      console.error("Bulk delete error:", err);
+      loadDrivers(false);
     }
   };
 
@@ -216,6 +257,25 @@ export default function AdminDriversPage() {
         </div>
       </div>
 
+      {/* Bulk Delete Bar */}
+      {selectedIds.length > 0 && (
+        <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-xl flex items-center justify-between text-xs animate-in fade-in duration-200">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+            <span className="font-bold text-amber-300">
+              {selectedIds.length} chauffeur(s) selected
+            </span>
+          </div>
+          <button
+            onClick={handleBulkDelete}
+            className="inline-flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-extrabold px-4 py-2 rounded-lg transition-colors shadow-lg"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>Delete Selected Chauffeurs ({selectedIds.length})</span>
+          </button>
+        </div>
+      )}
+
       {/* Drivers Table */}
       <div className="bg-slate-900/60 rounded-xl border border-white/5 overflow-hidden">
         {loading ? (
@@ -225,6 +285,15 @@ export default function AdminDriversPage() {
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-slate-900 border-b border-white/5 text-slate-400 font-semibold uppercase tracking-wider">
+                  <th className="p-4 w-10 text-center">
+                    <input
+                      type="checkbox"
+                      checked={drivers.length > 0 && selectedIds.length === drivers.length}
+                      onChange={handleSelectAll}
+                      className="w-4 h-4 rounded text-amber-500 bg-slate-950 border-white/20 focus:ring-0 cursor-pointer"
+                    />
+                  </th>
+                  <th className="p-4 w-12 text-center">S. No.</th>
                   <th className="p-4">Chauffeur Profile</th>
                   <th className="p-4">Contact Details</th>
                   <th className="p-4">Govt IDs (Aadhaar / PAN / License)</th>
@@ -237,13 +306,24 @@ export default function AdminDriversPage() {
               <tbody className="divide-y divide-white/5">
                 {drivers.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="text-center py-16 text-slate-500 italic">
+                    <td colSpan={9} className="text-center py-16 text-slate-500 italic">
                       No chauffeurs found matching criteria.
                     </td>
                   </tr>
                 ) : (
-                  drivers.map((d) => (
-                    <tr key={d.id} className="hover:bg-white/5 transition-colors">
+                  drivers.map((d, idx) => (
+                    <tr key={d.id} className={`hover:bg-white/5 transition-colors ${selectedIds.includes(d.id) ? "bg-amber-500/5" : ""}`}>
+                      <td className="p-4 text-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.includes(d.id)}
+                          onChange={() => handleSelectOne(d.id)}
+                          className="w-4 h-4 rounded text-amber-500 bg-slate-950 border-white/20 focus:ring-0 cursor-pointer"
+                        />
+                      </td>
+                      <td className="p-4 text-center font-mono font-bold text-slate-400">
+                        {idx + 1}
+                      </td>
                       {/* Profile Photo & Name */}
                       <td className="p-4">
                         <div className="flex items-center gap-3">

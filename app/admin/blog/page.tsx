@@ -77,8 +77,10 @@ export default function AdminBlogPage() {
     SCHEDULED: 0,
   });
 
-  async function loadPosts() {
-    setLoading(true);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  async function loadPosts(showSpinner = true) {
+    if (showSpinner) setLoading(true);
     try {
       const queryParams = new URLSearchParams({
         admin: "true",
@@ -117,33 +119,67 @@ export default function AdminBlogPage() {
     } catch (err) {
       console.error("Failed to load admin blog posts:", err);
     } finally {
-      setLoading(false);
+      if (showSpinner) setLoading(false);
     }
   }
 
   useEffect(() => {
     loadPosts();
+    setSelectedIds([]);
   }, [search, categoryFilter, statusFilter, sortBy, sortOrder, currentPage, pageSize]);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this blog post?")) {
-      return;
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedIds(posts.map((p) => p.id));
+    } else {
+      setSelectedIds([]);
     }
-    setActionId(id);
+  };
+
+  const handleSelectOne = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this blog post?")) return;
+
+    // Optimistic remove
+    setPosts((prev) => prev.filter((p) => p.id !== id));
+    setSelectedIds((prev) => prev.filter((i) => i !== id));
+    setTotalCount((prev) => Math.max(0, prev - 1));
+
     try {
-      const res = await fetch(`/api/blog/posts/${id}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        loadPosts();
-      } else {
+      const res = await fetch(`/api/blog/posts/${id}`, { method: "DELETE" });
+      if (!res.ok) {
         const data = await res.json();
         alert(data.error || "Failed to delete blog post");
+        loadPosts(false);
+      } else {
+        loadPosts(false);
       }
     } catch (err) {
-      alert("Error deleting blog post");
-    } finally {
-      setActionId(null);
+      console.error("Error deleting blog post:", err);
+      loadPosts(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    if (!confirm(`Are you sure you want to delete ${selectedIds.length} selected blog post(s)?`)) return;
+
+    const idsToDelete = [...selectedIds];
+    setPosts((prev) => prev.filter((p) => !idsToDelete.includes(p.id)));
+    setSelectedIds([]);
+    setTotalCount((prev) => Math.max(0, prev - idsToDelete.length));
+
+    try {
+      await Promise.all(idsToDelete.map((id) => fetch(`/api/blog/posts/${id}`, { method: "DELETE" })));
+      loadPosts(false);
+    } catch (err) {
+      console.error("Bulk delete error:", err);
+      loadPosts(false);
     }
   };
 
@@ -339,6 +375,25 @@ export default function AdminBlogPage() {
 
       </div>
 
+      {/* Bulk Delete Bar */}
+      {selectedIds.length > 0 && (
+        <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-xl flex items-center justify-between text-xs animate-in fade-in duration-200">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+            <span className="font-bold text-amber-300">
+              {selectedIds.length} blog post(s) selected
+            </span>
+          </div>
+          <button
+            onClick={handleBulkDelete}
+            className="inline-flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-extrabold px-4 py-2 rounded-lg transition-colors shadow-lg"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>Delete Selected Posts ({selectedIds.length})</span>
+          </button>
+        </div>
+      )}
+
       {/* Blog Articles Table Grid */}
       <div className="glassmorphism rounded-xl border border-white/5 overflow-hidden flex flex-col">
         {loading ? (
@@ -349,6 +404,15 @@ export default function AdminBlogPage() {
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="bg-slate-900 border-b border-white/5 text-slate-400 font-semibold uppercase tracking-wider">
+                    <th className="p-4 w-10 text-center">
+                      <input
+                        type="checkbox"
+                        checked={posts.length > 0 && selectedIds.length === posts.length}
+                        onChange={handleSelectAll}
+                        className="w-4 h-4 rounded text-amber-500 bg-slate-950 border-white/20 focus:ring-0 cursor-pointer"
+                      />
+                    </th>
+                    <th className="p-4 w-12 text-center">S. No.</th>
                     <th className="p-4">Article Title & Slug</th>
                     <th className="p-4">Category & Tags</th>
                     <th className="p-4">Author & Date</th>
@@ -359,13 +423,24 @@ export default function AdminBlogPage() {
                 <tbody className="divide-y divide-white/5">
                   {posts.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="text-center py-16 text-slate-500 italic">
+                      <td colSpan={7} className="text-center py-16 text-slate-500 italic">
                         No blog posts matching selected criteria found.
                       </td>
                     </tr>
                   ) : (
-                    posts.map((post) => (
-                      <tr key={post.id} className="hover:bg-white/5 transition-colors">
+                    posts.map((post, idx) => (
+                      <tr key={post.id} className={`hover:bg-white/5 transition-colors ${selectedIds.includes(post.id) ? "bg-amber-500/5" : ""}`}>
+                        <td className="p-4 text-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.includes(post.id)}
+                            onChange={() => handleSelectOne(post.id)}
+                            className="w-4 h-4 rounded text-amber-500 bg-slate-950 border-white/20 focus:ring-0 cursor-pointer"
+                          />
+                        </td>
+                        <td className="p-4 text-center font-mono font-bold text-slate-400">
+                          {(currentPage - 1) * pageSize + idx + 1}
+                        </td>
                         <td className="p-4">
                           <div className="font-bold text-slate-100 text-sm">
                             {post.title}

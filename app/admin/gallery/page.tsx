@@ -75,8 +75,10 @@ export default function AdminGalleryPage() {
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const loadMedia = async () => {
-    setLoading(true);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const loadMedia = async (showSpinner = true) => {
+    if (showSpinner) setLoading(true);
     try {
       const queryParams = new URLSearchParams({
         search,
@@ -96,13 +98,28 @@ export default function AdminGalleryPage() {
     } catch (err) {
       console.error("Failed to load gallery media:", err);
     } finally {
-      setLoading(false);
+      if (showSpinner) setLoading(false);
     }
   };
 
   useEffect(() => {
     loadMedia();
+    setSelectedIds([]);
   }, [search, categoryFilter, currentPage, pageSize]);
+
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedIds(mediaList.map((m) => m.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectOne = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
 
   const openModal = (mediaItem: Media | null = null) => {
     setFormError("");
@@ -120,7 +137,7 @@ export default function AdminGalleryPage() {
         isActive: mediaItem.isActive ?? true,
         altText: mediaItem.altText || "",
         caption: mediaItem.caption || "",
-        sortOrder: mediaItem.sortOrder ?? 0,
+        sortOrder: mediaItem.sortOrder || 0,
       });
     } else {
       setEditingMedia(null);
@@ -136,7 +153,7 @@ export default function AdminGalleryPage() {
         isActive: true,
         altText: "",
         caption: "",
-        sortOrder: mediaList.length + 1,
+        sortOrder: 0,
       });
     }
     setIsModalOpen(true);
@@ -148,39 +165,23 @@ export default function AdminGalleryPage() {
     setIsSubmitting(true);
 
     try {
-      const payload = {
-        title: formData.title.trim() || null,
-        description: formData.description.trim() || null,
-        imageUrl: formData.imageUrl.trim(),
-        mediaType: formData.mediaType,
-        category: formData.category.toLowerCase(),
-        location: formData.location.trim() || null,
-        year: formData.year.trim() || null,
-        isFeatured: formData.isFeatured,
-        isActive: formData.isActive,
-        altText: formData.altText.trim() || null,
-        caption: formData.caption.trim() || null,
-        sortOrder: Number(formData.sortOrder) || 0,
-      };
-
       const url = editingMedia ? `/api/gallery/${editingMedia.id}` : "/api/gallery";
       const method = editingMedia ? "PUT" : "POST";
 
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(formData),
       });
 
       const data = await res.json();
-
       if (!res.ok) {
-        setFormError(typeof data.error === "string" ? data.error : JSON.stringify(data.error));
+        setFormError(data.error || "Failed to save media item");
         return;
       }
 
       setIsModalOpen(false);
-      loadMedia();
+      loadMedia(false);
     } catch (err) {
       console.error("Save gallery media error:", err);
       setFormError("Server connection error");
@@ -191,15 +192,41 @@ export default function AdminGalleryPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this media item?")) return;
+
+    // Optimistic remove
+    setMediaList((prev) => prev.filter((m) => m.id !== id));
+    setSelectedIds((prev) => prev.filter((i) => i !== id));
+    setTotalCount((prev) => Math.max(0, prev - 1));
+
     try {
       const res = await fetch(`/api/gallery/${id}`, { method: "DELETE" });
-      if (res.ok) {
-        loadMedia();
-      } else {
+      if (!res.ok) {
         alert("Failed to delete media item");
+        loadMedia(false);
+      } else {
+        loadMedia(false);
       }
     } catch (e) {
       console.error("Error deleting media item:", e);
+      loadMedia(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    if (!confirm(`Are you sure you want to delete ${selectedIds.length} selected media item(s)?`)) return;
+
+    const idsToDelete = [...selectedIds];
+    setMediaList((prev) => prev.filter((m) => !idsToDelete.includes(m.id)));
+    setSelectedIds([]);
+    setTotalCount((prev) => Math.max(0, prev - idsToDelete.length));
+
+    try {
+      await Promise.all(idsToDelete.map((id) => fetch(`/api/gallery/${id}`, { method: "DELETE" })));
+      loadMedia(false);
+    } catch (err) {
+      console.error("Bulk delete error:", err);
+      loadMedia(false);
     }
   };
 
@@ -300,6 +327,25 @@ export default function AdminGalleryPage() {
 
       </div>
 
+      {/* Bulk Delete Bar */}
+      {selectedIds.length > 0 && (
+        <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-xl flex items-center justify-between text-xs animate-in fade-in duration-200">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+            <span className="font-bold text-amber-300">
+              {selectedIds.length} gallery item(s) selected
+            </span>
+          </div>
+          <button
+            onClick={handleBulkDelete}
+            className="inline-flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white font-extrabold px-4 py-2 rounded-lg transition-colors shadow-lg"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>Delete Selected Items ({selectedIds.length})</span>
+          </button>
+        </div>
+      )}
+
       {/* Media Grid Display */}
       {loading ? (
         <div className="text-center py-20 text-slate-400 text-xs">Loading media journal database...</div>
@@ -313,13 +359,25 @@ export default function AdminGalleryPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {mediaList.map((item) => (
+          {mediaList.map((item, idx) => (
             <div 
               key={item.id}
-              className={`bg-slate-900/60 border rounded-2xl overflow-hidden flex flex-col justify-between transition-all group hover:border-white/20 ${
+              className={`bg-slate-900/60 border rounded-2xl overflow-hidden flex flex-col justify-between transition-all group hover:border-white/20 relative ${
                 item.isFeatured ? "border-accent/40 bg-accent/5 shadow-xl" : "border-white/5"
-              }`}
+              } ${selectedIds.includes(item.id) ? "ring-2 ring-amber-400" : ""}`}
             >
+              {/* Checkbox & S. No. Overlay */}
+              <div className="absolute top-3 left-3 z-20 flex items-center gap-2 bg-slate-950/80 p-1.5 rounded-lg border border-white/10 backdrop-blur-md">
+                <input
+                  type="checkbox"
+                  checked={selectedIds.includes(item.id)}
+                  onChange={() => handleSelectOne(item.id)}
+                  className="w-4 h-4 rounded text-amber-500 bg-slate-950 border-white/20 focus:ring-0 cursor-pointer"
+                />
+                <span className="text-[10px] font-mono font-bold text-slate-300">
+                  #{(currentPage - 1) * pageSize + idx + 1}
+                </span>
+              </div>
               {/* Media Preview Box */}
               <div className="relative h-48 bg-slate-950 overflow-hidden group">
                 <img

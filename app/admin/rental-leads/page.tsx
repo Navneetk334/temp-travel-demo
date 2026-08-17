@@ -78,8 +78,10 @@ export default function AdminRentalLeadsPage() {
   const [activeLead, setActiveLead] = useState<RentalLead | null>(null);
   const [newNoteInput, setNewNoteInput] = useState("");
 
-  const loadLeads = async () => {
-    setLoading(true);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const loadLeads = async (showSpinner = true) => {
+    if (showSpinner) setLoading(true);
     try {
       const queryParams = new URLSearchParams({
         search,
@@ -110,13 +112,28 @@ export default function AdminRentalLeadsPage() {
     } catch (err) {
       console.error("Failed to load rental leads:", err);
     } finally {
-      setLoading(false);
+      if (showSpinner) setLoading(false);
     }
   };
 
   useEffect(() => {
     loadLeads();
+    setSelectedIds([]);
   }, [search, statusFilter, tripTypeFilter, sortBy, sortOrder, currentPage, pageSize]);
+
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedIds(leads.map((l) => l.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectOne = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
 
   const handleStatusChange = async (id: string, newStatus: LeadStatus) => {
     try {
@@ -136,7 +153,7 @@ export default function AdminRentalLeadsPage() {
         if (activeLead && activeLead.id === id) {
           setActiveLead(updated);
         }
-        loadLeads();
+        loadLeads(false);
       }
     } catch (err) {
       console.error("Failed to update status:", err);
@@ -181,17 +198,42 @@ export default function AdminRentalLeadsPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this rental lead?")) return;
+
+    // Optimistic remove
+    setLeads((prev) => prev.filter((l) => l.id !== id));
+    setSelectedIds((prev) => prev.filter((i) => i !== id));
+    setTotalCount((prev) => Math.max(0, prev - 1));
+    if (activeLead && activeLead.id === id) {
+      setActiveLead(null);
+    }
+
     try {
       const res = await fetch(`/api/rental/lead/${id}`, { method: "DELETE" });
-      if (res.ok) {
-        setLeads(leads.filter((l) => l.id !== id));
-        if (activeLead && activeLead.id === id) {
-          setActiveLead(null);
-        }
-        loadLeads();
-      }
+      loadLeads(false);
     } catch (e) {
       console.error("Failed to delete lead:", e);
+      loadLeads(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    if (!confirm(`Are you sure you want to delete ${selectedIds.length} selected rental lead(s)?`)) return;
+
+    const idsToDelete = [...selectedIds];
+    setLeads((prev) => prev.filter((l) => !idsToDelete.includes(l.id)));
+    setSelectedIds([]);
+    setTotalCount((prev) => Math.max(0, prev - idsToDelete.length));
+    if (activeLead && idsToDelete.includes(activeLead.id)) {
+      setActiveLead(null);
+    }
+
+    try {
+      await Promise.all(idsToDelete.map((id) => fetch(`/api/rental/lead/${id}`, { method: "DELETE" })));
+      loadLeads(false);
+    } catch (err) {
+      console.error("Bulk delete error:", err);
+      loadLeads(false);
     }
   };
 
@@ -400,7 +442,23 @@ export default function AdminRentalLeadsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* Leads Table */}
-        <div className="lg:col-span-7 glassmorphism rounded-xl border border-white/5 overflow-hidden flex flex-col">
+        <div className="lg:col-span-7 glassmorphism rounded-xl border border-white/5 overflow-hidden flex flex-col space-y-2 p-2 sm:p-0">
+          {/* Bulk Action Header Bar */}
+          {selectedIds.length > 0 && (
+            <div className="bg-amber-500/10 border-b border-amber-500/20 p-3 flex items-center justify-between text-xs">
+              <span className="font-bold text-amber-300">
+                {selectedIds.length} lead(s) selected
+              </span>
+              <button
+                onClick={handleBulkDelete}
+                className="bg-rose-500 hover:bg-rose-600 text-white font-extrabold px-3 py-1.5 rounded-lg text-xs transition-colors flex items-center gap-1"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete Selected ({selectedIds.length})</span>
+              </button>
+            </div>
+          )}
+
           {loading ? (
             <div className="text-center py-16 text-slate-400 text-xs">Loading rental inquiries...</div>
           ) : (
@@ -409,6 +467,15 @@ export default function AdminRentalLeadsPage() {
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
                     <tr className="bg-slate-900 border-b border-white/5 text-slate-400 font-semibold uppercase tracking-wider">
+                      <th className="p-4 w-10 text-center" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          checked={leads.length > 0 && selectedIds.length === leads.length}
+                          onChange={handleSelectAll}
+                          className="w-4 h-4 rounded text-amber-500 bg-slate-950 border-white/20 focus:ring-0 cursor-pointer"
+                        />
+                      </th>
+                      <th className="p-4 w-12 text-center">S. No.</th>
                       <th className="p-4">Customer & Phone</th>
                       <th className="p-4">Rental Spec</th>
                       <th className="p-4">Status</th>
@@ -418,19 +485,30 @@ export default function AdminRentalLeadsPage() {
                   <tbody className="divide-y divide-white/5">
                     {leads.length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="text-center py-16 text-slate-500 italic">
+                        <td colSpan={6} className="text-center py-16 text-slate-500 italic">
                           No rental inquiries matching criteria found.
                         </td>
                       </tr>
                     ) : (
-                      leads.map((lead) => (
+                      leads.map((lead, idx) => (
                         <tr 
                           key={lead.id} 
                           onClick={() => openLeadDetails(lead)}
                           className={`hover:bg-white/5 cursor-pointer transition-colors ${
                             activeLead?.id === lead.id ? "bg-white/5" : ""
-                          }`}
+                          } ${selectedIds.includes(lead.id) ? "bg-amber-500/5" : ""}`}
                         >
+                          <td className="p-4 text-center" onClick={(e) => e.stopPropagation()}>
+                            <input
+                              type="checkbox"
+                              checked={selectedIds.includes(lead.id)}
+                              onChange={() => handleSelectOne(lead.id)}
+                              className="w-4 h-4 rounded text-amber-500 bg-slate-950 border-white/20 focus:ring-0 cursor-pointer"
+                            />
+                          </td>
+                          <td className="p-4 text-center font-mono font-bold text-slate-400">
+                            {(currentPage - 1) * pageSize + idx + 1}
+                          </td>
                           <td className="p-4">
                             <div className="font-bold text-slate-200 text-sm">{lead.customerName}</div>
                             <div className="text-slate-400 mt-0.5"><span className="font-mono text-slate-500">{lead.phone}</span></div>
