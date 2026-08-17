@@ -471,35 +471,35 @@ export default function Homepage() {
                   <p className="text-slate-300 text-xs sm:text-sm italic leading-relaxed">"{t.text}"</p>
                 </div>
 
-                <div className="border-t border-white/10 pt-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                <div className="border-t border-white/10 pt-4 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
                     {t.authorPhoto ? (
                       <img
                         src={t.authorPhoto}
                         alt={t.authorName}
-                        className="w-9 h-9 rounded-full object-cover border border-amber-400/40"
+                        className="w-9 h-9 rounded-full object-cover border border-amber-400/40 shrink-0"
                       />
                     ) : (
-                      <div className="w-9 h-9 rounded-full bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs border border-amber-400/40">
+                      <div className="w-9 h-9 rounded-full bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs border border-amber-400/40 shrink-0">
                         {t.authorName?.charAt(0) || "G"}
                       </div>
                     )}
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <div className="font-extrabold text-slate-100 text-xs sm:text-sm flex items-center gap-1">
-                        <span>{t.authorName}</span>
+                        <span className="truncate" title={t.authorName}>{t.authorName}</span>
                         <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                       </div>
-                      <div className="text-[10px] text-slate-400">Google Verified Customer</div>
+                      <div className="text-[10px] text-slate-400 truncate">Google Verified Customer</div>
                     </div>
                   </div>
                   <a
                     href={googleData.googleMapsUri}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-[10px] font-bold text-amber-400 hover:underline bg-amber-500/10 px-2.5 py-1.5 rounded-lg border border-amber-500/20"
+                    className="flex items-center gap-1 text-[10px] font-bold text-amber-400 hover:underline bg-amber-500/10 px-2.5 py-1.5 rounded-lg border border-amber-500/20 shrink-0"
                   >
                     <span>View on Maps</span>
-                    <ArrowUpRight className="w-3 h-3" />
+                    <ArrowUpRight className="w-3 h-3 shrink-0" />
                   </a>
                 </div>
               </div>
