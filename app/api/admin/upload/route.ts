@@ -44,28 +44,36 @@ export async function POST(req: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // 6. Ensure public/uploads directory exists
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
+    // 6. Try local disk write first (for local dev servers)
+    // On Vercel / Serverless (/var/task), the filesystem is read-only.
+    // Fall back seamlessly to Base64 Data URL encoding!
+    try {
+      const uploadsDir = path.join(process.cwd(), "public", "uploads");
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+
+      const ext = fileExt || ".png";
+      const baseName = path.basename(file.name, fileExt).replace(/[^a-zA-Z0-9_-]/g, "_");
+      const filename = `vehicle_${Date.now()}_${baseName}${ext}`;
+      const filePath = path.join(uploadsDir, filename);
+
+      fs.writeFileSync(filePath, buffer);
+      const publicUrl = `/uploads/${filename}`;
+
+      return NextResponse.json({ url: publicUrl, filename, size: file.size }, { status: 201 });
+    } catch (fsErr) {
+      console.warn("Serverless read-only environment detected (/var/task), switching to Base64 Data URL storage.");
+      const mimeType = file.type || "image/png";
+      const base64String = buffer.toString("base64");
+      const dataUrl = `data:${mimeType};base64,${base64String}`;
+
+      return NextResponse.json({ url: dataUrl, filename: file.name, size: file.size }, { status: 201 });
     }
-
-    // 7. Generate safe unique filename
-    const ext = fileExt || ".png";
-    const baseName = path.basename(file.name, fileExt).replace(/[^a-zA-Z0-9_-]/g, "_");
-    const filename = `vehicle_${Date.now()}_${baseName}${ext}`;
-    const filePath = path.join(uploadsDir, filename);
-
-    // 8. Write to disk
-    fs.writeFileSync(filePath, buffer);
-
-    const publicUrl = `/uploads/${filename}`;
-
-    return NextResponse.json({ url: publicUrl, filename, size: file.size }, { status: 201 });
   } catch (error: any) {
     console.error("POST /api/admin/upload server error:", error);
     return NextResponse.json({ 
-      error: error?.message || "Server encountered an error while writing image to storage." 
+      error: error?.message || "Server encountered an error while processing image upload." 
     }, { status: 500 });
   }
 }
