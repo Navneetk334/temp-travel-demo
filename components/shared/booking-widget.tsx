@@ -358,14 +358,16 @@ export default function BookingWidget() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [bookingRef, setBookingRef] = useState<string | null>(null);
+  const [dbModels, setDbModels] = useState<any[]>([]);
 
-  // Fetch dynamic categories and tour packages
+  // Fetch dynamic categories, tour packages, and vehicle models from admin catalogue
   useEffect(() => {
     async function loadData() {
       try {
-        const [catsRes, toursRes] = await Promise.all([
+        const [catsRes, toursRes, modelsRes] = await Promise.all([
           fetch("/api/fleet/categories"),
-          fetch("/api/tours")
+          fetch("/api/tours"),
+          fetch("/api/fleet/models")
         ]);
 
         if (catsRes.ok) {
@@ -377,12 +379,130 @@ export default function BookingWidget() {
           const toursData = await toursRes.json();
           setTours(toursData);
         }
+
+        if (modelsRes.ok) {
+          const modelsData = await modelsRes.json();
+          if (modelsData.models && Array.isArray(modelsData.models)) {
+            setDbModels(modelsData.models);
+          }
+        }
       } catch (err) {
         console.error("Failed to load booking widget dependencies:", err);
       }
     }
     loadData();
   }, []);
+
+  // Dynamically filter models uploaded in Admin Panel according to selected vehicleCategory & vehicleClass
+  const availableModels = React.useMemo(() => {
+    if (!localData.vehicleCategory) return [];
+
+    const catLower = localData.vehicleCategory.toLowerCase();
+    const classLower = (localData.vehicleClass || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
+    // 1. Filter models uploaded in the Admin Panel DB Catalogue
+    if (dbModels && dbModels.length > 0) {
+      const matched = dbModels.filter((m: any) => {
+        const mCat = (m.category || "").toLowerCase();
+        const mSub = (m.subcategory || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
+        const catMatches = mCat.includes(catLower) || catLower.includes(mCat);
+        const classMatches = !classLower || mSub.includes(classLower) || classLower.includes(mSub);
+
+        return catMatches && classMatches;
+      });
+
+      if (matched.length > 0) {
+        return matched.map((m: any) => ({
+          value: `${m.brand} ${m.modelName}`,
+          label: `${m.brand} ${m.modelName}`
+        }));
+      }
+    }
+
+    // 2. Default Seeded catalogue fallbacks per category & class if API models are not yet loaded
+    if (localData.vehicleCategory === "Sedan") {
+      if (localData.vehicleClass === "Compact") {
+        return [
+          { value: "Maruti Suzuki Swift Dzire", label: "Maruti Suzuki Swift Dzire" },
+          { value: "Hyundai Aura", label: "Hyundai Aura" },
+          { value: "Honda Amaze", label: "Honda Amaze" },
+          { value: "Tata Tigor", label: "Tata Tigor" }
+        ];
+      }
+      if (localData.vehicleClass === "Executive") {
+        return [
+          { value: "Honda City", label: "Honda City" },
+          { value: "Hyundai Verna", label: "Hyundai Verna" },
+          { value: "Maruti Suzuki Ciaz", label: "Maruti Suzuki Ciaz" },
+          { value: "Skoda Slavia", label: "Skoda Slavia" }
+        ];
+      }
+      if (localData.vehicleClass === "Premium Executive") {
+        return [
+          { value: "Toyota Camry", label: "Toyota Camry" },
+          { value: "Skoda Superb", label: "Skoda Superb" },
+          { value: "Volkswagen Passat", label: "Volkswagen Passat" }
+        ];
+      }
+      if (localData.vehicleClass === "Luxury") {
+        return [
+          { value: "Mercedes-Benz E-Class", label: "Mercedes-Benz E-Class" },
+          { value: "BMW 5 Series", label: "BMW 5 Series" },
+          { value: "Audi A6", label: "Audi A6" },
+          { value: "Jaguar XF", label: "Jaguar XF" }
+        ];
+      }
+      return [
+        { value: "Maruti Suzuki Swift Dzire", label: "Maruti Suzuki Swift Dzire" },
+        { value: "Honda City", label: "Honda City" },
+        { value: "Toyota Camry", label: "Toyota Camry" },
+        { value: "Mercedes-Benz E-Class", label: "Mercedes-Benz E-Class" }
+      ];
+    }
+
+    if (localData.vehicleCategory === "SUV") {
+      if (localData.vehicleClass === "Subcompact / Urban") {
+        return [
+          { value: "Tata Nexon", label: "Tata Nexon" },
+          { value: "Maruti Suzuki Brezza", label: "Maruti Suzuki Brezza" },
+          { value: "Hyundai Venue", label: "Hyundai Venue" },
+          { value: "Kia Sonet", label: "Kia Sonet" }
+        ];
+      }
+      if (localData.vehicleClass === "Mid-Premium") {
+        return [
+          { value: "Hyundai Creta", label: "Hyundai Creta" },
+          { value: "Kia Seltos", label: "Kia Seltos" },
+          { value: "Mahindra Scorpio-N", label: "Mahindra Scorpio-N" },
+          { value: "Tata Harrier", label: "Tata Harrier" }
+        ];
+      }
+      if (localData.vehicleClass === "Premium") {
+        return [
+          { value: "Mahindra XUV700", label: "Mahindra XUV700" },
+          { value: "Tata Safari", label: "Tata Safari" },
+          { value: "MG Hector Plus", label: "MG Hector Plus" },
+          { value: "Jeep Compass", label: "Jeep Compass" }
+        ];
+      }
+      if (localData.vehicleClass === "Luxury") {
+        return [
+          { value: "Toyota Fortuner", label: "Toyota Fortuner" },
+          { value: "Mercedes-Benz GLE", label: "Mercedes-Benz GLE" },
+          { value: "BMW X5", label: "BMW X5" }
+        ];
+      }
+      return [
+        { value: "Tata Nexon", label: "Tata Nexon" },
+        { value: "Hyundai Creta", label: "Hyundai Creta" },
+        { value: "Mahindra XUV700", label: "Mahindra XUV700" },
+        { value: "Toyota Fortuner", label: "Toyota Fortuner" }
+      ];
+    }
+
+    return [];
+  }, [localData.vehicleCategory, localData.vehicleClass, dbModels]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1122,7 +1242,7 @@ export default function BookingWidget() {
                   </div>
                 </div>
 
-                {/* Column 3: Vehicle Model (Dynamic based on Category) */}
+                {/* Column 3: Vehicle Model (Dynamic based on Admin Catalogue Uploads & Category / Class selection) */}
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Vehicle Model *</label>
                   <div className="relative h-[42px]">
@@ -1133,25 +1253,21 @@ export default function BookingWidget() {
                       className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <option value="" disabled className="bg-slate-900">
-                        {localData.vehicleCategory ? "- Please Select -" : "- Select Category First -"}
+                        {!localData.vehicleCategory
+                          ? "- Select Category First -"
+                          : !localData.vehicleClass
+                            ? "- Select Class First -"
+                            : "- Please Select -"}
                       </option>
-                      {localData.vehicleCategory === "Sedan" && (
-                        <>
-                          <option value="Swift Dzire / Etios" className="bg-slate-900">Swift Dzire / Etios (Compact)</option>
-                          <option value="Honda City / Hyundai Verna" className="bg-slate-900">Honda City / Hyundai Verna (Executive)</option>
-                          <option value="Toyota Camry / Skoda Superb" className="bg-slate-900">Toyota Camry / Skoda Superb (Premium Executive)</option>
-                          <option value="BMW 5 / Mercedes E-Class" className="bg-slate-900">BMW 5 / Mercedes E-Class (Luxury)</option>
-                          <option value="Any Available Sedan" className="bg-slate-900">Any Available Sedan</option>
-                        </>
-                      )}
-                      {localData.vehicleCategory === "SUV" && (
-                        <>
-                          <option value="Ertiga / XL6 / Carens" className="bg-slate-900">Ertiga / XL6 / Carens (Subcompact / Urban)</option>
-                          <option value="Innova Crysta" className="bg-slate-900">Innova Crysta (Mid-Premium)</option>
-                          <option value="Innova Hycross" className="bg-slate-900">Innova Hycross (Premium)</option>
-                          <option value="Toyota Fortuner / Audi Q5" className="bg-slate-900">Toyota Fortuner / Audi Q5 (Luxury)</option>
-                          <option value="Any Available SUV" className="bg-slate-900">Any Available SUV</option>
-                        </>
+                      {availableModels.map((item, idx) => (
+                        <option key={idx} value={item.value} className="bg-slate-900">
+                          {item.label}
+                        </option>
+                      ))}
+                      {localData.vehicleCategory && (
+                        <option value={`Any Available ${localData.vehicleCategory}`} className="bg-slate-900">
+                          Any Available {localData.vehicleCategory}
+                        </option>
                       )}
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
