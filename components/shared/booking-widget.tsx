@@ -668,16 +668,13 @@ export default function BookingWidget() {
               {pickupDropSubTab === "working" && (
                 <div className="flex justify-center w-full">
                   <div className="space-y-2 relative w-full max-w-xl">
-                    <div className="flex justify-between items-center">
-                      <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Company Name *</label>
-                      <span className="text-[10px] text-accent font-medium uppercase tracking-wide">PAN India (Startup / SMB / PSU / Enterprise)</span>
-                    </div>
-                    <div className="relative">
-                      <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Company Name *</label>
+                    <div className="relative h-[42px]">
+                      <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
                       <input
                         type="text"
                         required
-                        placeholder="Type any company name (Startup, MSME, Small, Medium, Enterprise)"
+                        placeholder="Enter Company Name"
                         value={corpData.company}
                         onFocus={() => setShowCompanySuggestions(true)}
                         onBlur={() => setTimeout(() => setShowCompanySuggestions(false), 200)}
@@ -685,7 +682,7 @@ export default function BookingWidget() {
                           setCorpData({ ...corpData, company: e.target.value });
                           setShowCompanySuggestions(true);
                         }}
-                        className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all text-center placeholder:text-left md:placeholder:text-center"
+                        className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all text-center placeholder:text-left md:placeholder:text-center"
                       />
                       {showCompanySuggestions && (
                         <div className="absolute left-0 right-0 top-full mt-1 max-h-64 overflow-y-auto bg-slate-900 border border-white/15 rounded-lg shadow-2xl z-50 py-1 divide-y divide-white/5 text-left">
@@ -760,6 +757,19 @@ export default function BookingWidget() {
                 </div>
               )}
 
+              {/* Section Divider with Centered Title "Passenger Details" */}
+              <div className="relative py-2">
+                <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                  <div className="w-full border-t border-white/10" />
+                </div>
+                <div className="relative flex justify-center">
+                  <span className="bg-slate-900 px-4 text-xs font-bold uppercase tracking-wider text-amber-400 border border-white/10 rounded-full py-1 flex items-center gap-1.5 shadow-md">
+                    <User className="w-3.5 h-3.5" />
+                    Passenger Details
+                  </span>
+                </div>
+              </div>
+
               {/* Row 1: Contact Name, Email Address, Mobile Number in 1 line */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
@@ -810,7 +820,7 @@ export default function BookingWidget() {
                       onChange={(e) => setCorpData({ ...corpData, gender: e.target.value })}
                       className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
                     >
-                      <option value="" disabled className="bg-slate-900">Please Select</option>
+                      <option value="" disabled className="bg-slate-900">- Please Select -</option>
                       <option value="Male" className="bg-slate-900">Male</option>
                       <option value="Female" className="bg-slate-900">Female</option>
                       <option value="Other" className="bg-slate-900">Other</option>
@@ -962,7 +972,7 @@ export default function BookingWidget() {
                   onChange={(e) => setLocalData({ ...localData, vehicleCategoryId: e.target.value })}
                   className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
                 >
-                  <option value="" disabled className="bg-slate-900">Please select</option>
+                  <option value="" disabled className="bg-slate-900">- Please Select -</option>
                   {categories.map((cat) => (
                     <option key={cat.id} value={cat.id} className="bg-slate-900">{cat.name}</option>
                   ))}
@@ -976,7 +986,7 @@ export default function BookingWidget() {
                   onChange={(e) => setLocalData({ ...localData, duration: e.target.value })}
                   className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
                 >
-                  <option value="" disabled className="bg-slate-900">Please select</option>
+                  <option value="" disabled className="bg-slate-900">- Please Select -</option>
                   <option value="8hr_80km" className="bg-slate-900">8 Hrs / 80 Kms</option>
                   <option value="12hr_120km" className="bg-slate-900">12 Hrs / 120 Kms</option>
                   <option value="4hr_40km" className="bg-slate-900">4 Hrs / 40 Kms</option>
@@ -1096,7 +1106,7 @@ export default function BookingWidget() {
                   onChange={(e) => setOutstationData({ ...outstationData, vehicleCategoryId: e.target.value })}
                   className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
                 >
-                  <option value="" disabled className="bg-slate-900">Please select</option>
+                  <option value="" disabled className="bg-slate-900">- Please Select -</option>
                   {categories.map((cat) => (
                     <option key={cat.id} value={cat.id} className="bg-slate-900">{cat.name}</option>
                   ))}

@@ -211,7 +211,7 @@ export default function CorporateLeadForm({ cityFormatted, defaultServiceType }:
               onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
               className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
             >
-              <option value="" disabled hidden className="bg-slate-900">Please Select</option>
+              <option value="" disabled hidden className="bg-slate-900">- Please Select -</option>
               <option value="Male" className="bg-slate-900">Male</option>
               <option value="Female" className="bg-slate-900">Female</option>
               <option value="Other" className="bg-slate-900">Other</option>
