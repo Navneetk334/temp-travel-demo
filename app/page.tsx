@@ -402,62 +402,47 @@ export default function Homepage() {
         </div>
       </section>
 
-      {/* 11. Contact CTA & Footer */}
-      <section id="contact" className="py-24 bg-slate-950 text-slate-100 px-4 sm:px-6 lg:px-8 border-t border-white/5">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16">
-          
-          {/* Contact Details */}
-          <div className="lg:col-span-5 space-y-6">
+      {/* 11. Contact Details Section */}
+      <section id="contact" className="py-20 bg-slate-950 text-slate-100 px-4 sm:px-6 lg:px-8 border-t border-white/5">
+        <div className="max-w-5xl mx-auto space-y-8 text-center">
+          <div className="space-y-3">
             <span className="text-xs font-bold text-accent uppercase tracking-wider block">Get In Touch</span>
-            <h2 className="text-3xl font-extrabold text-slate-50 tracking-tight leading-snug">
-              Discuss Your Transport & Tour Requirements
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-50 tracking-tight">
+              Discuss Your Transport & Fleet Requirements
             </h2>
-            <p className="text-slate-300 text-sm leading-relaxed">
-              Have a custom itinerary request? Or looking for a fleet quote for employee logistics? Reach out directly and our managers will contact you within 24 hours.
+            <p className="text-slate-300 text-sm leading-relaxed max-w-2xl mx-auto">
+              Looking for a custom fleet quote or employee logistics management? Reach out to our corporate team directly.
             </p>
+          </div>
 
-            <div className="space-y-4 pt-4">
-              <div className="flex gap-4 items-start">
-                <div className="bg-white/5 p-3 rounded-lg text-accent">
-                  <Phone className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Call Support</div>
-                  <a href="tel:+919999999999" className="text-slate-200 font-bold hover:underline">+91 99999 99999</a>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+            <div className="bg-slate-900/60 border border-white/10 p-6 rounded-2xl space-y-3 flex flex-col items-center text-center">
+              <div className="bg-white/5 p-3 rounded-xl text-accent">
+                <Phone className="w-6 h-6" />
               </div>
+              <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Call Support</div>
+              <a href="tel:+919999999999" className="text-slate-200 font-bold hover:underline text-base">+91 99999 99999</a>
+            </div>
 
-              <div className="flex gap-4 items-start">
-                <div className="bg-white/5 p-3 rounded-lg text-accent">
-                  <Mail className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Email Sales</div>
-                  <a href="mailto:info@temptravels.com" className="text-slate-200 font-bold hover:underline">info@temptravels.com</a>
-                </div>
+            <div className="bg-slate-900/60 border border-white/10 p-6 rounded-2xl space-y-3 flex flex-col items-center text-center">
+              <div className="bg-white/5 p-3 rounded-xl text-accent">
+                <Mail className="w-6 h-6" />
               </div>
+              <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Email Sales</div>
+              <a href="mailto:info@temptravels.com" className="text-slate-200 font-bold hover:underline text-base">info@temptravels.com</a>
+            </div>
 
-              <div className="flex gap-4 items-start">
-                <div className="bg-white/5 p-3 rounded-lg text-accent">
-                  <MapPin className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Corporate Office</div>
-                  <div className="text-slate-300 text-sm">
-                    Flat No C-102, Shanti Vihar, Lokhandwala Complex, Kandivali East, Mumbai, MH, 400101
-                  </div>
-                </div>
+            <div className="bg-slate-900/60 border border-white/10 p-6 rounded-2xl space-y-3 flex flex-col items-center text-center">
+              <div className="bg-white/5 p-3 rounded-xl text-accent">
+                <MapPin className="w-6 h-6" />
+              </div>
+              <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Corporate Office</div>
+              <div className="text-slate-300 text-xs leading-relaxed">
+                Flat No C-102, Shanti Vihar, Lokhandwala Complex, Kandivali East, Mumbai, MH 400101
               </div>
             </div>
           </div>
-
-          {/* Quick Inquiry Form */}
-          <div className="lg:col-span-7">
-            <ContactForm />
-          </div>
-
         </div>
-
       </section>
 
       {/* Footer */}
