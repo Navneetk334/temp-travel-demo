@@ -211,6 +211,7 @@ export default function CorporateLeadForm({ cityFormatted, defaultServiceType }:
               onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
               className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
             >
+              <option value="" disabled hidden className="bg-slate-900">Please select</option>
               <option value="Male" className="bg-slate-900">Male</option>
               <option value="Female" className="bg-slate-900">Female</option>
               <option value="Other" className="bg-slate-900">Other</option>
@@ -231,6 +232,7 @@ export default function CorporateLeadForm({ cityFormatted, defaultServiceType }:
                 onChange={(e) => setFormData({ ...formData, shiftStartHour: e.target.value })}
                 className="bg-slate-950/50 border border-white/10 rounded-lg py-2 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary text-center font-mono"
               >
+                <option value="" disabled hidden className="bg-slate-900">Please select</option>
                 {["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"].map((h) => (
                   <option key={h} value={h} className="bg-slate-900">{h}</option>
                 ))}
@@ -241,6 +243,7 @@ export default function CorporateLeadForm({ cityFormatted, defaultServiceType }:
                 onChange={(e) => setFormData({ ...formData, shiftStartMinute: e.target.value })}
                 className="bg-slate-950/50 border border-white/10 rounded-lg py-2 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary text-center font-mono"
               >
+                <option value="" disabled hidden className="bg-slate-900">Please select</option>
                 {["00", "15", "30", "45"].map((m) => (
                   <option key={m} value={m} className="bg-slate-900">{m}</option>
                 ))}
@@ -251,6 +254,7 @@ export default function CorporateLeadForm({ cityFormatted, defaultServiceType }:
                 onChange={(e) => setFormData({ ...formData, shiftStartAmpm: e.target.value })}
                 className="bg-slate-950/50 border border-white/10 rounded-lg py-2 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary text-center font-bold"
               >
+                <option value="" disabled hidden className="bg-slate-900">Please select</option>
                 <option value="AM" className="bg-slate-900">AM</option>
                 <option value="PM" className="bg-slate-900">PM</option>
               </select>
@@ -268,6 +272,7 @@ export default function CorporateLeadForm({ cityFormatted, defaultServiceType }:
                 onChange={(e) => setFormData({ ...formData, shiftEndHour: e.target.value })}
                 className="bg-slate-950/50 border border-white/10 rounded-lg py-2 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary text-center font-mono"
               >
+                <option value="" disabled hidden className="bg-slate-900">Please select</option>
                 {["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"].map((h) => (
                   <option key={h} value={h} className="bg-slate-900">{h}</option>
                 ))}
@@ -278,6 +283,7 @@ export default function CorporateLeadForm({ cityFormatted, defaultServiceType }:
                 onChange={(e) => setFormData({ ...formData, shiftEndMinute: e.target.value })}
                 className="bg-slate-950/50 border border-white/10 rounded-lg py-2 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary text-center font-mono"
               >
+                <option value="" disabled hidden className="bg-slate-900">Please select</option>
                 {["00", "15", "30", "45"].map((m) => (
                   <option key={m} value={m} className="bg-slate-900">{m}</option>
                 ))}
@@ -288,6 +294,7 @@ export default function CorporateLeadForm({ cityFormatted, defaultServiceType }:
                 onChange={(e) => setFormData({ ...formData, shiftEndAmpm: e.target.value })}
                 className="bg-slate-950/50 border border-white/10 rounded-lg py-2 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary text-center font-bold"
               >
+                <option value="" disabled hidden className="bg-slate-900">Please select</option>
                 <option value="AM" className="bg-slate-900">AM</option>
                 <option value="PM" className="bg-slate-900">PM</option>
               </select>

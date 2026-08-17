@@ -163,6 +163,7 @@ export default function TourInquiryForm({ tourId }: TourInquiryFormProps) {
               min="1"
               required
               name="numPassengers"
+              placeholder="e.g. 2"
               value={formData.numPassengers}
               onChange={handleChange}
               className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3.5 text-xs text-slate-100 focus:outline-none focus:border-primary transition-all"

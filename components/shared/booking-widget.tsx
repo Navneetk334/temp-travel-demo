@@ -277,13 +277,13 @@ export default function BookingWidget() {
     email: "",
     phone: "",
     employeeId: "",
-    gender: "Male",
-    shiftStartHour: "09",
-    shiftStartMinute: "00",
-    shiftStartAmpm: "AM",
-    shiftEndHour: "06",
-    shiftEndMinute: "00",
-    shiftEndAmpm: "PM",
+    gender: "",
+    shiftStartHour: "",
+    shiftStartMinute: "",
+    shiftStartAmpm: "",
+    shiftEndHour: "",
+    shiftEndMinute: "",
+    shiftEndAmpm: "",
     pickup: "",
     drop: ""
   });
@@ -323,7 +323,7 @@ export default function BookingWidget() {
     phone: "",
     pickupLocation: "",
     vehicleCategoryId: "",
-    duration: "8hr_80km",
+    duration: "",
     pickupDate: "",
     pickupTime: ""
   });
@@ -367,18 +367,11 @@ export default function BookingWidget() {
         if (catsRes.ok) {
           const catsData = await catsRes.json();
           setCategories(catsData);
-          if (catsData.length > 0) {
-            setLocalData(prev => ({ ...prev, vehicleCategoryId: catsData[0].id }));
-            setOutstationData(prev => ({ ...prev, vehicleCategoryId: catsData[0].id }));
-          }
         }
 
         if (toursRes.ok) {
           const toursData = await toursRes.json();
           setTours(toursData);
-          if (toursData.length > 0) {
-            setTourData(prev => ({ ...prev, tourPackageId: toursData[0].id }));
-          }
         }
       } catch (err) {
         console.error("Failed to load booking widget dependencies:", err);
@@ -775,6 +768,7 @@ export default function BookingWidget() {
                       onChange={(e) => setCorpData({ ...corpData, gender: e.target.value })}
                       className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
                     >
+                      <option value="" disabled className="bg-slate-900">Please select</option>
                       <option value="Male" className="bg-slate-900">Male</option>
                       <option value="Female" className="bg-slate-900">Female</option>
                       <option value="Other" className="bg-slate-900">Other</option>
@@ -793,6 +787,7 @@ export default function BookingWidget() {
                       onChange={(e) => setCorpData({ ...corpData, shiftStartHour: e.target.value })}
                       className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
                     >
+                      <option value="" disabled className="bg-slate-900">Please select</option>
                       {["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"].map(h => (
                         <option key={h} value={h} className="bg-slate-900">{h}</option>
                       ))}
@@ -802,6 +797,7 @@ export default function BookingWidget() {
                       onChange={(e) => setCorpData({ ...corpData, shiftStartMinute: e.target.value })}
                       className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
                     >
+                      <option value="" disabled className="bg-slate-900">Please select</option>
                       {["00", "15", "30", "45"].map(m => (
                         <option key={m} value={m} className="bg-slate-900">{m}</option>
                       ))}
@@ -811,6 +807,7 @@ export default function BookingWidget() {
                       onChange={(e) => setCorpData({ ...corpData, shiftStartAmpm: e.target.value })}
                       className="bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-bold"
                     >
+                      <option value="" disabled className="bg-slate-900">Please select</option>
                       <option value="AM" className="bg-slate-900">AM</option>
                       <option value="PM" className="bg-slate-900">PM</option>
                     </select>
@@ -825,6 +822,7 @@ export default function BookingWidget() {
                       onChange={(e) => setCorpData({ ...corpData, shiftEndHour: e.target.value })}
                       className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
                     >
+                      <option value="" disabled className="bg-slate-900">Please select</option>
                       {["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"].map(h => (
                         <option key={h} value={h} className="bg-slate-900">{h}</option>
                       ))}
@@ -834,6 +832,7 @@ export default function BookingWidget() {
                       onChange={(e) => setCorpData({ ...corpData, shiftEndMinute: e.target.value })}
                       className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
                     >
+                      <option value="" disabled className="bg-slate-900">Please select</option>
                       {["00", "15", "30", "45"].map(m => (
                         <option key={m} value={m} className="bg-slate-900">{m}</option>
                       ))}
@@ -843,6 +842,7 @@ export default function BookingWidget() {
                       onChange={(e) => setCorpData({ ...corpData, shiftEndAmpm: e.target.value })}
                       className="bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-bold"
                     >
+                      <option value="" disabled className="bg-slate-900">Please select</option>
                       <option value="AM" className="bg-slate-900">AM</option>
                       <option value="PM" className="bg-slate-900">PM</option>
                     </select>
@@ -923,6 +923,7 @@ export default function BookingWidget() {
                   onChange={(e) => setLocalData({ ...localData, vehicleCategoryId: e.target.value })}
                   className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
                 >
+                  <option value="" disabled className="bg-slate-900">Please select</option>
                   {categories.map((cat) => (
                     <option key={cat.id} value={cat.id} className="bg-slate-900">{cat.name}</option>
                   ))}
@@ -936,6 +937,7 @@ export default function BookingWidget() {
                   onChange={(e) => setLocalData({ ...localData, duration: e.target.value })}
                   className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
                 >
+                  <option value="" disabled className="bg-slate-900">Please select</option>
                   <option value="8hr_80km" className="bg-slate-900">8 Hrs / 80 Kms</option>
                   <option value="12hr_120km" className="bg-slate-900">12 Hrs / 120 Kms</option>
                   <option value="4hr_40km" className="bg-slate-900">4 Hrs / 40 Kms</option>
@@ -1055,6 +1057,7 @@ export default function BookingWidget() {
                   onChange={(e) => setOutstationData({ ...outstationData, vehicleCategoryId: e.target.value })}
                   className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
                 >
+                  <option value="" disabled className="bg-slate-900">Please select</option>
                   {categories.map((cat) => (
                     <option key={cat.id} value={cat.id} className="bg-slate-900">{cat.name}</option>
                   ))}
