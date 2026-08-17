@@ -59,6 +59,14 @@ interface Category {
   name: string;
 }
 
+const DEFAULT_CATEGORIES: Category[] = [
+  { id: "36194d98-0236-4566-8231-e515cfc2e979", name: "Sedan" },
+  { id: "4a315fe8-3c73-4cf9-97a1-1ddb8d107df5", name: "SUV" },
+  { id: "b423f34c-ec9d-4bec-88a6-e2c51b261a49", name: "Hatchback" },
+  { id: "82205d3d-61ce-48f8-bf78-aca806da5aa1", name: "Luxury" },
+  { id: "9589dc24-d4c1-435f-9837-aec4207e2d46", name: "Tempo Traveller" }
+];
+
 interface Driver {
   id: string;
   name: string;
@@ -102,12 +110,15 @@ export default function AdminFleetPage() {
     INACTIVE: 0,
   });
 
+  // Active Category list with fallback
+  const activeCategories = categories.length > 0 ? categories : DEFAULT_CATEGORIES;
+
   // Form State
   const [formData, setFormData] = useState({
     model: "",
     make: "",
     registrationNumber: "",
-    subCategory: "Executive",
+    subCategory: "",
     capacity: 4,
     fuelType: "DIESEL",
     transmission: "MANUAL",
@@ -190,7 +201,7 @@ export default function AdminFleetPage() {
         model: vehicle.model,
         make: vehicle.make,
         registrationNumber: vehicle.registrationNumber,
-        subCategory: vehicle.subCategory || "Executive",
+        subCategory: vehicle.subCategory || "",
         capacity: vehicle.capacity,
         fuelType: vehicle.fuelType || "DIESEL",
         transmission: vehicle.transmission || "MANUAL",
@@ -200,17 +211,17 @@ export default function AdminFleetPage() {
         extraKmRate: vehicle.extraKmRate ? String(vehicle.extraKmRate) : "",
         extraHourRate: vehicle.extraHrRate ? String(vehicle.extraHrRate) : "",
         status: vehicle.status,
-        categoryId: vehicle.categoryId || (categories[0]?.id || ""),
+        categoryId: vehicle.categoryId || (activeCategories[0]?.id || ""),
         driverId: vehicle.driverId || "",
       });
     } else {
       setEditingVehicle(null);
-      const defaultCatId = categories.length > 0 ? categories[0].id : "";
+      const defaultCatId = activeCategories.length > 0 ? activeCategories[0].id : "";
       setFormData({
         model: "",
         make: "",
         registrationNumber: "",
-        subCategory: "Compact",
+        subCategory: "",
         capacity: 4,
         fuelType: "DIESEL",
         transmission: "MANUAL",
@@ -603,7 +614,7 @@ export default function AdminFleetPage() {
       {/* Vehicle CRUD Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-white/10 rounded-2xl max-w-2xl w-full p-6 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-thin">
+          <div className="bg-slate-900 border border-white/10 rounded-2xl max-w-4xl lg:max-w-5xl w-full p-6 md:p-8 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-thin">
             
             <div className="flex justify-between items-center border-b border-white/5 pb-4">
               <div>
@@ -629,7 +640,8 @@ export default function AdminFleetPage() {
 
             <form onSubmit={handleSaveVehicle} className="space-y-4">
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Row 1: Make, Model, Registration */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="text-xs font-bold text-slate-300 block mb-1">Vehicle Make / Brand *</label>
                   <input
@@ -653,9 +665,7 @@ export default function AdminFleetPage() {
                     className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-bold text-slate-300 block mb-1">Registration Number *</label>
                   <input
@@ -667,7 +677,10 @@ export default function AdminFleetPage() {
                     className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono font-bold focus:outline-none focus:border-accent"
                   />
                 </div>
+              </div>
 
+              {/* Row 2: Category, Class, Capacity */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="text-xs font-bold text-slate-300 block mb-1">Vehicle Category *</label>
                   <select
@@ -675,19 +688,12 @@ export default function AdminFleetPage() {
                     value={formData.categoryId}
                     onChange={(e) => {
                       const newCatId = e.target.value;
-                      const selectedCat = categories.find(c => c.id === newCatId);
-                      const catName = (selectedCat?.name || "").toLowerCase();
-                      let defaultSub = "Executive";
-                      if (catName.includes("sedan")) defaultSub = "Compact";
-                      else if (catName.includes("suv")) defaultSub = "Subcompact / Urban";
-                      else if (catName.includes("hatchback")) defaultSub = "Compact";
-
-                      setFormData({ ...formData, categoryId: newCatId, subCategory: defaultSub });
+                      setFormData({ ...formData, categoryId: newCatId, subCategory: "" });
                     }}
                     className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                   >
                     <option value="" disabled>-- Select Vehicle Category --</option>
-                    {categories.map((c) => (
+                    {activeCategories.map((c) => (
                       <option key={c.id} value={c.id} className="bg-slate-900">{c.name}</option>
                     ))}
                   </select>
@@ -697,12 +703,13 @@ export default function AdminFleetPage() {
                   <label className="text-xs font-bold text-slate-300 block mb-1">Vehicle Class *</label>
                   <select
                     required
-                    value={formData.subCategory || "Executive"}
+                    value={formData.subCategory}
                     onChange={(e) => setFormData({ ...formData, subCategory: e.target.value })}
                     className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                   >
+                    <option value="" disabled>-- Select Vehicle Class --</option>
                     {(() => {
-                      const selectedCat = categories.find(c => c.id === formData.categoryId);
+                      const selectedCat = activeCategories.find(c => c.id === formData.categoryId);
                       const catName = (selectedCat?.name || "").toLowerCase();
 
                       if (catName.includes("sedan")) {
@@ -737,9 +744,7 @@ export default function AdminFleetPage() {
                     })()}
                   </select>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="text-xs font-bold text-slate-300 block mb-1">Seating Capacity *</label>
                   <input
@@ -751,7 +756,10 @@ export default function AdminFleetPage() {
                     className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                   />
                 </div>
+              </div>
 
+              {/* Row 3: Fuel, Transmission, Status */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="text-xs font-bold text-slate-300 block mb-1">Fuel Type *</label>
                   <select
@@ -778,9 +786,24 @@ export default function AdminFleetPage() {
                     <option value="AUTOMATIC" className="bg-slate-900">Automatic</option>
                   </select>
                 </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Vehicle Status *</label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value as VehicleStatus })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                  >
+                    <option value="AVAILABLE" className="bg-slate-900 text-emerald-400">AVAILABLE</option>
+                    <option value="ON_TRIP" className="bg-slate-900 text-blue-400">ON TRIP</option>
+                    <option value="MAINTENANCE" className="bg-slate-900 text-yellow-400">MAINTENANCE</option>
+                    <option value="INACTIVE" className="bg-slate-900 text-rose-400">INACTIVE</option>
+                  </select>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Row 4: Custom Per-KM Rate, Daily Rate, Extra KM Rate */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="text-xs font-bold text-slate-300 block mb-1">Custom Per-KM Rate (₹)</label>
                   <input
@@ -804,9 +827,7 @@ export default function AdminFleetPage() {
                     className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-bold text-slate-300 block mb-1">Extra KM Rate (₹/extra km)</label>
                   <input
@@ -818,7 +839,10 @@ export default function AdminFleetPage() {
                     className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
                   />
                 </div>
+              </div>
 
+              {/* Row 5: Extra Hour Rate, Assign Driver, Fleet Image */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
                 <div>
                   <label className="text-xs font-bold text-slate-300 block mb-1">Extra Hour Rate (₹/extra hr)</label>
                   <input
@@ -829,22 +853,6 @@ export default function AdminFleetPage() {
                     onChange={(e) => setFormData({ ...formData, extraHourRate: e.target.value })}
                     className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
                   />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Vehicle Status *</label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value as VehicleStatus })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
-                  >
-                    <option value="AVAILABLE" className="bg-slate-900 text-emerald-400">AVAILABLE</option>
-                    <option value="ON_TRIP" className="bg-slate-900 text-blue-400">ON TRIP</option>
-                    <option value="MAINTENANCE" className="bg-slate-900 text-yellow-400">MAINTENANCE</option>
-                    <option value="INACTIVE" className="bg-slate-900 text-rose-400">INACTIVE</option>
-                  </select>
                 </div>
 
                 <div>
@@ -862,14 +870,16 @@ export default function AdminFleetPage() {
                     ))}
                   </select>
                 </div>
-              </div>
 
-              <ImageUploader
-                value={formData.imageUrl}
-                onChange={(url) => setFormData({ ...formData, imageUrl: url })}
-                label="Vehicle Fleet Image"
-                placeholder="Upload file from device or paste image URL"
-              />
+                <div>
+                  <ImageUploader
+                    value={formData.imageUrl}
+                    onChange={(url) => setFormData({ ...formData, imageUrl: url })}
+                    label="Vehicle Fleet Image"
+                    placeholder="Upload file from device or paste URL"
+                  />
+                </div>
+              </div>
 
               <div className="flex gap-3 pt-4 border-t border-white/5">
                 <button

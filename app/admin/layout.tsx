@@ -20,7 +20,8 @@ import {
   X, 
   User, 
   Bell,
-  Mail
+  Mail,
+  UserCheck
 } from "lucide-react";
 
 interface SidebarItem {
@@ -81,6 +82,7 @@ export default function AdminLayout({
     { name: "Bookings Dispatch", href: "/admin/bookings-dispatch", icon: CalendarRange },
     // { name: "Tour Packages", href: "/admin/tours", icon: Compass }, // Hidden as per user directive
     { name: "Fleet Vehicles", href: "/admin/fleet", icon: Car },
+    { name: "Driver Management", href: "/admin/drivers", icon: UserCheck },
     { name: "Corporate Leads", href: "/admin/corporate-leads", icon: Building2 },
     { name: "Rental Leads", href: "/admin/rental-leads", icon: PhoneCall },
     { name: "Contact Leads", href: "/admin/contact-leads", icon: Mail },
