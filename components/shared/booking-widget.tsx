@@ -799,15 +799,16 @@ export default function BookingWidget() {
               </div>
 
               {/* Row 2: Gender, Pickup Time, Drop Time in 1 line */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                {/* Column 1: Passenger Gender */}
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Passenger Gender *</label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Passenger Gender *</label>
+                  <div className="relative h-[42px]">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
                     <select
                       value={corpData.gender}
                       onChange={(e) => setCorpData({ ...corpData, gender: e.target.value })}
-                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
+                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
                     >
                       <option value="" disabled className="bg-slate-900">Please Select</option>
                       <option value="Male" className="bg-slate-900">Male</option>
@@ -817,13 +818,14 @@ export default function BookingWidget() {
                   </div>
                 </div>
 
+                {/* Column 2: Pickup Time */}
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Pickup Time *</label>
-                  <div className="flex gap-2 items-center">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Pickup Time *</label>
+                  <div className="flex gap-1.5 items-center h-[42px]">
                     <select
                       value={corpData.shiftStartHour}
                       onChange={(e) => setCorpData({ ...corpData, shiftStartHour: e.target.value })}
-                      className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
+                      className="flex-1 h-full bg-slate-950/50 border border-white/10 rounded-lg px-2 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono cursor-pointer"
                     >
                       <option value="" disabled className="bg-slate-900">Hour</option>
                       {["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"].map(h => (
@@ -834,7 +836,7 @@ export default function BookingWidget() {
                     <select
                       value={corpData.shiftStartMinute}
                       onChange={(e) => setCorpData({ ...corpData, shiftStartMinute: e.target.value })}
-                      className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
+                      className="flex-1 h-full bg-slate-950/50 border border-white/10 rounded-lg px-2 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono cursor-pointer"
                     >
                       <option value="" disabled className="bg-slate-900">Minutes</option>
                       {["00", "15", "30", "45"].map(m => (
@@ -843,11 +845,11 @@ export default function BookingWidget() {
                     </select>
 
                     {/* AM / PM Segmented Tab Control */}
-                    <div className="flex bg-slate-950/80 p-1 border border-white/10 rounded-lg shrink-0">
+                    <div className="flex h-full bg-slate-950/80 p-1 border border-white/10 rounded-lg shrink-0 items-center">
                       <button
                         type="button"
                         onClick={() => setCorpData({ ...corpData, shiftStartAmpm: "AM" })}
-                        className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${
+                        className={`h-full px-2.5 text-xs font-bold rounded-md transition-all flex items-center justify-center ${
                           corpData.shiftStartAmpm === "AM"
                             ? "bg-amber-500 text-slate-950 shadow-md"
                             : "text-slate-400 hover:text-slate-200"
@@ -858,7 +860,7 @@ export default function BookingWidget() {
                       <button
                         type="button"
                         onClick={() => setCorpData({ ...corpData, shiftStartAmpm: "PM" })}
-                        className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${
+                        className={`h-full px-2.5 text-xs font-bold rounded-md transition-all flex items-center justify-center ${
                           corpData.shiftStartAmpm === "PM"
                             ? "bg-amber-500 text-slate-950 shadow-md"
                             : "text-slate-400 hover:text-slate-200"
@@ -870,13 +872,14 @@ export default function BookingWidget() {
                   </div>
                 </div>
 
+                {/* Column 3: Drop Time */}
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Drop Time *</label>
-                  <div className="flex gap-2 items-center">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Drop Time *</label>
+                  <div className="flex gap-1.5 items-center h-[42px]">
                     <select
                       value={corpData.shiftEndHour}
                       onChange={(e) => setCorpData({ ...corpData, shiftEndHour: e.target.value })}
-                      className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
+                      className="flex-1 h-full bg-slate-950/50 border border-white/10 rounded-lg px-2 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono cursor-pointer"
                     >
                       <option value="" disabled className="bg-slate-900">Hour</option>
                       {["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"].map(h => (
@@ -887,7 +890,7 @@ export default function BookingWidget() {
                     <select
                       value={corpData.shiftEndMinute}
                       onChange={(e) => setCorpData({ ...corpData, shiftEndMinute: e.target.value })}
-                      className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
+                      className="flex-1 h-full bg-slate-950/50 border border-white/10 rounded-lg px-2 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono cursor-pointer"
                     >
                       <option value="" disabled className="bg-slate-900">Minutes</option>
                       {["00", "15", "30", "45"].map(m => (
@@ -896,11 +899,11 @@ export default function BookingWidget() {
                     </select>
 
                     {/* AM / PM Segmented Tab Control */}
-                    <div className="flex bg-slate-950/80 p-1 border border-white/10 rounded-lg shrink-0">
+                    <div className="flex h-full bg-slate-950/80 p-1 border border-white/10 rounded-lg shrink-0 items-center">
                       <button
                         type="button"
                         onClick={() => setCorpData({ ...corpData, shiftEndAmpm: "AM" })}
-                        className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${
+                        className={`h-full px-2.5 text-xs font-bold rounded-md transition-all flex items-center justify-center ${
                           corpData.shiftEndAmpm === "AM"
                             ? "bg-amber-500 text-slate-950 shadow-md"
                             : "text-slate-400 hover:text-slate-200"
@@ -911,7 +914,7 @@ export default function BookingWidget() {
                       <button
                         type="button"
                         onClick={() => setCorpData({ ...corpData, shiftEndAmpm: "PM" })}
-                        className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${
+                        className={`h-full px-2.5 text-xs font-bold rounded-md transition-all flex items-center justify-center ${
                           corpData.shiftEndAmpm === "PM"
                             ? "bg-amber-500 text-slate-950 shadow-md"
                             : "text-slate-400 hover:text-slate-200"
