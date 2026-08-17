@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { 
-  Building2, 
-  Clock, 
-  MapPin, 
-  Calendar, 
-  Compass, 
-  ArrowRight, 
-  Users, 
+import {
+  Building2,
+  Clock,
+  MapPin,
+  Calendar,
+  Compass,
+  ArrowRight,
+  Users,
   User,
   ChevronRight,
   CheckCircle2,
@@ -49,12 +49,12 @@ export default function BookingWidget() {
   const [tours, setTours] = useState<any[]>([]);
 
   // State for forms
-  const [corpData, setCorpData] = useState({ 
-    company: "", 
+  const [corpData, setCorpData] = useState({
+    company: "",
     contactName: "",
     email: "",
     phone: "",
-    employeeId: "", 
+    employeeId: "",
     gender: "Male",
     shiftStartHour: "09",
     shiftStartMinute: "00",
@@ -62,40 +62,40 @@ export default function BookingWidget() {
     shiftEndHour: "06",
     shiftEndMinute: "00",
     shiftEndAmpm: "PM",
-    pickup: "", 
-    drop: "" 
+    pickup: "",
+    drop: ""
   });
 
-  const [localData, setLocalData] = useState({ 
+  const [localData, setLocalData] = useState({
     name: "",
     email: "",
     phone: "",
     pickupLocation: "",
-    vehicleCategoryId: "", 
-    duration: "8hr_80km", 
-    pickupDate: "", 
-    pickupTime: "" 
+    vehicleCategoryId: "",
+    duration: "8hr_80km",
+    pickupDate: "",
+    pickupTime: ""
   });
 
-  const [outstationData, setOutstationData] = useState({ 
-    type: "ONE_WAY", 
+  const [outstationData, setOutstationData] = useState({
+    type: "ONE_WAY",
     name: "",
     email: "",
     phone: "",
-    pickup: "", 
-    drop: "", 
-    date: "", 
+    pickup: "",
+    drop: "",
+    date: "",
     returnDate: "",
     vehicleCategoryId: ""
   });
 
-  const [tourData, setTourData] = useState({ 
-    tourPackageId: "", 
-    guests: "1", 
-    date: "", 
-    name: "", 
-    email: "", 
-    phone: "" 
+  const [tourData, setTourData] = useState({
+    tourPackageId: "",
+    guests: "1",
+    date: "",
+    name: "",
+    email: "",
+    phone: ""
   });
 
   // UI status states
@@ -112,7 +112,7 @@ export default function BookingWidget() {
           fetch("/api/fleet/categories"),
           fetch("/api/tours")
         ]);
-        
+
         if (catsRes.ok) {
           const catsData = await catsRes.json();
           setCategories(catsData);
@@ -178,7 +178,7 @@ export default function BookingWidget() {
         const formattedPhone = `+91${digitsPhone}`;
         const shiftIn = `${corpData.shiftStartHour}:${corpData.shiftStartMinute} ${corpData.shiftStartAmpm}`;
         const shiftOut = `${corpData.shiftEndHour}:${corpData.shiftEndMinute} ${corpData.shiftEndAmpm}`;
-        
+
         payload = {
           companyName: corpData.company.trim(),
           contactName: corpData.contactName.trim(),
@@ -191,7 +191,7 @@ export default function BookingWidget() {
         };
       } else if (activeTab === "local") {
         url = "/api/rental/lead";
-        
+
         if (!validateName(localData.name)) {
           throw new Error("Contact Name can only contain alphabetic characters.");
         }
@@ -203,7 +203,7 @@ export default function BookingWidget() {
           throw new Error("Mobile number must be exactly 10 digits.");
         }
         const formattedPhone = `+91${digitsPhone}`;
-        
+
         payload = {
           customerName: localData.name.trim(),
           email: localData.email.trim(),
@@ -229,7 +229,7 @@ export default function BookingWidget() {
           throw new Error("Mobile number must be exactly 10 digits.");
         }
         const formattedPhone = `+91${digitsPhone}`;
-        
+
         payload = {
           customerName: outstationData.name.trim(),
           email: outstationData.email.trim(),
@@ -237,8 +237,8 @@ export default function BookingWidget() {
           pickupLocation: outstationData.pickup.trim(),
           dropLocation: outstationData.drop.trim(),
           pickupDateTime: new Date(`${outstationData.date}T06:00:00`).toISOString(),
-          returnDateTime: outstationData.type === "ROUND_TRIP" && outstationData.returnDate 
-            ? new Date(`${outstationData.returnDate}T23:59:00`).toISOString() 
+          returnDateTime: outstationData.type === "ROUND_TRIP" && outstationData.returnDate
+            ? new Date(`${outstationData.returnDate}T23:59:00`).toISOString()
             : null,
           vehicleCategoryId: outstationData.vehicleCategoryId,
           tripType: `Outstation ${outstationData.type === "ROUND_TRIP" ? "Round Trip" : "One Way"}`
@@ -257,7 +257,7 @@ export default function BookingWidget() {
           throw new Error("Mobile number must be exactly 10 digits.");
         }
         const formattedPhone = `+91${digitsPhone}`;
-        
+
         payload = {
           name: tourData.name.trim(),
           email: tourData.email.trim(),
@@ -289,7 +289,7 @@ export default function BookingWidget() {
       if (data.bookingNumber) {
         setBookingRef(data.bookingNumber);
       }
-      
+
       // Reset forms
       setCorpData({ company: "", contactName: "", email: "", phone: "", employeeId: "", gender: "Male", shiftStartHour: "09", shiftStartMinute: "00", shiftStartAmpm: "AM", shiftEndHour: "06", shiftEndMinute: "00", shiftEndAmpm: "PM", pickup: "", drop: "" });
       setLocalData(prev => ({ ...prev, name: "", email: "", phone: "", pickupLocation: "", pickupDate: "", pickupTime: "" }));
@@ -306,14 +306,13 @@ export default function BookingWidget() {
   return (
     <div className="w-full max-w-5xl mx-auto glassmorphism rounded-2xl shadow-2xl border border-white/10 text-slate-100 relative">
       {/* Tabs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 bg-slate-950/80 border-b border-white/5">
+      <div className="grid grid-cols-1 md:grid-cols-3 bg-slate-950/80 border-b border-white/5">
         <button
           onClick={() => { setActiveTab("corporate"); setError(null); setSuccess(false); }}
-          className={`flex items-center justify-center gap-2 py-4 px-3 text-sm font-semibold tracking-wide transition-all ${
-            activeTab === "corporate"
-              ? "bg-primary text-primary-foreground border-b-2 border-accent"
-              : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
-          }`}
+          className={`flex items-center justify-center gap-2 py-4 px-3 text-sm font-semibold tracking-wide transition-all ${activeTab === "corporate"
+            ? "bg-primary text-primary-foreground border-b-2 border-accent"
+            : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+            }`}
         >
           <Building2 className="w-4 h-4" />
           <span>Corporate Cab</span>
@@ -321,11 +320,10 @@ export default function BookingWidget() {
 
         <button
           onClick={() => { setActiveTab("local"); setError(null); setSuccess(false); }}
-          className={`flex items-center justify-center gap-2 py-4 px-3 text-sm font-semibold tracking-wide transition-all ${
-            activeTab === "local"
-              ? "bg-primary text-primary-foreground border-b-2 border-accent"
-              : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
-          }`}
+          className={`flex items-center justify-center gap-2 py-4 px-3 text-sm font-semibold tracking-wide transition-all ${activeTab === "local"
+            ? "bg-primary text-primary-foreground border-b-2 border-accent"
+            : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+            }`}
         >
           <Clock className="w-4 h-4" />
           <span>Local Rentals</span>
@@ -333,16 +331,16 @@ export default function BookingWidget() {
 
         <button
           onClick={() => { setActiveTab("outstation"); setError(null); setSuccess(false); }}
-          className={`flex items-center justify-center gap-2 py-4 px-3 text-sm font-semibold tracking-wide transition-all ${
-            activeTab === "outstation"
-              ? "bg-primary text-primary-foreground border-b-2 border-accent"
-              : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
-          }`}
+          className={`flex items-center justify-center gap-2 py-4 px-3 text-sm font-semibold tracking-wide transition-all ${activeTab === "outstation"
+            ? "bg-primary text-primary-foreground border-b-2 border-accent"
+            : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+            }`}
         >
           <Compass className="w-4 h-4" />
           <span>Outstation</span>
         </button>
 
+        {/* Tour Packages tab hidden via comment
         <button
           onClick={() => { setActiveTab("tours"); setError(null); setSuccess(false); }}
           className={`flex items-center justify-center gap-2 py-4 px-3 text-sm font-semibold tracking-wide transition-all ${
@@ -354,6 +352,7 @@ export default function BookingWidget() {
           <Compass className="w-4 h-4" />
           <span>Tour Packages</span>
         </button>
+        */}
       </div>
 
       {success ? (
@@ -448,7 +447,7 @@ export default function BookingWidget() {
                       onChange={(e) => setCorpData({ ...corpData, shiftStartHour: e.target.value })}
                       className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
                     >
-                      {["01","02","03","04","05","06","07","08","09","10","11","12"].map(h => (
+                      {["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"].map(h => (
                         <option key={h} value={h} className="bg-slate-900">{h}</option>
                       ))}
                     </select>
@@ -457,7 +456,7 @@ export default function BookingWidget() {
                       onChange={(e) => setCorpData({ ...corpData, shiftStartMinute: e.target.value })}
                       className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
                     >
-                      {["00","15","30","45"].map(m => (
+                      {["00", "15", "30", "45"].map(m => (
                         <option key={m} value={m} className="bg-slate-900">{m}</option>
                       ))}
                     </select>
@@ -480,7 +479,7 @@ export default function BookingWidget() {
                       onChange={(e) => setCorpData({ ...corpData, shiftEndHour: e.target.value })}
                       className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
                     >
-                      {["01","02","03","04","05","06","07","08","09","10","11","12"].map(h => (
+                      {["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"].map(h => (
                         <option key={h} value={h} className="bg-slate-900">{h}</option>
                       ))}
                     </select>
@@ -489,7 +488,7 @@ export default function BookingWidget() {
                       onChange={(e) => setCorpData({ ...corpData, shiftEndMinute: e.target.value })}
                       className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
                     >
-                      {["00","15","30","45"].map(m => (
+                      {["00", "15", "30", "45"].map(m => (
                         <option key={m} value={m} className="bg-slate-900">{m}</option>
                       ))}
                     </select>
@@ -808,7 +807,8 @@ export default function BookingWidget() {
             </div>
           )}
 
-          {/* Tour Package Tab */}
+          {/* Tour Package Tab hidden via comment */}
+          {/*
           {activeTab === "tours" && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
@@ -889,6 +889,7 @@ export default function BookingWidget() {
               </div>
             </div>
           )}
+          */}
 
           {/* Extra Distance & Waiting Time Fare Rules Notice */}
           <div className="bg-slate-900/90 border border-amber-500/20 p-4 rounded-xl space-y-1">
