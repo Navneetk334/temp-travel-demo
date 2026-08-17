@@ -664,10 +664,10 @@ export default function BookingWidget() {
                 </button>
               </div>
 
-              {/* Company Name (Shown only for Working sub-tab) & Passenger Gender */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {pickupDropSubTab === "working" && (
-                  <div className="space-y-2 relative col-span-1 md:col-span-2">
+              {/* Working Sub-Tab: Company Name in Center */}
+              {pickupDropSubTab === "working" && (
+                <div className="flex justify-center w-full">
+                  <div className="space-y-2 relative w-full max-w-xl">
                     <div className="flex justify-between items-center">
                       <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Company Name *</label>
                       <span className="text-[10px] text-accent font-medium uppercase tracking-wide">PAN India (Startup / SMB / PSU / Enterprise)</span>
@@ -685,10 +685,10 @@ export default function BookingWidget() {
                           setCorpData({ ...corpData, company: e.target.value });
                           setShowCompanySuggestions(true);
                         }}
-                        className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                        className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all text-center placeholder:text-left md:placeholder:text-center"
                       />
                       {showCompanySuggestions && (
-                        <div className="absolute left-0 right-0 top-full mt-1 max-h-64 overflow-y-auto bg-slate-900 border border-white/15 rounded-lg shadow-2xl z-50 py-1 divide-y divide-white/5">
+                        <div className="absolute left-0 right-0 top-full mt-1 max-h-64 overflow-y-auto bg-slate-900 border border-white/15 rounded-lg shadow-2xl z-50 py-1 divide-y divide-white/5 text-left">
                           {corpData.company.trim().length > 0 && (
                             <button
                               type="button"
@@ -757,9 +757,50 @@ export default function BookingWidget() {
                       )}
                     </div>
                   </div>
-                )}
+                </div>
+              )}
 
-                <div className={`space-y-2 ${pickupDropSubTab === "working" ? "col-span-1" : "col-span-1 md:col-span-3"}`}>
+              {/* Row 1: Contact Name, Email Address, Mobile Number in 1 line */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Contact Name *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Amit Sharma"
+                    value={corpData.contactName}
+                    onChange={(e) => setCorpData({ ...corpData, contactName: e.target.value.replace(/[^a-zA-Z\s.-]/g, "") })}
+                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Email Address *</label>
+                  <input
+                    type="email"
+                    required
+                    placeholder={pickupDropSubTab === "working" ? "e.g. corporate@company.com" : "e.g. john@example.com"}
+                    value={corpData.email}
+                    onChange={(e) => setCorpData({ ...corpData, email: e.target.value })}
+                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mobile Number (10 Digits) *</label>
+                  <input
+                    type="tel"
+                    required
+                    maxLength={10}
+                    placeholder="e.g. 9999999999"
+                    value={corpData.phone}
+                    onChange={(e) => setCorpData({ ...corpData, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
+                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"
+                  />
+                </div>
+              </div>
+
+              {/* Row 2: Gender, Pickup Time, Drop Time in 1 line */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Passenger Gender *</label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
@@ -775,10 +816,7 @@ export default function BookingWidget() {
                     </select>
                   </div>
                 </div>
-              </div>
 
-              {/* Pickup Time & Drop Time */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Pickup Time *</label>
                   <div className="flex gap-2 items-center">
@@ -886,7 +924,7 @@ export default function BookingWidget() {
                 </div>
               </div>
 
-              {/* Pickup Address & Drop Address */}
+              {/* Row 3: Pickup Address & Drop Address in 1 line */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pickup Address *</label>
@@ -905,44 +943,6 @@ export default function BookingWidget() {
                     placeholder="Enter drop location (e.g. Airport, Hinjewadi, BKC)"
                     value={corpData.drop}
                     onChange={(val) => setCorpData({ ...corpData, drop: val })}
-                  />
-                </div>
-              </div>
-
-              {/* Contact Information */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2 border-t border-white/5">
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Contact Name *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Amit Sharma"
-                    value={corpData.contactName}
-                    onChange={(e) => setCorpData({ ...corpData, contactName: e.target.value.replace(/[^a-zA-Z\s.-]/g, "") })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Email Address *</label>
-                  <input
-                    type="email"
-                    required
-                    placeholder={pickupDropSubTab === "working" ? "e.g. corporate@company.com" : "e.g. john@example.com"}
-                    value={corpData.email}
-                    onChange={(e) => setCorpData({ ...corpData, email: e.target.value })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Mobile Number (10 Digits) *</label>
-                  <input
-                    type="tel"
-                    required
-                    maxLength={10}
-                    placeholder="e.g. 9999999999"
-                    value={corpData.phone}
-                    onChange={(e) => setCorpData({ ...corpData, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"
                   />
                 </div>
               </div>
