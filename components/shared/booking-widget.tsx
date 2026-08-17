@@ -43,81 +43,219 @@ function validatePhone(phone: string): boolean {
 
 const POPULAR_COMPANIES = [
   "Accenture",
+  "Acme Solutions",
   "Adobe",
+  "Aegis Global",
   "Airbus",
   "Airtel",
+  "Alkem Laboratories",
   "Amazon",
   "AMD",
+  "Amul",
+  "Apex Tech Solutions",
+  "Apollo Hospitals",
   "Apple",
+  "Asian Paints",
   "AstraZeneca",
+  "Astral Pipes",
+  "Ather Energy",
+  "Axis Bank",
   "Bain & Company",
+  "Bajaj Auto",
+  "Bajaj Finserv",
+  "Bank of Baroda",
   "Barclays",
+  "BharatPe",
+  "BEL (Bharat Electronics)",
+  "BHEL",
+  "Biocon",
+  "Blinkit",
+  "Birlasoft",
+  "Blue Star",
+  "BluSmart",
   "Boeing",
   "Bosch",
   "Boston Consulting Group (BCG)",
+  "BPCL",
+  "BrowserStack",
+  "Canara Bank",
   "Capgemini",
+  "CarDekho",
+  "Cars24",
+  "Cipla",
   "Cisco",
   "Citigroup",
+  "Classplus",
+  "ClearTax",
+  "Coal India",
   "Coca-Cola",
   "Cognizant",
+  "CoinDCX",
+  "Concentrix",
+  "Cred",
+  "Crompton Greaves",
+  "Cybage Software",
+  "Dabur",
+  "Darwinbox",
+  "Delhivery",
   "Deloitte",
   "Deutsche Bank",
   "DHL Express",
+  "DLF Limited",
+  "Dr. Reddy's Laboratories",
+  "Dream11",
+  "Dunzo",
+  "ElasticRun",
   "EY (Ernst & Young)",
+  "Federal Bank",
   "FedEx",
+  "Firstsource",
   "Flipkart",
+  "Fortis Healthcare",
+  "Freshworks",
+  "GAIL India",
   "General Electric (GE)",
+  "Genpact",
+  "Godrej Group",
   "Goldman Sachs",
   "Google",
+  "Groww",
+  "Gupshup",
+  "HAL (Hindustan Aeronautics)",
+  "Happiest Minds",
+  "Hasura",
+  "Havells",
+  "HCLTech",
   "HDFC Bank",
+  "Hero MotoCorp",
+  "Hexaware Technologies",
+  "Hindalco",
+  "Hinduja Global Solutions",
+  "Hindustan Unilever (HUL)",
+  "Hiranandani Group",
   "Honda",
+  "HPCL",
   "HSBC",
   "Hyundai",
   "IBM",
   "ICICI Bank",
   "IKEA",
+  "Indian Oil (IOCL)",
+  "IndusInd Bank",
+  "Infra.Market",
   "Infosys",
+  "InMobi",
   "Intel",
+  "ISRO",
+  "ITC Limited",
   "Jio",
+  "JK Tyre",
   "Johnson & Johnson",
   "JPMorgan Chase & Co.",
+  "Jubilant FoodWorks",
+  "Justdial",
   "KPMG",
-  "Larsen & Toubro (L&T)",
+  "KPIT Technologies",
+  "Kotak Mahindra Bank",
+  "L&T (Larsen & Toubro)",
+  "LeadSquared",
+  "Lenskart",
+  "LIC India",
+  "Licious",
+  "LG Electronics",
+  "Lodha (Macrotech)",
+  "LTI Mindtree",
+  "Lupin Pharmaceuticals",
   "Mahindra & Mahindra",
+  "Mahindra Logistics",
   "MakeMyTrip",
+  "Mamaearth",
+  "Mankind Pharma",
+  "Marico",
   "Maruti Suzuki",
+  "Max Healthcare",
   "McKinsey & Company",
+  "Meesho",
   "Meta",
+  "Mphasis",
   "Microsoft",
+  "Moglix",
   "Morgan Stanley",
   "Nestlé",
+  "NHPC",
+  "NTPC",
   "Novartis",
   "NVIDIA",
-  "Ola",
+  "Nykaa",
+  "Oberoi Realty",
+  "OfBusiness",
+  "Ola Cabs",
+  "Ola Electric",
+  "ONGC",
   "Oracle",
+  "Page Industries",
   "Paytm",
   "PepsiCo",
+  "Persistent Systems",
   "Pfizer",
   "Philips",
   "PhonePe",
+  "PhysicsWallah",
+  "Pidilite Industries",
+  "PolicyBazaar",
+  "Polycab",
+  "Porter",
+  "Postman",
+  "Pristyn Care",
   "Procter & Gamble (P&G)",
   "PwC (PricewaterhouseCoopers)",
+  "Quess Corp",
+  "Rapido",
+  "Razorpay",
+  "Rebel Foods",
   "Reliance Industries",
+  "SAIL",
   "Salesforce",
   "Samsung",
   "SAP",
+  "Sasken Technologies",
+  "Schbang",
+  "SBI (State Bank of India)",
+  "ShareChat",
+  "Shiprocket",
   "Siemens",
+  "Simplilearn",
+  "Sobha Limited",
+  "Sonata Software",
   "Sony",
+  "Spinny",
+  "Sun Pharma",
   "Swiggy",
   "Tata Consultancy Services (TCS)",
   "Tata Motors",
+  "Tata Steel",
+  "Tata Power",
+  "TeamLease",
   "Tech Mahindra",
+  "Torrent Pharma",
   "Toyota",
+  "Trent (Westside)",
+  "TVS Motor",
   "Uber",
+  "UltraTech Cement",
+  "Unacademy",
   "Unilever",
+  "Union Bank",
+  "UpGrad",
+  "Urban Company",
   "Vodafone Idea",
+  "Voltas",
   "Walmart",
   "Wipro",
+  "WNS Global",
+  "Zepto",
+  "Zensar Technologies",
+  "Zerodha",
   "Zomato"
 ];
 
@@ -506,13 +644,16 @@ export default function BookingWidget() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {pickupDropSubTab === "working" && (
                   <div className="space-y-2 relative col-span-1 md:col-span-2">
-                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Company Name *</label>
+                    <div className="flex justify-between items-center">
+                      <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Company Name *</label>
+                      <span className="text-[10px] text-accent font-medium uppercase tracking-wide">PAN India (Startup / SMB / PSU / Enterprise)</span>
+                    </div>
                     <div className="relative">
                       <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                       <input
                         type="text"
                         required
-                        placeholder="Search company (e.g. Google, TCS, Deloitte, Accenture)"
+                        placeholder="Type any company name (Startup, MSME, Small, Medium, Enterprise)"
                         value={corpData.company}
                         onFocus={() => setShowCompanySuggestions(true)}
                         onBlur={() => setTimeout(() => setShowCompanySuggestions(false), 200)}
@@ -523,26 +664,35 @@ export default function BookingWidget() {
                         className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
                       />
                       {showCompanySuggestions && (
-                        <div className="absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-slate-900 border border-white/15 rounded-lg shadow-xl z-50 py-1">
-                          {POPULAR_COMPANIES.filter(c => c.toLowerCase().includes((corpData.company || "").toLowerCase())).map(company => (
+                        <div className="absolute left-0 right-0 top-full mt-1 max-h-56 overflow-y-auto bg-slate-900 border border-white/15 rounded-lg shadow-2xl z-50 py-1 divide-y divide-white/5">
+                          {corpData.company.trim().length > 0 && (
                             <button
-                              key={company}
                               type="button"
                               onMouseDown={() => {
-                                setCorpData({ ...corpData, company });
                                 setShowCompanySuggestions(false);
                               }}
-                              className="w-full text-left px-4 py-2 text-xs text-slate-200 hover:bg-primary/30 hover:text-white transition-colors flex items-center gap-2"
+                              className="w-full text-left px-4 py-2.5 text-xs text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 font-semibold transition-colors flex items-center gap-2"
                             >
-                              <Building2 className="w-3.5 h-3.5 text-accent" />
-                              <span>{company}</span>
+                              <CheckCircle2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                              <span>Use entered company: <strong className="text-white font-bold">&quot;{corpData.company}&quot;</strong></span>
                             </button>
-                          ))}
-                          {POPULAR_COMPANIES.filter(c => c.toLowerCase().includes((corpData.company || "").toLowerCase())).length === 0 && (
-                            <div className="px-4 py-2 text-xs text-slate-400">
-                              Worldwide search: Press enter or keep typing <span className="text-slate-100 font-semibold">{corpData.company}</span>
-                            </div>
                           )}
+                          <div>
+                            {POPULAR_COMPANIES.filter(c => c.toLowerCase().includes((corpData.company || "").toLowerCase())).slice(0, 15).map(company => (
+                              <button
+                                key={company}
+                                type="button"
+                                onMouseDown={() => {
+                                  setCorpData({ ...corpData, company });
+                                  setShowCompanySuggestions(false);
+                                }}
+                                className="w-full text-left px-4 py-2 text-xs text-slate-200 hover:bg-primary/30 hover:text-white transition-colors flex items-center gap-2"
+                              >
+                                <Building2 className="w-3.5 h-3.5 text-accent shrink-0" />
+                                <span>{company}</span>
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
