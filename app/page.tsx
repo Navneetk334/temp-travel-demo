@@ -7,25 +7,25 @@ import { JsonLd } from "@/components/shared/json-ld";
 import Header from "@/components/shared/header";
 import Footer from "@/components/shared/footer";
 import ContactForm from "@/components/shared/contact-form";
-import { 
-  Building2, 
-  Car, 
-  ShieldCheck, 
-  MapPin, 
-  Phone, 
-  Mail, 
-  Star, 
-  Award, 
-  Clock, 
-  Users, 
-  Compass, 
-  ArrowUpRight, 
+import {
+  Building2,
+  Car,
+  ShieldCheck,
+  MapPin,
+  Phone,
+  Mail,
+  Star,
+  Award,
+  Clock,
+  Users,
+  Compass,
+  ArrowUpRight,
   ChevronRight,
   TrendingUp
 } from "lucide-react";
 
 export default function Homepage() {
-  
+
   // LocalBusiness and CarRental Schema JSON-LD payloads for SEO
   const businessSchema = {
     "@context": "https://schema.org",
@@ -63,7 +63,7 @@ export default function Homepage() {
       <section className="relative min-h-[90vh] flex flex-col justify-center items-center py-20 px-4 md:px-8 bg-slate-950 overflow-hidden">
         {/* Background image overlay */}
         <div className="absolute inset-0 z-0">
-          <Image 
+          <Image
             src="/images/hero-cover.png"
             alt="Premium executive car driving at sunset"
             fill
@@ -236,7 +236,7 @@ export default function Homepage() {
           </div>
 
           <div className="lg:col-span-7 relative bg-slate-900 border border-white/5 rounded-2xl overflow-hidden shadow-2xl h-[350px] md:h-[450px]">
-            <Image 
+            <Image
               src="/images/fleet-suv.png"
               alt="Premium executive black SUV fleet vehicle"
               fill
