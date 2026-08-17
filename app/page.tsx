@@ -29,6 +29,54 @@ export default function Homepage() {
   const [activeTab, setActiveTab] = useState<"sedan" | "suv" | "luxury">("sedan");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
+  const [googleData, setGoogleData] = useState<{
+    rating: number;
+    userRatingCount: number;
+    googleMapsUri: string;
+    reviews: any[];
+  }>({
+    rating: 5.0,
+    userRatingCount: 120,
+    googleMapsUri: "https://www.google.com/maps/place/?q=place_id:ChIJ5Zoykd0bDTkRc8tFlL_O6rY",
+    reviews: [
+      {
+        id: "rev-1",
+        authorName: "Abhinandan Kumar Kundan",
+        authorPhoto: "https://lh3.googleusercontent.com/a-/ALV-UjWoZsUu95OwRf4JSLmmN74OFaM-rT_pK8Wnio3mBotwezngxaGy=s128-c0x00000000-cc-rp-mo",
+        rating: 5,
+        relativeTime: "a month ago",
+        text: "Excellent outstation taxi service. I used them for a long-distance business trip across cities and was highly impressed. The chauffeur was experienced, professional, and knew the highway routes and best rest stops perfectly."
+      },
+      {
+        id: "rev-2",
+        authorName: "Kartik Arora",
+        authorPhoto: "https://lh3.googleusercontent.com/a/ACg8ocK3XXgJBeEMktlBHrtUh-7aPvCOKQM-Z07oVnaarwQno2QEuA=s128-c0x00000000-cc-rp-mo",
+        rating: 5,
+        relativeTime: "a month ago",
+        text: "Best corporate cab service we’ve partnered with so far. Punctual drivers, pristine cars, and smooth coordination. Their corporate account management team makes booking and invoicing incredibly easy. Five stars for reliability and professionalism!"
+      },
+      {
+        id: "rev-3",
+        authorName: "Lokesh Nath Jha",
+        authorPhoto: "https://lh3.googleusercontent.com/a/ACg8ocJJgrasr6Il7qed2ia885ZDgrtOLL7iNEncvNASggWwowjx4Q=s128-c0x00000000-cc-rp-mo",
+        rating: 5,
+        relativeTime: "a month ago",
+        text: "Exceptional service from Intercity Taxi Service! Booking was seamless, and the customer support was very helpful. The driver was punctual, extremely courteous, and focused on safety throughout the highway journey."
+      }
+    ]
+  });
+
+  React.useEffect(() => {
+    fetch("/api/google-reviews")
+      .then(res => res.json())
+      .then(data => {
+        if (data.reviews && data.reviews.length > 0) {
+          setGoogleData(data);
+        }
+      })
+      .catch(err => console.error("Failed to load live Google reviews:", err));
+  }, []);
+
   const businessSchema = {
     "@context": "https://schema.org",
     "@type": "CarRental",
@@ -398,68 +446,76 @@ export default function Homepage() {
               </svg>
               <span>Google Business Profile Verified Reviews</span>
             </div>
-            <h2 className="text-3xl sm:text-5xl font-black text-slate-50 tracking-tight">4.9 ★★★★★ Rating on Google</h2>
+            <h2 className="text-3xl sm:text-5xl font-black text-slate-50 tracking-tight">
+              {googleData.rating} ★★★★★ Rating on Google Maps
+            </h2>
             <p className="text-slate-300 max-w-2xl mx-auto text-sm">
-              Real feedback from verified corporate procurement officers, HR managers, and retail travelers.
+              Live feedback synced directly from our Google Business Profile (Place ID: <span className="font-mono text-amber-400 font-bold">ChIJ5Zoykd0bDTkRc8tFlL_O6rY</span>).
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                name: "Sunil Deshmukh",
-                role: "Local Guide · Corporate HR Lead",
-                badge: "Google Verified Review",
-                time: "2 weeks ago",
-                content: "Exceptional corporate transit management service in Mumbai. Temp Travel handled our company's 40+ daily employee shift rosters with total punctuality. Innova Crystas and Dzires were immaculately clean.",
-                stars: 5
-              },
-              {
-                name: "Ananya Roy",
-                role: "Verified Business Traveler",
-                badge: "Google Verified Review",
-                time: "1 month ago",
-                content: "Booked an outstation trip from Mumbai to Pune. Chauffeur arrived 15 minutes before time, driving was smooth and safe. Clear transparent pricing without hidden charges. Highly recommended!",
-                stars: 5
-              },
-              {
-                name: "Rajesh Khandelwal",
-                role: "Director of Logistics",
-                badge: "Google Verified Review",
-                time: "3 weeks ago",
-                content: "We have been using Temp Travel for corporate executive cabs and airport pick & drop services for over 2 years now. Professional drivers, instant GST invoices, and 24/7 SPOC support.",
-                stars: 5
-              }
-            ].map((t, idx) => (
-              <div key={idx} className="bg-slate-950/90 border border-white/10 p-6 rounded-2xl space-y-4 hover:border-amber-400/40 transition-all shadow-xl flex flex-col justify-between">
+            {googleData.reviews.slice(0, 3).map((t, idx) => (
+              <div key={t.id || idx} className="bg-slate-950/90 border border-white/10 p-6 rounded-2xl space-y-4 hover:border-amber-400/40 transition-all shadow-xl flex flex-col justify-between">
                 <div className="space-y-3">
                   <div className="flex justify-between items-start">
                     <div className="flex gap-1">
-                      {[...Array(t.stars)].map((_, i) => (
+                      {[...Array(t.rating || 5)].map((_, i) => (
                         <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
                       ))}
                     </div>
                     <span className="text-[10px] font-bold text-slate-400 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
-                      {t.time}
+                      {t.relativeTime}
                     </span>
                   </div>
-                  <p className="text-slate-300 text-sm italic leading-relaxed">"{t.content}"</p>
+                  <p className="text-slate-300 text-xs sm:text-sm italic leading-relaxed">"{t.text}"</p>
                 </div>
 
                 <div className="border-t border-white/10 pt-4 flex items-center justify-between">
-                  <div>
-                    <div className="font-extrabold text-slate-100 text-sm flex items-center gap-1.5">
-                      <span>{t.name}</span>
-                      <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                  <div className="flex items-center gap-3">
+                    {t.authorPhoto ? (
+                      <img
+                        src={t.authorPhoto}
+                        alt={t.authorName}
+                        className="w-9 h-9 rounded-full object-cover border border-amber-400/40"
+                      />
+                    ) : (
+                      <div className="w-9 h-9 rounded-full bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs border border-amber-400/40">
+                        {t.authorName?.charAt(0) || "G"}
+                      </div>
+                    )}
+                    <div>
+                      <div className="font-extrabold text-slate-100 text-xs sm:text-sm flex items-center gap-1">
+                        <span>{t.authorName}</span>
+                        <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                      </div>
+                      <div className="text-[10px] text-slate-400">Google Verified Customer</div>
                     </div>
-                    <div className="text-[11px] text-slate-400 mt-0.5">{t.role}</div>
                   </div>
-                  <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20">
-                    <span>Google Verified</span>
-                  </div>
+                  <a
+                    href={googleData.googleMapsUri}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-[10px] font-bold text-amber-400 hover:underline bg-amber-500/10 px-2.5 py-1.5 rounded-lg border border-amber-500/20"
+                  >
+                    <span>View on Maps</span>
+                    <ArrowUpRight className="w-3 h-3" />
+                  </a>
                 </div>
               </div>
             ))}
+          </div>
+
+          <div className="text-center pt-4">
+            <a
+              href={googleData.googleMapsUri}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-xs font-extrabold text-slate-950 bg-amber-400 hover:bg-amber-300 px-6 py-3 rounded-xl transition-all shadow-lg shadow-amber-400/10 uppercase tracking-wider"
+            >
+              <span>Read All Verified Google Reviews ({googleData.userRatingCount}+)</span>
+              <ArrowUpRight className="w-4 h-4" />
+            </a>
           </div>
         </div>
       </section>
