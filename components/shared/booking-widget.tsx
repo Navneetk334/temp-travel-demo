@@ -41,8 +41,90 @@ function validatePhone(phone: string): boolean {
   return digitsOnly.length === 10;
 }
 
+const POPULAR_COMPANIES = [
+  "Accenture",
+  "Adobe",
+  "Airbus",
+  "Airtel",
+  "Amazon",
+  "AMD",
+  "Apple",
+  "AstraZeneca",
+  "Bain & Company",
+  "Barclays",
+  "Boeing",
+  "Bosch",
+  "Boston Consulting Group (BCG)",
+  "Capgemini",
+  "Cisco",
+  "Citigroup",
+  "Coca-Cola",
+  "Cognizant",
+  "Deloitte",
+  "Deutsche Bank",
+  "DHL Express",
+  "EY (Ernst & Young)",
+  "FedEx",
+  "Flipkart",
+  "General Electric (GE)",
+  "Goldman Sachs",
+  "Google",
+  "HDFC Bank",
+  "Honda",
+  "HSBC",
+  "Hyundai",
+  "IBM",
+  "ICICI Bank",
+  "IKEA",
+  "Infosys",
+  "Intel",
+  "Jio",
+  "Johnson & Johnson",
+  "JPMorgan Chase & Co.",
+  "KPMG",
+  "Larsen & Toubro (L&T)",
+  "Mahindra & Mahindra",
+  "MakeMyTrip",
+  "Maruti Suzuki",
+  "McKinsey & Company",
+  "Meta",
+  "Microsoft",
+  "Morgan Stanley",
+  "Nestlé",
+  "Novartis",
+  "NVIDIA",
+  "Ola",
+  "Oracle",
+  "Paytm",
+  "PepsiCo",
+  "Pfizer",
+  "Philips",
+  "PhonePe",
+  "Procter & Gamble (P&G)",
+  "PwC (PricewaterhouseCoopers)",
+  "Reliance Industries",
+  "Salesforce",
+  "Samsung",
+  "SAP",
+  "Siemens",
+  "Sony",
+  "Swiggy",
+  "Tata Consultancy Services (TCS)",
+  "Tata Motors",
+  "Tech Mahindra",
+  "Toyota",
+  "Uber",
+  "Unilever",
+  "Vodafone Idea",
+  "Walmart",
+  "Wipro",
+  "Zomato"
+];
+
 export default function BookingWidget() {
   const [activeTab, setActiveTab] = useState<BookingTab>("corporate");
+  const [pickupDropSubTab, setPickupDropSubTab] = useState<"individual" | "working">("individual");
+  const [showCompanySuggestions, setShowCompanySuggestions] = useState(false);
 
   // Dynamic lists from DB
   const [categories, setCategories] = useState<any[]>([]);
@@ -150,14 +232,18 @@ export default function BookingWidget() {
       if (activeTab === "corporate") {
         url = "/api/corporate/lead";
 
-        // 1. Shift Time Validation
+        if (pickupDropSubTab === "working" && !corpData.company.trim()) {
+          throw new Error("Please enter your Company Name.");
+        }
+
+        // 1. Pickup/Drop Time Validation
         const startMins = timeToMinutes(corpData.shiftStartHour, corpData.shiftStartMinute, corpData.shiftStartAmpm);
         const endMins = timeToMinutes(corpData.shiftEndHour, corpData.shiftEndMinute, corpData.shiftEndAmpm);
         if (startMins === endMins) {
-          throw new Error("Shift End Time cannot be equal to Shift Start Time.");
+          throw new Error("Drop Time cannot be equal to Pickup Time.");
         }
         if (startMins > endMins) {
-          throw new Error("Shift End Time must be after Shift Start Time.");
+          throw new Error("Drop Time must be after Pickup Time.");
         }
 
         // 2. Contact Name Validation
@@ -167,7 +253,7 @@ export default function BookingWidget() {
 
         // 3. Email Validation
         if (!validateEmail(corpData.email)) {
-          throw new Error("Please enter a valid work email address.");
+          throw new Error("Please enter a valid email address.");
         }
 
         // 4. Mobile Number Validation
@@ -176,18 +262,18 @@ export default function BookingWidget() {
           throw new Error("Mobile number must be exactly 10 digits.");
         }
         const formattedPhone = `+91${digitsPhone}`;
-        const shiftIn = `${corpData.shiftStartHour}:${corpData.shiftStartMinute} ${corpData.shiftStartAmpm}`;
-        const shiftOut = `${corpData.shiftEndHour}:${corpData.shiftEndMinute} ${corpData.shiftEndAmpm}`;
+        const pickupTimeStr = `${corpData.shiftStartHour}:${corpData.shiftStartMinute} ${corpData.shiftStartAmpm}`;
+        const dropTimeStr = `${corpData.shiftEndHour}:${corpData.shiftEndMinute} ${corpData.shiftEndAmpm}`;
 
         payload = {
-          companyName: corpData.company.trim(),
+          companyName: pickupDropSubTab === "working" ? corpData.company.trim() : "Individual",
           contactName: corpData.contactName.trim(),
           email: corpData.email.trim(),
           phone: formattedPhone,
           employeeCount: 1,
           pickupLocations: corpData.pickup.trim(),
-          serviceType: `Corporate Cab (Shift In: ${shiftIn} | Shift Out: ${shiftOut})`,
-          requirements: `Employee ID: ${corpData.employeeId.trim()}. Gender: ${corpData.gender}. Drop Address: ${corpData.drop.trim()}. Shift In: ${shiftIn}, Shift Out: ${shiftOut}.`
+          serviceType: `Pickup & Drop (${pickupDropSubTab === "working" ? `Working - ${corpData.company.trim()}` : "Individual"})`,
+          requirements: `Booking Type: ${pickupDropSubTab === "working" ? "Working" : "Individual"}.${pickupDropSubTab === "working" ? ` Company: ${corpData.company.trim()}.` : ""} Gender: ${corpData.gender}. Pickup Address: ${corpData.pickup.trim()}. Drop Address: ${corpData.drop.trim()}. Pickup Time: ${pickupTimeStr}, Drop Time: ${dropTimeStr}.`
         };
       } else if (activeTab === "local") {
         url = "/api/rental/lead";
@@ -385,42 +471,85 @@ export default function BookingWidget() {
             </div>
           )}
 
-          {/* Corporate Cab Tab */}
+          {/* Pickup & Drop Tab (Sub-tabs: Individual vs Working) */}
           {activeTab === "corporate" && (
             <div className="space-y-6">
-              {/* Row 1: Company Name, Employee ID, Gender */}
+              {/* Sub-Tabs Selector */}
+              <div className="flex items-center gap-3 p-1.5 bg-slate-950/80 rounded-xl border border-white/10 w-fit">
+                <button
+                  type="button"
+                  onClick={() => setPickupDropSubTab("individual")}
+                  className={`flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-all ${
+                    pickupDropSubTab === "individual"
+                      ? "bg-accent text-slate-950 shadow-lg scale-105"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                  }`}
+                >
+                  <User className="w-3.5 h-3.5" />
+                  <span>Individual</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPickupDropSubTab("working")}
+                  className={`flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-all ${
+                    pickupDropSubTab === "working"
+                      ? "bg-accent text-slate-950 shadow-lg scale-105"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                  }`}
+                >
+                  <Building2 className="w-3.5 h-3.5" />
+                  <span>Working</span>
+                </button>
+              </div>
+
+              {/* Company Name (Shown only for Working sub-tab) & Passenger Gender */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Company Name *</label>
-                  <div className="relative">
-                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Google India"
-                      value={corpData.company}
-                      onChange={(e) => setCorpData({ ...corpData, company: e.target.value })}
-                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
-                    />
+                {pickupDropSubTab === "working" && (
+                  <div className="space-y-2 relative col-span-1 md:col-span-2">
+                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Company Name *</label>
+                    <div className="relative">
+                      <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                      <input
+                        type="text"
+                        required
+                        placeholder="Search company (e.g. Google, TCS, Deloitte, Accenture)"
+                        value={corpData.company}
+                        onFocus={() => setShowCompanySuggestions(true)}
+                        onBlur={() => setTimeout(() => setShowCompanySuggestions(false), 200)}
+                        onChange={(e) => {
+                          setCorpData({ ...corpData, company: e.target.value });
+                          setShowCompanySuggestions(true);
+                        }}
+                        className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                      />
+                      {showCompanySuggestions && (
+                        <div className="absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-slate-900 border border-white/15 rounded-lg shadow-xl z-50 py-1">
+                          {POPULAR_COMPANIES.filter(c => c.toLowerCase().includes((corpData.company || "").toLowerCase())).map(company => (
+                            <button
+                              key={company}
+                              type="button"
+                              onMouseDown={() => {
+                                setCorpData({ ...corpData, company });
+                                setShowCompanySuggestions(false);
+                              }}
+                              className="w-full text-left px-4 py-2 text-xs text-slate-200 hover:bg-primary/30 hover:text-white transition-colors flex items-center gap-2"
+                            >
+                              <Building2 className="w-3.5 h-3.5 text-accent" />
+                              <span>{company}</span>
+                            </button>
+                          ))}
+                          {POPULAR_COMPANIES.filter(c => c.toLowerCase().includes((corpData.company || "").toLowerCase())).length === 0 && (
+                            <div className="px-4 py-2 text-xs text-slate-400">
+                              Worldwide search: Press enter or keep typing <span className="text-slate-100 font-semibold">{corpData.company}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
 
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Employee ID *</label>
-                  <div className="relative">
-                    <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <input
-                      type="text"
-                      required
-                      placeholder="EMP-8973"
-                      value={corpData.employeeId}
-                      onChange={(e) => setCorpData({ ...corpData, employeeId: e.target.value })}
-                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
+                <div className={`space-y-2 ${pickupDropSubTab === "working" ? "col-span-1" : "col-span-1 md:col-span-3"}`}>
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Passenger Gender *</label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
@@ -437,10 +566,10 @@ export default function BookingWidget() {
                 </div>
               </div>
 
-              {/* Row 2: Shift Start Time (In) & Shift End Time (Out) */}
+              {/* Pickup Time & Drop Time */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Shift Start Time (Shift In) *</label>
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Pickup Time *</label>
                   <div className="flex gap-2">
                     <select
                       value={corpData.shiftStartHour}
@@ -472,7 +601,7 @@ export default function BookingWidget() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Shift End Time (Shift Out) *</label>
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Drop Time *</label>
                   <div className="flex gap-2">
                     <select
                       value={corpData.shiftEndHour}
@@ -504,7 +633,7 @@ export default function BookingWidget() {
                 </div>
               </div>
 
-              {/* Row 3: Pickup & Drop Address */}
+              {/* Pickup Address & Drop Address */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pickup Address *</label>
@@ -527,7 +656,7 @@ export default function BookingWidget() {
                 </div>
               </div>
 
-              {/* Row 4: Contact Information */}
+              {/* Contact Information */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2 border-t border-white/5">
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Contact Name *</label>
@@ -541,11 +670,11 @@ export default function BookingWidget() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Work Email *</label>
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Email Address *</label>
                   <input
                     type="email"
                     required
-                    placeholder="e.g. amit@company.com"
+                    placeholder={pickupDropSubTab === "working" ? "e.g. corporate@company.com" : "e.g. john@example.com"}
                     value={corpData.email}
                     onChange={(e) => setCorpData({ ...corpData, email: e.target.value })}
                     className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
@@ -916,7 +1045,7 @@ export default function BookingWidget() {
                 </>
               ) : (
                 <>
-                  <span>Proceed Booking</span>
+                  <span>Proceed</span>
                   <ChevronRight className="w-5 h-5" />
                 </>
               )}

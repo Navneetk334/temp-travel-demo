@@ -223,7 +223,7 @@ export default function CorporateLeadForm({ cityFormatted, defaultServiceType }:
           <div className="space-y-1">
             <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1">
               <Clock className="w-3.5 h-3.5 text-accent" />
-              <span>Shift Start Time (Shift In) *</span>
+              <span>Pickup Time *</span>
             </label>
             <div className="grid grid-cols-3 gap-2">
               <select
@@ -260,7 +260,7 @@ export default function CorporateLeadForm({ cityFormatted, defaultServiceType }:
           <div className="space-y-1">
             <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1">
               <Clock className="w-3.5 h-3.5 text-accent" />
-              <span>Shift End Time (Shift Out) *</span>
+              <span>Drop Time *</span>
             </label>
             <div className="grid grid-cols-3 gap-2">
               <select
