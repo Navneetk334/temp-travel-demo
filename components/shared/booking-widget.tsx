@@ -280,10 +280,10 @@ export default function BookingWidget() {
     gender: "",
     shiftStartHour: "",
     shiftStartMinute: "",
-    shiftStartAmpm: "",
+    shiftStartAmpm: "AM",
     shiftEndHour: "",
     shiftEndMinute: "",
-    shiftEndAmpm: "",
+    shiftEndAmpm: "PM",
     pickup: "",
     drop: ""
   });
@@ -768,7 +768,7 @@ export default function BookingWidget() {
                       onChange={(e) => setCorpData({ ...corpData, gender: e.target.value })}
                       className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
                     >
-                      <option value="" disabled className="bg-slate-900">Please select</option>
+                      <option value="" disabled className="bg-slate-900">Please Select</option>
                       <option value="Male" className="bg-slate-900">Male</option>
                       <option value="Female" className="bg-slate-900">Female</option>
                       <option value="Other" className="bg-slate-900">Other</option>
@@ -781,71 +781,107 @@ export default function BookingWidget() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Pickup Time *</label>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-center">
                     <select
                       value={corpData.shiftStartHour}
                       onChange={(e) => setCorpData({ ...corpData, shiftStartHour: e.target.value })}
                       className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
                     >
-                      <option value="" disabled className="bg-slate-900">Please select</option>
+                      <option value="" disabled className="bg-slate-900">Hour</option>
                       {["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"].map(h => (
                         <option key={h} value={h} className="bg-slate-900">{h}</option>
                       ))}
                     </select>
+
                     <select
                       value={corpData.shiftStartMinute}
                       onChange={(e) => setCorpData({ ...corpData, shiftStartMinute: e.target.value })}
                       className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
                     >
-                      <option value="" disabled className="bg-slate-900">Please select</option>
+                      <option value="" disabled className="bg-slate-900">Minutes</option>
                       {["00", "15", "30", "45"].map(m => (
                         <option key={m} value={m} className="bg-slate-900">{m}</option>
                       ))}
                     </select>
-                    <select
-                      value={corpData.shiftStartAmpm}
-                      onChange={(e) => setCorpData({ ...corpData, shiftStartAmpm: e.target.value })}
-                      className="bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-bold"
-                    >
-                      <option value="" disabled className="bg-slate-900">Please select</option>
-                      <option value="AM" className="bg-slate-900">AM</option>
-                      <option value="PM" className="bg-slate-900">PM</option>
-                    </select>
+
+                    {/* AM / PM Segmented Tab Control */}
+                    <div className="flex bg-slate-950/80 p-1 border border-white/10 rounded-lg shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setCorpData({ ...corpData, shiftStartAmpm: "AM" })}
+                        className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${
+                          corpData.shiftStartAmpm === "AM"
+                            ? "bg-amber-500 text-slate-950 shadow-md"
+                            : "text-slate-400 hover:text-slate-200"
+                        }`}
+                      >
+                        AM
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCorpData({ ...corpData, shiftStartAmpm: "PM" })}
+                        className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${
+                          corpData.shiftStartAmpm === "PM"
+                            ? "bg-amber-500 text-slate-950 shadow-md"
+                            : "text-slate-400 hover:text-slate-200"
+                        }`}
+                      >
+                        PM
+                      </button>
+                    </div>
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Drop Time *</label>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-center">
                     <select
                       value={corpData.shiftEndHour}
                       onChange={(e) => setCorpData({ ...corpData, shiftEndHour: e.target.value })}
                       className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
                     >
-                      <option value="" disabled className="bg-slate-900">Please select</option>
+                      <option value="" disabled className="bg-slate-900">Hour</option>
                       {["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"].map(h => (
                         <option key={h} value={h} className="bg-slate-900">{h}</option>
                       ))}
                     </select>
+
                     <select
                       value={corpData.shiftEndMinute}
                       onChange={(e) => setCorpData({ ...corpData, shiftEndMinute: e.target.value })}
                       className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
                     >
-                      <option value="" disabled className="bg-slate-900">Please select</option>
+                      <option value="" disabled className="bg-slate-900">Minutes</option>
                       {["00", "15", "30", "45"].map(m => (
                         <option key={m} value={m} className="bg-slate-900">{m}</option>
                       ))}
                     </select>
-                    <select
-                      value={corpData.shiftEndAmpm}
-                      onChange={(e) => setCorpData({ ...corpData, shiftEndAmpm: e.target.value })}
-                      className="bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-bold"
-                    >
-                      <option value="" disabled className="bg-slate-900">Please select</option>
-                      <option value="AM" className="bg-slate-900">AM</option>
-                      <option value="PM" className="bg-slate-900">PM</option>
-                    </select>
+
+                    {/* AM / PM Segmented Tab Control */}
+                    <div className="flex bg-slate-950/80 p-1 border border-white/10 rounded-lg shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setCorpData({ ...corpData, shiftEndAmpm: "AM" })}
+                        className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${
+                          corpData.shiftEndAmpm === "AM"
+                            ? "bg-amber-500 text-slate-950 shadow-md"
+                            : "text-slate-400 hover:text-slate-200"
+                        }`}
+                      >
+                        AM
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCorpData({ ...corpData, shiftEndAmpm: "PM" })}
+                        className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${
+                          corpData.shiftEndAmpm === "PM"
+                            ? "bg-amber-500 text-slate-950 shadow-md"
+                            : "text-slate-400 hover:text-slate-200"
+                        }`}
+                      >
+                        PM
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -211,7 +211,7 @@ export default function CorporateLeadForm({ cityFormatted, defaultServiceType }:
               onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
               className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
             >
-              <option value="" disabled hidden className="bg-slate-900">Please select</option>
+              <option value="" disabled hidden className="bg-slate-900">Please Select</option>
               <option value="Male" className="bg-slate-900">Male</option>
               <option value="Female" className="bg-slate-900">Female</option>
               <option value="Other" className="bg-slate-900">Other</option>
@@ -226,13 +226,13 @@ export default function CorporateLeadForm({ cityFormatted, defaultServiceType }:
               <Clock className="w-3.5 h-3.5 text-accent" />
               <span>Pickup Time *</span>
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="flex gap-2 items-center">
               <select
                 value={formData.shiftStartHour}
                 onChange={(e) => setFormData({ ...formData, shiftStartHour: e.target.value })}
-                className="bg-slate-950/50 border border-white/10 rounded-lg py-2 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary text-center font-mono"
+                className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono"
               >
-                <option value="" disabled hidden className="bg-slate-900">Please select</option>
+                <option value="" disabled hidden className="bg-slate-900">Hour</option>
                 {["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"].map((h) => (
                   <option key={h} value={h} className="bg-slate-900">{h}</option>
                 ))}
@@ -241,23 +241,39 @@ export default function CorporateLeadForm({ cityFormatted, defaultServiceType }:
               <select
                 value={formData.shiftStartMinute}
                 onChange={(e) => setFormData({ ...formData, shiftStartMinute: e.target.value })}
-                className="bg-slate-950/50 border border-white/10 rounded-lg py-2 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary text-center font-mono"
+                className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono"
               >
-                <option value="" disabled hidden className="bg-slate-900">Please select</option>
+                <option value="" disabled hidden className="bg-slate-900">Minutes</option>
                 {["00", "15", "30", "45"].map((m) => (
                   <option key={m} value={m} className="bg-slate-900">{m}</option>
                 ))}
               </select>
 
-              <select
-                value={formData.shiftStartAmpm}
-                onChange={(e) => setFormData({ ...formData, shiftStartAmpm: e.target.value })}
-                className="bg-slate-950/50 border border-white/10 rounded-lg py-2 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary text-center font-bold"
-              >
-                <option value="" disabled hidden className="bg-slate-900">Please select</option>
-                <option value="AM" className="bg-slate-900">AM</option>
-                <option value="PM" className="bg-slate-900">PM</option>
-              </select>
+              {/* AM / PM Segmented Tab Control */}
+              <div className="flex bg-slate-950/80 p-1 border border-white/10 rounded-lg shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, shiftStartAmpm: "AM" })}
+                  className={`px-2.5 py-1 text-xs font-bold rounded-md transition-all ${
+                    formData.shiftStartAmpm === "AM"
+                      ? "bg-amber-500 text-slate-950 shadow-md"
+                      : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  AM
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, shiftStartAmpm: "PM" })}
+                  className={`px-2.5 py-1 text-xs font-bold rounded-md transition-all ${
+                    formData.shiftStartAmpm === "PM"
+                      ? "bg-amber-500 text-slate-950 shadow-md"
+                      : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  PM
+                </button>
+              </div>
             </div>
           </div>
 
@@ -266,13 +282,13 @@ export default function CorporateLeadForm({ cityFormatted, defaultServiceType }:
               <Clock className="w-3.5 h-3.5 text-accent" />
               <span>Drop Time *</span>
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="flex gap-2 items-center">
               <select
                 value={formData.shiftEndHour}
                 onChange={(e) => setFormData({ ...formData, shiftEndHour: e.target.value })}
-                className="bg-slate-950/50 border border-white/10 rounded-lg py-2 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary text-center font-mono"
+                className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono"
               >
-                <option value="" disabled hidden className="bg-slate-900">Please select</option>
+                <option value="" disabled hidden className="bg-slate-900">Hour</option>
                 {["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"].map((h) => (
                   <option key={h} value={h} className="bg-slate-900">{h}</option>
                 ))}
@@ -281,23 +297,39 @@ export default function CorporateLeadForm({ cityFormatted, defaultServiceType }:
               <select
                 value={formData.shiftEndMinute}
                 onChange={(e) => setFormData({ ...formData, shiftEndMinute: e.target.value })}
-                className="bg-slate-950/50 border border-white/10 rounded-lg py-2 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary text-center font-mono"
+                className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono"
               >
-                <option value="" disabled hidden className="bg-slate-900">Please select</option>
+                <option value="" disabled hidden className="bg-slate-900">Minutes</option>
                 {["00", "15", "30", "45"].map((m) => (
                   <option key={m} value={m} className="bg-slate-900">{m}</option>
                 ))}
               </select>
 
-              <select
-                value={formData.shiftEndAmpm}
-                onChange={(e) => setFormData({ ...formData, shiftEndAmpm: e.target.value })}
-                className="bg-slate-950/50 border border-white/10 rounded-lg py-2 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary text-center font-bold"
-              >
-                <option value="" disabled hidden className="bg-slate-900">Please select</option>
-                <option value="AM" className="bg-slate-900">AM</option>
-                <option value="PM" className="bg-slate-900">PM</option>
-              </select>
+              {/* AM / PM Segmented Tab Control */}
+              <div className="flex bg-slate-950/80 p-1 border border-white/10 rounded-lg shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, shiftEndAmpm: "AM" })}
+                  className={`px-2.5 py-1 text-xs font-bold rounded-md transition-all ${
+                    formData.shiftEndAmpm === "AM"
+                      ? "bg-amber-500 text-slate-950 shadow-md"
+                      : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  AM
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, shiftEndAmpm: "PM" })}
+                  className={`px-2.5 py-1 text-xs font-bold rounded-md transition-all ${
+                    formData.shiftEndAmpm === "PM"
+                      ? "bg-amber-500 text-slate-950 shadow-md"
+                      : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  PM
+                </button>
+              </div>
             </div>
           </div>
         </div>
