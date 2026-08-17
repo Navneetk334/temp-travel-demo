@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import ImageUploader from "@/components/shared/image-uploader";
 import { 
   Plus, 
   Trash2, 
@@ -863,16 +864,12 @@ export default function AdminFleetPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="text-xs font-bold text-slate-300 block mb-1">Vehicle Image URL</label>
-                <input
-                  type="url"
-                  placeholder="https://images.unsplash.com/photo-..."
-                  value={formData.imageUrl}
-                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
-                />
-              </div>
+              <ImageUploader
+                value={formData.imageUrl}
+                onChange={(url) => setFormData({ ...formData, imageUrl: url })}
+                label="Vehicle Fleet Image"
+                placeholder="Upload file from device or paste image URL"
+              />
 
               <div className="flex gap-3 pt-4 border-t border-white/5">
                 <button

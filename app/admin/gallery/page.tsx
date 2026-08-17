@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import ImageUploader from "@/components/shared/image-uploader";
 import { 
   Plus, 
   Trash2, 
@@ -485,26 +486,12 @@ export default function AdminGalleryPage() {
 
             <form onSubmit={handleSaveMedia} className="space-y-4 text-xs">
               
-              <div>
-                <label className="font-bold text-slate-300 block mb-1">Image / Media URL *</label>
-                <div className="flex gap-3 items-center">
-                  <div className="w-14 h-14 bg-slate-950 border border-white/10 rounded-lg overflow-hidden shrink-0 flex items-center justify-center">
-                    <img
-                      src={formData.imageUrl.trim() || "/images/fleet-suv.png"}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <input
-                    type="url"
-                    required
-                    placeholder="https://images.unsplash.com/photo-..."
-                    value={formData.imageUrl}
-                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
-                  />
-                </div>
-              </div>
+              <ImageUploader
+                value={formData.imageUrl}
+                onChange={(url) => setFormData({ ...formData, imageUrl: url })}
+                label="Gallery Media Image *"
+                placeholder="Upload file from device or paste image URL"
+              />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>

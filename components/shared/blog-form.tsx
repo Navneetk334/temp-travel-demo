@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import ImageUploader from "@/components/shared/image-uploader";
 import { 
   Loader2, 
   Plus, 
@@ -364,30 +365,13 @@ export default function BlogForm({ initialData, isEdit = false }: BlogFormProps)
               </div>
             )}
 
-            {/* Featured Image & Thumbnail Preview */}
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Featured Image URL</label>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <input
-                  type="url"
-                  name="featuredImage"
-                  value={formData.featuredImage}
-                  onChange={handleInputChange}
-                  placeholder="https://images.unsplash.com/photo-..."
-                  className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-4 text-xs text-slate-100 focus:outline-none focus:border-accent font-mono"
-                />
-              </div>
-              {formData.featuredImage.trim() && (
-                <div className="relative rounded-xl overflow-hidden border border-white/10 h-40 bg-slate-950 max-w-sm mt-2">
-                  <img
-                    src={formData.featuredImage}
-                    alt="Featured Image Preview"
-                    className="w-full h-full object-cover"
-                    onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
-                  />
-                </div>
-              )}
-            </div>
+            {/* Featured Image & Device Uploader */}
+            <ImageUploader
+              value={formData.featuredImage}
+              onChange={(url) => setFormData(prev => ({ ...prev, featuredImage: url }))}
+              label="Article Featured Image"
+              placeholder="Upload file from device or paste image URL"
+            />
 
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Summary / Excerpt *</label>
