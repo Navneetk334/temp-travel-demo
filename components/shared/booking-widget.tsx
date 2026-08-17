@@ -263,6 +263,37 @@ export default function BookingWidget() {
   const [activeTab, setActiveTab] = useState<BookingTab>("corporate");
   const [pickupDropSubTab, setPickupDropSubTab] = useState<"individual" | "working">("individual");
   const [showCompanySuggestions, setShowCompanySuggestions] = useState(false);
+  const [companyGoogleSuggestions, setCompanyGoogleSuggestions] = useState<any[]>([]);
+  const [companyLoading, setCompanyLoading] = useState(false);
+
+  // Debounced search for Company Name via Google Places & Business DB
+  useEffect(() => {
+    const query = corpData.company.trim();
+    if (query.length < 2) {
+      setCompanyGoogleSuggestions([]);
+      setCompanyLoading(false);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setCompanyLoading(true);
+      try {
+        const res = await fetch(`/api/places/autocomplete?q=${encodeURIComponent(query)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.suggestions && Array.isArray(data.suggestions)) {
+            setCompanyGoogleSuggestions(data.suggestions);
+          }
+        }
+      } catch (err) {
+        console.error("Company Places autocomplete error:", err);
+      } finally {
+        setCompanyLoading(false);
+      }
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [corpData.company]);
 
   // Dynamic lists from DB
   const [categories, setCategories] = useState<any[]>([]);
@@ -664,7 +695,7 @@ export default function BookingWidget() {
                         className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
                       />
                       {showCompanySuggestions && (
-                        <div className="absolute left-0 right-0 top-full mt-1 max-h-56 overflow-y-auto bg-slate-900 border border-white/15 rounded-lg shadow-2xl z-50 py-1 divide-y divide-white/5">
+                        <div className="absolute left-0 right-0 top-full mt-1 max-h-64 overflow-y-auto bg-slate-900 border border-white/15 rounded-lg shadow-2xl z-50 py-1 divide-y divide-white/5">
                           {corpData.company.trim().length > 0 && (
                             <button
                               type="button"
@@ -677,8 +708,44 @@ export default function BookingWidget() {
                               <span>Use entered company: <strong className="text-white font-bold">&quot;{corpData.company}&quot;</strong></span>
                             </button>
                           )}
+
+                          {/* Google Maps Real-time Places API Business Results */}
+                          {companyGoogleSuggestions.length > 0 && (
+                            <div>
+                              <div className="px-4 py-1.5 text-[10px] font-bold text-accent uppercase tracking-wider bg-slate-950/40 flex items-center gap-1.5">
+                                <MapPin className="w-3 h-3 text-accent" />
+                                <span>Google Maps Places & Registered Businesses</span>
+                              </div>
+                              {companyGoogleSuggestions.map((place, idx) => (
+                                <button
+                                  key={idx}
+                                  type="button"
+                                  onMouseDown={() => {
+                                    setCorpData({ ...corpData, company: place.mainText || place.fullText });
+                                    setShowCompanySuggestions(false);
+                                  }}
+                                  className="w-full text-left px-4 py-2 text-xs text-slate-200 hover:bg-primary/30 hover:text-white transition-colors flex items-start gap-2"
+                                >
+                                  <Building2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                                  <div className="truncate">
+                                    <span className="font-semibold text-slate-100">{place.mainText}</span>
+                                    {place.secondaryText && (
+                                      <span className="text-[11px] text-slate-400 block truncate">{place.secondaryText}</span>
+                                    )}
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Preset Business Dictionary Results */}
                           <div>
-                            {POPULAR_COMPANIES.filter(c => c.toLowerCase().includes((corpData.company || "").toLowerCase())).slice(0, 15).map(company => (
+                            {companyGoogleSuggestions.length > 0 && (
+                              <div className="px-4 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-950/40">
+                                Popular Corporate Directory
+                              </div>
+                            )}
+                            {POPULAR_COMPANIES.filter(c => c.toLowerCase().includes((corpData.company || "").toLowerCase())).slice(0, 12).map(company => (
                               <button
                                 key={company}
                                 type="button"
