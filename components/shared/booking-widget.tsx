@@ -11,6 +11,7 @@ import {
   Users,
   User,
   ChevronRight,
+  ChevronDown,
   CheckCircle2,
   AlertCircle,
   Loader2
@@ -820,13 +821,14 @@ export default function BookingWidget() {
                     <select
                       value={corpData.gender}
                       onChange={(e) => setCorpData({ ...corpData, gender: e.target.value })}
-                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
+                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-10 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
                     >
                       <option value="" disabled className="bg-slate-900">- Please Select -</option>
                       <option value="Male" className="bg-slate-900">Male</option>
                       <option value="Female" className="bg-slate-900">Female</option>
                       <option value="Other" className="bg-slate-900">Other</option>
                     </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                   </div>
                 </div>
 
@@ -834,27 +836,33 @@ export default function BookingWidget() {
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Pickup Time *</label>
                   <div className="flex gap-1.5 items-center h-[42px]">
-                    <select
-                      value={corpData.shiftStartHour}
-                      onChange={(e) => setCorpData({ ...corpData, shiftStartHour: e.target.value })}
-                      className="flex-1 h-full bg-slate-950/50 border border-white/10 rounded-lg px-2 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono cursor-pointer"
-                    >
-                      <option value="" disabled className="bg-slate-900">Hour</option>
-                      {["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"].map(h => (
-                        <option key={h} value={h} className="bg-slate-900">{h}</option>
-                      ))}
-                    </select>
+                    <div className="relative flex-1 h-full">
+                      <select
+                        value={corpData.shiftStartHour}
+                        onChange={(e) => setCorpData({ ...corpData, shiftStartHour: e.target.value })}
+                        className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-2.5 pr-7 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono cursor-pointer appearance-none"
+                      >
+                        <option value="" disabled className="bg-slate-900">Hour</option>
+                        {["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"].map(h => (
+                          <option key={h} value={h} className="bg-slate-900">{h}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                    </div>
 
-                    <select
-                      value={corpData.shiftStartMinute}
-                      onChange={(e) => setCorpData({ ...corpData, shiftStartMinute: e.target.value })}
-                      className="flex-1 h-full bg-slate-950/50 border border-white/10 rounded-lg px-2 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono cursor-pointer"
-                    >
-                      <option value="" disabled className="bg-slate-900">Minutes</option>
-                      {["00", "15", "30", "45"].map(m => (
-                        <option key={m} value={m} className="bg-slate-900">{m}</option>
-                      ))}
-                    </select>
+                    <div className="relative flex-1 h-full">
+                      <select
+                        value={corpData.shiftStartMinute}
+                        onChange={(e) => setCorpData({ ...corpData, shiftStartMinute: e.target.value })}
+                        className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-2.5 pr-7 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono cursor-pointer appearance-none"
+                      >
+                        <option value="" disabled className="bg-slate-900">Minutes</option>
+                        {["00", "15", "30", "45"].map(m => (
+                          <option key={m} value={m} className="bg-slate-900">{m}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                    </div>
 
                     {/* AM / PM Segmented Tab Control */}
                     <div className="flex h-full bg-slate-950/80 p-1 border border-white/10 rounded-lg shrink-0 items-center">
@@ -886,27 +894,33 @@ export default function BookingWidget() {
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Drop Time *</label>
                   <div className="flex gap-1.5 items-center h-[42px]">
-                    <select
-                      value={corpData.shiftEndHour}
-                      onChange={(e) => setCorpData({ ...corpData, shiftEndHour: e.target.value })}
-                      className="flex-1 h-full bg-slate-950/50 border border-white/10 rounded-lg px-2 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono cursor-pointer"
-                    >
-                      <option value="" disabled className="bg-slate-900">Hour</option>
-                      {["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"].map(h => (
-                        <option key={h} value={h} className="bg-slate-900">{h}</option>
-                      ))}
-                    </select>
+                    <div className="relative flex-1 h-full">
+                      <select
+                        value={corpData.shiftEndHour}
+                        onChange={(e) => setCorpData({ ...corpData, shiftEndHour: e.target.value })}
+                        className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-2.5 pr-7 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono cursor-pointer appearance-none"
+                      >
+                        <option value="" disabled className="bg-slate-900">Hour</option>
+                        {["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"].map(h => (
+                          <option key={h} value={h} className="bg-slate-900">{h}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                    </div>
 
-                    <select
-                      value={corpData.shiftEndMinute}
-                      onChange={(e) => setCorpData({ ...corpData, shiftEndMinute: e.target.value })}
-                      className="flex-1 h-full bg-slate-950/50 border border-white/10 rounded-lg px-2 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono cursor-pointer"
-                    >
-                      <option value="" disabled className="bg-slate-900">Minutes</option>
-                      {["00", "15", "30", "45"].map(m => (
-                        <option key={m} value={m} className="bg-slate-900">{m}</option>
-                      ))}
-                    </select>
+                    <div className="relative flex-1 h-full">
+                      <select
+                        value={corpData.shiftEndMinute}
+                        onChange={(e) => setCorpData({ ...corpData, shiftEndMinute: e.target.value })}
+                        className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-2.5 pr-7 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono cursor-pointer appearance-none"
+                      >
+                        <option value="" disabled className="bg-slate-900">Minutes</option>
+                        {["00", "15", "30", "45"].map(m => (
+                          <option key={m} value={m} className="bg-slate-900">{m}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                    </div>
 
                     {/* AM / PM Segmented Tab Control */}
                     <div className="flex h-full bg-slate-950/80 p-1 border border-white/10 rounded-lg shrink-0 items-center">
@@ -1044,50 +1058,59 @@ export default function BookingWidget() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Vehicle Category *</label>
-                  <select
-                    value={localData.vehicleCategoryId}
-                    onChange={(e) => setLocalData({ ...localData, vehicleCategoryId: e.target.value })}
-                    className="w-full h-[42px] bg-slate-950/50 border border-white/10 rounded-lg px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
-                  >
-                    <option value="" disabled className="bg-slate-900">- Please Select -</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id} className="bg-slate-900">{cat.name}</option>
-                    ))}
-                  </select>
+                  <div className="relative h-[42px]">
+                    <select
+                      value={localData.vehicleCategoryId}
+                      onChange={(e) => setLocalData({ ...localData, vehicleCategoryId: e.target.value })}
+                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="" disabled className="bg-slate-900">- Please Select -</option>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id} className="bg-slate-900">{cat.name}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Vehicle Class *</label>
-                  <select
-                    value={localData.vehicleClass || ""}
-                    onChange={(e) => setLocalData({ ...localData, vehicleClass: e.target.value })}
-                    className="w-full h-[42px] bg-slate-950/50 border border-white/10 rounded-lg px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
-                  >
-                    <option value="" disabled className="bg-slate-900">- Please Select -</option>
-                    <option value="Executive" className="bg-slate-900">Executive Class</option>
-                    <option value="Premium" className="bg-slate-900">Premium Class</option>
-                    <option value="Luxury" className="bg-slate-900">Luxury Class</option>
-                    <option value="Economy" className="bg-slate-900">Economy Class</option>
-                  </select>
+                  <div className="relative h-[42px]">
+                    <select
+                      value={localData.vehicleClass || ""}
+                      onChange={(e) => setLocalData({ ...localData, vehicleClass: e.target.value })}
+                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="" disabled className="bg-slate-900">- Please Select -</option>
+                      <option value="Executive" className="bg-slate-900">Executive Class</option>
+                      <option value="Premium" className="bg-slate-900">Premium Class</option>
+                      <option value="Luxury" className="bg-slate-900">Luxury Class</option>
+                      <option value="Economy" className="bg-slate-900">Economy Class</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Vehicle Model *</label>
-                  <select
-                    value={localData.vehicleModel || ""}
-                    onChange={(e) => setLocalData({ ...localData, vehicleModel: e.target.value })}
-                    className="w-full h-[42px] bg-slate-950/50 border border-white/10 rounded-lg px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
-                  >
-                    <option value="" disabled className="bg-slate-900">- Please Select -</option>
-                    <option value="Swift Dzire / Etios" className="bg-slate-900">Swift Dzire / Etios (Sedan)</option>
-                    <option value="Ertiga / XL6" className="bg-slate-900">Ertiga / XL6 (SUV)</option>
-                    <option value="Innova Crysta" className="bg-slate-900">Innova Crysta (Premium SUV)</option>
-                    <option value="Innova Hycross" className="bg-slate-900">Innova Hycross (Hybrid SUV)</option>
-                    <option value="Toyota Fortuner" className="bg-slate-900">Toyota Fortuner (Luxury SUV)</option>
-                    <option value="BMW 5 / Mercedes E-Class" className="bg-slate-900">BMW 5 / Mercedes E-Class (Luxury Sedan)</option>
-                    <option value="Tempo Traveller" className="bg-slate-900">Tempo Traveller (Minibus)</option>
-                    <option value="Any Available" className="bg-slate-900">Any Available Model</option>
-                  </select>
+                  <div className="relative h-[42px]">
+                    <select
+                      value={localData.vehicleModel || ""}
+                      onChange={(e) => setLocalData({ ...localData, vehicleModel: e.target.value })}
+                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="" disabled className="bg-slate-900">- Please Select -</option>
+                      <option value="Swift Dzire / Etios" className="bg-slate-900">Swift Dzire / Etios (Sedan)</option>
+                      <option value="Ertiga / XL6" className="bg-slate-900">Ertiga / XL6 (SUV)</option>
+                      <option value="Innova Crysta" className="bg-slate-900">Innova Crysta (Premium SUV)</option>
+                      <option value="Innova Hycross" className="bg-slate-900">Innova Hycross (Hybrid SUV)</option>
+                      <option value="Toyota Fortuner" className="bg-slate-900">Toyota Fortuner (Luxury SUV)</option>
+                      <option value="BMW 5 / Mercedes E-Class" className="bg-slate-900">BMW 5 / Mercedes E-Class (Luxury Sedan)</option>
+                      <option value="Tempo Traveller" className="bg-slate-900">Tempo Traveller (Minibus)</option>
+                      <option value="Any Available" className="bg-slate-900">Any Available Model</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
                 </div>
               </div>
 
@@ -1150,16 +1173,19 @@ export default function BookingWidget() {
 
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Car Category *</label>
-                <select
-                  value={outstationData.vehicleCategoryId}
-                  onChange={(e) => setOutstationData({ ...outstationData, vehicleCategoryId: e.target.value })}
-                  className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
-                >
-                  <option value="" disabled className="bg-slate-900">- Please Select -</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id} className="bg-slate-900">{cat.name}</option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    value={outstationData.vehicleCategoryId}
+                    onChange={(e) => setOutstationData({ ...outstationData, vehicleCategoryId: e.target.value })}
+                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="" disabled className="bg-slate-900">- Please Select -</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id} className="bg-slate-900">{cat.name}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                </div>
               </div>
 
               <div className="space-y-2">

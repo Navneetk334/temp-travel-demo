@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ChevronRight, CheckCircle2, AlertCircle, Loader2, Building2, User, Mail, Phone, Users, MapPin, Clock } from "lucide-react";
+import { ChevronRight, ChevronDown, CheckCircle2, AlertCircle, Loader2, Building2, User, Mail, Phone, Users, MapPin, Clock } from "lucide-react";
 import LocationInput from "@/components/shared/location-input";
 
 interface CorporateLeadFormProps {
@@ -206,16 +206,19 @@ export default function CorporateLeadForm({ cityFormatted, defaultServiceType }:
 
           <div className="space-y-1">
             <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Passenger Gender *</label>
-            <select
-              value={formData.gender}
-              onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-              className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
-            >
-              <option value="" disabled hidden className="bg-slate-900">- Please Select -</option>
-              <option value="Male" className="bg-slate-900">Male</option>
-              <option value="Female" className="bg-slate-900">Female</option>
-              <option value="Other" className="bg-slate-900">Other</option>
-            </select>
+            <div className="relative">
+              <select
+                value={formData.gender}
+                onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
+              >
+                <option value="" disabled hidden className="bg-slate-900">- Please Select -</option>
+                <option value="Male" className="bg-slate-900">Male</option>
+                <option value="Female" className="bg-slate-900">Female</option>
+                <option value="Other" className="bg-slate-900">Other</option>
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            </div>
           </div>
         </div>
 
@@ -227,27 +230,33 @@ export default function CorporateLeadForm({ cityFormatted, defaultServiceType }:
               <span>Pickup Time *</span>
             </label>
             <div className="flex gap-2 items-center">
-              <select
-                value={formData.shiftStartHour}
-                onChange={(e) => setFormData({ ...formData, shiftStartHour: e.target.value })}
-                className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono"
-              >
-                <option value="" disabled hidden className="bg-slate-900">Hour</option>
-                {["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"].map((h) => (
-                  <option key={h} value={h} className="bg-slate-900">{h}</option>
-                ))}
-              </select>
+              <div className="relative flex-1">
+                <select
+                  value={formData.shiftStartHour}
+                  onChange={(e) => setFormData({ ...formData, shiftStartHour: e.target.value })}
+                  className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 pl-2 pr-6 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono appearance-none cursor-pointer"
+                >
+                  <option value="" disabled hidden className="bg-slate-900">Hour</option>
+                  {["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"].map((h) => (
+                    <option key={h} value={h} className="bg-slate-900">{h}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+              </div>
 
-              <select
-                value={formData.shiftStartMinute}
-                onChange={(e) => setFormData({ ...formData, shiftStartMinute: e.target.value })}
-                className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono"
-              >
-                <option value="" disabled hidden className="bg-slate-900">Minutes</option>
-                {["00", "15", "30", "45"].map((m) => (
-                  <option key={m} value={m} className="bg-slate-900">{m}</option>
-                ))}
-              </select>
+              <div className="relative flex-1">
+                <select
+                  value={formData.shiftStartMinute}
+                  onChange={(e) => setFormData({ ...formData, shiftStartMinute: e.target.value })}
+                  className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 pl-2 pr-6 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono appearance-none cursor-pointer"
+                >
+                  <option value="" disabled hidden className="bg-slate-900">Minutes</option>
+                  {["00", "15", "30", "45"].map((m) => (
+                    <option key={m} value={m} className="bg-slate-900">{m}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+              </div>
 
               {/* AM / PM Segmented Tab Control */}
               <div className="flex bg-slate-950/80 p-1 border border-white/10 rounded-lg shrink-0">
@@ -283,27 +292,33 @@ export default function CorporateLeadForm({ cityFormatted, defaultServiceType }:
               <span>Drop Time *</span>
             </label>
             <div className="flex gap-2 items-center">
-              <select
-                value={formData.shiftEndHour}
-                onChange={(e) => setFormData({ ...formData, shiftEndHour: e.target.value })}
-                className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono"
-              >
-                <option value="" disabled hidden className="bg-slate-900">Hour</option>
-                {["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"].map((h) => (
-                  <option key={h} value={h} className="bg-slate-900">{h}</option>
-                ))}
-              </select>
+              <div className="relative flex-1">
+                <select
+                  value={formData.shiftEndHour}
+                  onChange={(e) => setFormData({ ...formData, shiftEndHour: e.target.value })}
+                  className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 pl-2 pr-6 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono appearance-none cursor-pointer"
+                >
+                  <option value="" disabled hidden className="bg-slate-900">Hour</option>
+                  {["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"].map((h) => (
+                    <option key={h} value={h} className="bg-slate-900">{h}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+              </div>
 
-              <select
-                value={formData.shiftEndMinute}
-                onChange={(e) => setFormData({ ...formData, shiftEndMinute: e.target.value })}
-                className="flex-1 bg-slate-950/50 border border-white/10 rounded-lg py-2 px-2 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono"
-              >
-                <option value="" disabled hidden className="bg-slate-900">Minutes</option>
-                {["00", "15", "30", "45"].map((m) => (
-                  <option key={m} value={m} className="bg-slate-900">{m}</option>
-                ))}
-              </select>
+              <div className="relative flex-1">
+                <select
+                  value={formData.shiftEndMinute}
+                  onChange={(e) => setFormData({ ...formData, shiftEndMinute: e.target.value })}
+                  className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 pl-2 pr-6 text-xs text-slate-100 focus:outline-none focus:border-primary font-mono appearance-none cursor-pointer"
+                >
+                  <option value="" disabled hidden className="bg-slate-900">Minutes</option>
+                  {["00", "15", "30", "45"].map((m) => (
+                    <option key={m} value={m} className="bg-slate-900">{m}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+              </div>
 
               {/* AM / PM Segmented Tab Control */}
               <div className="flex bg-slate-950/80 p-1 border border-white/10 rounded-lg shrink-0">
