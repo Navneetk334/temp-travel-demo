@@ -1060,23 +1060,28 @@ export default function BookingWidget() {
 
               {/* Row 3: Vehicle Category, Vehicle Class, Vehicle Model in 1 line */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Vehicle Category */}
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Vehicle Category *</label>
                   <div className="relative h-[42px]">
                     <select
                       value={localData.vehicleCategoryId}
-                      onChange={(e) => setLocalData({ ...localData, vehicleCategoryId: e.target.value })}
+                      onChange={(e) => {
+                        const cat = e.target.value;
+                        setLocalData({ ...localData, vehicleCategoryId: cat, vehicleClass: "", vehicleModel: "" });
+                      }}
                       className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
                     >
                       <option value="" disabled className="bg-slate-900">- Please Select -</option>
-                      {categories.map((cat) => (
-                        <option key={cat.id} value={cat.id} className="bg-slate-900">{cat.name}</option>
-                      ))}
+                      <option value="Sedan" className="bg-slate-900">Sedan</option>
+                      <option value="SUV" className="bg-slate-900">SUV</option>
+                      <option value="Traveller" className="bg-slate-900">Traveller</option>
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                   </div>
                 </div>
 
+                {/* Vehicle Class */}
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Vehicle Class *</label>
                   <div className="relative h-[42px]">
@@ -1086,15 +1091,34 @@ export default function BookingWidget() {
                       className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
                     >
                       <option value="" disabled className="bg-slate-900">- Please Select -</option>
-                      <option value="Executive" className="bg-slate-900">Executive Class</option>
-                      <option value="Premium" className="bg-slate-900">Premium Class</option>
-                      <option value="Luxury" className="bg-slate-900">Luxury Class</option>
-                      <option value="Economy" className="bg-slate-900">Economy Class</option>
+                      {localData.vehicleCategoryId === "SUV" ? (
+                        <>
+                          <option value="Subcompact/Urban" className="bg-slate-900">Subcompact / Urban</option>
+                          <option value="Mid-Premium" className="bg-slate-900">Mid-Premium</option>
+                          <option value="Premium" className="bg-slate-900">Premium</option>
+                          <option value="Luxury" className="bg-slate-900">Luxury</option>
+                        </>
+                      ) : localData.vehicleCategoryId === "Traveller" ? (
+                        <>
+                          <option value="Standard Traveller" className="bg-slate-900">Standard Traveller</option>
+                          <option value="Executive Traveller" className="bg-slate-900">Executive Traveller</option>
+                          <option value="Luxury Maharaja" className="bg-slate-900">Luxury Maharaja</option>
+                        </>
+                      ) : (
+                        /* Default / Sedan */
+                        <>
+                          <option value="Compact" className="bg-slate-900">Compact</option>
+                          <option value="Executive" className="bg-slate-900">Executive</option>
+                          <option value="Premium Executive" className="bg-slate-900">Premium Executive</option>
+                          <option value="Luxury" className="bg-slate-900">Luxury</option>
+                        </>
+                      )}
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                   </div>
                 </div>
 
+                {/* Vehicle Model */}
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Vehicle Model *</label>
                   <div className="relative h-[42px]">
@@ -1104,13 +1128,29 @@ export default function BookingWidget() {
                       className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
                     >
                       <option value="" disabled className="bg-slate-900">- Please Select -</option>
-                      <option value="Swift Dzire / Etios" className="bg-slate-900">Swift Dzire / Etios (Sedan)</option>
-                      <option value="Ertiga / XL6" className="bg-slate-900">Ertiga / XL6 (SUV)</option>
-                      <option value="Innova Crysta" className="bg-slate-900">Innova Crysta (Premium SUV)</option>
-                      <option value="Innova Hycross" className="bg-slate-900">Innova Hycross (Hybrid SUV)</option>
-                      <option value="Toyota Fortuner" className="bg-slate-900">Toyota Fortuner (Luxury SUV)</option>
-                      <option value="BMW 5 / Mercedes E-Class" className="bg-slate-900">BMW 5 / Mercedes E-Class (Luxury Sedan)</option>
-                      <option value="Tempo Traveller" className="bg-slate-900">Tempo Traveller (Minibus)</option>
+                      {localData.vehicleCategoryId === "SUV" ? (
+                        <>
+                          <option value="Ertiga / XL6" className="bg-slate-900">Ertiga / XL6 (SUV)</option>
+                          <option value="Innova Crysta" className="bg-slate-900">Innova Crysta (Premium SUV)</option>
+                          <option value="Innova Hycross" className="bg-slate-900">Innova Hycross (Hybrid SUV)</option>
+                          <option value="Toyota Fortuner" className="bg-slate-900">Toyota Fortuner (Luxury SUV)</option>
+                        </>
+                      ) : localData.vehicleCategoryId === "Traveller" ? (
+                        <>
+                          <option value="Tempo Traveller 12 Seater" className="bg-slate-900">Tempo Traveller 12 Seater</option>
+                          <option value="Tempo Traveller 17 Seater" className="bg-slate-900">Tempo Traveller 17 Seater</option>
+                          <option value="Tempo Traveller 26 Seater" className="bg-slate-900">Tempo Traveller 26 Seater</option>
+                          <option value="Urbania Luxury Minibus" className="bg-slate-900">Urbania Luxury Minibus</option>
+                        </>
+                      ) : (
+                        /* Default / Sedan */
+                        <>
+                          <option value="Swift Dzire / Etios" className="bg-slate-900">Swift Dzire / Etios (Sedan)</option>
+                          <option value="Honda City / Ciaz" className="bg-slate-900">Honda City / Ciaz (Executive Sedan)</option>
+                          <option value="Camry / Accord" className="bg-slate-900">Camry / Accord (Premium Executive)</option>
+                          <option value="BMW 5 / Mercedes E-Class" className="bg-slate-900">BMW 5 / Mercedes E-Class (Luxury Sedan)</option>
+                        </>
+                      )}
                       <option value="Any Available" className="bg-slate-900">Any Available Model</option>
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -1184,9 +1224,9 @@ export default function BookingWidget() {
                     className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
                   >
                     <option value="" disabled className="bg-slate-900">- Please Select -</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id} className="bg-slate-900">{cat.name}</option>
-                    ))}
+                    <option value="Sedan" className="bg-slate-900">Sedan</option>
+                    <option value="SUV" className="bg-slate-900">SUV</option>
+                    <option value="Traveller" className="bg-slate-900">Traveller</option>
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 </div>
