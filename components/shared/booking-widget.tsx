@@ -266,6 +266,28 @@ export default function BookingWidget() {
   const [companyGoogleSuggestions, setCompanyGoogleSuggestions] = useState<any[]>([]);
   const [companyLoading, setCompanyLoading] = useState(false);
 
+  // Dynamic lists from DB
+  const [categories, setCategories] = useState<any[]>([]);
+  const [tours, setTours] = useState<any[]>([]);
+
+  // State for forms
+  const [corpData, setCorpData] = useState({
+    company: "",
+    contactName: "",
+    email: "",
+    phone: "",
+    employeeId: "",
+    gender: "Male",
+    shiftStartHour: "09",
+    shiftStartMinute: "00",
+    shiftStartAmpm: "AM",
+    shiftEndHour: "06",
+    shiftEndMinute: "00",
+    shiftEndAmpm: "PM",
+    pickup: "",
+    drop: ""
+  });
+
   // Debounced search for Company Name via Google Places & Business DB
   useEffect(() => {
     const query = corpData.company.trim();
@@ -294,28 +316,6 @@ export default function BookingWidget() {
 
     return () => clearTimeout(timer);
   }, [corpData.company]);
-
-  // Dynamic lists from DB
-  const [categories, setCategories] = useState<any[]>([]);
-  const [tours, setTours] = useState<any[]>([]);
-
-  // State for forms
-  const [corpData, setCorpData] = useState({
-    company: "",
-    contactName: "",
-    email: "",
-    phone: "",
-    employeeId: "",
-    gender: "Male",
-    shiftStartHour: "09",
-    shiftStartMinute: "00",
-    shiftStartAmpm: "AM",
-    shiftEndHour: "06",
-    shiftEndMinute: "00",
-    shiftEndAmpm: "PM",
-    pickup: "",
-    drop: ""
-  });
 
   const [localData, setLocalData] = useState({
     name: "",
