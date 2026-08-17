@@ -272,43 +272,6 @@ export default function Home2Page() {
         </div>
       </section>
 
-      {/* Safety & Quality Guarantee Banner */}
-      <section className="py-20 bg-slate-950 px-4 sm:px-6 lg:px-8 border-b border-white/5">
-        <div className="max-w-7xl mx-auto bg-gradient-to-r from-slate-900 via-slate-900/90 to-slate-950 border border-white/10 rounded-3xl p-8 md:p-12 relative overflow-hidden">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-            <div className="space-y-3">
-              <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center">
-                <ShieldCheck className="w-6 h-6 text-amber-400" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-50">100% Police Verified Chauffeurs</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Background credentials, driving license history, and address records are verified before driver onboarding.
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center">
-                <Clock className="w-6 h-6 text-amber-400" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-50">Guaranteed On-Time Pickup</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Automated driver dispatch alerts ensure cab placement at pickup location at least 10 minutes prior to scheduled time.
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center">
-                <Award className="w-6 h-6 text-amber-400" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-50">Zero Cancellation Assurance</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Once confirmed, your ride is guaranteed. In the rare event of vehicle breakdown, a replacement is dispatched instantly.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Testimonials / Reviews Section */}
       <section className="py-24 bg-slate-900/40 px-4 sm:px-6 lg:px-8 border-b border-white/5">
         <div className="max-w-7xl mx-auto space-y-16">
@@ -351,6 +314,126 @@ export default function Home2Page() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Fleet Showcase Interactive Section */}
+      <section id="fleet" className="py-24 bg-slate-900/60 px-4 sm:px-6 lg:px-8 border-b border-white/5">
+        <div className="max-w-7xl mx-auto space-y-12">
+          <div className="text-center space-y-4">
+            <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">Our Luxury & Commercial Fleet</span>
+            <h2 className="text-3xl sm:text-5xl font-black text-slate-50 tracking-tight">Immaculate Vehicles For Every Journey</h2>
+            <p className="text-slate-300 max-w-2xl mx-auto text-sm">
+              All vehicles are thoroughly sanitized, equipped with GPS trackers, emergency SOS buttons, and driven by certified chauffeurs.
+            </p>
+
+            {/* Category Tabs */}
+            <div className="flex justify-center gap-3 pt-4">
+              {[
+                { id: "sedan", label: "Sedan Fleet" },
+                { id: "suv", label: "SUV & MUV Fleet" },
+                { id: "luxury", label: "Luxury & Group Coaches" }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`px-6 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all border ${
+                    activeTab === tab.id
+                      ? "bg-amber-500 border-amber-500 text-slate-950 shadow-lg shadow-amber-500/20"
+                      : "bg-slate-950/60 border-white/10 text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Vehicle Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {fleetData[activeTab].map((vehicle, idx) => (
+              <div key={idx} className="bg-slate-950 border border-white/10 rounded-2xl overflow-hidden hover:border-amber-400/50 transition-all duration-300 group shadow-xl flex flex-col">
+                <div className="relative h-48 bg-slate-900 overflow-hidden">
+                  <Image
+                    src={vehicle.img}
+                    alt={vehicle.name}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute top-3 right-3 bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-[10px] font-bold text-amber-400">
+                    {vehicle.category}
+                  </div>
+                </div>
+
+                <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-bold text-slate-100 group-hover:text-amber-400 transition-colors">{vehicle.name}</h3>
+                    <div className="flex items-center gap-4 text-xs text-slate-400">
+                      <span className="flex items-center gap-1">
+                        <Users className="w-3.5 h-3.5 text-amber-400" />
+                        {vehicle.seats}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Shield className="w-3.5 h-3.5 text-emerald-400" />
+                        GPS Enabled
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-white/10 flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] text-slate-400 block uppercase font-bold">Base Tariff</span>
+                      <span className="text-base font-black text-amber-400">{vehicle.rate}</span>
+                    </div>
+                    <a
+                      href="#book-widget"
+                      className="inline-flex items-center gap-1 text-xs font-extrabold text-slate-100 bg-white/5 hover:bg-amber-500 hover:text-slate-950 px-4 py-2 rounded-lg transition-all border border-white/10"
+                    >
+                      <span>Book Now</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Safety & Quality Guarantee Banner */}
+      <section className="py-20 bg-slate-950 px-4 sm:px-6 lg:px-8 border-b border-white/5">
+        <div className="max-w-7xl mx-auto bg-gradient-to-r from-slate-900 via-slate-900/90 to-slate-950 border border-white/10 rounded-3xl p-8 md:p-12 relative overflow-hidden">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+            <div className="space-y-3">
+              <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center">
+                <ShieldCheck className="w-6 h-6 text-amber-400" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-50">100% Police Verified Chauffeurs</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Background credentials, driving license history, and address records are verified before driver onboarding.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center">
+                <Clock className="w-6 h-6 text-amber-400" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-50">Guaranteed On-Time Pickup</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Automated driver dispatch alerts ensure cab placement at pickup location at least 10 minutes prior to scheduled time.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center">
+                <Award className="w-6 h-6 text-amber-400" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-50">Zero Cancellation Assurance</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Once confirmed, your ride is guaranteed. In the rare event of vehicle breakdown, a replacement is dispatched instantly.
+              </p>
+            </div>
           </div>
         </div>
       </section>
