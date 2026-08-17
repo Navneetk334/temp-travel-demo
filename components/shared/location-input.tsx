@@ -174,7 +174,9 @@ export default function LocationInput({
           className={`w-full bg-slate-950/60 border border-white/10 rounded-lg py-2.5 pl-10 pr-9 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/40 transition-all ${className}`}
         />
         {(loading || locating) && (
-          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-accent animate-spin pointer-events-none" />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none text-accent">
+            <Loader2 className="w-4 h-4 animate-spin" />
+          </div>
         )}
       </div>
 
