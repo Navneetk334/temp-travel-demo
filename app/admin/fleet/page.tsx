@@ -30,6 +30,7 @@ interface Vehicle {
   model: string;
   make: string;
   registrationNumber: string;
+  subCategory?: string | null;
   capacity: number;
   fuelType?: string | null;
   transmission?: string | null;
@@ -105,6 +106,7 @@ export default function AdminFleetPage() {
     model: "",
     make: "",
     registrationNumber: "",
+    subCategory: "Executive",
     capacity: 4,
     fuelType: "DIESEL",
     transmission: "MANUAL",
@@ -160,11 +162,12 @@ export default function AdminFleetPage() {
           }
         }
 
-        setCategories(cData);
+        const loadedCats = Array.isArray(cData) ? cData : (cData.categories || []);
+        setCategories(loadedCats);
         setDrivers(dData);
 
-        if (cData.length > 0 && !formData.categoryId) {
-          setFormData(prev => ({ ...prev, categoryId: cData[0].id }));
+        if (loadedCats.length > 0 && !formData.categoryId) {
+          setFormData(prev => ({ ...prev, categoryId: loadedCats[0].id }));
         }
       }
     } catch (err) {
@@ -186,6 +189,7 @@ export default function AdminFleetPage() {
         model: vehicle.model,
         make: vehicle.make,
         registrationNumber: vehicle.registrationNumber,
+        subCategory: vehicle.subCategory || "Executive",
         capacity: vehicle.capacity,
         fuelType: vehicle.fuelType || "DIESEL",
         transmission: vehicle.transmission || "MANUAL",
@@ -195,15 +199,17 @@ export default function AdminFleetPage() {
         extraKmRate: vehicle.extraKmRate ? String(vehicle.extraKmRate) : "",
         extraHourRate: vehicle.extraHrRate ? String(vehicle.extraHrRate) : "",
         status: vehicle.status,
-        categoryId: vehicle.categoryId,
+        categoryId: vehicle.categoryId || (categories[0]?.id || ""),
         driverId: vehicle.driverId || "",
       });
     } else {
       setEditingVehicle(null);
+      const defaultCatId = categories.length > 0 ? categories[0].id : "";
       setFormData({
         model: "",
         make: "",
         registrationNumber: "",
+        subCategory: "Compact",
         capacity: 4,
         fuelType: "DIESEL",
         transmission: "MANUAL",
@@ -213,7 +219,7 @@ export default function AdminFleetPage() {
         extraKmRate: "",
         extraHourRate: "",
         status: "AVAILABLE",
-        categoryId: categories.length > 0 ? categories[0].id : "",
+        categoryId: defaultCatId,
         driverId: "",
       });
     }
@@ -230,6 +236,7 @@ export default function AdminFleetPage() {
         model: formData.model,
         make: formData.make,
         registrationNumber: formData.registrationNumber,
+        subCategory: formData.subCategory,
         capacity: Number(formData.capacity),
         fuelType: formData.fuelType,
         transmission: formData.transmission,
@@ -492,7 +499,14 @@ export default function AdminFleetPage() {
                           )}
                         </td>
                         <td className="p-4">
-                          <div className="font-bold text-slate-200">{v.category?.name || "Standard"}</div>
+                          <div className="font-bold text-slate-200 flex items-center gap-1.5">
+                            <span>{v.category?.name || "Standard"}</span>
+                            {v.subCategory && (
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                {v.subCategory}
+                              </span>
+                            )}
+                          </div>
                           <div className="text-slate-400 mt-0.5">{v.capacity} Passenger Seats</div>
                         </td>
                         <td className="p-4">
@@ -658,13 +672,68 @@ export default function AdminFleetPage() {
                   <select
                     required
                     value={formData.categoryId}
-                    onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                    onChange={(e) => {
+                      const newCatId = e.target.value;
+                      const selectedCat = categories.find(c => c.id === newCatId);
+                      const catName = (selectedCat?.name || "").toLowerCase();
+                      let defaultSub = "Executive";
+                      if (catName.includes("sedan")) defaultSub = "Compact";
+                      else if (catName.includes("suv")) defaultSub = "Subcompact / Urban";
+                      else if (catName.includes("hatchback")) defaultSub = "Compact";
+
+                      setFormData({ ...formData, categoryId: newCatId, subCategory: defaultSub });
+                    }}
                     className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                   >
-                    <option value="" disabled>Select Vehicle Category</option>
+                    <option value="" disabled>-- Select Vehicle Category --</option>
                     {categories.map((c) => (
                       <option key={c.id} value={c.id} className="bg-slate-900">{c.name}</option>
                     ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Vehicle Class *</label>
+                  <select
+                    required
+                    value={formData.subCategory || "Executive"}
+                    onChange={(e) => setFormData({ ...formData, subCategory: e.target.value })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                  >
+                    {(() => {
+                      const selectedCat = categories.find(c => c.id === formData.categoryId);
+                      const catName = (selectedCat?.name || "").toLowerCase();
+
+                      if (catName.includes("sedan")) {
+                        return (
+                          <>
+                            <option value="Compact" className="bg-slate-900">Compact (e.g. Swift Dzire, Aura, Amaze)</option>
+                            <option value="Executive" className="bg-slate-900">Executive (e.g. Honda City, Verna, Ciaz)</option>
+                            <option value="Premium Executive" className="bg-slate-900">Premium Executive (e.g. Camry, Superb)</option>
+                            <option value="Luxury" className="bg-slate-900">Luxury (e.g. E-Class, 5 Series, A6)</option>
+                          </>
+                        );
+                      }
+                      if (catName.includes("suv")) {
+                        return (
+                          <>
+                            <option value="Subcompact / Urban" className="bg-slate-900">Subcompact / Urban (e.g. Brezza, Nexon, Venue)</option>
+                            <option value="Mid-Premium" className="bg-slate-900">Mid-Premium (e.g. Creta, Seltos, Harrier)</option>
+                            <option value="Premium" className="bg-slate-900">Premium (e.g. Innova Crysta, XUV700, Safari)</option>
+                            <option value="Luxury" className="bg-slate-900">Luxury (e.g. Fortuner, GLE, X5)</option>
+                          </>
+                        );
+                      }
+                      return (
+                        <>
+                          <option value="Compact" className="bg-slate-900">Compact</option>
+                          <option value="Standard" className="bg-slate-900">Standard</option>
+                          <option value="Executive" className="bg-slate-900">Executive</option>
+                          <option value="Premium" className="bg-slate-900">Premium</option>
+                          <option value="Luxury" className="bg-slate-900">Luxury</option>
+                        </>
+                      );
+                    })()}
                   </select>
                 </div>
               </div>
