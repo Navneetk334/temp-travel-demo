@@ -1034,9 +1034,11 @@ export default function BookingWidget() {
                       type="date"
                       required
                       value={localData.pickupDate}
+                      onClick={(e) => e.currentTarget.showPicker?.()}
                       onChange={(e) => setLocalData({ ...localData, pickupDate: e.target.value })}
-                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-3 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:invert"
+                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all cursor-pointer [color-scheme:dark]"
                     />
+                    <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -1047,9 +1049,11 @@ export default function BookingWidget() {
                       type="time"
                       required
                       value={localData.pickupTime}
+                      onClick={(e) => e.currentTarget.showPicker?.()}
                       onChange={(e) => setLocalData({ ...localData, pickupTime: e.target.value })}
-                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-3 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:invert"
+                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all cursor-pointer [color-scheme:dark]"
                     />
+                    <Clock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
                   </div>
                 </div>
               </div>
@@ -1196,9 +1200,11 @@ export default function BookingWidget() {
                     type="date"
                     required
                     value={outstationData.date}
+                    onClick={(e) => e.currentTarget.showPicker?.()}
                     onChange={(e) => setOutstationData({ ...outstationData, date: e.target.value })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-3 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:invert"
+                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all cursor-pointer [color-scheme:dark]"
                   />
+                  <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
                 </div>
               </div>
 
@@ -1211,9 +1217,11 @@ export default function BookingWidget() {
                       type="date"
                       required
                       value={outstationData.returnDate}
+                      onClick={(e) => e.currentTarget.showPicker?.()}
                       onChange={(e) => setOutstationData({ ...outstationData, returnDate: e.target.value })}
-                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-3 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:invert"
+                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all cursor-pointer [color-scheme:dark]"
                     />
+                    <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
                   </div>
                 </div>
               )}
