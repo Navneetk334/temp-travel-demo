@@ -323,6 +323,7 @@ export default function BookingWidget() {
     email: "",
     phone: "",
     pickupLocation: "",
+    vehicleCategory: "",
     vehicleCategoryId: "",
     vehicleClass: "",
     vehicleModel: "",
@@ -1060,52 +1061,47 @@ export default function BookingWidget() {
 
               {/* Row 3: Vehicle Category, Vehicle Class, Vehicle Model in 1 line */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Vehicle Category */}
+                {/* Column 1: Vehicle Category (Sedan & SUV only) */}
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Vehicle Category *</label>
                   <div className="relative h-[42px]">
                     <select
-                      value={localData.vehicleCategoryId}
+                      value={localData.vehicleCategory || ""}
                       onChange={(e) => {
-                        const cat = e.target.value;
-                        setLocalData({ ...localData, vehicleCategoryId: cat, vehicleClass: "", vehicleModel: "" });
+                        const val = e.target.value;
+                        const matchedCat = categories.find(c => c.name.toLowerCase().includes(val.toLowerCase()));
+                        setLocalData({
+                          ...localData,
+                          vehicleCategory: val,
+                          vehicleCategoryId: matchedCat ? matchedCat.id : (categories[0]?.id || ""),
+                          vehicleClass: "",
+                          vehicleModel: ""
+                        });
                       }}
                       className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
                     >
                       <option value="" disabled className="bg-slate-900">- Please Select -</option>
                       <option value="Sedan" className="bg-slate-900">Sedan</option>
                       <option value="SUV" className="bg-slate-900">SUV</option>
-                      <option value="Traveller" className="bg-slate-900">Traveller</option>
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                   </div>
                 </div>
 
-                {/* Vehicle Class */}
+                {/* Column 2: Vehicle Class (Dynamic based on Category) */}
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Vehicle Class *</label>
                   <div className="relative h-[42px]">
                     <select
                       value={localData.vehicleClass || ""}
                       onChange={(e) => setLocalData({ ...localData, vehicleClass: e.target.value })}
-                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
+                      disabled={!localData.vehicleCategory}
+                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <option value="" disabled className="bg-slate-900">- Please Select -</option>
-                      {localData.vehicleCategoryId === "SUV" ? (
-                        <>
-                          <option value="Subcompact/Urban" className="bg-slate-900">Subcompact / Urban</option>
-                          <option value="Mid-Premium" className="bg-slate-900">Mid-Premium</option>
-                          <option value="Premium" className="bg-slate-900">Premium</option>
-                          <option value="Luxury" className="bg-slate-900">Luxury</option>
-                        </>
-                      ) : localData.vehicleCategoryId === "Traveller" ? (
-                        <>
-                          <option value="Standard Traveller" className="bg-slate-900">Standard Traveller</option>
-                          <option value="Executive Traveller" className="bg-slate-900">Executive Traveller</option>
-                          <option value="Luxury Maharaja" className="bg-slate-900">Luxury Maharaja</option>
-                        </>
-                      ) : (
-                        /* Default / Sedan */
+                      <option value="" disabled className="bg-slate-900">
+                        {localData.vehicleCategory ? "- Please Select -" : "- Select Category First -"}
+                      </option> <option></option>
+                      {localData.vehicleCategory === "Sedan" && (
                         <>
                           <option value="Compact" className="bg-slate-900">Compact</option>
                           <option value="Executive" className="bg-slate-900">Executive</option>
@@ -1113,45 +1109,50 @@ export default function BookingWidget() {
                           <option value="Luxury" className="bg-slate-900">Luxury</option>
                         </>
                       )}
+                      {localData.vehicleCategory === "SUV" && (
+                        <>
+                          <option value="Subcompact / Urban" className="bg-slate-900">Subcompact / Urban</option>
+                          <option value="Mid-Premium" className="bg-slate-900">Mid-Premium</option>
+                          <option value="Premium" className="bg-slate-900">Premium</option>
+                          <option value="Luxury" className="bg-slate-900">Luxury</option>
+                        </>
+                      )}
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                   </div>
                 </div>
 
-                {/* Vehicle Model */}
+                {/* Column 3: Vehicle Model (Dynamic based on Category) */}
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Vehicle Model *</label>
                   <div className="relative h-[42px]">
                     <select
                       value={localData.vehicleModel || ""}
                       onChange={(e) => setLocalData({ ...localData, vehicleModel: e.target.value })}
-                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
+                      disabled={!localData.vehicleCategory}
+                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <option value="" disabled className="bg-slate-900">- Please Select -</option>
-                      {localData.vehicleCategoryId === "SUV" ? (
+                      <option value="" disabled className="bg-slate-900">
+                        {localData.vehicleCategory ? "- Please Select -" : "- Select Category First -"}
+                      </option>
+                      {localData.vehicleCategory === "Sedan" && (
                         <>
-                          <option value="Ertiga / XL6" className="bg-slate-900">Ertiga / XL6 (SUV)</option>
-                          <option value="Innova Crysta" className="bg-slate-900">Innova Crysta (Premium SUV)</option>
-                          <option value="Innova Hycross" className="bg-slate-900">Innova Hycross (Hybrid SUV)</option>
-                          <option value="Toyota Fortuner" className="bg-slate-900">Toyota Fortuner (Luxury SUV)</option>
-                        </>
-                      ) : localData.vehicleCategoryId === "Traveller" ? (
-                        <>
-                          <option value="Tempo Traveller 12 Seater" className="bg-slate-900">Tempo Traveller 12 Seater</option>
-                          <option value="Tempo Traveller 17 Seater" className="bg-slate-900">Tempo Traveller 17 Seater</option>
-                          <option value="Tempo Traveller 26 Seater" className="bg-slate-900">Tempo Traveller 26 Seater</option>
-                          <option value="Urbania Luxury Minibus" className="bg-slate-900">Urbania Luxury Minibus</option>
-                        </>
-                      ) : (
-                        /* Default / Sedan */
-                        <>
-                          <option value="Swift Dzire / Etios" className="bg-slate-900">Swift Dzire / Etios (Sedan)</option>
-                          <option value="Honda City / Ciaz" className="bg-slate-900">Honda City / Ciaz (Executive Sedan)</option>
-                          <option value="Camry / Accord" className="bg-slate-900">Camry / Accord (Premium Executive)</option>
-                          <option value="BMW 5 / Mercedes E-Class" className="bg-slate-900">BMW 5 / Mercedes E-Class (Luxury Sedan)</option>
+                          <option value="Swift Dzire / Etios" className="bg-slate-900">Swift Dzire / Etios (Compact)</option>
+                          <option value="Honda City / Hyundai Verna" className="bg-slate-900">Honda City / Hyundai Verna (Executive)</option>
+                          <option value="Toyota Camry / Skoda Superb" className="bg-slate-900">Toyota Camry / Skoda Superb (Premium Executive)</option>
+                          <option value="BMW 5 / Mercedes E-Class" className="bg-slate-900">BMW 5 / Mercedes E-Class (Luxury)</option>
+                          <option value="Any Available Sedan" className="bg-slate-900">Any Available Sedan</option>
                         </>
                       )}
-                      <option value="Any Available" className="bg-slate-900">Any Available Model</option>
+                      {localData.vehicleCategory === "SUV" && (
+                        <>
+                          <option value="Ertiga / XL6 / Carens" className="bg-slate-900">Ertiga / XL6 / Carens (Subcompact / Urban)</option>
+                          <option value="Innova Crysta" className="bg-slate-900">Innova Crysta (Mid-Premium)</option>
+                          <option value="Innova Hycross" className="bg-slate-900">Innova Hycross (Premium)</option>
+                          <option value="Toyota Fortuner / Audi Q5" className="bg-slate-900">Toyota Fortuner / Audi Q5 (Luxury)</option>
+                          <option value="Any Available SUV" className="bg-slate-900">Any Available SUV</option>
+                        </>
+                      )}
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                   </div>
@@ -1224,9 +1225,9 @@ export default function BookingWidget() {
                     className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
                   >
                     <option value="" disabled className="bg-slate-900">- Please Select -</option>
-                    <option value="Sedan" className="bg-slate-900">Sedan</option>
-                    <option value="SUV" className="bg-slate-900">SUV</option>
-                    <option value="Traveller" className="bg-slate-900">Traveller</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id} className="bg-slate-900">{cat.name}</option>
+                    ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 </div>
