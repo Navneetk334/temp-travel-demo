@@ -22,6 +22,9 @@ export async function GET(req: NextRequest) {
         { name: { contains: search, mode: "insensitive" } },
         { phone: { contains: search, mode: "insensitive" } },
         { email: { contains: search, mode: "insensitive" } },
+        { aadhaarNumber: { contains: search, mode: "insensitive" } },
+        { panNumber: { contains: search, mode: "insensitive" } },
+        { licenseNumber: { contains: search, mode: "insensitive" } },
       ];
     }
 
@@ -34,6 +37,12 @@ export async function GET(req: NextRequest) {
         phone: true,
         role: true,
         isActive: true,
+        photoUrl: true,
+        aadhaarNumber: true,
+        panNumber: true,
+        dob: true,
+        dateOfJoining: true,
+        licenseNumber: true,
         createdAt: true,
         vehicle: {
           select: {
@@ -62,7 +71,19 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name, phone, email, password, isActive } = body;
+    const { 
+      name, 
+      phone, 
+      email, 
+      password, 
+      isActive,
+      photoUrl,
+      aadhaarNumber,
+      panNumber,
+      dob,
+      dateOfJoining,
+      licenseNumber
+    } = body;
 
     if (!name || !phone || !email) {
       return NextResponse.json({ error: "Name, phone, and email are required" }, { status: 400 });
@@ -92,6 +113,12 @@ export async function POST(req: NextRequest) {
         passwordHash,
         role: "DRIVER",
         isActive: isActive ?? true,
+        photoUrl: photoUrl?.trim() || null,
+        aadhaarNumber: aadhaarNumber?.trim() || null,
+        panNumber: panNumber?.trim()?.toUpperCase() || null,
+        licenseNumber: licenseNumber?.trim()?.toUpperCase() || null,
+        dob: dob ? new Date(dob) : null,
+        dateOfJoining: dateOfJoining ? new Date(dateOfJoining) : new Date(),
       },
       select: {
         id: true,
@@ -100,6 +127,12 @@ export async function POST(req: NextRequest) {
         phone: true,
         role: true,
         isActive: true,
+        photoUrl: true,
+        aadhaarNumber: true,
+        panNumber: true,
+        dob: true,
+        dateOfJoining: true,
+        licenseNumber: true,
         createdAt: true,
       }
     });
@@ -107,6 +140,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(driver, { status: 201 });
   } catch (error: any) {
     console.error("POST /api/admin/drivers error:", error);
-    return NextResponse.json({ error: "Failed to create driver account" }, { status: 500 });
+    return NextResponse.json({ error: error?.message || "Failed to create driver account" }, { status: 500 });
   }
 }

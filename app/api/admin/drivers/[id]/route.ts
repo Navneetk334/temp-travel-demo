@@ -12,7 +12,19 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     const { id } = await params;
     const body = await req.json();
-    const { name, phone, email, password, isActive } = body;
+    const { 
+      name, 
+      phone, 
+      email, 
+      password, 
+      isActive,
+      photoUrl,
+      aadhaarNumber,
+      panNumber,
+      dob,
+      dateOfJoining,
+      licenseNumber
+    } = body;
 
     const existingDriver = await prisma.user.findUnique({
       where: { id }
@@ -27,6 +39,13 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (email) updateData.email = email.trim().toLowerCase();
     if (phone) updateData.phone = phone.trim();
     if (typeof isActive === "boolean") updateData.isActive = isActive;
+    if (photoUrl !== undefined) updateData.photoUrl = photoUrl ? photoUrl.trim() : null;
+    if (aadhaarNumber !== undefined) updateData.aadhaarNumber = aadhaarNumber ? aadhaarNumber.trim() : null;
+    if (panNumber !== undefined) updateData.panNumber = panNumber ? panNumber.trim().toUpperCase() : null;
+    if (licenseNumber !== undefined) updateData.licenseNumber = licenseNumber ? licenseNumber.trim().toUpperCase() : null;
+    if (dob !== undefined) updateData.dob = dob ? new Date(dob) : null;
+    if (dateOfJoining !== undefined) updateData.dateOfJoining = dateOfJoining ? new Date(dateOfJoining) : null;
+
     if (password && password.trim()) {
       updateData.passwordHash = await bcrypt.hash(password.trim(), 10);
     }
@@ -41,6 +60,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         phone: true,
         role: true,
         isActive: true,
+        photoUrl: true,
+        aadhaarNumber: true,
+        panNumber: true,
+        dob: true,
+        dateOfJoining: true,
+        licenseNumber: true,
         updatedAt: true,
       }
     });
@@ -48,7 +73,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.json(updatedDriver, { status: 200 });
   } catch (error: any) {
     console.error("PUT /api/admin/drivers/[id] error:", error);
-    return NextResponse.json({ error: "Failed to update driver" }, { status: 500 });
+    return NextResponse.json({ error: error?.message || "Failed to update driver" }, { status: 500 });
   }
 }
 
