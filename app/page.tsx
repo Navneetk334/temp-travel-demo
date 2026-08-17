@@ -1,12 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import BookingWidget from "@/components/shared/booking-widget";
 import { JsonLd } from "@/components/shared/json-ld";
 import Header from "@/components/shared/header";
 import Footer from "@/components/shared/footer";
-import ContactForm from "@/components/shared/contact-form";
 import {
   Building2,
   Car,
@@ -18,15 +17,18 @@ import {
   Award,
   Clock,
   Users,
-  Compass,
   ArrowUpRight,
   ChevronRight,
-  TrendingUp
+  Sparkles,
+  CheckCircle2,
+  ChevronDown,
+  Shield
 } from "lucide-react";
 
 export default function Homepage() {
+  const [activeTab, setActiveTab] = useState<"sedan" | "suv" | "luxury">("sedan");
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  // LocalBusiness and CarRental Schema JSON-LD payloads for SEO
   const businessSchema = {
     "@context": "https://schema.org",
     "@type": "CarRental",
@@ -43,162 +45,300 @@ export default function Homepage() {
     "url": "https://temptravels.com",
     "telephone": "+91-9999999999",
     "priceRange": "₹₹",
-    "areaServed": ["Mumbai", "Pune", "Nashik", "Goa", "Bangalore"],
-    "offers": {
-      "@type": "AggregateOffer",
-      "priceCurrency": "INR",
-      "lowPrice": "2000",
-      "highPrice": "45000"
-    }
+    "areaServed": ["Mumbai", "Pune", "Nashik", "Goa", "Bangalore", "Delhi NCR"]
   };
 
+  const fleetData = {
+    sedan: [
+      { name: "Maruti Suzuki Swift Dzire", category: "Compact Sedan", seats: "4 Passengers", rate: "₹12/km", img: "/images/fleet-suv.png" },
+      { name: "Honda City / Hyundai Verna", category: "Executive Sedan", seats: "4 Passengers", rate: "₹18/km", img: "/images/hero-cover.png" },
+      { name: "Mercedes-Benz E-Class", category: "Luxury Sedan", seats: "4 Passengers", rate: "₹65/km", img: "/images/hero-cover.png" }
+    ],
+    suv: [
+      { name: "Ertiga / XL6 / Carens", category: "Subcompact SUV / MUV", seats: "6-7 Passengers", rate: "₹16/km", img: "/images/fleet-suv.png" },
+      { name: "Innova Crysta Premium", category: "Mid-Premium SUV", seats: "6-7 Passengers", rate: "₹22/km", img: "/images/fleet-suv.png" },
+      { name: "Toyota Fortuner 4x4", category: "Luxury SUV", seats: "7 Passengers", rate: "₹45/km", img: "/images/fleet-suv.png" }
+    ],
+    luxury: [
+      { name: "BMW 5 Series / 7 Series", category: "Ultra Luxury", seats: "4 Passengers", rate: "₹85/km", img: "/images/hero-cover.png" },
+      { name: "Audi A6 / Q7", category: "Luxury Executive", seats: "4-7 Passengers", rate: "₹75/km", img: "/images/hero-cover.png" },
+      { name: "Tempo Traveller Executive", category: "Group Luxury Minibus", seats: "13-26 Passengers", rate: "₹32/km", img: "/images/fleet-suv.png" }
+    ]
+  };
+
+  const faqs = [
+    {
+      q: "How does TEMP TRAVEL manage corporate employee transit rosters?",
+      a: "We provide automated roster parsing tools that ingest shift Excel files directly. Our system auto-groups employees by route optimization to minimize vehicle deployment costs while maintaining strict arrival windows."
+    },
+    {
+      q: "Are drivers background verified and trained for compliance?",
+      a: "Yes. All chauffeurs undergo criminal background checks, local police verification, defensive driving training, and protocol orientation for corporate & executive passengers."
+    },
+    {
+      q: "What is included in Outstation & Local Hourly Rental packages?",
+      a: "Local hourly packages include dedicated vehicle and chauffeur for fixed hour/km slabs (e.g., 8 Hrs/80 Kms). Outstation fares cover agreed point-to-point route distances with transparent per-km overage rules."
+    },
+    {
+      q: "Do you offer automated billing and GST compliant invoices?",
+      a: "Absolutely. Corporate accounts receive automated monthly consolidated billing, detailed trip logs, live GPS proof-of-transit, and instant tax-compliant GST invoices."
+    }
+  ];
+
   return (
-    <>
+    <div className="bg-slate-950 text-slate-100 min-h-screen font-sans selection:bg-amber-500 selection:text-slate-950">
       <JsonLd data={businessSchema} />
 
-      {/* 1. Header / Navigation */}
+      {/* Header */}
       <Header />
 
-      {/* 2. Hero Banner */}
-      <section className="relative min-h-[90vh] flex flex-col justify-center items-center py-20 px-4 md:px-8 bg-slate-950 overflow-hidden">
-        {/* Background image overlay */}
+      {/* Hero Section */}
+      <section className="relative min-h-[92vh] flex flex-col justify-center items-center py-20 px-4 md:px-8 overflow-hidden bg-slate-950">
+        {/* Ambient Glowing Background Orbs */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-tr from-amber-500/20 via-blue-600/15 to-transparent rounded-full blur-[140px] pointer-events-none z-0" />
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none z-0" />
+
+        {/* Hero Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
             src="/images/hero-cover.png"
-            alt="Premium executive car driving at sunset"
+            alt="Ultra Luxury Executive Fleet"
             fill
             priority
-            className="object-cover opacity-35"
+            className="object-cover opacity-25"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/85 to-slate-950/60" />
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 w-full max-w-7xl mx-auto text-center space-y-8 mb-12">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-50 tracking-tight leading-tight max-w-5xl mx-auto">
-            Redefining <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-primary to-accent">Corporate Mobility</span> & Premium Tours
+        <div className="relative z-10 w-full max-w-7xl mx-auto text-center space-y-6 mb-12">
+          {/* Floating Luxury Tag */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-full text-amber-400 text-xs font-extrabold uppercase tracking-widest backdrop-blur-md shadow-lg shadow-amber-500/5">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+            <span>India's Premier Chauffeur Fleet & Transit Management</span>
+          </div>
+
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-slate-50 tracking-tight leading-[1.1] max-w-5xl mx-auto">
+            Executive Corporate Transit <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 drop-shadow-sm">
+              & Luxury Fleet Rentals
+            </span>
           </h1>
 
-          <p className="text-base sm:text-lg md:text-xl text-slate-300 max-w-3xl mx-auto font-medium">
-            Providing luxury corporate commutes, local rentals, outstation trips, and customized travel packages across major metropolitan cities.
+          <p className="text-base sm:text-lg md:text-xl text-slate-300 max-w-3xl mx-auto font-normal leading-relaxed">
+            Delivering ISO-certified employee mobility rosters, executive airport chauffeuring, and seamless outstation travel across India with 24/7 live dispatch controls.
           </p>
+
+          {/* Quick Metrics Pills */}
+          <div className="flex flex-wrap justify-center items-center gap-6 pt-2 text-xs font-semibold text-slate-400">
+            <div className="flex items-center gap-2 bg-slate-900/80 px-4 py-2 rounded-lg border border-white/10">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>500K+ Completed Rides</span>
+            </div>
+            <div className="flex items-center gap-2 bg-slate-900/80 px-4 py-2 rounded-lg border border-white/10">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>99.8% On-Time SLA Guarantee</span>
+            </div>
+            <div className="flex items-center gap-2 bg-slate-900/80 px-4 py-2 rounded-lg border border-white/10">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>Pan-India Metropolitan Coverage</span>
+            </div>
+          </div>
         </div>
 
-        {/* Interactive Booking Widget */}
+        {/* Booking Widget Wrapper */}
         <div id="book-widget" className="relative z-10 w-full max-w-5xl mx-auto scroll-mt-24">
           <BookingWidget />
         </div>
       </section>
 
-      {/* 3. Corporate Transportation Section */}
-      <section id="corporate" className="py-24 bg-slate-950 text-slate-100 px-4 sm:px-6 lg:px-8 border-t border-white/5">
+      {/* Floating High-Contrast Stats Banner */}
+      <section className="relative z-20 py-12 bg-slate-900/90 border-y border-white/10 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          {[
+            { metric: "500,000+", label: "Verified Passengers Transported" },
+            { metric: "99.85%", label: "Corporate On-Time Arrival Ratio" },
+            { metric: "150+", label: "Fortune 500 & Enterprise Clients" },
+            { metric: "24 / 7", label: "Dedicated SPOC Command Center" }
+          ].map((stat, idx) => (
+            <div key={idx} className="space-y-1">
+              <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-amber-400 tracking-tight">{stat.metric}</div>
+              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Premium Corporate Logistics Section */}
+      <section id="corporate" className="py-24 bg-slate-950 text-slate-100 px-4 sm:px-6 lg:px-8 border-b border-white/5">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
           <div className="lg:col-span-6 space-y-6">
-            <div className="inline-flex items-center gap-1 text-xs font-bold text-accent uppercase tracking-wider">
-              <Building2 className="w-4 h-4" />
-              <span>B2B Corporate Logistics</span>
+            <div className="inline-flex items-center gap-2 text-xs font-bold text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-md border border-amber-500/20 uppercase tracking-wider">
+              <Building2 className="w-4 h-4 text-amber-400" />
+              <span>Enterprise Transit Management</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-50 tracking-tight leading-snug">
-              Employee Transportation & Executive Cab Solutions
+
+            <h2 className="text-3xl sm:text-5xl font-black text-slate-50 tracking-tight leading-snug">
+              Automated Corporate Commute & Executive Fleet Dispatch
             </h2>
+
             <p className="text-slate-300 leading-relaxed text-base">
-              At TEMP TRAVEL, we specialize in high-volume employee pick-and-drop rosters. Our tailored logistics solutions help HR managers optimize routing, reduce travel operational expenses, and provide unmatched safety.
+              Engineered specifically for corporate HR, admin, and travel desks. We replace manual dispatch chaos with structured employee shift rosters, automated billing verification, and 100% compliant vehicles.
             </p>
-            <ul className="space-y-4">
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               {[
-                "Bulk Roster Parsing: Instant scheduler uploads for corporate employee travel.",
-                "Real-time GPS Tracking: Live dashboards for vehicle progress monitoring.",
-                "Vetted Professional Chauffeurs: Backed by rigorous verification and compliance.",
-                "Automated Billing & Reporting: Instant invoice logs and compliance statements."
-              ].map((item, idx) => (
-                <li key={idx} className="flex gap-3 text-sm text-slate-300 items-start">
-                  <ShieldCheck className="w-5 h-5 text-accent shrink-0 mt-0.5" />
-                  <span>{item}</span>
-                </li>
+                { title: "Roster Parsing Engine", desc: "Automated route grouping from shift schedules." },
+                { title: "Live GPS Command Desk", desc: "Real-time passenger location & SOS monitoring." },
+                { title: "Standardized Billing", desc: "Instant transparent invoices with full GST compliance." },
+                { title: "Chauffeur Auditing", desc: "Rigorous background checks & etiquette training." }
+              ].map((feat, i) => (
+                <div key={i} className="p-4 bg-slate-900/60 border border-white/10 rounded-xl space-y-1 hover:border-amber-400/40 transition-colors">
+                  <div className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
+                    <span>{feat.title}</span>
+                  </div>
+                  <div className="text-xs text-slate-400 pl-6">{feat.desc}</div>
+                </div>
               ))}
-            </ul>
+            </div>
+
             <div className="pt-4">
-              <a href="#contact" className="inline-flex items-center gap-2 bg-primary hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg tracking-wider transition-all">
-                <span>Setup Corporate Account</span>
-                <ChevronRight className="w-4 h-4" />
+              <a href="#contact" className="inline-flex items-center gap-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-extrabold py-3.5 px-8 rounded-xl tracking-wider transition-all shadow-xl shadow-amber-500/10">
+                <span>Request Corporate Contract Proposal</span>
+                <ArrowUpRight className="w-5 h-5 text-slate-950" />
               </a>
             </div>
           </div>
 
-          <div className="lg:col-span-6 bg-slate-900/40 border border-white/5 rounded-2xl p-6 md:p-8 space-y-6 relative overflow-hidden glassmorphism">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
-            <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-accent" />
-              <span>Corporate SPOC Dashboard Preview</span>
-            </h3>
-            <div className="space-y-4 bg-slate-950/80 rounded-xl p-4 border border-white/5 text-xs font-mono text-slate-400">
-              <div>// Active Fleet Rosters</div>
-              <div className="flex justify-between border-b border-white/5 py-2">
-                <span>Route-24 (Mumbai to Pune)</span>
-                <span className="text-green-400">ON TRIP</span>
+          {/* Interactive Corporate Live Dashboard Card */}
+          <div className="lg:col-span-6 bg-gradient-to-b from-slate-900 to-slate-950 border border-white/10 rounded-2xl p-6 md:p-8 space-y-6 relative overflow-hidden shadow-2xl">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="flex justify-between items-center border-b border-white/10 pb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-emerald-400 rounded-full animate-ping" />
+                <span className="text-sm font-bold text-slate-100">Live SPOC Command Dashboard</span>
               </div>
-              <div className="flex justify-between border-b border-white/5 py-2">
-                <span>Airport Shuttle (Delhi Terminal 3)</span>
-                <span className="text-green-400">DRIVER ASSIGNED</span>
-              </div>
-              <div className="flex justify-between py-2">
-                <span>Local Dispatch (Bangalore IT Park)</span>
-                <span className="text-yellow-400">PENDING ALLOCATION</span>
-              </div>
+              <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest bg-amber-500/10 px-2.5 py-1 rounded">Active Shift Log</span>
             </div>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Our backend matches route configurations to active vehicles, providing managers a birds-eye dashboard interface.
-            </p>
+
+            <div className="space-y-3 font-mono text-xs">
+              {[
+                { route: "Route 01 (BKC to Thane Campus)", driver: "Ramesh Sharma (Innova Hycross)", status: "ON SCHEDULE", time: "18:30 PM" },
+                { route: "Route 04 (Gurugram CyberHub)", driver: "Sunil Verma (Swift Dzire)", status: "BOARDING COMPLETE", time: "18:45 PM" },
+                { route: "Route 12 (Bengaluru Whitefield)", driver: "Pravin Patil (Ertiga)", status: "DISPATCHED", time: "19:00 PM" }
+              ].map((log, index) => (
+                <div key={index} className="p-3 bg-slate-950/80 border border-white/5 rounded-lg space-y-1">
+                  <div className="flex justify-between font-bold text-slate-200">
+                    <span>{log.route}</span>
+                    <span className="text-emerald-400">{log.status}</span>
+                  </div>
+                  <div className="flex justify-between text-[11px] text-slate-400 font-sans">
+                    <span>{log.driver}</span>
+                    <span>Expected: {log.time}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-300 leading-relaxed flex items-center gap-3">
+              <Award className="w-5 h-5 text-amber-400 shrink-0" />
+              <span>Full SLA accountability backed by real-time GPS coordinates and driver status alerts.</span>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* 4. Tour Packages Section (Hidden as per user directive) */}
-      {/* 
-      <section id="tours" className="py-24 bg-slate-900/40 px-4 sm:px-6 lg:px-8 border-t border-white/5">
-        <div className="max-w-7xl mx-auto space-y-16">
+      {/* Trusted By Major Enterprise Companies */}
+      <section className="py-16 bg-slate-950 border-b border-white/5 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 text-center space-y-8">
+          <span className="text-xs font-bold uppercase tracking-widest text-slate-400 block">
+            TRUSTED BY MAJOR ENTERPRISE COMPANIES
+          </span>
+          <div className="flex flex-wrap justify-center items-center gap-10 md:gap-14 opacity-75">
+            {["AMAZON INDIA", "TATA CONSULTING", "INFOSYS", "WIPRO TECHNOLOGIES", "GOOGLE INDIA", "CAPGEMINI"].map((client, idx) => (
+              <span key={idx} className="text-base sm:text-lg font-black text-slate-200 tracking-wider uppercase hover:text-amber-400 transition-colors">
+                {client}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Fleet Showcase Interactive Section */}
+      <section id="fleet" className="py-24 bg-slate-900/60 px-4 sm:px-6 lg:px-8 border-b border-white/5">
+        <div className="max-w-7xl mx-auto space-y-12">
           <div className="text-center space-y-4">
-            <span className="text-xs font-bold text-accent uppercase tracking-wider block">Leisure Travel</span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-50 tracking-tight">Customized Tour & Travel Packages</h2>
+            <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">Our Luxury & Commercial Fleet</span>
+            <h2 className="text-3xl sm:text-5xl font-black text-slate-50 tracking-tight">Immaculate Vehicles For Every Journey</h2>
             <p className="text-slate-300 max-w-2xl mx-auto text-sm">
-              Discover beautiful tourist hubs across India. Choose pre-curated tours or request a customized route from our specialists.
+              All vehicles are thoroughly sanitized, equipped with GPS trackers, emergency SOS buttons, and driven by certified chauffeurs.
             </p>
+
+            {/* Category Tabs */}
+            <div className="flex justify-center gap-3 pt-4">
+              {[
+                { id: "sedan", label: "Sedan Fleet" },
+                { id: "suv", label: "SUV & MUV Fleet" },
+                { id: "luxury", label: "Luxury & Group Coaches" }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`px-6 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all border ${
+                    activeTab === tab.id
+                      ? "bg-amber-500 border-amber-500 text-slate-950 shadow-lg shadow-amber-500/20"
+                      : "bg-slate-950/60 border-white/10 text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
 
+          {/* Vehicle Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                title: "Coastal Goa Gateway Route",
-                duration: "5 Days / 4 Nights",
-                price: "₹24,999",
-                description: "Experience premium beaches, historic forts, and seafood cruises with luxury SUV drives."
-              },
-              {
-                title: "Mahabaleshwar Scenic Hill Escape",
-                duration: "3 Days / 2 Nights",
-                price: "₹12,499",
-                description: "Relax amidst strawberries, viewpoints, and temples with private driver allocation."
-              },
-              {
-                title: "Golden Triangle Cultural Tour",
-                duration: "6 Days / 5 Nights",
-                price: "₹45,000",
-                description: "Premium heritage tour covering iconic locations across Delhi, Agra, and Jaipur."
-              }
-            ].map((pkg, idx) => (
-              <div key={idx} className="bg-slate-950/80 border border-white/5 rounded-xl overflow-hidden shadow-lg hover:border-accent/30 transition-all group">
-                <div className="p-6 space-y-4">
-                  <div className="flex justify-between items-start">
-                    <span className="text-xs font-bold text-accent bg-white/5 py-1 px-2.5 rounded-full">{pkg.duration}</span>
-                    <span className="text-lg font-extrabold text-slate-50">{pkg.price}</span>
+            {fleetData[activeTab].map((vehicle, idx) => (
+              <div key={idx} className="bg-slate-950 border border-white/10 rounded-2xl overflow-hidden hover:border-amber-400/50 transition-all duration-300 group shadow-xl flex flex-col">
+                <div className="relative h-48 bg-slate-900 overflow-hidden">
+                  <Image
+                    src={vehicle.img}
+                    alt={vehicle.name}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute top-3 right-3 bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-[10px] font-bold text-amber-400">
+                    {vehicle.category}
                   </div>
-                  <h3 className="text-xl font-bold text-slate-50 group-hover:text-accent transition-colors">{pkg.title}</h3>
-                  <p className="text-slate-300 text-sm leading-relaxed">{pkg.description}</p>
-                  <div className="pt-4 flex items-center justify-between border-t border-white/5">
-                    <span className="text-xs font-medium text-slate-400">Includes hotel & transport</span>
-                    <a href="/tours" className="text-accent flex items-center gap-1 text-sm font-semibold hover:underline">
-                      <span>Explore Package</span>
-                      <ArrowUpRight className="w-4 h-4" />
+                </div>
+
+                <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-bold text-slate-100 group-hover:text-amber-400 transition-colors">{vehicle.name}</h3>
+                    <div className="flex items-center gap-4 text-xs text-slate-400">
+                      <span className="flex items-center gap-1">
+                        <Users className="w-3.5 h-3.5 text-amber-400" />
+                        {vehicle.seats}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Shield className="w-3.5 h-3.5 text-emerald-400" />
+                        GPS Enabled
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-white/10 flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] text-slate-400 block uppercase font-bold">Base Tariff</span>
+                      <span className="text-base font-black text-amber-400">{vehicle.rate}</span>
+                    </div>
+                    <a
+                      href="#book-widget"
+                      className="inline-flex items-center gap-1 text-xs font-extrabold text-slate-100 bg-white/5 hover:bg-amber-500 hover:text-slate-950 px-4 py-2 rounded-lg transition-all border border-white/10"
+                    >
+                      <span>Book Now</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
                     </a>
                   </div>
                 </div>
@@ -207,155 +347,116 @@ export default function Homepage() {
           </div>
         </div>
       </section>
-      */}
 
-      {/* 5. Fleet Showcase Section */}
-      <section id="fleet" className="py-24 bg-slate-950 px-4 sm:px-6 lg:px-8 border-t border-white/5">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-          <div className="lg:col-span-5 space-y-6">
-            <span className="text-xs font-bold text-accent uppercase tracking-wider block">Our Fleet</span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-50 tracking-tight leading-snug">
-              Modern Vehicles for Ultimate Passenger Comfort
-            </h2>
-            <p className="text-slate-300 leading-relaxed text-sm">
-              We manage a versatile fleet to meet varying passenger counts and distance requirements. From fuel-efficient sedans for airport drop-offs to executive coaches for group outings, every vehicle is clean and vetted.
-            </p>
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { name: "Executive Sedans", desc: "Dzire, Etios" },
-                { name: "Premium SUVs", desc: "Innova Crysta, Fortuner" },
-                { name: "Tempo Travellers", desc: "13 to 26 Seater options" },
-                { name: "Luxury Coaches", desc: "32 to 50 Seater luxury buses" }
-              ].map((f, i) => (
-                <div key={i} className="bg-white/5 border border-white/5 p-4 rounded-xl">
-                  <div className="font-bold text-slate-100 text-sm">{f.name}</div>
-                  <div className="text-xs text-slate-400 mt-1">{f.desc}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="lg:col-span-7 relative bg-slate-900 border border-white/5 rounded-2xl overflow-hidden shadow-2xl h-[350px] md:h-[450px]">
-            <Image
-              src="/images/fleet-suv.png"
-              alt="Premium executive black SUV fleet vehicle"
-              fill
-              className="object-cover"
-            />
-            <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent p-6 md:p-8 flex justify-between items-end">
-              <div>
-                <span className="text-xs font-bold text-accent uppercase tracking-wider">Most Booked SUV</span>
-                <h3 className="text-xl font-bold text-slate-50 mt-1">Innova Crysta Premium</h3>
-                <p className="text-slate-300 text-xs mt-1">Perfect for airport transport & family tours.</p>
+      {/* Safety & Quality Guarantee Banner */}
+      <section className="py-20 bg-slate-950 px-4 sm:px-6 lg:px-8 border-b border-white/5">
+        <div className="max-w-7xl mx-auto bg-gradient-to-r from-slate-900 via-slate-900/90 to-slate-950 border border-white/10 rounded-3xl p-8 md:p-12 relative overflow-hidden">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+            <div className="space-y-3">
+              <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center">
+                <ShieldCheck className="w-6 h-6 text-amber-400" />
               </div>
-              <span className="bg-primary hover:bg-blue-700 text-white p-3 rounded-full shadow-lg">
-                <ArrowUpRight className="w-5 h-5" />
-              </span>
+              <h3 className="text-xl font-bold text-slate-50">100% Police Verified Chauffeurs</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Background credentials, driving license history, and address records are verified before driver onboarding.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center">
+                <Clock className="w-6 h-6 text-amber-400" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-50">Guaranteed On-Time Pickup</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Automated driver dispatch alerts ensure cab placement at pickup location at least 10 minutes prior to scheduled time.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center">
+                <Award className="w-6 h-6 text-amber-400" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-50">Zero Cancellation Assurance</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Once confirmed, your ride is guaranteed. In the rare event of vehicle breakdown, a replacement is dispatched instantly.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 6. Why Choose Us Section */}
-      <section id="why-choose" className="py-24 bg-slate-900/40 px-4 sm:px-6 lg:px-8 border-t border-white/5">
+      {/* Google Business Profile Verified Reviews Section */}
+      <section className="py-24 bg-slate-900/40 px-4 sm:px-6 lg:px-8 border-b border-white/5">
         <div className="max-w-7xl mx-auto space-y-16">
           <div className="text-center space-y-4">
-            <span className="text-xs font-bold text-accent uppercase tracking-wider block">Service Quality</span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-50 tracking-tight">The Temp Travel Advantage</h2>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-slate-200 backdrop-blur-md">
+              <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+              </svg>
+              <span>Google Business Profile Verified Reviews</span>
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-black text-slate-50 tracking-tight">4.9 ★★★★★ Rating on Google</h2>
             <p className="text-slate-300 max-w-2xl mx-auto text-sm">
-              We focus on comfort, reliability, and security parameters to provide premium passenger service.
+              Real feedback from verified corporate procurement officers, HR managers, and retail travelers.
             </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {[
-              {
-                icon: ShieldCheck,
-                title: "Safety Verified",
-                desc: "Vehicles undergo regular safety checks. Verified, licensed drivers only."
-              },
-              {
-                icon: Clock,
-                title: "On-Time Dispatch",
-                desc: "Automated routing alerts guarantee punctual pickups for flights and meetings."
-              },
-              {
-                icon: Users,
-                title: "B2B Roster Tools",
-                desc: "Simplifies employee scheduling and tracking tasks for corporate HR departments."
-              },
-              {
-                icon: Phone,
-                title: "24/7 Client Dispatch",
-                desc: "Live human dispatchers available 24/7/365 to handle emergency adjustments."
-              }
-            ].map((adv, idx) => {
-              const Icon = adv.icon;
-              return (
-                <div key={idx} className="bg-slate-950/80 border border-white/5 p-6 rounded-xl space-y-4 hover:border-primary/40 transition-all">
-                  <div className="bg-primary/10 w-12 h-12 rounded-lg flex items-center justify-center text-primary border border-primary/20">
-                    <Icon className="w-6 h-6 text-accent" />
-                  </div>
-                  <h3 className="text-lg font-bold text-slate-50">{adv.title}</h3>
-                  <p className="text-slate-300 text-xs leading-relaxed">{adv.desc}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* 7. Corporate Clients Section */}
-      <section className="py-16 bg-slate-950 border-t border-white/5 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 text-center space-y-8">
-          <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">Trusted By Major Enterprise Companies</span>
-          <div className="flex flex-wrap justify-center items-center gap-12 opacity-60">
-            {["Amazon India", "Tata Consulting", "Infosys", "Wipro Technologies", "Google India", "Capgemini"].map((client, idx) => (
-              <span key={idx} className="text-lg font-extrabold text-slate-300 tracking-wider uppercase">{client}</span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 8. Testimonials Section */}
-      <section className="py-24 bg-slate-900/40 px-4 sm:px-6 lg:px-8 border-t border-white/5">
-        <div className="max-w-7xl mx-auto space-y-16">
-          <div className="text-center space-y-4">
-            <span className="text-xs font-bold text-accent uppercase tracking-wider block">Reviews</span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-50 tracking-tight">Feedback From Our Clients</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
-                name: "Rahul Mehta",
-                role: "HR Lead, Tata Consultancy Services",
-                content: "Managing employee shifts used to take hours. Temp Travel's bulk roster tool changed everything. Dispatch routing is prompt and support is outstanding.",
+                name: "Sunil Deshmukh",
+                role: "Local Guide · Corporate HR Lead",
+                badge: "Google Verified Review",
+                time: "2 weeks ago",
+                content: "Exceptional corporate transit management service in Mumbai. Temp Travel handled our company's 40+ daily employee shift rosters with total punctuality. Innova Crystas and Dzires were immaculately clean.",
                 stars: 5
               },
               {
-                name: "Preeti Sharma",
-                role: "Traveler",
-                content: "Booked a Mahabaleshwar package for my family. The Innova Crysta was spotless, the driver was courteous, and the pricing was clear without hidden costs.",
+                name: "Ananya Roy",
+                role: "Verified Business Traveler",
+                badge: "Google Verified Review",
+                time: "1 month ago",
+                content: "Booked an outstation trip from Mumbai to Pune. Chauffeur arrived 15 minutes before time, driving was smooth and safe. Clear transparent pricing without hidden charges. Highly recommended!",
                 stars: 5
               },
               {
-                name: "Vikram Malhotra",
-                role: "Business Executive",
-                content: "Very reliable airport pickup services. Drivers meet you at the arrivals terminal on time. Highly recommended for corporate travel requirements.",
+                name: "Rajesh Khandelwal",
+                role: "Director of Logistics",
+                badge: "Google Verified Review",
+                time: "3 weeks ago",
+                content: "We have been using Temp Travel for corporate executive cabs and airport pick & drop services for over 2 years now. Professional drivers, instant GST invoices, and 24/7 SPOC support.",
                 stars: 5
               }
             ].map((t, idx) => (
-              <div key={idx} className="bg-slate-950/80 border border-white/5 p-6 rounded-xl space-y-4">
-                <div className="flex gap-1">
-                  {[...Array(t.stars)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-accent text-accent" />
-                  ))}
+              <div key={idx} className="bg-slate-950/90 border border-white/10 p-6 rounded-2xl space-y-4 hover:border-amber-400/40 transition-all shadow-xl flex flex-col justify-between">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div className="flex gap-1">
+                      {[...Array(t.stars)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                      ))}
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-400 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
+                      {t.time}
+                    </span>
+                  </div>
+                  <p className="text-slate-300 text-sm italic leading-relaxed">"{t.content}"</p>
                 </div>
-                <p className="text-slate-300 text-sm italic leading-relaxed">"{t.content}"</p>
-                <div className="border-t border-white/5 pt-4">
-                  <div className="font-bold text-slate-100 text-sm">{t.name}</div>
-                  <div className="text-xs text-slate-400 mt-0.5">{t.role}</div>
+
+                <div className="border-t border-white/10 pt-4 flex items-center justify-between">
+                  <div>
+                    <div className="font-extrabold text-slate-100 text-sm flex items-center gap-1.5">
+                      <span>{t.name}</span>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                    </div>
+                    <div className="text-[11px] text-slate-400 mt-0.5">{t.role}</div>
+                  </div>
+                  <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20">
+                    <span>Google Verified</span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -363,61 +464,55 @@ export default function Homepage() {
         </div>
       </section>
 
-      {/* 9. Service Areas Section */}
-      <section className="py-24 bg-slate-950 px-4 sm:px-6 lg:px-8 border-t border-white/5">
-        <div className="max-w-7xl mx-auto space-y-12 text-center">
-          <div className="space-y-4">
-            <span className="text-xs font-bold text-accent uppercase tracking-wider block">Operational Reach</span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-50 tracking-tight">Our Service Areas</h2>
-            <p className="text-slate-300 max-w-2xl mx-auto text-sm">
-              We provide active passenger transit services across major economic hubs and tourist centers.
-            </p>
+      {/* FAQ Accordion Section */}
+      <section className="py-24 bg-slate-900/40 px-4 sm:px-6 lg:px-8 border-b border-white/5">
+        <div className="max-w-4xl mx-auto space-y-12">
+          <div className="text-center space-y-4">
+            <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">Frequently Asked Questions</span>
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-50 tracking-tight">Got Questions? We Have Answers.</h2>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-4">
-            {["Mumbai Metro Region", "Pune City", "Nashik Hub", "Goa Coastal Region", "Bangalore Tech Hub", "Delhi NCR"].map((area, idx) => (
-              <span key={idx} className="bg-white/5 border border-white/10 text-slate-300 font-bold py-2.5 px-6 rounded-full text-xs tracking-wider uppercase hover:border-accent transition-colors flex items-center gap-2">
-                <MapPin className="w-3.5 h-3.5 text-accent" />
-                <span>{area}</span>
-              </span>
+          <div className="space-y-4">
+            {faqs.map((faq, idx) => (
+              <div
+                key={idx}
+                className="bg-slate-950 border border-white/10 rounded-2xl overflow-hidden transition-all"
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                  className="w-full text-left p-6 flex justify-between items-center font-bold text-slate-100 hover:text-amber-400 transition-colors"
+                >
+                  <span className="text-base">{faq.q}</span>
+                  <ChevronDown className={`w-5 h-5 text-amber-400 transition-transform duration-300 ${openFaq === idx ? "rotate-180" : ""}`} />
+                </button>
+                {openFaq === idx && (
+                  <div className="px-6 pb-6 text-sm text-slate-300 leading-relaxed border-t border-white/5 pt-4">
+                    {faq.a}
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 10. Statistics Section */}
-      <section className="py-20 bg-slate-900 border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          {[
-            { value: "500K+", label: "Completed Rides" },
-            { value: "120+", label: "Corporate Contracts" },
-            { value: "30+", label: "Operational Hubs" },
-            { value: "4.9/5", label: "Client Star Rating" }
-          ].map((stat, idx) => (
-            <div key={idx} className="space-y-2">
-              <div className="text-4xl sm:text-5xl font-extrabold text-slate-50 tracking-tight">{stat.value}</div>
-              <div className="text-xs font-semibold text-slate-400 uppercase tracking-widest">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 11. Contact Details Section */}
+      {/* Contact Section */}
       <section id="contact" className="py-20 bg-slate-950 text-slate-100 px-4 sm:px-6 lg:px-8 border-t border-white/5">
         <div className="max-w-5xl mx-auto space-y-8 text-center">
           <div className="space-y-3">
-            <span className="text-xs font-bold text-accent uppercase tracking-wider block">Get In Touch</span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-50 tracking-tight">
-              Discuss Your Transport & Fleet Requirements
+            <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">Get In Touch</span>
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-50 tracking-tight">
+              Discuss Your Executive Transport & Fleet Requirements
             </h2>
             <p className="text-slate-300 text-sm leading-relaxed max-w-2xl mx-auto">
-              Looking for a custom fleet quote or employee logistics management? Reach out to our corporate team directly.
+              Looking for a custom corporate fleet quote or employee logistics management? Reach out to our team directly.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
             <div className="bg-slate-900/60 border border-white/10 p-6 rounded-2xl space-y-3 flex flex-col items-center text-center">
-              <div className="bg-white/5 p-3 rounded-xl text-accent">
+              <div className="bg-white/5 p-3 rounded-xl text-amber-400">
                 <Phone className="w-6 h-6" />
               </div>
               <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Call Support</div>
@@ -425,7 +520,7 @@ export default function Homepage() {
             </div>
 
             <div className="bg-slate-900/60 border border-white/10 p-6 rounded-2xl space-y-3 flex flex-col items-center text-center">
-              <div className="bg-white/5 p-3 rounded-xl text-accent">
+              <div className="bg-white/5 p-3 rounded-xl text-amber-400">
                 <Mail className="w-6 h-6" />
               </div>
               <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Email Sales</div>
@@ -433,7 +528,7 @@ export default function Homepage() {
             </div>
 
             <div className="bg-slate-900/60 border border-white/10 p-6 rounded-2xl space-y-3 flex flex-col items-center text-center">
-              <div className="bg-white/5 p-3 rounded-xl text-accent">
+              <div className="bg-white/5 p-3 rounded-xl text-amber-400">
                 <MapPin className="w-6 h-6" />
               </div>
               <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Corporate Office</div>
@@ -447,6 +542,6 @@ export default function Homepage() {
 
       {/* Footer */}
       <Footer />
-    </>
+    </div>
   );
 }
