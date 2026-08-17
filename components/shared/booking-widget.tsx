@@ -1100,7 +1100,7 @@ export default function BookingWidget() {
                     >
                       <option value="" disabled className="bg-slate-900">
                         {localData.vehicleCategory ? "- Please Select -" : "- Select Category First -"}
-                      </option> <option></option>
+                      </option>
                       {localData.vehicleCategory === "Sedan" && (
                         <>
                           <option value="Compact" className="bg-slate-900">Compact</option>
