@@ -25,7 +25,6 @@ export default async function AdminDashboardPage() {
   const totalRentalLeads = await prisma.rentalLead.count();
   const totalBookings = await prisma.booking.count();
   const totalFleetVehicles = await prisma.fleetVehicle.count();
-  const totalTourPackages = await prisma.tourPackage.count();
   const totalBlogPosts = await prisma.blogPost.count();
   const totalGalleryMedia = await prisma.gallery.count();
   const totalTestimonials = await prisma.testimonial.count();
@@ -113,7 +112,7 @@ export default async function AdminDashboardPage() {
     };
   }).slice(0, 6); // show first 6 months
 
-  // Counter cards configurations
+  // Counter cards configurations (6 equally distributed cards)
   const cards = [
     {
       title: "Contact Leads",
@@ -156,14 +155,6 @@ export default async function AdminDashboardPage() {
       href: "/admin/fleet"
     },
     {
-      title: "Tour Packages",
-      value: totalTourPackages.toString(),
-      change: "Travel & holiday tours",
-      icon: TrendingUp,
-      color: "text-amber-400",
-      href: "/admin/tours"
-    },
-    {
       title: "Total Payments",
       value: `₹${totalPaymentsAmount.toLocaleString("en-IN")}`,
       change: `${totalPaymentsCount} successful logs`,
@@ -185,8 +176,8 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Grid of counter cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+      {/* Grid of counter cards equally distributed */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
         {cards.map((c, i) => {
           const Icon = c.icon;
           return (
