@@ -757,18 +757,20 @@ export default function BookingWidget() {
                 </div>
               )}
 
-              {/* Section Divider with Centered Title "Passenger Details" */}
-              <div className="relative py-2">
-                <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                  <div className="w-full border-t border-white/10" />
+              {/* Section Divider with Centered Title "Passenger Details" (Only shown for Working sub-tab to separate Company Name) */}
+              {pickupDropSubTab === "working" && (
+                <div className="relative py-2">
+                  <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div className="w-full border-t border-white/10" />
+                  </div>
+                  <div className="relative flex justify-center">
+                    <span className="bg-slate-900 px-4 text-xs font-bold uppercase tracking-wider text-amber-400 border border-white/10 rounded-full py-1 flex items-center gap-1.5 shadow-md">
+                      <User className="w-3.5 h-3.5" />
+                      Passenger Details
+                    </span>
+                  </div>
                 </div>
-                <div className="relative flex justify-center">
-                  <span className="bg-slate-900 px-4 text-xs font-bold uppercase tracking-wider text-amber-400 border border-white/10 rounded-full py-1 flex items-center gap-1.5 shadow-md">
-                    <User className="w-3.5 h-3.5" />
-                    Passenger Details
-                  </span>
-                </div>
-              </div>
+              )}
 
               {/* Row 1: Contact Name, Email Address, Mobile Number in 1 line */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
