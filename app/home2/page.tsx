@@ -272,52 +272,6 @@ export default function Home2Page() {
         </div>
       </section>
 
-      {/* Testimonials / Reviews Section */}
-      <section className="py-24 bg-slate-900/40 px-4 sm:px-6 lg:px-8 border-b border-white/5">
-        <div className="max-w-7xl mx-auto space-y-16">
-          <div className="text-center space-y-4">
-            <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">REVIEWS</span>
-            <h2 className="text-3xl sm:text-5xl font-black text-slate-50 tracking-tight">Feedback From Our Clients</h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                name: "Rahul Mehta",
-                role: "HR Lead, Tata Consultancy Services",
-                content: "Managing employee shifts used to take hours. Temp Travel's bulk roster tool changed everything. Dispatch routing is prompt and support is outstanding.",
-                stars: 5
-              },
-              {
-                name: "Preeti Sharma",
-                role: "Traveler",
-                content: "Booked a Mahabaleshwar package for my family. The Innova Crysta was spotless, the driver was courteous, and the pricing was clear without hidden costs.",
-                stars: 5
-              },
-              {
-                name: "Vikram Malhotra",
-                role: "Business Executive",
-                content: "Very reliable airport pickup services. Drivers meet you at the arrivals terminal on time. Highly recommended for corporate travel requirements.",
-                stars: 5
-              }
-            ].map((t, idx) => (
-              <div key={idx} className="bg-slate-950/90 border border-white/10 p-6 rounded-2xl space-y-4 hover:border-amber-400/40 transition-all shadow-xl">
-                <div className="flex gap-1">
-                  {[...Array(t.stars)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                  ))}
-                </div>
-                <p className="text-slate-300 text-sm italic leading-relaxed">"{t.content}"</p>
-                <div className="border-t border-white/10 pt-4">
-                  <div className="font-extrabold text-slate-100 text-sm">{t.name}</div>
-                  <div className="text-xs text-slate-400 mt-0.5">{t.role}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Fleet Showcase Interactive Section */}
       <section id="fleet" className="py-24 bg-slate-900/60 px-4 sm:px-6 lg:px-8 border-b border-white/5">
         <div className="max-w-7xl mx-auto space-y-12">
@@ -434,6 +388,52 @@ export default function Home2Page() {
                 Once confirmed, your ride is guaranteed. In the rare event of vehicle breakdown, a replacement is dispatched instantly.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials / Reviews Section */}
+      <section className="py-24 bg-slate-900/40 px-4 sm:px-6 lg:px-8 border-b border-white/5">
+        <div className="max-w-7xl mx-auto space-y-16">
+          <div className="text-center space-y-4">
+            <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">REVIEWS</span>
+            <h2 className="text-3xl sm:text-5xl font-black text-slate-50 tracking-tight">Feedback From Our Clients</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                name: "Rahul Mehta",
+                role: "HR Lead, Tata Consultancy Services",
+                content: "Managing employee shifts used to take hours. Temp Travel's bulk roster tool changed everything. Dispatch routing is prompt and support is outstanding.",
+                stars: 5
+              },
+              {
+                name: "Preeti Sharma",
+                role: "Traveler",
+                content: "Booked a Mahabaleshwar package for my family. The Innova Crysta was spotless, the driver was courteous, and the pricing was clear without hidden costs.",
+                stars: 5
+              },
+              {
+                name: "Vikram Malhotra",
+                role: "Business Executive",
+                content: "Very reliable airport pickup services. Drivers meet you at the arrivals terminal on time. Highly recommended for corporate travel requirements.",
+                stars: 5
+              }
+            ].map((t, idx) => (
+              <div key={idx} className="bg-slate-950/90 border border-white/10 p-6 rounded-2xl space-y-4 hover:border-amber-400/40 transition-all shadow-xl">
+                <div className="flex gap-1">
+                  {[...Array(t.stars)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
+                <p className="text-slate-300 text-sm italic leading-relaxed">"{t.content}"</p>
+                <div className="border-t border-white/10 pt-4">
+                  <div className="font-extrabold text-slate-100 text-sm">{t.name}</div>
+                  <div className="text-xs text-slate-400 mt-0.5">{t.role}</div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
