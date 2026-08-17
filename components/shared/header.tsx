@@ -13,11 +13,11 @@ export default function Header() {
     { name: "About", href: "/about" },
     { name: "Services", href: "/services" },
     { name: "Fleet", href: "/fleet" },
-    { name: "Tours", href: "/tours" },
+    // { name: "Tours", href: "/tours" }, // Hidden as per user directive
     { name: "Blog", href: "/blog" },
     { name: "Gallery", href: "/gallery" },
     { name: "Contact", href: "/contact" },
-  ];
+  ].filter(l => l.name !== "Tours");
 
   return (
     <header className="sticky top-0 z-50 w-full bg-slate-950/75 backdrop-blur-md border-b border-white/5 transition-all">

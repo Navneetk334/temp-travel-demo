@@ -153,7 +153,8 @@ export default function Homepage() {
         </div>
       </section>
 
-      {/* 4. Tour Packages Section */}
+      {/* 4. Tour Packages Section (Hidden as per user directive) */}
+      {/* 
       <section id="tours" className="py-24 bg-slate-900/40 px-4 sm:px-6 lg:px-8 border-t border-white/5">
         <div className="max-w-7xl mx-auto space-y-16">
           <div className="text-center space-y-4">
@@ -206,6 +207,7 @@ export default function Homepage() {
           </div>
         </div>
       </section>
+      */}
 
       {/* 5. Fleet Showcase Section */}
       <section id="fleet" className="py-24 bg-slate-950 px-4 sm:px-6 lg:px-8 border-t border-white/5">

@@ -48,9 +48,9 @@ export default function Footer() {
             <li>
               <Link href="/fleet" className="hover:text-accent transition-colors">Fleet Showcase</Link>
             </li>
-            <li>
+            {/* <li>
               <Link href="/tours" className="hover:text-accent transition-colors">Tour Packages</Link>
-            </li>
+            </li> */}
             <li>
               <Link href="/blog" className="hover:text-accent transition-colors">Blog & Guides</Link>
             </li>
@@ -79,9 +79,9 @@ export default function Footer() {
             <li>
               <Link href="/services" className="hover:text-accent transition-colors">Outstation Cabs</Link>
             </li>
-            <li>
+            {/* <li>
               <Link href="/services" className="hover:text-accent transition-colors">Custom Holiday Packages</Link>
-            </li>
+            </li> */}
           </ul>
         </div>
 
