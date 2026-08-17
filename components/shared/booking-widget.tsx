@@ -881,8 +881,8 @@ export default function BookingWidget() {
                   type="button"
                   onClick={() => setPickupDropSubTab("individual")}
                   className={`flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-all ${pickupDropSubTab === "individual"
-                      ? "bg-accent text-slate-950 shadow-lg scale-105"
-                      : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                    ? "bg-accent text-slate-950 shadow-lg scale-105"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
                     }`}
                 >
                   <User className="w-3.5 h-3.5" />
@@ -892,8 +892,8 @@ export default function BookingWidget() {
                   type="button"
                   onClick={() => setPickupDropSubTab("working")}
                   className={`flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-all ${pickupDropSubTab === "working"
-                      ? "bg-accent text-slate-950 shadow-lg scale-105"
-                      : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                    ? "bg-accent text-slate-950 shadow-lg scale-105"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
                     }`}
                 >
                   <Building2 className="w-3.5 h-3.5" />
@@ -1106,8 +1106,8 @@ export default function BookingWidget() {
                         type="button"
                         onClick={() => setCorpData({ ...corpData, shiftStartAmpm: "AM" })}
                         className={`h-full px-2.5 text-xs font-bold rounded-md transition-all flex items-center justify-center ${corpData.shiftStartAmpm === "AM"
-                            ? "bg-amber-500 text-slate-950 shadow-md"
-                            : "text-slate-400 hover:text-slate-200"
+                          ? "bg-amber-500 text-slate-950 shadow-md"
+                          : "text-slate-400 hover:text-slate-200"
                           }`}
                       >
                         AM
@@ -1116,8 +1116,8 @@ export default function BookingWidget() {
                         type="button"
                         onClick={() => setCorpData({ ...corpData, shiftStartAmpm: "PM" })}
                         className={`h-full px-2.5 text-xs font-bold rounded-md transition-all flex items-center justify-center ${corpData.shiftStartAmpm === "PM"
-                            ? "bg-amber-500 text-slate-950 shadow-md"
-                            : "text-slate-400 hover:text-slate-200"
+                          ? "bg-amber-500 text-slate-950 shadow-md"
+                          : "text-slate-400 hover:text-slate-200"
                           }`}
                       >
                         PM
@@ -1164,8 +1164,8 @@ export default function BookingWidget() {
                         type="button"
                         onClick={() => setCorpData({ ...corpData, shiftEndAmpm: "AM" })}
                         className={`h-full px-2.5 text-xs font-bold rounded-md transition-all flex items-center justify-center ${corpData.shiftEndAmpm === "AM"
-                            ? "bg-amber-500 text-slate-950 shadow-md"
-                            : "text-slate-400 hover:text-slate-200"
+                          ? "bg-amber-500 text-slate-950 shadow-md"
+                          : "text-slate-400 hover:text-slate-200"
                           }`}
                       >
                         AM
@@ -1174,8 +1174,8 @@ export default function BookingWidget() {
                         type="button"
                         onClick={() => setCorpData({ ...corpData, shiftEndAmpm: "PM" })}
                         className={`h-full px-2.5 text-xs font-bold rounded-md transition-all flex items-center justify-center ${corpData.shiftEndAmpm === "PM"
-                            ? "bg-amber-500 text-slate-950 shadow-md"
-                            : "text-slate-400 hover:text-slate-200"
+                          ? "bg-amber-500 text-slate-950 shadow-md"
+                          : "text-slate-400 hover:text-slate-200"
                           }`}
                       >
                         PM
@@ -1403,11 +1403,10 @@ export default function BookingWidget() {
                       key={pkg.id}
                       type="button"
                       onClick={() => setLocalData({ ...localData, duration: pkg.id })}
-                      className={`py-2 px-3 rounded-lg border text-center transition-all ${
-                        localData.duration === pkg.id || (!localData.duration && pkg.id === "8hr_80km")
-                          ? "bg-accent/20 border-accent text-amber-400 font-bold shadow-md"
-                          : "bg-slate-950/40 border-white/10 text-slate-300 hover:bg-white/5"
-                      }`}
+                      className={`py-2 px-3 rounded-lg border text-center transition-all ${localData.duration === pkg.id || (!localData.duration && pkg.id === "8hr_80km")
+                        ? "bg-accent/20 border-accent text-amber-400 font-bold shadow-md"
+                        : "bg-slate-950/40 border-white/10 text-slate-300 hover:bg-white/5"
+                        }`}
                     >
                       <div className="text-xs font-bold">{pkg.label}</div>
                       <div className="text-[10px] text-slate-400">{pkg.desc}</div>
@@ -1430,22 +1429,20 @@ export default function BookingWidget() {
                     <button
                       type="button"
                       onClick={() => setOutstationData({ ...outstationData, type: "ONE_WAY" })}
-                      className={`flex-1 h-full text-xs font-bold rounded-md transition-all flex items-center justify-center ${
-                        outstationData.type === "ONE_WAY"
-                          ? "bg-amber-500 text-slate-950 shadow-md"
-                          : "text-slate-400 hover:text-slate-200"
-                      }`}
+                      className={`flex-1 h-full text-xs font-bold rounded-md transition-all flex items-center justify-center ${outstationData.type === "ONE_WAY"
+                        ? "bg-amber-500 text-slate-950 shadow-md"
+                        : "text-slate-400 hover:text-slate-200"
+                        }`}
                     >
                       One Way
                     </button>
                     <button
                       type="button"
                       onClick={() => setOutstationData({ ...outstationData, type: "ROUND_TRIP" })}
-                      className={`flex-1 h-full text-xs font-bold rounded-md transition-all flex items-center justify-center ${
-                        outstationData.type === "ROUND_TRIP"
-                          ? "bg-amber-500 text-slate-950 shadow-md"
-                          : "text-slate-400 hover:text-slate-200"
-                      }`}
+                      className={`flex-1 h-full text-xs font-bold rounded-md transition-all flex items-center justify-center ${outstationData.type === "ROUND_TRIP"
+                        ? "bg-amber-500 text-slate-950 shadow-md"
+                        : "text-slate-400 hover:text-slate-200"
+                        }`}
                     >
                       Round Trip
                     </button>
