@@ -1029,26 +1029,26 @@ export default function BookingWidget() {
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Pickup Date *</label>
                   <div className="relative h-[42px]">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-400 pointer-events-none" />
                     <input
                       type="date"
                       required
                       value={localData.pickupDate}
                       onChange={(e) => setLocalData({ ...localData, pickupDate: e.target.value })}
-                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-3 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:invert"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Pickup Time *</label>
                   <div className="relative h-[42px]">
-                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-400 pointer-events-none" />
                     <input
                       type="time"
                       required
                       value={localData.pickupTime}
                       onChange={(e) => setLocalData({ ...localData, pickupTime: e.target.value })}
-                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-3 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:invert"
                     />
                   </div>
                 </div>
@@ -1191,13 +1191,13 @@ export default function BookingWidget() {
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Outstation Date *</label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-400 pointer-events-none" />
                   <input
                     type="date"
                     required
                     value={outstationData.date}
                     onChange={(e) => setOutstationData({ ...outstationData, date: e.target.value })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-3 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:invert"
                   />
                 </div>
               </div>
@@ -1206,13 +1206,13 @@ export default function BookingWidget() {
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Return Date *</label>
                   <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-400 pointer-events-none" />
                     <input
                       type="date"
                       required
                       value={outstationData.returnDate}
                       onChange={(e) => setOutstationData({ ...outstationData, returnDate: e.target.value })}
-                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                      className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-3 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:invert"
                     />
                   </div>
                 </div>
