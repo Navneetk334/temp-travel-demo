@@ -641,11 +641,10 @@ export default function BookingWidget() {
                 <button
                   type="button"
                   onClick={() => setPickupDropSubTab("individual")}
-                  className={`flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-all ${
-                    pickupDropSubTab === "individual"
+                  className={`flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-all ${pickupDropSubTab === "individual"
                       ? "bg-accent text-slate-950 shadow-lg scale-105"
                       : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
-                  }`}
+                    }`}
                 >
                   <User className="w-3.5 h-3.5" />
                   <span>Individual</span>
@@ -653,11 +652,10 @@ export default function BookingWidget() {
                 <button
                   type="button"
                   onClick={() => setPickupDropSubTab("working")}
-                  className={`flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-all ${
-                    pickupDropSubTab === "working"
+                  className={`flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-all ${pickupDropSubTab === "working"
                       ? "bg-accent text-slate-950 shadow-lg scale-105"
                       : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
-                  }`}
+                    }`}
                 >
                   <Building2 className="w-3.5 h-3.5" />
                   <span>Working</span>
@@ -861,22 +859,20 @@ export default function BookingWidget() {
                       <button
                         type="button"
                         onClick={() => setCorpData({ ...corpData, shiftStartAmpm: "AM" })}
-                        className={`h-full px-2.5 text-xs font-bold rounded-md transition-all flex items-center justify-center ${
-                          corpData.shiftStartAmpm === "AM"
+                        className={`h-full px-2.5 text-xs font-bold rounded-md transition-all flex items-center justify-center ${corpData.shiftStartAmpm === "AM"
                             ? "bg-amber-500 text-slate-950 shadow-md"
                             : "text-slate-400 hover:text-slate-200"
-                        }`}
+                          }`}
                       >
                         AM
                       </button>
                       <button
                         type="button"
                         onClick={() => setCorpData({ ...corpData, shiftStartAmpm: "PM" })}
-                        className={`h-full px-2.5 text-xs font-bold rounded-md transition-all flex items-center justify-center ${
-                          corpData.shiftStartAmpm === "PM"
+                        className={`h-full px-2.5 text-xs font-bold rounded-md transition-all flex items-center justify-center ${corpData.shiftStartAmpm === "PM"
                             ? "bg-amber-500 text-slate-950 shadow-md"
                             : "text-slate-400 hover:text-slate-200"
-                        }`}
+                          }`}
                       >
                         PM
                       </button>
@@ -915,22 +911,20 @@ export default function BookingWidget() {
                       <button
                         type="button"
                         onClick={() => setCorpData({ ...corpData, shiftEndAmpm: "AM" })}
-                        className={`h-full px-2.5 text-xs font-bold rounded-md transition-all flex items-center justify-center ${
-                          corpData.shiftEndAmpm === "AM"
+                        className={`h-full px-2.5 text-xs font-bold rounded-md transition-all flex items-center justify-center ${corpData.shiftEndAmpm === "AM"
                             ? "bg-amber-500 text-slate-950 shadow-md"
                             : "text-slate-400 hover:text-slate-200"
-                        }`}
+                          }`}
                       >
                         AM
                       </button>
                       <button
                         type="button"
                         onClick={() => setCorpData({ ...corpData, shiftEndAmpm: "PM" })}
-                        className={`h-full px-2.5 text-xs font-bold rounded-md transition-all flex items-center justify-center ${
-                          corpData.shiftEndAmpm === "PM"
+                        className={`h-full px-2.5 text-xs font-bold rounded-md transition-all flex items-center justify-center ${corpData.shiftEndAmpm === "PM"
                             ? "bg-amber-500 text-slate-950 shadow-md"
                             : "text-slate-400 hover:text-slate-200"
-                        }`}
+                          }`}
                       >
                         PM
                       </button>
