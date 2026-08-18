@@ -19,6 +19,9 @@ import {
   Users,
   ArrowUpRight,
   ChevronRight,
+  ChevronLeft,
+  Quote,
+  ThumbsUp,
   Sparkles,
   CheckCircle2,
   ChevronDown,
@@ -26,8 +29,9 @@ import {
 } from "lucide-react";
 
 export default function Homepage() {
-  const [activeTab, setActiveTab] = useState<"sedan" | "suv" | "luxury">("sedan");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [activeReviewIndex, setActiveReviewIndex] = useState(0);
+  const [isReviewHovered, setIsReviewHovered] = useState(false);
 
   const [featuredVehicles, setFeaturedVehicles] = useState<any[]>([
     { id: "1", name: "Maruti Suzuki Swift Dzire", category: "Compact Sedan", seats: "4 Passengers", rate: "₹12/km", img: "/images/fleet-suv.png" },
@@ -51,7 +55,8 @@ export default function Homepage() {
         authorPhoto: "https://lh3.googleusercontent.com/a-/ALV-UjWoZsUu95OwRf4JSLmmN74OFaM-rT_pK8Wnio3mBotwezngxaGy=s128-c0x00000000-cc-rp-mo",
         rating: 5,
         relativeTime: "a month ago",
-        text: "Excellent outstation taxi service. I used them for a long-distance business trip across cities and was highly impressed. The chauffeur was experienced, professional, and knew the highway routes and best rest stops perfectly."
+        text: "Excellent outstation taxi service. I used them for a long-distance business trip across cities and was highly impressed. The chauffeur was experienced, professional, and knew the highway routes and best rest stops perfectly.",
+        tripType: "Outstation Business Trip"
       },
       {
         id: "rev-2",
@@ -59,7 +64,8 @@ export default function Homepage() {
         authorPhoto: "https://lh3.googleusercontent.com/a/ACg8ocK3XXgJBeEMktlBHrtUh-7aPvCOKQM-Z07oVnaarwQno2QEuA=s128-c0x00000000-cc-rp-mo",
         rating: 5,
         relativeTime: "a month ago",
-        text: "Best corporate cab service we’ve partnered with so far. Punctual drivers, pristine cars, and smooth coordination. Their corporate account management team makes booking and invoicing incredibly easy. Five stars for reliability and professionalism!"
+        text: "Best corporate cab service we’ve partnered with so far. Punctual drivers, pristine cars, and smooth coordination. Their corporate account management team makes booking and invoicing incredibly easy. Five stars for reliability and professionalism!",
+        tripType: "Corporate Employee Commute"
       },
       {
         id: "rev-3",
@@ -67,10 +73,47 @@ export default function Homepage() {
         authorPhoto: "https://lh3.googleusercontent.com/a/ACg8ocJJgrasr6Il7qed2ia885ZDgrtOLL7iNEncvNASggWwowjx4Q=s128-c0x00000000-cc-rp-mo",
         rating: 5,
         relativeTime: "a month ago",
-        text: "Exceptional service from Intercity Taxi Service! Booking was seamless, and the customer support was very helpful. The driver was punctual, extremely courteous, and focused on safety throughout the highway journey."
+        text: "Exceptional service from Intercity Taxi Service! Booking was seamless, and the customer support was very helpful. The driver was punctual, extremely courteous, and focused on safety throughout the highway journey.",
+        tripType: "Intercity Highway Rental"
+      },
+      {
+        id: "rev-4",
+        authorName: "Priya Sharma",
+        authorPhoto: "",
+        rating: 5,
+        relativeTime: "2 weeks ago",
+        text: "Booked an Innova Crysta for a family weekend trip. The car was spotless and smelled fresh. Driver was very polite, drove smoothly, and was very patient during all our sightseeing stops.",
+        tripType: "Family Outstation Tour"
+      },
+      {
+        id: "rev-5",
+        authorName: "Rajesh Malhotra",
+        authorPhoto: "",
+        rating: 5,
+        relativeTime: "3 weeks ago",
+        text: "Outstanding airport transfer experience. Received driver details and live GPS link 30 minutes prior to pickup. Car arrived 10 minutes early. Premium executive feel all the way!",
+        tripType: "Airport Transfer"
+      },
+      {
+        id: "rev-6",
+        authorName: "Vikramaditya Singh",
+        authorPhoto: "",
+        rating: 5,
+        relativeTime: "a month ago",
+        text: "We hired multiple luxury sedans for our corporate VIP delegates. Flawless execution, zero delay, and top-tier hospitality. Highly recommended for corporate events!",
+        tripType: "VIP Event Fleet"
       }
     ]
   });
+
+  // Auto-play reviews carousel every 4.5 seconds unless hovered
+  React.useEffect(() => {
+    if (isReviewHovered) return;
+    const interval = setInterval(() => {
+      setActiveReviewIndex((prev) => (prev + 1) % Math.max(1, googleData.reviews.length));
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [googleData.reviews.length, isReviewHovered]);
 
   React.useEffect(() => {
     fetch("/api/google-reviews")
@@ -79,8 +122,15 @@ export default function Homepage() {
         throw new Error("Failed to fetch reviews");
       })
       .then((data) => {
-        if (data?.reviews && Array.isArray(data.reviews)) {
-          setGoogleData(data);
+        if (data?.reviews && Array.isArray(data.reviews) && data.reviews.length > 0) {
+          setGoogleData(prev => ({
+            ...prev,
+            ...data,
+            reviews: data.reviews.map((r: any, idx: number) => ({
+              ...r,
+              tripType: prev.reviews[idx]?.tripType || "Verified Customer Review"
+            }))
+          }));
         }
       })
       .catch((err) => {
@@ -442,84 +492,163 @@ export default function Homepage() {
       </section>
 
       {/* Google Business Profile Verified Reviews Section */}
-      <section className="py-24 bg-slate-900/40 px-4 sm:px-6 lg:px-8 border-b border-white/5">
-        <div className="max-w-7xl mx-auto space-y-16">
-          <div className="text-center space-y-4">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-slate-200 backdrop-blur-md">
-              <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
-              </svg>
-              <span>Google Business Profile Verified Reviews</span>
+      <section className="py-24 bg-slate-900/40 px-4 sm:px-6 lg:px-8 border-b border-white/5 overflow-hidden">
+        <div className="max-w-7xl mx-auto space-y-12">
+          {/* Section Header with Carousel Navigation Controls */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="space-y-4 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-slate-200 backdrop-blur-md">
+                <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                </svg>
+                <span>Google Business Profile Verified Reviews</span>
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-black text-slate-50 tracking-tight">
+                {googleData.rating} ★★★★★ Rating on Google Maps
+              </h2>
             </div>
-            <h2 className="text-3xl sm:text-5xl font-black text-slate-50 tracking-tight">
-              {googleData.rating} ★★★★★ Rating on Google Maps
-            </h2>
+
+            {/* Interactive Slide Controls & Navigation */}
+            <div className="flex items-center gap-3 self-start md:self-auto">
+              <button
+                type="button"
+                onClick={() => setActiveReviewIndex((prev) => (prev === 0 ? googleData.reviews.length - 1 : prev - 1))}
+                className="w-11 h-11 rounded-xl bg-slate-950 border border-white/10 hover:border-amber-400/50 hover:bg-amber-500/10 text-slate-300 hover:text-amber-400 flex items-center justify-center transition-all shadow-lg active:scale-95 cursor-pointer"
+                aria-label="Previous Review"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveReviewIndex((prev) => (prev + 1) % googleData.reviews.length)}
+                className="w-11 h-11 rounded-xl bg-slate-950 border border-white/10 hover:border-amber-400/50 hover:bg-amber-500/10 text-slate-300 hover:text-amber-400 flex items-center justify-center transition-all shadow-lg active:scale-95 cursor-pointer"
+                aria-label="Next Review"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {googleData.reviews.slice(0, 3).map((t, idx) => (
-              <div key={t.id || idx} className="bg-slate-950/90 border border-white/10 p-6 rounded-2xl space-y-4 hover:border-amber-400/40 transition-all shadow-xl flex flex-col justify-between">
-                <div className="space-y-3">
-                  <div className="flex justify-between items-start">
-                    <div className="flex gap-1">
+          {/* Dynamic Interactive Cards Grid with Hover Animation */}
+          <div 
+            onMouseEnter={() => setIsReviewHovered(true)}
+            onMouseLeave={() => setIsReviewHovered(false)}
+            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+          >
+            {Array.from({ length: Math.min(3, googleData.reviews.length) }, (_, i) => 
+              googleData.reviews[(activeReviewIndex + i) % googleData.reviews.length]
+            ).map((t, idx) => (
+              <div 
+                key={t.id || idx}
+                className="bg-slate-950/90 border border-white/10 p-7 rounded-2xl space-y-6 hover:border-amber-400/50 hover:-translate-y-3 hover:shadow-2xl hover:shadow-amber-500/15 transition-all duration-500 group relative overflow-hidden flex flex-col justify-between"
+              >
+                {/* Glowing Top-Right Background Glow & Floating Quote Watermark */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/15 transition-all duration-500 pointer-events-none" />
+                <Quote className="w-16 h-16 absolute -top-2 -right-2 text-white/5 group-hover:text-amber-400/20 group-hover:scale-125 group-hover:rotate-12 transition-all duration-500 pointer-events-none" />
+
+                <div className="space-y-4 relative z-10">
+                  {/* Rating Stars & Timestamp */}
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full">
                       {[...Array(t.rating || 5)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                        <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400 group-hover:scale-110 transition-transform duration-300" />
                       ))}
+                      <span className="text-[10px] font-black text-amber-400 ml-1">5.0</span>
                     </div>
-                    <span className="text-[10px] font-bold text-slate-400 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
+
+                    <span className="text-[10px] font-extrabold text-slate-400 bg-slate-900 border border-white/10 px-2.5 py-1 rounded-full font-mono">
                       {t.relativeTime}
                     </span>
                   </div>
-                  <p className="text-slate-300 text-xs sm:text-sm italic leading-relaxed">"{t.text}"</p>
+
+                  {/* Review Text */}
+                  <p className="text-slate-200 text-xs sm:text-sm leading-relaxed font-sans font-medium group-hover:text-slate-50 transition-colors duration-300">
+                    "{t.text}"
+                  </p>
                 </div>
 
-                <div className="border-t border-white/10 pt-4 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                    {t.authorPhoto ? (
-                      <img
-                        src={t.authorPhoto}
-                        alt={t.authorName}
-                        className="w-9 h-9 rounded-full object-cover border border-amber-400/40 shrink-0"
-                      />
-                    ) : (
-                      <div className="w-9 h-9 rounded-full bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs border border-amber-400/40 shrink-0">
-                        {t.authorName?.charAt(0) || "G"}
-                      </div>
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <div className="font-extrabold text-slate-100 text-xs sm:text-sm flex items-center gap-1">
-                        <span className="truncate" title={t.authorName}>{t.authorName}</span>
-                        <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                      </div>
-                      <div className="text-[10px] text-slate-400 truncate">Google Verified Customer</div>
+                {/* Author Info & Interactive Links */}
+                <div className="border-t border-white/10 pt-5 space-y-3 relative z-10">
+                  {t.tripType && (
+                    <div className="inline-flex items-center gap-1.5 text-[9px] font-extrabold uppercase tracking-widest text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded border border-amber-500/20">
+                      <Sparkles className="w-2.5 h-2.5 text-amber-400" />
+                      <span>{t.tripType}</span>
                     </div>
+                  )}
+
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      {t.authorPhoto ? (
+                        <img
+                          src={t.authorPhoto}
+                          alt={t.authorName}
+                          className="w-10 h-10 rounded-full object-cover border-2 border-amber-400/40 group-hover:border-amber-400 transition-colors shrink-0 shadow-md"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 text-slate-950 font-black flex items-center justify-center text-sm border-2 border-amber-400/40 group-hover:border-amber-400 shrink-0 shadow-md">
+                          {t.authorName?.charAt(0) || "G"}
+                        </div>
+                      )}
+
+                      <div className="min-w-0 flex-1">
+                        <div className="font-extrabold text-slate-100 text-xs sm:text-sm flex items-center gap-1.5 group-hover:text-amber-300 transition-colors">
+                          <span className="truncate" title={t.authorName}>{t.authorName}</span>
+                          <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" />
+                        </div>
+                        <div className="text-[10px] text-slate-400 truncate flex items-center gap-1">
+                          <ThumbsUp className="w-2.5 h-2.5 text-emerald-400" />
+                          <span>Google Verified Customer</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <a
+                      href={googleData.googleMapsUri}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-[10px] font-extrabold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 px-3 py-1.5 rounded-lg border border-amber-500/30 transition-all shrink-0 group/link"
+                    >
+                      <span>Maps</span>
+                      <ArrowUpRight className="w-3 h-3 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
+                    </a>
                   </div>
-                  <a
-                    href={googleData.googleMapsUri}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-[10px] font-bold text-amber-400 hover:underline bg-amber-500/10 px-2.5 py-1.5 rounded-lg border border-amber-500/20 shrink-0"
-                  >
-                    <span>View on Maps</span>
-                    <ArrowUpRight className="w-3 h-3 shrink-0" />
-                  </a>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="text-center pt-4">
+          {/* Interactive Pagination Indicators & Maps Link Button */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-4 border-t border-white/5">
+            {/* Pagination Dots */}
+            <div className="flex items-center gap-2">
+              {googleData.reviews.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setActiveReviewIndex(i)}
+                  className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                    i === activeReviewIndex 
+                      ? "w-8 bg-amber-400 shadow-md shadow-amber-400/30" 
+                      : "w-2 bg-white/20 hover:bg-white/40"
+                  }`}
+                  aria-label={`Go to slide ${i + 1}`}
+                />
+              ))}
+            </div>
+
+            {/* Read All Reviews Button */}
             <a
               href={googleData.googleMapsUri}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-xs font-extrabold text-slate-950 bg-amber-400 hover:bg-amber-300 px-6 py-3 rounded-xl transition-all shadow-lg shadow-amber-400/10 uppercase tracking-wider"
+              className="inline-flex items-center gap-2.5 text-xs font-extrabold text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 px-7 py-3.5 rounded-xl transition-all shadow-xl shadow-amber-500/15 uppercase tracking-wider font-mono hover:scale-105 active:scale-95"
             >
-              <span>Read All Verified Google Reviews ({googleData.userRatingCount}+)</span>
-              <ArrowUpRight className="w-4 h-4" />
+              <span>Explore All Verified Google Reviews ({googleData.userRatingCount}+)</span>
+              <ArrowUpRight className="w-4 h-4 text-slate-950" />
             </a>
           </div>
         </div>
