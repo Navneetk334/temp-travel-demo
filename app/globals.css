@@ -185,13 +185,72 @@ input[type="time"]::-webkit-clear-button {
   height: 0 !important;
 }
 
-/* Real Light Mode Theme Overrides */
+/* =========================================================
+   WORLD-CLASS HIGH-CONTRAST LIGHT THEME DESIGN SYSTEM
+   ========================================================= */
+
 html.light,
 html.light body {
   background-color: #f8fafc !important;
   color: #0f172a !important;
 }
 
+/* Header & Navigation in Light Mode */
+html.light header {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+html.light header nav a {
+  color: #1e293b !important;
+}
+
+html.light header nav a:hover {
+  color: #d97706 !important;
+}
+
+html.light header span.text-slate-50 {
+  color: #0f172a !important;
+}
+
+/* Typography & Headings */
+html.light h1,
+html.light h2,
+html.light h3,
+html.light h4,
+html.light .text-slate-50,
+html.light .text-slate-100,
+html.light .text-slate-200 {
+  color: #020617 !important;
+}
+
+html.light p,
+html.light span:not(.text-amber-400):not(.text-amber-500):not(.text-amber-600):not(.text-emerald-400):not(.text-accent),
+html.light .text-slate-300,
+html.light .text-slate-400 {
+  color: #334155 !important;
+}
+
+/* Badges & Pill Tags */
+html.light .bg-white\/5,
+html.light .bg-slate-900\/80,
+html.light .bg-slate-950\/80 {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+html.light .text-amber-400,
+html.light .text-amber-300 {
+  color: #b45309 !important;
+}
+
+html.light .bg-amber-500\/10 {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+/* Background Sections Override */
 html.light .bg-slate-950,
 html.light .bg-slate-900,
 html.light .bg-slate-900\/90,
@@ -208,39 +267,92 @@ html.light .bg-slate-950\/60 {
   color: #0f172a !important;
 }
 
-html.light header {
-  background-color: rgba(255, 255, 255, 0.9) !important;
-  border-bottom-color: rgba(0, 0, 0, 0.08) !important;
-}
-
-html.light .glassmorphism {
-  background: rgba(255, 255, 255, 0.9) !important;
-  border-color: rgba(0, 0, 0, 0.08) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
-}
-
-html.light .text-slate-50,
-html.light .text-slate-100,
-html.light .text-slate-200 {
-  color: #0f172a !important;
-}
-
-html.light .text-slate-300,
-html.light .text-slate-400 {
-  color: #334155 !important;
-}
-
+/* Section Dividers & Borders */
 html.light .border-white\/5,
 html.light .border-white\/10,
 html.light .border-white\/15,
-html.light .border-white\/20 {
-  border-color: rgba(0, 0, 0, 0.08) !important;
+html.light .border-white\/20,
+html.light .border-white\/30 {
+  border-color: #e2e8f0 !important;
 }
 
+/* Cards & Glassmorphism in Light Mode */
+html.light .glassmorphism,
+html.light .shadow-xl,
+html.light .shadow-2xl {
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Stats Banner in Light Mode */
+html.light section.relative.z-20.py-12 {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+html.light section.relative.z-20.py-12 .text-amber-400 {
+  color: #d97706 !important;
+}
+
+html.light section.relative.z-20.py-12 .text-slate-400 {
+  color: #475569 !important;
+}
+
+/* Inputs, Selects, and Form Controls */
 html.light input:not([type="checkbox"]):not([type="radio"]),
 html.light select,
 html.light textarea {
-  background-color: #f8fafc !important;
+  background-color: #ffffff !important;
   color: #0f172a !important;
   border-color: #cbd5e1 !important;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+html.light option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+/* Google Maps Places Autocomplete Dropdown in Light Mode */
+html.light .pac-container {
+  background-color: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light .pac-item {
+  color: #1e293b !important;
+  border-top-color: #f1f5f9 !important;
+}
+
+html.light .pac-item:hover, 
+html.light .pac-item-selected {
+  background-color: #f1f5f9 !important;
+  color: #020617 !important;
+}
+
+html.light .pac-item-query {
+  color: #0f172a !important;
+}
+
+/* Footer in Light Mode - Retain Sleek Dark Slate Footer Grounding */
+html.light footer {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+html.light footer h4,
+html.light footer .text-slate-50,
+html.light footer .text-slate-300 {
+  color: #f8fafc !important;
+}
+
+html.light footer .text-slate-400,
+html.light footer .text-slate-500 {
+  color: #94a3b8 !important;
 }
