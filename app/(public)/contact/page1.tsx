@@ -191,38 +191,39 @@ export default function ContactPage() {
               </p>
             </div>
 
-            {/* Google Map Mock Frame */}
-            <div className="relative bg-slate-900 border border-white/5 rounded-2xl h-96 overflow-hidden glassmorphism flex flex-col justify-center items-center text-center p-8 gap-4">
-              {/* Styled background simulation */}
-              <div className="absolute inset-0 bg-slate-950 opacity-40 pointer-events-none" />
-              <div className="absolute inset-0 bg-radial-gradient from-blue-900/10 to-transparent pointer-events-none" />
-              
-              {/* Styled SVG map representation */}
-              <div className="absolute inset-0 opacity-15 pointer-events-none flex items-center justify-center">
-                <svg className="w-full h-full text-blue-500" viewBox="0 0 800 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M50 150 L200 120 L300 250 L450 100 L600 280 L750 150 M100 20 L100 380 M400 20 L400 380 M700 20 L700 380 M20 200 L780 200" stroke="currentColor" strokeWidth="2" strokeDasharray="5 5" />
-                  <circle cx="400" cy="200" r="10" fill="currentColor" />
-                  <circle cx="200" cy="120" r="6" fill="currentColor" />
-                  <circle cx="600" cy="280" r="6" fill="currentColor" />
-                </svg>
-              </div>
+            {/* Real Interactive Google Maps Container */}
+            <div className="relative bg-slate-900 border border-white/10 rounded-2xl h-[420px] overflow-hidden shadow-2xl group">
+              {/* Real Google Maps Embed Iframe */}
+              <iframe
+                title="TEMP TRAVEL CAR RENTALS PVT LTD - Google Maps Location"
+                src="https://maps.google.com/maps?q=place_id:ChIJ5Zoykd0bDTkRc8tFlL_O6rY&t=&z=16&ie=UTF8&iwloc=&output=embed"
+                className="w-full h-full border-0 filter grayscale invert contrast-125 opacity-90 group-hover:filter-none group-hover:opacity-100 transition-all duration-500"
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
 
-              <div className="relative z-10 bg-slate-950/80 border border-white/10 p-4 rounded-full text-accent shadow-2xl mb-2 animate-bounce">
-                <MapPin className="w-8 h-8" />
+              {/* Direct Click Overlay Bar */}
+              <div className="absolute bottom-4 left-4 right-4 md:left-auto md:right-4 bg-slate-950/90 backdrop-blur-md border border-white/15 p-4 rounded-xl flex items-center justify-between gap-4 shadow-2xl z-10">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-amber-500/20 text-amber-400 rounded-lg border border-amber-500/30">
+                    <MapPin className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-slate-100 text-xs sm:text-sm">TEMP TRAVEL CAR RENTALS PVT. LTD.</h3>
+                    <p className="text-[11px] text-slate-400 truncate max-w-xs sm:max-w-md">Plot No. 183, Kh No. 16/2, Qutub Vihar PH-I, New Delhi - 110071</p>
+                  </div>
+                </div>
+                <a
+                  href="https://www.google.com/maps/place/?q=place_id:ChIJ5Zoykd0bDTkRc8tFlL_O6rY"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-4 py-2.5 rounded-lg text-xs tracking-wider transition-all shadow-lg shrink-0 uppercase"
+                >
+                  <span>Open Business Listing</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
               </div>
-              <h3 className="relative z-10 text-xl font-bold text-slate-50">TEMP TRAVEL CAR RENTALS PVT. LTD.</h3>
-              <p className="relative z-10 text-slate-300 text-sm max-w-md">
-                Plot No. 183, Kh No. 16/2, A-Block, Qutub Vihar PH-I, New Delhi - 110071
-              </p>
-              <a 
-                href="https://maps.google.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="relative z-10 bg-primary hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-lg text-xs tracking-wider transition-all flex items-center gap-2 border border-white/10"
-              >
-                <span>Open in Google Maps</span>
-                <ExternalLink className="w-4 h-4" />
-              </a>
             </div>
 
           </div>
