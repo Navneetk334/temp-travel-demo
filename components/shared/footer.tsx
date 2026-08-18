@@ -92,7 +92,7 @@ export default function Footer() {
             <li className="flex gap-2 items-start">
               <MapPin className="w-4 h-4 text-accent shrink-0 mt-0.5" />
               <span className="leading-relaxed text-slate-300">
-                Flat No C-102, Shanti Vihar, Lokhandwala Complex, Kandivali East, Mumbai, MH, 400101
+                Plot No. 183, Kh No. 16/2, A-Block, Qutub Vihar PH-I, New Delhi - 110071
               </span>
             </li>
             <li className="flex gap-2 items-center">
@@ -101,7 +101,7 @@ export default function Footer() {
             </li>
             <li className="flex gap-2 items-center">
               <Mail className="w-4 h-4 text-accent shrink-0" />
-              <a href="mailto:info@temptravels.com" className="text-slate-300 hover:underline">info@temptravels.com</a>
+              <a href="mailto:sales@temptravel.co.in" className="text-slate-300 hover:underline">sales@temptravel.co.in</a>
             </li>
           </ul>
         </div>

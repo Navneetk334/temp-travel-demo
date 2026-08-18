@@ -31,13 +31,13 @@ export default function ContactPage() {
       "name": "TEMP TRAVEL CAR RENTALS PVT LTD",
       "image": "https://temptravels.com/images/hero-cover.png",
       "telephone": "+91-9999999999",
-      "email": "info@temptravels.com",
+      "email": "sales@temptravel.co.in",
       "address": {
         "@type": "PostalAddress",
-        "streetAddress": "Flat No C-102, Shanti Vihar, Lokhandwala Complex",
-        "addressLocality": "Mumbai",
-        "addressRegion": "MH",
-        "postalCode": "400101",
+        "streetAddress": "Plot No. 183, Kh No. 16/2, A-Block, Qutub Vihar PH-I",
+        "addressLocality": "New Delhi",
+        "addressRegion": "DL",
+        "postalCode": "110071",
         "addressCountry": "IN"
       }
     }
@@ -68,7 +68,7 @@ export default function ContactPage() {
               Contact <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-accent">Our Travel Desk</span>
             </h1>
             <p className="text-slate-300 max-w-3xl mx-auto text-base sm:text-lg leading-relaxed font-medium">
-              Have questions about billing logs, custom tours, or setting up corporate roster plans? Speak directly to our support agents.
+              Have questions about corporate roster plans, executive rentals, or custom travel contracts? Speak directly to our team.
             </p>
           </div>
         </section>
@@ -94,7 +94,7 @@ export default function ContactPage() {
                     <a href="tel:+919999999999" className="font-bold hover:text-accent transition-colors">+91 99999 99999</a>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-400">Tour Customization:</span>
+                    <span className="text-slate-400">Technical Support:</span>
                     <a href="tel:+919999988888" className="font-bold hover:text-accent transition-colors">+91 99999 88888</a>
                   </div>
                 </div>
@@ -110,12 +110,8 @@ export default function ContactPage() {
                 </div>
                 <div className="space-y-1.5 pl-11 text-sm text-slate-300">
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-400">General Support:</span>
-                    <a href="mailto:info@temptravels.com" className="font-bold hover:text-accent transition-colors">info@temptravels.com</a>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-400">Enterprise Sales:</span>
-                    <a href="mailto:sales@temptravels.com" className="font-bold hover:text-accent transition-colors">sales@temptravels.com</a>
+                    <span className="text-slate-400">Sales Support:</span>
+                    <a href="mailto:sales@temptravel.co.in" className="font-bold hover:text-accent transition-colors">sales@temptravel.co.in</a>
                   </div>
                 </div>
               </div>
@@ -128,8 +124,11 @@ export default function ContactPage() {
                   </div>
                   <h3 className="font-bold text-slate-100 text-base">Corporate Head Office</h3>
                 </div>
-                <div className="pl-11 text-sm text-slate-300 leading-relaxed">
-                  Flat No C-102, Shanti Vihar, Lokhandwala Complex, Kandivali East, Mumbai, MH, 400101, India
+                <div className="pl-11 text-sm text-slate-300 leading-relaxed font-semibold">
+                  TEMP TRAVEL CAR RENTALS PVT. LTD.
+                  <div className="font-normal text-slate-300 mt-1">
+                    Plot No. 183, Kh No. 16/2, A-Block, Qutub Vihar PH-I, New Delhi - 110071
+                  </div>
                 </div>
               </div>
 
@@ -144,11 +143,11 @@ export default function ContactPage() {
                 <div className="space-y-1.5 pl-11 text-sm text-slate-300">
                   <div className="flex justify-between">
                     <span className="text-slate-400">Monday - Saturday:</span>
-                    <span className="font-semibold text-slate-200">09:00 AM - 08:00 PM</span>
+                    <span className="font-semibold text-slate-200">10:00 AM - 7:00 PM</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Sunday:</span>
-                    <span className="font-semibold text-slate-500">Office Closed</span>
+                    <span className="font-semibold text-slate-500">Closed</span>
                   </div>
                 </div>
               </div>
@@ -188,7 +187,7 @@ export default function ContactPage() {
                 <span>Our Office Location</span>
               </h2>
               <p className="text-slate-400 text-sm max-w-xl mx-auto">
-                Flat No C-102, Shanti Vihar, Lokhandwala Complex, Kandivali East, Mumbai.
+                Plot No. 183, Kh No. 16/2, A-Block, Qutub Vihar PH-I, New Delhi - 110071
               </p>
             </div>
 
@@ -211,9 +210,9 @@ export default function ContactPage() {
               <div className="relative z-10 bg-slate-950/80 border border-white/10 p-4 rounded-full text-accent shadow-2xl mb-2 animate-bounce">
                 <MapPin className="w-8 h-8" />
               </div>
-              <h3 className="relative z-10 text-xl font-bold text-slate-50">TEMP TRAVEL CAR RENTALS PVT LTD</h3>
+              <h3 className="relative z-10 text-xl font-bold text-slate-50">TEMP TRAVEL CAR RENTALS PVT. LTD.</h3>
               <p className="relative z-10 text-slate-300 text-sm max-w-md">
-                Kandivali East, Lokhandwala Complex, Mumbai, Maharashtra, 400101
+                Plot No. 183, Kh No. 16/2, A-Block, Qutub Vihar PH-I, New Delhi - 110071
               </p>
               <a 
                 href="https://maps.google.com" 
