@@ -29,11 +29,14 @@ export default function Homepage() {
   const [activeTab, setActiveTab] = useState<"sedan" | "suv" | "luxury">("sedan");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  const [featuredVehicles, setFeaturedVehicles] = useState<any[]>([
+  const DEFAULT_FEATURED = [
     { id: "1", name: "Maruti Suzuki Swift Dzire", category: "Compact Sedan", seats: "4 Passengers", rate: "₹12/km", img: "/images/fleet-suv.png" },
     { id: "2", name: "Honda City / Hyundai Verna", category: "Executive Sedan", seats: "4 Passengers", rate: "₹18/km", img: "/images/hero-cover.png" },
     { id: "3", name: "Mercedes-Benz E-Class", category: "Luxury Sedan", seats: "4 Passengers", rate: "₹65/km", img: "/images/hero-cover.png" }
-  ]);
+  ];
+
+  const [featuredVehicles, setFeaturedVehicles] = useState<any[]>([]);
+  const [vehiclesLoading, setVehiclesLoading] = useState<boolean>(true);
 
   const [googleData, setGoogleData] = useState<{
     rating: number;
@@ -113,11 +116,19 @@ export default function Homepage() {
               rate: v.perKmRate ? `₹${Number(v.perKmRate)}/km` : v.baseDailyRate ? `₹${Number(v.baseDailyRate)}/day` : "On Request",
               img: v.imageUrl || "/images/fleet-suv.png"
             })));
+          } else {
+            setFeaturedVehicles(DEFAULT_FEATURED);
           }
+        } else {
+          setFeaturedVehicles(DEFAULT_FEATURED);
         }
       })
       .catch((err) => {
         console.error("Featured vehicles load error:", err);
+        setFeaturedVehicles(DEFAULT_FEATURED);
+      })
+      .finally(() => {
+        setVehiclesLoading(false);
       });
   }, []);
 
@@ -355,51 +366,69 @@ export default function Homepage() {
 
           {/* Vehicle Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {featuredVehicles.map((vehicle, idx) => (
-              <div key={vehicle.id || idx} className="bg-slate-950 border border-white/10 rounded-2xl overflow-hidden hover:border-amber-400/50 transition-all duration-300 group shadow-xl flex flex-col">
-                <div className="relative h-48 bg-slate-900 overflow-hidden">
-                  <Image
-                    src={vehicle.img}
-                    alt={vehicle.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute top-3 right-3 bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-[10px] font-bold text-amber-400">
-                    {vehicle.category}
+            {vehiclesLoading ? (
+              [...Array(3)].map((_, i) => (
+                <div key={i} className="bg-slate-950 border border-white/10 rounded-2xl overflow-hidden shadow-xl animate-pulse flex flex-col h-80">
+                  <div className="h-48 bg-slate-900/80 w-full" />
+                  <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
+                    <div className="space-y-2">
+                      <div className="h-5 bg-slate-900 rounded w-3/4" />
+                      <div className="h-4 bg-slate-900/60 rounded w-1/2" />
+                    </div>
+                    <div className="pt-4 border-t border-white/5 flex justify-between items-center">
+                      <div className="h-6 bg-slate-900 rounded w-1/3" />
+                      <div className="h-8 bg-slate-900 rounded w-1/4" />
+                    </div>
                   </div>
                 </div>
-
-                <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-bold text-slate-100 group-hover:text-amber-400 transition-colors">{vehicle.name}</h3>
-                    <div className="flex items-center gap-4 text-xs text-slate-400">
-                      <span className="flex items-center gap-1">
-                        <Users className="w-3.5 h-3.5 text-amber-400" />
-                        {vehicle.seats}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Shield className="w-3.5 h-3.5 text-emerald-400" />
-                        GPS Enabled
-                      </span>
+              ))
+            ) : (
+              featuredVehicles.map((vehicle, idx) => (
+                <div key={vehicle.id || idx} className="bg-slate-950 border border-white/10 rounded-2xl overflow-hidden hover:border-amber-400/50 transition-all duration-300 group shadow-xl flex flex-col">
+                  <div className="relative h-48 bg-slate-900 overflow-hidden">
+                    <Image
+                      src={vehicle.img}
+                      alt={vehicle.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute top-3 right-3 bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-[10px] font-bold text-amber-400">
+                      {vehicle.category}
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t border-white/10 flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] text-slate-400 block uppercase font-bold">Base Tariff</span>
-                      <span className="text-base font-black text-amber-400">{vehicle.rate}</span>
+                  <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
+                    <div className="space-y-2">
+                      <h3 className="text-lg font-bold text-slate-100 group-hover:text-amber-400 transition-colors">{vehicle.name}</h3>
+                      <div className="flex items-center gap-4 text-xs text-slate-400">
+                        <span className="flex items-center gap-1">
+                          <Users className="w-3.5 h-3.5 text-amber-400" />
+                          {vehicle.seats}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Shield className="w-3.5 h-3.5 text-emerald-400" />
+                          GPS Enabled
+                        </span>
+                      </div>
                     </div>
-                    <a
-                      href="#book-widget"
-                      className="inline-flex items-center gap-1 text-xs font-extrabold text-slate-100 bg-white/5 hover:bg-amber-500 hover:text-slate-950 px-4 py-2 rounded-lg transition-all border border-white/10"
-                    >
-                      <span>Book Now</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </a>
+
+                    <div className="pt-4 border-t border-white/10 flex items-center justify-between">
+                      <div>
+                        <span className="text-[10px] text-slate-400 block uppercase font-bold">Base Tariff</span>
+                        <span className="text-base font-black text-amber-400">{vehicle.rate}</span>
+                      </div>
+                      <a
+                        href="#book-widget"
+                        className="inline-flex items-center gap-1 text-xs font-extrabold text-slate-100 bg-white/5 hover:bg-amber-500 hover:text-slate-950 px-4 py-2 rounded-lg transition-all border border-white/10"
+                      >
+                        <span>Book Now</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </section>
