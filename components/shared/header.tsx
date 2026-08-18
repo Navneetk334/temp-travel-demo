@@ -1,12 +1,40 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Car, Phone } from "lucide-react";
+import { Car, Sun, Moon } from "lucide-react";
 
 export default function Header() {
   const pathname = usePathname();
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const savedTheme = (localStorage.getItem("theme") as "dark" | "light") || "dark";
+    setTheme(savedTheme);
+    if (savedTheme === "light") {
+      document.documentElement.classList.add("light");
+      document.documentElement.classList.remove("dark");
+    } else {
+      document.documentElement.classList.add("dark");
+      document.documentElement.classList.remove("light");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "dark" ? "light" : "dark";
+    setTheme(nextTheme);
+    localStorage.setItem("theme", nextTheme);
+    if (nextTheme === "light") {
+      document.documentElement.classList.add("light");
+      document.documentElement.classList.remove("dark");
+    } else {
+      document.documentElement.classList.add("dark");
+      document.documentElement.classList.remove("light");
+    }
+  };
 
   const links = [
     { name: "Home", href: "/" },
@@ -50,19 +78,33 @@ export default function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-4">
-          <Link 
-            href="/book" 
-            className="bg-primary hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-lg text-sm tracking-wide shadow-md transition-all hidden sm:block border border-white/10"
-          >
-            Book Cab
-          </Link>
-          <a 
-            href="tel:+919999999999" 
-            className="flex items-center justify-center p-2.5 bg-slate-900 border border-white/10 rounded-lg text-slate-300 hover:text-accent transition-colors"
-          >
-            <Phone className="w-4 h-4" />
-          </a>
+        {/* Theme Toggle Switch */}
+        <div className="flex items-center gap-3">
+          {mounted && (
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="group relative w-16 h-8 rounded-full p-1 bg-slate-900 border border-white/15 cursor-pointer shadow-inner transition-all hover:border-amber-400/40 flex items-center justify-between"
+              title={theme === "dark" ? "Switch to Light Theme" : "Switch to Dark Theme"}
+              aria-label="Toggle theme"
+            >
+              <Sun className="w-3.5 h-3.5 text-amber-400 ml-1 z-10 opacity-70 group-hover:opacity-100 transition-opacity" />
+              <Moon className="w-3.5 h-3.5 text-blue-300 mr-1 z-10 opacity-70 group-hover:opacity-100 transition-opacity" />
+              <div
+                className={`absolute top-1 left-1 w-6 h-6 rounded-full shadow-md transition-transform duration-300 flex items-center justify-center ${
+                  theme === "light"
+                    ? "translate-x-0 bg-gradient-to-tr from-amber-400 to-amber-500 shadow-amber-500/20"
+                    : "translate-x-8 bg-gradient-to-tr from-blue-600 to-indigo-600 shadow-blue-500/20"
+                }`}
+              >
+                {theme === "light" ? (
+                  <Sun className="w-3.5 h-3.5 text-slate-950 fill-amber-300" />
+                ) : (
+                  <Moon className="w-3.5 h-3.5 text-white fill-white" />
+                )}
+              </div>
+            </button>
+          )}
         </div>
       </div>
     </header>
