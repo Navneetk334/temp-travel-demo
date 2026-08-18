@@ -297,21 +297,6 @@ export default function Homepage() {
         </div>
       </section>
 
-      {/* Trusted By Major Enterprise Companies */}
-      <section className="py-16 bg-slate-950 border-b border-white/5 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 text-center space-y-8">
-          <span className="text-xs font-bold uppercase tracking-widest text-slate-400 block">
-            TRUSTED BY MAJOR ENTERPRISE COMPANIES
-          </span>
-          <div className="flex flex-wrap justify-center items-center gap-10 md:gap-14 opacity-75">
-            {["AMAZON INDIA", "TATA CONSULTING", "INFOSYS", "WIPRO TECHNOLOGIES", "GOOGLE INDIA", "CAPGEMINI"].map((client, idx) => (
-              <span key={idx} className="text-base sm:text-lg font-black text-slate-200 tracking-wider uppercase hover:text-amber-400 transition-colors">
-                {client}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Fleet Showcase Interactive Section */}
       <section id="fleet" className="py-24 bg-slate-900/60 px-4 sm:px-6 lg:px-8 border-b border-white/5">
