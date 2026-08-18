@@ -94,9 +94,13 @@ export default function AnimatedReviewsShowcase({
                 rotate: 0,
                 transition: { duration: 0.3 },
               }}
-              className="absolute w-[320px] bg-slate-950/95 border border-white/10 p-6 rounded-2xl space-y-4 hover:border-amber-400/60 shadow-2xl hover:shadow-amber-500/20 backdrop-blur-xl transition-colors group flex flex-col justify-between"
+              className="absolute w-[320px] bg-slate-950/95 border border-white/10 p-6 rounded-2xl space-y-4 hover:border-amber-400/60 shadow-2xl hover:shadow-amber-500/20 backdrop-blur-xl transition-colors group flex flex-col justify-between overflow-hidden"
             >
-              <Quote className="w-14 h-14 absolute -top-2 -right-2 text-white/5 group-hover:text-amber-400/20 group-hover:scale-125 group-hover:rotate-12 transition-all pointer-events-none" />
+              {/* Background Glow Aura */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/15 transition-all duration-500 pointer-events-none z-0" />
+              
+              {/* Double Inverted Commas Quote Icon (Inside card bounds, glowing border goes behind) */}
+              <Quote className="w-14 h-14 absolute top-2 right-2 text-white/5 group-hover:text-amber-400/25 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 pointer-events-none z-10" />
 
               <div className="space-y-3 relative z-10">
                 <div className="flex justify-between items-center">
@@ -168,8 +172,9 @@ export default function AnimatedReviewsShowcase({
           {displayReviews.map((rev, idx) => (
             <div
               key={rev.id || idx}
-              className="bg-slate-950/90 border border-white/10 p-6 rounded-2xl space-y-4 hover:border-amber-400/40 shadow-xl flex flex-col justify-between"
+              className="bg-slate-950/90 border border-white/10 p-6 rounded-2xl space-y-4 hover:border-amber-400/40 shadow-xl flex flex-col justify-between overflow-hidden relative group"
             >
+              <Quote className="w-12 h-12 absolute top-2 right-2 text-white/5 group-hover:text-amber-400/20 transition-all pointer-events-none z-10" />
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full">
