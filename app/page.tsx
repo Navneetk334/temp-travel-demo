@@ -248,9 +248,9 @@ export default function Homepage() {
       <section className="relative z-20 py-12 bg-slate-900/90 border-y border-white/10 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {[
-            { metric: "500,000+", label: "Verified Passengers Transported" },
+            { metric: "90,000+", label: "Verified Passengers Transported" },
             { metric: "99.85%", label: "Corporate On-Time Arrival Ratio" },
-            { metric: "150+", label: "Fortune 500 & Enterprise Clients" },
+            { metric: "121+", label: "Satisfied clients" },
             { metric: "24 / 7", label: "Dedicated SPOC Command Center" }
           ].map((stat, idx) => (
             <div key={idx} className="space-y-1">
@@ -457,9 +457,6 @@ export default function Homepage() {
             <h2 className="text-3xl sm:text-5xl font-black text-slate-50 tracking-tight">
               {googleData.rating} ★★★★★ Rating on Google Maps
             </h2>
-            <p className="text-slate-300 max-w-2xl mx-auto text-sm">
-              Live feedback synced directly from our Google Business Profile (Place ID: <span className="font-mono text-amber-400 font-bold">ChIJ5Zoykd0bDTkRc8tFlL_O6rY</span>).
-            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

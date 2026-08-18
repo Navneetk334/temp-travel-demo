@@ -897,7 +897,7 @@ export default function BookingWidget() {
                     }`}
                 >
                   <Building2 className="w-3.5 h-3.5" />
-                  <span>Working</span>
+                  <span>Corporate</span>
                 </button>
               </div>
 
