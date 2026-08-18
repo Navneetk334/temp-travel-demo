@@ -251,7 +251,7 @@ export default function Homepage() {
             { metric: "90,000+", label: "Verified Passengers Transported" },
             { metric: "99.85%", label: "Corporate On-Time Arrival Ratio" },
             { metric: "121+", label: "Satisfied clients" },
-            { metric: "24 / 7", label: "Dedicated SPOC Command Center" }
+            { metric: "24/7", label: "Dedicated SPOC Command Center" }
           ].map((stat, idx) => (
             <div key={idx} className="space-y-1">
               <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-amber-400 tracking-tight">{stat.metric}</div>
