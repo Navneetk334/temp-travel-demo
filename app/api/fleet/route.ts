@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
     const status = searchParams.get("status") || "";
     const fuelType = searchParams.get("fuelType") || "";
     const transmission = searchParams.get("transmission") || "";
+    const featuredParam = searchParams.get("featured");
     const sortBy = searchParams.get("sortBy") || "createdAt";
     const sortOrder = searchParams.get("sortOrder") === "asc" ? "asc" : "desc";
     const page = parseInt(searchParams.get("page") || "1", 10);
@@ -22,6 +23,7 @@ export async function GET(req: NextRequest) {
     if (status) where.status = status;
     if (fuelType) where.fuelType = fuelType;
     if (transmission) where.transmission = transmission;
+    if (featuredParam === "true") where.isFeatured = true;
 
     if (search) {
       where.OR = [

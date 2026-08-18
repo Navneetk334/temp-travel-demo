@@ -241,6 +241,7 @@ model FleetVehicle {
   extraKmRate        Decimal?        @db.Decimal(10, 2)
   extraHrRate        Decimal?        @db.Decimal(10, 2)
   status             VehicleStatus   @default(AVAILABLE)
+  isFeatured         Boolean         @default(false)
   driverId           String?         @unique
   driver             User?           @relation("DriverVehicle", fields: [driverId], references: [id], onDelete: SetNull)
   createdAt          DateTime        @default(now())

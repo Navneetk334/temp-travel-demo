@@ -29,6 +29,12 @@ export default function Homepage() {
   const [activeTab, setActiveTab] = useState<"sedan" | "suv" | "luxury">("sedan");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
+  const [featuredVehicles, setFeaturedVehicles] = useState<any[]>([
+    { id: "1", name: "Maruti Suzuki Swift Dzire", category: "Compact Sedan", seats: "4 Passengers", rate: "₹12/km", img: "/images/fleet-suv.png" },
+    { id: "2", name: "Honda City / Hyundai Verna", category: "Executive Sedan", seats: "4 Passengers", rate: "₹18/km", img: "/images/hero-cover.png" },
+    { id: "3", name: "Mercedes-Benz E-Class", category: "Luxury Sedan", seats: "4 Passengers", rate: "₹65/km", img: "/images/hero-cover.png" }
+  ]);
+
   const [googleData, setGoogleData] = useState<{
     rating: number;
     userRatingCount: number;
@@ -68,13 +74,51 @@ export default function Homepage() {
 
   React.useEffect(() => {
     fetch("/api/google-reviews")
-      .then(res => res.json())
-      .then(data => {
-        if (data.reviews && data.reviews.length > 0) {
+      .then((res) => {
+        if (res.ok) return res.json();
+        throw new Error("Failed to fetch reviews");
+      })
+      .then((data) => {
+        if (data?.reviews && Array.isArray(data.reviews)) {
           setGoogleData(data);
         }
       })
-      .catch(err => console.error("Failed to load live Google reviews:", err));
+      .catch((err) => {
+        console.error("Google reviews load error:", err);
+      });
+
+    // Fetch featured homepage fleet vehicles selected in Admin Panel
+    fetch("/api/fleet?limit=30")
+      .then((res) => {
+        if (res.ok) return res.json();
+        throw new Error("Failed to fetch fleet");
+      })
+      .then((data) => {
+        const vehicles = Array.isArray(data) ? data : (data.vehicles || []);
+        if (vehicles.length > 0) {
+          let selected = vehicles.filter((v: any) => v.isFeatured);
+          if (selected.length < 3) {
+            const unselected = vehicles.filter((v: any) => !selected.some((s: any) => s.id === v.id));
+            selected = [...selected, ...unselected].slice(0, 3);
+          } else {
+            selected = selected.slice(0, 3);
+          }
+
+          if (selected.length > 0) {
+            setFeaturedVehicles(selected.map((v: any) => ({
+              id: v.id,
+              name: `${v.make} ${v.model}`,
+              category: v.subCategory || v.category?.name || "Executive Fleet",
+              seats: `${v.capacity} Passengers`,
+              rate: v.perKmRate ? `₹${Number(v.perKmRate)}/km` : v.baseDailyRate ? `₹${Number(v.baseDailyRate)}/day` : "On Request",
+              img: v.imageUrl || "/images/fleet-suv.png"
+            })));
+          }
+        }
+      })
+      .catch((err) => {
+        console.error("Featured vehicles load error:", err);
+      });
   }, []);
 
   const businessSchema = {
@@ -307,33 +351,12 @@ export default function Homepage() {
             <p className="text-slate-300 max-w-2xl mx-auto text-sm">
               All vehicles are thoroughly sanitized, equipped with GPS trackers, emergency SOS buttons, and driven by certified chauffeurs.
             </p>
-
-            {/* Category Tabs */}
-            <div className="flex justify-center gap-3 pt-4">
-              {[
-                { id: "sedan", label: "Sedan Fleet" },
-                { id: "suv", label: "SUV & MUV Fleet" },
-                { id: "luxury", label: "Luxury & Group Coaches" }
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`px-6 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all border ${
-                    activeTab === tab.id
-                      ? "bg-amber-500 border-amber-500 text-slate-950 shadow-lg shadow-amber-500/20"
-                      : "bg-slate-950/60 border-white/10 text-slate-400 hover:text-slate-200"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* Vehicle Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {fleetData[activeTab].map((vehicle, idx) => (
-              <div key={idx} className="bg-slate-950 border border-white/10 rounded-2xl overflow-hidden hover:border-amber-400/50 transition-all duration-300 group shadow-xl flex flex-col">
+            {featuredVehicles.map((vehicle, idx) => (
+              <div key={vehicle.id || idx} className="bg-slate-950 border border-white/10 rounded-2xl overflow-hidden hover:border-amber-400/50 transition-all duration-300 group shadow-xl flex flex-col">
                 <div className="relative h-48 bg-slate-900 overflow-hidden">
                   <Image
                     src={vehicle.img}

@@ -21,7 +21,9 @@ import {
   Settings,
   DollarSign,
   UserCheck,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Star,
+  Sparkles
 } from "lucide-react";
 
 export type VehicleStatus = "AVAILABLE" | "ON_TRIP" | "MAINTENANCE" | "INACTIVE";
@@ -41,6 +43,7 @@ interface Vehicle {
   extraKmRate?: number | string | null;
   extraHrRate?: number | string | null;
   status: VehicleStatus;
+  isFeatured?: boolean;
   categoryId: string;
   category?: {
     id: string;
@@ -128,6 +131,7 @@ export default function AdminFleetPage() {
     extraKmRate: "",
     extraHourRate: "",
     status: "AVAILABLE" as VehicleStatus,
+    isFeatured: false,
     categoryId: "",
     driverId: "",
   });
@@ -137,6 +141,42 @@ export default function AdminFleetPage() {
 
   // Multi-select state
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const handleToggleFeatured = async (vehicle: Vehicle) => {
+    const newFeatured = !vehicle.isFeatured;
+    setVehicles((prev) =>
+      prev.map((v) => (v.id === vehicle.id ? { ...v, isFeatured: newFeatured } : v))
+    );
+
+    try {
+      const payload: any = {
+        model: vehicle.model,
+        make: vehicle.make,
+        registrationNumber: vehicle.registrationNumber,
+        subCategory: vehicle.subCategory,
+        capacity: Number(vehicle.capacity),
+        fuelType: vehicle.fuelType || "DIESEL",
+        transmission: vehicle.transmission || "MANUAL",
+        status: vehicle.status,
+        categoryId: vehicle.categoryId,
+        isFeatured: newFeatured,
+        driverId: vehicle.driverId || null,
+      };
+      if (vehicle.imageUrl) payload.imageUrl = vehicle.imageUrl;
+      if (vehicle.perKmRate) payload.perKmRate = Number(vehicle.perKmRate);
+      if (vehicle.baseDailyRate) payload.baseDailyRate = Number(vehicle.baseDailyRate);
+
+      const res = await fetch(`/api/fleet/${vehicle.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) loadData(false);
+    } catch (e) {
+      console.error("Toggle featured vehicle error:", e);
+      loadData(false);
+    }
+  };
 
   const loadData = async (showSpinner = true) => {
     if (showSpinner) setLoading(true);
@@ -271,6 +311,7 @@ export default function AdminFleetPage() {
         extraKmRate: vehicle.extraKmRate ? String(vehicle.extraKmRate) : "",
         extraHourRate: vehicle.extraHrRate ? String(vehicle.extraHrRate) : "",
         status: vehicle.status,
+        isFeatured: vehicle.isFeatured ?? false,
         categoryId: vehicle.categoryId || (activeCategories[0]?.id || ""),
         driverId: vehicle.driverId || "",
       });
@@ -291,6 +332,7 @@ export default function AdminFleetPage() {
         extraKmRate: "",
         extraHourRate: "",
         status: "AVAILABLE",
+        isFeatured: false,
         categoryId: defaultCatId,
         driverId: "",
       });
@@ -313,6 +355,7 @@ export default function AdminFleetPage() {
         fuelType: formData.fuelType,
         transmission: formData.transmission,
         status: formData.status,
+        isFeatured: formData.isFeatured,
         categoryId: formData.categoryId,
         driverId: formData.driverId || null,
       };
@@ -587,6 +630,12 @@ export default function AdminFleetPage() {
                             <span className="font-mono text-emerald-400 text-xs px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 font-extrabold">
                               {v.registrationNumber}
                             </span>
+                            {v.isFeatured && (
+                              <span className="text-[9px] font-extrabold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center gap-1">
+                                <Sparkles className="w-3 h-3 fill-amber-400" />
+                                <span>HOMEPAGE FEATURED</span>
+                              </span>
+                            )}
                           </div>
                           {v.perKmRate && (
                             <div className="text-[10px] text-slate-400 font-mono mt-0.5">
@@ -629,6 +678,17 @@ export default function AdminFleetPage() {
                           </span>
                         </td>
                         <td className="p-4 text-right space-x-2">
+                          <button
+                            onClick={() => handleToggleFeatured(v)}
+                            className={`p-1.5 border rounded-lg transition-colors ${
+                              v.isFeatured 
+                                ? "bg-amber-500/20 text-amber-400 border-amber-400/40 shadow-sm" 
+                                : "bg-slate-900 border-white/5 text-slate-500 hover:text-amber-400"
+                            }`}
+                            title={v.isFeatured ? "Featured on Homepage (Click to Unfeature)" : "Click to Feature on Homepage Showcase"}
+                          >
+                            <Star className={`w-4 h-4 ${v.isFeatured ? "fill-amber-400" : ""}`} />
+                          </button>
                           <button
                             onClick={() => openModal(v)}
                             className="p-1.5 bg-slate-900 border border-white/5 rounded-lg text-slate-400 hover:text-accent transition-colors"
@@ -884,6 +944,23 @@ export default function AdminFleetPage() {
                     <option value="INACTIVE" className="bg-slate-900 text-rose-400">INACTIVE</option>
                   </select>
                 </div>
+              </div>
+
+              {/* Featured Showcase Checkbox Option */}
+              <div className="bg-amber-500/10 border border-amber-500/30 p-3.5 rounded-xl flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2.5">
+                  <Star className="w-5 h-5 text-amber-400 fill-amber-400 shrink-0" />
+                  <div>
+                    <div className="font-extrabold text-slate-100 text-xs">Feature on Homepage Showcase</div>
+                    <div className="text-[11px] text-amber-300/80">Display this vehicle directly on the main website homepage fleet section.</div>
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={formData.isFeatured}
+                  onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
+                  className="w-5 h-5 rounded text-amber-500 bg-slate-950 border-white/20 focus:ring-0 cursor-pointer"
+                />
               </div>
 
               {/* Row 4: Custom Per-KM Rate, Daily Rate, Extra KM Rate */}

@@ -29,6 +29,7 @@ export const fleetVehicleSchema = z.object({
   extraKmRate: z.number().positive("Extra km rate must be positive").optional().nullable(),
   extraHrRate: z.number().positive("Extra hour rate must be positive").optional().nullable(),
   status: z.enum(["AVAILABLE", "ON_TRIP", "MAINTENANCE", "INACTIVE"]).default("AVAILABLE"),
+  isFeatured: z.boolean().optional().default(false),
   subCategory: z.string().optional().nullable(),
   driverId: z.string().uuid("Invalid driver ID").optional().nullable(),
 });
