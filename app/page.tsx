@@ -214,7 +214,7 @@ export default function Homepage() {
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 w-full max-w-7xl mx-auto text-center space-y-6 mb-12">
+        <div className="relative z-10 w-full max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 text-center space-y-6 mb-12">
           {/* Floating Luxury Tag */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-full text-amber-400 text-xs font-extrabold uppercase tracking-widest backdrop-blur-md shadow-lg shadow-amber-500/5">
             <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
@@ -257,7 +257,7 @@ export default function Homepage() {
 
       {/* Floating High-Contrast Stats Banner */}
       <section className="relative z-20 py-12 bg-slate-900/90 border-y border-white/10 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {[
             { metric: "90,000+", label: "Verified Passengers Transported" },
             { metric: "99.85%", label: "Corporate On-Time Arrival Ratio" },
@@ -274,7 +274,7 @@ export default function Homepage() {
 
       {/* Premium Corporate Logistics Section */}
       <section id="corporate" className="py-24 bg-slate-950 text-slate-100 px-4 sm:px-6 lg:px-8 border-b border-white/5">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+        <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
           <div className="lg:col-span-6 space-y-6">
             <div className="inline-flex items-center gap-2 text-xs font-bold text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-md border border-amber-500/20 uppercase tracking-wider">
               <Building2 className="w-4 h-4 text-amber-400" />
@@ -355,7 +355,7 @@ export default function Homepage() {
 
       {/* Fleet Showcase Interactive Section */}
       <section id="fleet" className="py-24 bg-slate-900/60 px-4 sm:px-6 lg:px-8 border-b border-white/5">
-        <div className="max-w-7xl mx-auto space-y-12">
+        <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 space-y-12">
           <div className="text-center space-y-4">
             <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">Our Luxury & Commercial Fleet</span>
             <h2 className="text-3xl sm:text-5xl font-black text-slate-50 tracking-tight">Immaculate Vehicles For Every Journey</h2>
@@ -435,7 +435,7 @@ export default function Homepage() {
 
       {/* Safety & Quality Guarantee Banner */}
       <section className="py-20 bg-slate-950 px-4 sm:px-6 lg:px-8 border-b border-white/5">
-        <div className="max-w-7xl mx-auto bg-gradient-to-r from-slate-900 via-slate-900/90 to-slate-950 border border-white/10 rounded-3xl p-8 md:p-12 relative overflow-hidden">
+        <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 bg-gradient-to-r from-slate-900 via-slate-900/90 to-slate-950 border border-white/10 rounded-3xl p-8 md:p-12 relative overflow-hidden">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
             <div className="space-y-3">
               <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center">
@@ -472,7 +472,7 @@ export default function Homepage() {
 
       {/* Google Business Profile Verified Reviews Section */}
       <section className="py-24 bg-slate-900/40 px-4 sm:px-6 lg:px-8 border-b border-white/5">
-        <div className="max-w-7xl mx-auto space-y-16">
+        <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 space-y-16">
           <div className="text-center space-y-4">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-slate-200 backdrop-blur-md">
               <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
@@ -556,7 +556,7 @@ export default function Homepage() {
 
       {/* FAQ Accordion Section */}
       <section className="py-24 bg-slate-900/40 px-4 sm:px-6 lg:px-8 border-b border-white/5">
-        <div className="max-w-4xl mx-auto space-y-12">
+        <div className="max-w-[1500px] mx-auto px-4 sm:px-8 lg:px-12 space-y-12">
           <div className="text-center space-y-4">
             <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">Frequently Asked Questions</span>
             <h2 className="text-3xl sm:text-4xl font-black text-slate-50 tracking-tight">Got Questions? We Have Answers.</h2>
@@ -589,7 +589,7 @@ export default function Homepage() {
 
       {/* Contact Section */}
       <section id="contact" className="py-20 bg-slate-950 text-slate-100 px-4 sm:px-6 lg:px-8 border-t border-white/5">
-        <div className="max-w-5xl mx-auto space-y-8 text-center">
+        <div className="max-w-[1500px] mx-auto px-4 sm:px-8 lg:px-12 space-y-8 text-center">
           <div className="space-y-3">
             <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">Get In Touch</span>
             <h2 className="text-3xl sm:text-4xl font-black text-slate-50 tracking-tight">

@@ -189,7 +189,7 @@ export default function ServicesPage() {
         {/* Page Header */}
         <section className="relative py-20 bg-slate-950 overflow-hidden border-b border-white/5">
           <div className="absolute inset-0 bg-gradient-to-b from-blue-900/10 via-slate-950 to-slate-950 pointer-events-none" />
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6 relative z-10">
+          <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 text-center space-y-6 relative z-10">
             <span className="text-xs font-bold text-accent uppercase tracking-widest bg-white/5 border border-white/10 px-3 py-1 rounded-full">
               Our Fleet & Tour Offerings
             </span>
@@ -204,7 +204,7 @@ export default function ServicesPage() {
 
         {/* Services Grid Section */}
         <section className="py-20 bg-slate-950">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {servicesData.map((service, idx) => (
                 <div 

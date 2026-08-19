@@ -11,7 +11,7 @@ export default function Footer() {
 
   return (
     <footer className="bg-slate-950 border-t border-white/5 text-slate-400 pt-16 pb-8 text-xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+      <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
         {/* Brand Column */}
         <div className="space-y-4">
           <div className="flex items-center gap-2">
@@ -107,7 +107,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between text-slate-500 gap-4">
+      <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 mt-8 pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between text-slate-500 gap-4">
         <div>
           &copy; 2026 TEMP TRAVEL CAR RENTALS PVT LTD. All rights reserved.
         </div>

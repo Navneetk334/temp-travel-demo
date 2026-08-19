@@ -82,7 +82,7 @@ export default async function AboutPage() {
         {/* Hero Section */}
         <section className="relative py-20 bg-slate-950 overflow-hidden border-b border-white/5">
           <div className="absolute inset-0 bg-gradient-to-b from-blue-900/10 via-slate-950 to-slate-950 pointer-events-none" />
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6 relative z-10">
+          <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 text-center space-y-6 relative z-10">
             <span className="text-xs font-bold text-accent uppercase tracking-widest bg-white/5 border border-white/10 px-3 py-1 rounded-full">
               Who We Are
             </span>
@@ -97,7 +97,7 @@ export default async function AboutPage() {
 
         {/* Statistics Grid */}
         <section className="py-12 bg-slate-950">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <div className="glassmorphism p-6 rounded-xl border border-white/5 text-center hover:border-primary/20 transition-all">
                 <div className="text-2xl sm:text-3xl font-extrabold text-accent">{companyInfo.stats.completedRides || "500K+"}</div>
@@ -124,7 +124,7 @@ export default async function AboutPage() {
 
         {/* About details & Why Choose Us */}
         <section className="py-16 bg-slate-950">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+          <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             <div className="space-y-6">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-50 flex items-center gap-2">
                 <Building2 className="w-6 h-6 text-accent" />
@@ -157,7 +157,7 @@ export default async function AboutPage() {
 
         {/* Mission & Vision */}
         <section className="py-16 bg-slate-900/30 border-y border-white/5">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="glassmorphism p-8 rounded-xl border border-white/5 space-y-4 hover:border-primary/20 transition-all flex flex-col justify-between">
               <div className="space-y-4">
                 <div className="bg-primary/10 border border-primary/20 w-12 h-12 rounded-lg flex items-center justify-center text-accent">
@@ -186,7 +186,7 @@ export default async function AboutPage() {
 
         {/* Journey Timeline */}
         <section className="py-20 bg-slate-950">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 space-y-12">
             <div className="text-center space-y-4">
               <h2 className="text-3xl font-extrabold text-slate-50">Our Growth Journey</h2>
               <p className="text-slate-400 max-w-2xl mx-auto text-sm">
@@ -213,7 +213,7 @@ export default async function AboutPage() {
 
         {/* Core Values */}
         <section className="py-16 bg-slate-900/30 border-t border-white/5">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 space-y-12">
             <div className="text-center space-y-4">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-50">Our Core Values</h2>
               <p className="text-slate-400 max-w-2xl mx-auto text-sm">
@@ -237,7 +237,7 @@ export default async function AboutPage() {
 
         {/* Service Coverage areas */}
         <section className="py-16 bg-slate-950">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 space-y-8">
             <div className="text-center space-y-4">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-50 flex items-center justify-center gap-2">
                 <Globe className="w-6 h-6 text-accent" />

@@ -39,8 +39,8 @@ export default async function FleetPage({ searchParams }: PageProps) {
   });
 
   return (
-    <div className="bg-slate-950 min-h-screen text-slate-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-12">
+    <div className="bg-slate-950 min-h-screen text-slate-100 py-12 px-4 sm:px-8 lg:px-12 xl:px-16">
+      <div className="max-w-[1750px] mx-auto space-y-12">
         {/* Header Title */}
         <div className="text-center space-y-4">
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-50">

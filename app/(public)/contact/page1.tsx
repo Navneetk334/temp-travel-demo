@@ -60,7 +60,7 @@ export default function ContactPage() {
         {/* Page Header */}
         <section className="relative py-20 bg-slate-950 overflow-hidden border-b border-white/5">
           <div className="absolute inset-0 bg-gradient-to-b from-blue-900/10 via-slate-950 to-slate-950 pointer-events-none" />
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6 relative z-10">
+          <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 text-center space-y-6 relative z-10">
             <span className="text-xs font-bold text-accent uppercase tracking-widest bg-white/5 border border-white/10 px-3 py-1 rounded-full">
               Get In Touch
             </span>
@@ -75,7 +75,7 @@ export default function ContactPage() {
 
         {/* Form and Info Columns */}
         <section className="py-20 bg-slate-950">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+          <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
             
             {/* Contact Information Column */}
             <div className="lg:col-span-5 space-y-6">
@@ -180,7 +180,7 @@ export default function ContactPage() {
 
         {/* Google Maps Placeholder */}
         <section className="py-16 bg-slate-900/20 border-t border-white/5">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 space-y-8">
             <div className="space-y-3 text-center">
               <h2 className="text-2xl font-bold text-slate-50 flex items-center justify-center gap-2">
                 <Map className="w-6 h-6 text-accent" />

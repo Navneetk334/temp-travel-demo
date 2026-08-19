@@ -39,7 +39,7 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
     <>
       <JsonLd data={breadcrumbListSchema} />
       
-      <nav aria-label="Breadcrumb" className="py-4 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <nav aria-label="Breadcrumb" className="py-4 px-4 sm:px-8 lg:px-12 xl:px-16 max-w-[1750px] mx-auto">
         <ol className="flex flex-wrap items-center gap-2 text-sm text-slate-400 font-medium">
           <li className="flex items-center gap-1.5 hover:text-accent transition-colors">
             <Link href="/" className="flex items-center gap-1">
