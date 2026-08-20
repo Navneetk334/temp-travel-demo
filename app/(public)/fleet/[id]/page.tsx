@@ -27,7 +27,7 @@ export default async function VehicleDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="bg-slate-950 min-h-screen text-slate-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="bg-slate-950 min-h-screen text-slate-100 pt-32 sm:pt-36 lg:pt-40 pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-12">
         {/* Breadcrumbs */}
         <div className="text-xs font-semibold text-slate-400 uppercase tracking-widest flex gap-2">

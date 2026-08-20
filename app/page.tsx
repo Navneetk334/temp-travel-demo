@@ -196,7 +196,7 @@ export default function Homepage() {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative min-h-[92vh] flex flex-col justify-center items-center py-20 px-4 md:px-8 overflow-hidden bg-slate-950">
+      <section className="relative min-h-[92vh] flex flex-col justify-center items-center pt-32 sm:pt-36 lg:pt-40 pb-20 px-4 md:px-8 overflow-hidden bg-slate-950">
         {/* Ambient Glowing Background Orbs */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-tr from-amber-500/20 via-blue-600/15 to-transparent rounded-full blur-[140px] pointer-events-none z-0" />
         <div className="absolute bottom-10 right-10 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none z-0" />

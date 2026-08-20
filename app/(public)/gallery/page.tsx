@@ -322,7 +322,7 @@ export default function PublicGalleryPage() {
       )}
 
       {/* MINIMAL CATEGORY FILTER RIBBON (TOP BAR) */}
-      <div className="absolute top-4 left-0 right-0 z-40 px-6 sm:px-12 flex justify-center pointer-events-auto">
+      <div className="absolute top-24 sm:top-28 left-0 right-0 z-40 px-6 sm:px-12 flex justify-center pointer-events-auto">
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1 text-[11px] font-mono bg-slate-950/80 p-1.5 rounded-full border border-white/10 backdrop-blur-md">
           {CATEGORIES.map((cat) => {
             const isActive = activeCategory === cat.value;
