@@ -35,8 +35,8 @@ export default function Homepage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   useEffect(() => {
-    const timer1 = setTimeout(() => setBeamDone(true), 700);
-    const timer2 = setTimeout(() => setLoading(false), 1300);
+    const timer1 = setTimeout(() => setBeamDone(true), 1200);
+    const timer2 = setTimeout(() => setLoading(false), 2400);
     return () => {
       clearTimeout(timer1);
       clearTimeout(timer2);
@@ -212,14 +212,14 @@ export default function Homepage() {
           <motion.div
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, y: "-100%" }}
-            transition={{ duration: 0.7, ease: [0.76, 0, 0.24, 1] }}
+            transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1] }}
             className="fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center pointer-events-auto"
           >
             {/* Horizontal Laser Line Draw */}
             <motion.div
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
-              transition={{ duration: 0.8, ease: "easeInOut" }}
+              transition={{ duration: 1.2, ease: "easeInOut" }}
               className="w-full h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent absolute shadow-[0_0_25px_rgba(245,158,11,0.8)]"
             />
 
@@ -227,7 +227,7 @@ export default function Homepage() {
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={beamDone ? { opacity: 1, scale: 1 } : {}}
-              transition={{ duration: 0.4 }}
+              transition={{ duration: 0.6 }}
               className="relative z-10 text-center flex flex-col items-center justify-center"
             >
               <div className="flex items-center justify-center gap-2 mb-4">
