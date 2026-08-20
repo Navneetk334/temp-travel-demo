@@ -38,7 +38,13 @@ export default async function AboutPage() {
     aboutUs: "Established in 2012, Temp Travel operates with a compliant fleet across major business metros. We prioritize passenger safety, transparent billing, and 24/7 support desks.",
     mission: "To deliver safe, compliant, and cost-effective transportation logistics and leisure travel experiences.",
     vision: "To become India's primary choice for corporate employee transportation and customized leisure holiday packages.",
-    values: ["Safety First", "Integrity & Transparency", "Customer Obsession", "Operational Excellence"],
+    values: [
+      "Safety First", 
+      "Integrity & Transparency", 
+      "Customer Obsession", 
+      "Operational Excellence",
+      "Employee & Driver Empowerment"
+    ],
     whyUs: ["ISO 9001:2015 Compliance", "Defensive Driver Vetting", "Automated Roster Routing", "24/7 Command Center Support"],
     stats: { completedRides: "500K+", corporateContracts: "120+", hubs: "30+", rating: "4.9/5" },
     serviceAreas: ["Delhi NCR", "Mumbai Metro", "Pune City", "Bangalore Tech Hub", "Goa Coast", "Nashik Hub"],
@@ -317,16 +323,28 @@ export default async function AboutPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {companyInfo.values.map((val: string, idx: number) => (
-                <div key={idx} className="glassmorphism p-6 rounded-xl border border-white/5 hover:border-primary/20 transition-all space-y-3">
-                  <div className="text-accent font-bold text-sm">0{idx + 1}.</div>
-                  <h4 className="font-bold text-slate-100 text-base">{val}</h4>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    Executing everyday operations with a strong commitment to quality and service reliability.
-                  </p>
-                </div>
-              ))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+              {companyInfo.values.map((val: string, idx: number) => {
+                const valueDescriptions: Record<string, string> = {
+                  "Safety First": "Zero-tolerance safety protocols, defensive driver vetting, and real-time vehicle GPS tracking.",
+                  "Integrity & Transparency": "Guaranteed transparent billing ledgers, ISO-compliant SLAs, and honest client communication.",
+                  "Customer Obsession": "Punctual commuter dispatches, 24/7 command center support, and VIP passenger comfort.",
+                  "Operational Excellence": "Smart route optimization engines, automated roster parsing, and zero-downtime fleet logistics.",
+                  "Employee & Driver Empowerment": "Prioritizing employee wellbeing, fair chauffeur compensation, continuous skill training, and driver welfare programs."
+                };
+
+                return (
+                  <div key={idx} className="glassmorphism p-6 rounded-xl border border-white/5 hover:border-accent/30 transition-all space-y-3 flex flex-col justify-between group hover:-translate-y-1">
+                    <div className="space-y-3">
+                      <div className="text-accent font-mono font-extrabold text-sm">0{idx + 1}.</div>
+                      <h4 className="font-bold text-slate-100 text-base group-hover:text-amber-400 transition-colors leading-snug">{val}</h4>
+                      <p className="text-xs text-slate-400 leading-relaxed">
+                        {valueDescriptions[val] || "Executing everyday operations with a strong commitment to quality and service reliability."}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
