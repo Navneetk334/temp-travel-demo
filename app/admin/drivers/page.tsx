@@ -229,18 +229,10 @@ export default function AdminDriversPage() {
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-50 tracking-tight flex items-center gap-2.5">
             <UserCheck className="w-7 h-7 text-amber-400" />
-            <span>Driver Management</span>
+            <span>Driver Roster & Dispatch Contact Info</span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">Register chauffeurs with photo, Aadhaar, PAN, License credentials, and joining dates.</p>
+          <p className="text-xs text-slate-400 mt-1">View chauffeur roster, verify identity document status (Aadhaar, PAN, License), and access phone numbers for live trip dispatching.</p>
         </div>
-
-        <button
-          onClick={() => openModal(null)}
-          className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-extrabold px-5 py-2.5 rounded-xl text-xs tracking-wider uppercase transition-all shadow-lg shadow-amber-500/10"
-        >
-          <Plus className="w-4 h-4 text-slate-950" />
-          <span>Add New Chauffeur</span>
-        </button>
       </div>
 
       {/* Search Filter Bar */}

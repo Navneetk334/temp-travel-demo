@@ -419,19 +419,12 @@ export default function AdminFleetPage() {
         <div>
           <h1 className="text-3xl font-extrabold text-slate-50 tracking-tight flex items-center gap-2.5">
             <Car className="w-8 h-8 text-accent" />
-            <span>Fleet Management & Vehicle Operations</span>
+            <span>Fleet Roster & Live Status Control</span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Manage commercial fleet vehicles, seating capacities, fuel types, transmission specs, driver allocations, and maintenance statuses.
+            View commercial fleet roster, check vehicle seating capacities & assigned drivers, and update real-time dispatch status (Available, On Trip, Maintenance).
           </p>
         </div>
-        <button
-          onClick={() => openModal()}
-          className="flex items-center gap-1.5 bg-accent hover:bg-yellow-500 text-slate-950 font-extrabold py-2.5 px-6 rounded-lg text-xs tracking-wider uppercase transition-all shadow-lg"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add New Vehicle</span>
-        </button>
       </div>
 
       {/* Fleet Status Counters Bar */}
