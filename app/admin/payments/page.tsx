@@ -10,7 +10,7 @@ import {
   ChevronRight, 
   X, 
   Plus, 
-  DollarSign, 
+  IndianRupee, 
   UserCheck, 
   Printer, 
   CheckCircle2, 
@@ -237,7 +237,7 @@ export default function AdminPaymentsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-slate-900/80 border border-white/5 p-4 rounded-xl space-y-1">
           <div className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-amber-400" />
+            <IndianRupee className="w-4 h-4 text-amber-400" />
             <span>Total Cash Collected</span>
           </div>
           <div className="text-2xl font-black text-slate-50">₹{todayTotalCash.toLocaleString()}</div>
@@ -494,7 +494,7 @@ export default function AdminPaymentsPage() {
 
             <div className="space-y-1">
               <h3 className="text-xl font-bold text-slate-50 flex items-center gap-2">
-                <DollarSign className="w-5 h-5 text-amber-400" />
+                <IndianRupee className="w-5 h-5 text-amber-400" />
                 <span>Log Cash Collected by Driver</span>
               </h3>
               <p className="text-xs text-slate-400">Record cash received from trip completion for office ledger audits.</p>

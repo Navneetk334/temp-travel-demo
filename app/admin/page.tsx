@@ -8,7 +8,7 @@ import {
   Calendar, 
   Building2, 
   Car, 
-  DollarSign, 
+  IndianRupee, 
   Users, 
   PhoneCall, 
   Mail,
@@ -226,7 +226,7 @@ export default async function AdminDashboardPage() {
       title: "Total Payments",
       value: `₹${totalPaymentsAmount.toLocaleString("en-IN")}`,
       change: "Successful Razorpay logs",
-      icon: DollarSign,
+      icon: IndianRupee,
       color: "text-emerald-300",
       href: "/admin/payments"
     }
@@ -244,8 +244,8 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Grid of counter cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-8 gap-4">
+      {/* Grid of counter cards (4 cards per row across 2 rows) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {cards.map((c, i) => {
           const Icon = c.icon;
           return (

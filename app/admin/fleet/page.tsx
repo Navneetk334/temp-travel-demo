@@ -19,7 +19,7 @@ import {
   ChevronRight,
   Fuel,
   Settings,
-  DollarSign,
+  IndianRupee,
   UserCheck,
   Image as ImageIcon,
   Star,

@@ -15,7 +15,7 @@ import {
   AlertCircle,
   Truck,
   FileText,
-  DollarSign,
+  IndianRupee,
   ChevronLeft,
   ChevronRight,
   ShieldCheck,
