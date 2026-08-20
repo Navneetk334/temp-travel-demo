@@ -79,9 +79,7 @@ export default async function BlogIndexPage({ searchParams }: PageProps) {
     <div className="w-full">
 
       {/* 2. Breadcrumbs */}
-      <div className="bg-slate-950 border-b border-white/5">
-        <Breadcrumbs items={breadcrumbsList} />
-      </div>
+      <Breadcrumbs items={breadcrumbsList} />
 
       {/* Main Body */}
       <main className="flex-grow max-w-[1750px] w-full mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 py-12 space-y-12">

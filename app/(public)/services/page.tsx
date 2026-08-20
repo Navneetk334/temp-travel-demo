@@ -181,15 +181,15 @@ export default function ServicesPage() {
       <JsonLd data={serviceSchema} />
 
       <div className="bg-slate-950 text-slate-100 min-h-screen">
-        {/* Breadcrumbs Section */}
-        <div className="bg-slate-950 border-b border-white/5">
-          <Breadcrumbs items={breadcrumbsList} />
-        </div>
-
-        {/* Page Header */}
-        <section className="relative py-20 bg-slate-950 overflow-hidden border-b border-white/5">
+        {/* Combined Page Header & Breadcrumbs Section */}
+        <section className="relative bg-slate-950 overflow-hidden border-b border-white/5 pb-20">
           <div className="absolute inset-0 bg-gradient-to-b from-blue-900/10 via-slate-950 to-slate-950 pointer-events-none" />
-          <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 text-center space-y-6 relative z-10">
+          
+          <div className="relative z-10">
+            <Breadcrumbs items={breadcrumbsList} />
+          </div>
+
+          <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 text-center space-y-6 relative z-10 pt-4">
             <span className="text-xs font-bold text-accent uppercase tracking-widest bg-white/5 border border-white/10 px-3 py-1 rounded-full">
               Our Fleet & Tour Offerings
             </span>

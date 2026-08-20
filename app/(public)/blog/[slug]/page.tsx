@@ -104,9 +104,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       <div className="w-full">
 
         {/* 2. Breadcrumbs */}
-        <div className="bg-slate-950 border-b border-white/5">
-          <Breadcrumbs items={breadcrumbsList} />
-        </div>
+        <Breadcrumbs items={breadcrumbsList} />
 
         {/* Main Content */}
         <main className="flex-grow max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">

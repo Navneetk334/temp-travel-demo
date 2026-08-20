@@ -69,15 +69,15 @@ export default function TermsAndConditionsPage() {
 
   return (
     <div className="bg-slate-950 text-slate-100 min-h-screen">
-      {/* Breadcrumbs */}
-      <div className="bg-slate-950 border-b border-white/5">
-        <Breadcrumbs items={breadcrumbsList} />
-      </div>
-
-      {/* Page Header */}
-      <section className="relative py-16 bg-slate-950 overflow-hidden border-b border-white/5">
+      {/* Combined Page Header & Breadcrumbs Section */}
+      <section className="relative bg-slate-950 overflow-hidden border-b border-white/5 pb-16">
         <div className="absolute inset-0 bg-gradient-to-b from-blue-900/10 via-slate-950 to-slate-950 pointer-events-none" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4 relative z-10">
+        
+        <div className="relative z-10">
+          <Breadcrumbs items={breadcrumbsList} />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4 relative z-10 pt-4">
           <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1 rounded-full text-xs text-accent">
             <Scale className="w-3.5 h-3.5" />
             <span>Service Agreement Clauses</span>

@@ -87,13 +87,11 @@ export default async function CityPage({ params }: PageProps) {
 
       {/* Layout will inject Header here */}
 
-      {/* 2. Breadcrumbs Component Section */}
-      <div className="bg-slate-950 border-b border-white/5">
-        <Breadcrumbs items={breadcrumbsList} />
-      </div>
-
-      {/* 3. Hero Banner Section */}
-      <section className="relative min-h-[75vh] flex flex-col justify-center items-center py-20 px-4 md:px-8 bg-slate-950 overflow-hidden">
+      {/* Combined Hero Banner & Breadcrumbs Section */}
+      <section className="relative min-h-[75vh] flex flex-col justify-center items-center pb-20 px-4 md:px-8 bg-slate-950 overflow-hidden">
+        <div className="w-full relative z-10">
+          <Breadcrumbs items={breadcrumbsList} />
+        </div>
         {/* Background image overlay */}
         <div className="absolute inset-0 z-0">
           <Image 
