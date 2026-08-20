@@ -99,11 +99,11 @@ export default async function FleetPage({ searchParams }: PageProps) {
                 className="bg-slate-900/40 border border-white/5 rounded-xl overflow-hidden shadow-lg hover:border-primary/45 transition-all group flex flex-col justify-between"
               >
                 {/* Fallback Image */}
-                <div className="relative h-48 bg-slate-950 flex items-center justify-center">
+                <div className="relative h-64 bg-slate-950 flex items-center justify-center">
                   <img
                     src={v.imageUrl || v.category.imageUrl || "/images/fleet-suv.png"}
                     alt={v.model}
-                    className="w-full h-full object-cover opacity-80 group-hover:scale-[1.02] transition-all"
+                    className="w-full h-full object-cover opacity-90 group-hover:scale-[1.03] transition-all duration-300"
                   />
                   <div className="absolute top-4 left-4 bg-slate-950/80 border border-white/10 py-1 px-3 rounded-full text-[10px] font-bold text-accent uppercase tracking-widest">
                     {v.category.name}
