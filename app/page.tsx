@@ -25,27 +25,22 @@ import {
   CheckCircle2,
   ChevronDown,
   Shield,
-  Aperture
+  Zap
 } from "lucide-react";
 
 export default function Homepage() {
   const [loading, setLoading] = useState(true);
-  const [progress, setProgress] = useState(0);
+  const [beamDone, setBeamDone] = useState(false);
   const [activeTab, setActiveTab] = useState<"sedan" | "suv" | "luxury">("sedan");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setTimeout(() => setLoading(false), 400);
-          return 100;
-        }
-        return prev + 5;
-      });
-    }, 40);
-    return () => clearInterval(interval);
+    const timer1 = setTimeout(() => setBeamDone(true), 700);
+    const timer2 = setTimeout(() => setLoading(false), 1300);
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
   }, []);
 
   const DEFAULT_FEATURED = [
@@ -211,39 +206,36 @@ export default function Homepage() {
     <div className="bg-slate-950 text-slate-100 min-h-screen font-sans selection:bg-amber-500 selection:text-slate-950">
       <JsonLd data={businessSchema} />
 
-      {/* ENTRANCE ANIMATION: APERTURE IRIS LENS WIPE */}
+      {/* ENTRANCE ANIMATION: GOLDEN LASER BEAM & LINE UNCLIP */}
       <AnimatePresence>
         {loading && (
           <motion.div
-            initial={{ clipPath: "circle(150% at 50% 50%)" }}
-            exit={{ clipPath: "circle(0% at 50% 50%)" }}
-            transition={{ duration: 0.9, ease: [0.87, 0, 0.13, 1] }}
-            className="fixed inset-0 z-[100] bg-slate-950 flex flex-col items-center justify-center pointer-events-auto"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, y: "-100%" }}
+            transition={{ duration: 0.7, ease: [0.76, 0, 0.24, 1] }}
+            className="fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center pointer-events-auto"
           >
-            {/* Outer Spinning Lens Ring */}
-            <div className="relative flex items-center justify-center">
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                className="w-44 h-44 rounded-full border-2 border-dashed border-amber-400/40 absolute"
-              />
-              <motion.div
-                animate={{ rotate: -360 }}
-                transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-                className="w-56 h-56 rounded-full border border-white/10 absolute"
-              />
+            {/* Horizontal Laser Line Draw */}
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
+              className="w-full h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent absolute shadow-[0_0_25px_rgba(245,158,11,0.8)]"
+            />
 
-              {/* Central Glowing Icon */}
-              <div className="bg-slate-900 border border-amber-400/50 p-6 rounded-full shadow-2xl shadow-amber-400/20 flex flex-col items-center justify-center text-center">
-                <Aperture className="w-10 h-10 text-amber-400 animate-pulse" />
-                <span className="text-xl font-black font-mono text-amber-400 mt-2">{progress}%</span>
+            {/* Glowing Brand Name Overlay */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={beamDone ? { opacity: 1, scale: 1 } : {}}
+              transition={{ duration: 0.4 }}
+              className="relative z-10 text-center space-y-2"
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Zap className="w-6 h-6 text-amber-400 animate-bounce" />
+                <span className="text-3xl font-black uppercase tracking-widest text-slate-50">TEMP TRAVEL</span>
               </div>
-            </div>
-
-            <div className="mt-8 text-center space-y-1">
-              <span className="text-sm font-extrabold uppercase tracking-[0.3em] text-slate-200 block">Chauffeur Mobility Hub</span>
-              <span className="text-[10px] font-mono text-amber-400 uppercase tracking-widest block">TEMP TRAVEL DISPATCH ENGINE</span>
-            </div>
+              <p className="text-xs uppercase font-extrabold tracking-[0.4em] text-amber-400">Excellence in Transit</p>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -271,10 +263,9 @@ export default function Homepage() {
 
         {/* Hero Content */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.88, rotateX: 15 }}
-          animate={!loading ? { opacity: 1, scale: 1, rotateX: 0 } : {}}
-          transition={{ duration: 0.9, ease: "easeOut", delay: 0.1 }}
-          style={{ perspective: 1000 }}
+          initial={{ opacity: 0, y: 40, filter: "blur(12px)" }}
+          animate={!loading ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
+          transition={{ duration: 0.9, delay: 0.2 }}
           className="relative z-10 w-full max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 text-center space-y-6 mb-12"
         >
           {/* Floating Luxury Tag */}
