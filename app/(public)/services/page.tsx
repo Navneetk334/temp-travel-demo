@@ -63,36 +63,22 @@ export default function ServicesPage() {
       ctaLink: "/corporate-inquiry"
     },
     {
-      title: "Employee Pickup & Drop",
-      slug: "employee-commutes",
+      title: "Pickup & Drop",
+      slug: "pickup-and-drop",
       icon: <Clock className="w-6 h-6 text-accent" />,
       image: "/images/services/employee-commutes.jpg",
-      description: "Optimized route planning, bulk shift schedules, and safety-audited cab operations for staff commutes.",
+      description: "Optimized route planning, bulk shift schedules, and safety-audited cab operations for individual and corporate staff commutes.",
       features: [
         "Real-time GPS tracking logs",
         "Late-night security escort protocols",
         "Roster optimization & fuel savings"
       ],
-      ctaText: "Request Commute Proposal",
-      ctaLink: "/corporate-inquiry"
+      ctaText: "Book Pickup & Drop",
+      ctaLink: "/book"
     },
     {
-      title: "Corporate Cab Services",
-      slug: "corporate-cabs",
-      icon: <Car className="w-6 h-6 text-accent" />,
-      image: "/images/services/corporate-cabs.jpg",
-      description: "Premium sedans and SUVs on-demand or on daily retainers for business delegates, client visits, and executive runs.",
-      features: [
-        "Professional English-speaking chauffeurs",
-        "Mineral water and newspaper in-cabin",
-        "Flexible hourly packages"
-      ],
-      ctaText: "Book Corporate Cab",
-      ctaLink: "/corporate-inquiry"
-    },
-    {
-      title: "Airport Transfers",
-      slug: "airport-transfers",
+      title: "Airport Transfer",
+      slug: "airport-transfer",
       icon: <Plane className="w-6 h-6 text-accent" />,
       image: "/images/services/airport-transfers.jpg",
       description: "Timely airport pick-ups and drops at major metropolitan terminals with flight delay monitoring systems.",
@@ -101,7 +87,7 @@ export default function ServicesPage() {
         "Paging/meet-and-greet on request",
         "Fixed, transparent pricing models"
       ],
-      ctaText: "Book Airport Cab",
+      ctaText: "Book Airport Transfer",
       ctaLink: "/book"
     },
     {
@@ -161,7 +147,7 @@ export default function ServicesPage() {
       ctaLink: "/tours?category=international"
     },
     {
-      title: "Customized Travel Solutions",
+      title: "Customized Travel Solution",
       slug: "customized-travel",
       icon: <Settings className="w-6 h-6 text-accent" />,
       image: "/images/services/customized-travel.jpg",
