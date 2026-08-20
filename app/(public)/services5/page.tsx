@@ -12,119 +12,137 @@ import {
   Compass, 
   Globe, 
   Settings, 
-  ChevronDown, 
-  ArrowUpRight, 
-  CheckCircle2, 
+  ArrowRight, 
   Sparkles, 
+  CheckCircle2, 
+  Star,
   ShieldCheck,
-  Activity
+  UserCheck
 } from "lucide-react";
 
 export default function ServicesStyle5Page() {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [selectedFilter, setSelectedFilter] = useState<string>("ALL");
 
   const breadcrumbsList = [
-    { label: "Services Preview 5 (Executive Command Accordion)", path: "/services5" },
+    { label: "Services Preview 5 (Stitch Concierge Deck)", path: "/services5" },
   ];
 
   const services = [
     {
-      id: "01",
+      id: "1",
+      catGroup: "CORPORATE",
       title: "Corporate Transportation",
-      status: "24/7 ACTIVE",
-      statusColor: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+      tagline: "Enterprise Commute & Roster Planning",
       image: "/images/services/corporate-transportation.jpg",
       icon: Building2,
+      priceBadge: "Enterprise Contract Tariffs",
+      fleetTypes: "Sedans, SUVs, Buses",
       description: "End-to-end employee transit roster planning, executive rides, and custom logistics solutions for enterprise clients.",
       features: ["24/7 Command Center support", "ISO 9001:2015 compliant fleet", "Automated monthly invoice audits"],
       ctaText: "Setup Corporate Account",
       ctaLink: "/corporate-inquiry"
     },
     {
-      id: "02",
+      id: "2",
+      catGroup: "COMMUTE",
       title: "Pickup & Drop",
-      status: "SHIFT DISPATCH",
-      statusColor: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+      tagline: "Shift Commute & Doorstep Pickups",
       image: "/images/services/employee-commutes.jpg",
       icon: Clock,
+      priceBadge: "Flexible Shift Slabs",
+      fleetTypes: "Dzire, Innova, Tempo",
       description: "Optimized route planning, bulk shift schedules, and safety-audited cab operations for individual and corporate staff commutes.",
       features: ["Real-time GPS tracking logs", "Late-night security escort protocols", "Roster optimization & fuel savings"],
       ctaText: "Book Pickup & Drop",
       ctaLink: "/book"
     },
     {
-      id: "03",
+      id: "3",
+      catGroup: "COMMUTE",
       title: "Airport Transfer",
-      status: "FLIGHT SYNCED",
-      statusColor: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+      tagline: "Punctual Terminal Pickups & Flight Sync",
       image: "/images/services/airport-transfers.jpg",
       icon: Plane,
+      priceBadge: "Fixed Flat Terminal Fare",
+      fleetTypes: "Exec Sedans & SUVs",
       description: "Timely airport pick-ups and drops at major metropolitan terminals with flight delay monitoring systems.",
       features: ["Complimentary flight tracking adjust", "Paging/meet-and-greet on request", "Fixed, transparent pricing models"],
       ctaText: "Book Airport Transfer",
       ctaLink: "/book"
     },
     {
-      id: "04",
+      id: "4",
+      catGroup: "RENTALS",
       title: "Local Car Rentals",
-      status: "HOURLY SLABS",
-      statusColor: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+      tagline: "Chauffeur Packages for City Travel",
       image: "/images/services/local-rentals.jpg",
       icon: Clock,
+      priceBadge: "8 Hrs / 80 Km Slabs (₹12/km)",
+      fleetTypes: "Compact to Luxury",
       description: "Chauffeur-driven local hourly packages (e.g. 8 Hrs / 80 Kms) for city shopping, business meetings, and event travels.",
       features: ["Choose hatchbacks, sedans, or SUVs", "Professional driver navigations", "Flexible extra hour/km billing"],
       ctaText: "Rent Local Cab",
       ctaLink: "/book"
     },
     {
-      id: "05",
+      id: "5",
+      catGroup: "RENTALS",
       title: "Outstation Car Rentals",
-      status: "HIGHWAY READY",
-      statusColor: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+      tagline: "Highway Intercity Trips & Permits",
       image: "/images/services/outstation-cabs.jpg",
       icon: MapPin,
+      priceBadge: "From ₹16/km (Tolls Incl.)",
+      fleetTypes: "Innova, Fortuner, SUV",
       description: "Comfortable commercial vehicles with outstation licenses for intercity business trips, family trips, and weekend getaways.",
       features: ["One-way and round-trip routes", "Verified highway-trained drivers", "Toll/permit inclusive options"],
       ctaText: "Book Outstation Trip",
       ctaLink: "/book"
     },
     {
-      id: "06",
+      id: "6",
+      catGroup: "TOURS",
       title: "Domestic Tour Packages",
-      status: "CURATED TOURS",
-      statusColor: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+      tagline: "Curated Indian Destinations & Stay",
       image: "/images/services/domestic-tours.jpg",
       icon: Compass,
+      priceBadge: "Cab + Hotel + Meals",
+      fleetTypes: "Dedicated Chauffeur",
       description: "Curated domestic holiday itineraries covering hill stations, beaches, heritage spots, and pilgrimage trails across India.",
       features: ["Includes transport, stay, and breakfast", "Flexible itinerary alterations", "Local sightseeing guides included"],
       ctaText: "Browse Domestic Packages",
       ctaLink: "/tours?category=domestic"
     },
     {
-      id: "07",
+      id: "7",
+      catGroup: "TOURS",
       title: "International Tour Packages",
-      status: "GLOBAL TRANSIT",
-      statusColor: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
+      tagline: "Global Holidays, Visa & Flights",
       image: "/images/services/international-tours.jpg",
       icon: Globe,
+      priceBadge: "4-Star / 5-Star Resorts",
+      fleetTypes: "Bilingual Sightseeing",
       description: "Premium international tour itineraries covering popular destinations with flights, luxury hotels, and local ground transfers.",
       features: ["Visa and insurance documentation assist", "Handpicked 4-star and 5-star hotels", "Bilingual tour guides"],
       ctaText: "Browse International Packages",
       ctaLink: "/tours?category=international"
     },
     {
-      id: "08",
+      id: "8",
+      catGroup: "CUSTOM",
       title: "Customized Travel Solution",
-      status: "BESPOKE FLEET",
-      statusColor: "bg-amber-400/10 text-amber-300 border-amber-400/20",
+      tagline: "Bespoke VIP Delegations & Bus Fleets",
       image: "/images/services/customized-travel.jpg",
       icon: Settings,
+      priceBadge: "Bespoke Quotations",
+      fleetTypes: "Luxury Coaches & VIP",
       description: "Tailor-made itineraries, VIP event fleets, and bespoke transport packages designed to meet your specific travel ideas.",
       features: ["Dedicated tour desk counselor", "Custom hotel and transport configs", "Group travel and bus coach hires"],
       ctaText: "Discuss Your Plan",
       ctaLink: "/contact"
     }
   ];
+
+  const filtered = services.filter((s) => selectedFilter === "ALL" || s.catGroup === selectedFilter);
 
   return (
     <div className="bg-slate-950 text-slate-100 min-h-screen">
@@ -134,96 +152,102 @@ export default function ServicesStyle5Page() {
       <section className="py-12 px-4 sm:px-8 lg:px-12 xl:px-16 max-w-[1750px] mx-auto text-center space-y-4">
         <span className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.3em] text-amber-400 bg-amber-500/10 border border-amber-500/20 px-4 py-1.5 rounded-full">
           <Sparkles className="w-3.5 h-3.5" />
-          <span>Style Option 4: Executive Command Accordion</span>
+          <span>Stitch Design System: Chauffeur Concierge Deck</span>
         </span>
         <h1 className="text-4xl sm:text-6xl font-black text-slate-50 tracking-tight">
-          Executive Operations <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500">Service Roster</span>
+          Stitch Luxury <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500">Concierge Deck</span>
         </h1>
         <p className="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto">
-          Interactive expandable service rows with live status badges, image banners, and integrated booking triggers.
+          Horizontal luxury concierge cards with pricing badges, fleet type tags, and direct dispatch triggers.
         </p>
+
+        {/* Filter Bar */}
+        <div className="pt-6 flex flex-wrap items-center justify-center gap-2">
+          {[
+            { id: "ALL", name: "All Modules (8)" },
+            { id: "CORPORATE", name: "Corporate B2B" },
+            { id: "COMMUTE", name: "Commute & Airport" },
+            { id: "RENTALS", name: "Car Rentals" },
+            { id: "TOURS", name: "Holiday Tours" },
+            { id: "CUSTOM", name: "Bespoke" },
+          ].map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedFilter(cat.id)}
+              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 ${
+                selectedFilter === cat.id
+                  ? "bg-amber-400 text-slate-950 shadow-lg shadow-amber-400/20 scale-105"
+                  : "bg-slate-900 border border-white/10 text-slate-400 hover:text-white"
+              }`}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
       </section>
 
-      {/* Expandable Accordion Rows */}
-      <section className="pb-24 px-4 sm:px-8 lg:px-12 xl:px-16 max-w-[1750px] mx-auto space-y-4">
-        {services.map((item, idx) => {
+      {/* Concierge Deck Grid */}
+      <section className="pb-24 px-4 sm:px-8 lg:px-12 xl:px-16 max-w-[1750px] mx-auto space-y-6">
+        {filtered.map((item) => {
           const Icon = item.icon;
-          const isOpen = openIndex === idx;
-
           return (
             <div
               key={item.id}
-              className={`bg-slate-900/60 border rounded-2xl overflow-hidden transition-all duration-300 shadow-xl ${
-                isOpen ? "border-amber-400 bg-slate-900/90" : "border-white/10 hover:border-white/20"
-              }`}
+              className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 flex flex-col lg:flex-row items-center justify-between gap-6 hover:border-amber-400/50 transition-all duration-300 shadow-2xl group"
             >
-              {/* Accordion Row Bar */}
-              <button
-                onClick={() => setOpenIndex(isOpen ? null : idx)}
-                className="w-full p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left cursor-pointer"
-              >
-                <div className="flex items-center gap-4">
-                  <span className="text-xl font-black font-mono text-amber-400/80">{item.id}</span>
-                  <div className="p-2.5 rounded-xl bg-slate-950 border border-white/10 text-amber-400">
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-black text-slate-50">{item.title}</h3>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4 shrink-0">
-                  <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${item.statusColor}`}>
-                    {item.status}
+              {/* Left Photo & Title */}
+              <div className="flex flex-col sm:flex-row items-center gap-6 w-full lg:w-7/12">
+                <div className="relative h-44 w-full sm:w-56 rounded-2xl overflow-hidden border border-white/10 shrink-0">
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
+                  <span className="absolute top-2 left-2 bg-slate-950/90 text-amber-400 border border-amber-400/30 text-[9px] font-black uppercase px-2.5 py-1 rounded-md">
+                    {item.fleetTypes}
                   </span>
-                  <div className={`p-2 rounded-full border border-white/10 bg-slate-950 transition-transform duration-300 ${isOpen ? "rotate-180 text-amber-400" : "text-slate-400"}`}>
-                    <ChevronDown className="w-4 h-4" />
-                  </div>
                 </div>
-              </button>
 
-              {/* Expanded Body Content */}
-              {isOpen && (
-                <div className="p-6 sm:p-8 border-t border-white/5 bg-slate-950/60 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center animate-fadeIn">
-                  <div className="lg:col-span-5 relative h-56 sm:h-64 w-full rounded-xl overflow-hidden border border-white/10">
-                    <Image
-                      src={item.image}
-                      alt={item.title}
-                      fill
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
+                <div className="space-y-2 text-center sm:text-left">
+                  <div className="flex items-center justify-center sm:justify-start gap-2">
+                    <Icon className="w-5 h-5 text-amber-400" />
+                    <span className="text-xs font-mono font-bold text-amber-400 uppercase tracking-widest">{item.tagline}</span>
                   </div>
-
-                  <div className="lg:col-span-7 space-y-5">
-                    <p className="text-sm text-slate-300 leading-relaxed font-medium">
-                      {item.description}
-                    </p>
-
-                    <div className="space-y-2">
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Included Highlights</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        {item.features.map((feat, fIdx) => (
-                          <div key={fIdx} className="bg-slate-900 p-3 rounded-xl border border-white/5 flex items-center gap-2">
-                            <ShieldCheck className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                            <span className="text-xs text-slate-200">{feat}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="pt-2">
-                      <Link
-                        href={item.ctaLink}
-                        className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-500 text-slate-950 font-black px-6 py-3 rounded-xl text-xs uppercase tracking-wider transition-all"
-                      >
-                        <span>{item.ctaText}</span>
-                        <ArrowUpRight className="w-4 h-4 text-slate-950" />
-                      </Link>
-                    </div>
-                  </div>
+                  <h3 className="text-2xl font-black text-slate-50 group-hover:text-amber-400 transition-colors">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                    {item.description}
+                  </p>
                 </div>
-              )}
+              </div>
+
+              {/* Middle Features Badge */}
+              <div className="w-full lg:w-3/12 space-y-2 bg-slate-950/80 p-4 rounded-2xl border border-white/5">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Tariff & Rate Class</span>
+                <span className="text-xs font-black text-amber-300 block">{item.priceBadge}</span>
+                <div className="space-y-1.5 pt-2 border-t border-white/5">
+                  {item.features.map((feat, fIdx) => (
+                    <div key={fIdx} className="flex items-center gap-2 text-[11px] text-slate-300">
+                      <ShieldCheck className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <span>{feat}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right CTA */}
+              <div className="w-full lg:w-2/12 shrink-0">
+                <Link
+                  href={item.ctaLink}
+                  className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black py-4 px-6 rounded-2xl text-xs uppercase tracking-wider transition-all shadow-xl shadow-amber-400/10"
+                >
+                  <span>{item.ctaText}</span>
+                  <ArrowRight className="w-4 h-4 text-slate-950" />
+                </Link>
+              </div>
             </div>
           );
         })}
