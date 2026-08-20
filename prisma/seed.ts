@@ -195,11 +195,8 @@ async function main() {
   // 2. Vehicle Categories & Fleet Vehicles
   // ==========================================
   const categoriesData = [
-    { name: "Hatchback", slug: "hatchback", desc: "Compact & fuel-efficient cabs for daily city commutes.", hr: 120, km: 12, exHr: 100, exKm: 10, outKm: 11 },
     { name: "Sedan", slug: "sedan", desc: "Comfortable sedans for business commutes & executive transfers.", hr: 150, km: 15, exHr: 120, exKm: 12, outKm: 13 },
     { name: "SUV", slug: "suv", desc: "Spacious SUVs for family road trips & corporate airport runs.", hr: 220, km: 20, exHr: 180, exKm: 15, outKm: 16 },
-    { name: "Luxury", slug: "luxury", desc: "Premium vehicles for VIP transport & corporate executives.", hr: 500, km: 45, exHr: 400, exKm: 35, outKm: 40 },
-    { name: "Tempo Traveller", slug: "tempo-traveller", desc: "High capacity passenger vehicles for group excursions.", hr: 400, km: 35, exHr: 300, exKm: 25, outKm: 28 },
   ];
 
   const categoryMap: Record<string, string> = {};

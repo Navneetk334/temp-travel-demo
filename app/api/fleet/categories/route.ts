@@ -6,6 +6,9 @@ import { verifyAdmin } from "@/lib/auth";
 export async function GET() {
   try {
     const categories = await prisma.vehicleCategory.findMany({
+      where: {
+        slug: { in: ["sedan", "suv"] }
+      },
       orderBy: { name: "asc" },
     });
     return NextResponse.json(categories, { status: 200 });

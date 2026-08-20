@@ -15,8 +15,11 @@ export default async function FleetPage({ searchParams }: PageProps) {
   const resolvedParams = await searchParams;
   const categorySlug = resolvedParams.category || "";
 
-  // Query categories for header filters
+  // Query categories for header filters (Sedan and SUV only)
   const categories = await prisma.vehicleCategory.findMany({
+    where: {
+      slug: { in: ["sedan", "suv"] }
+    },
     orderBy: { name: "asc" },
   });
 
@@ -26,8 +29,11 @@ export default async function FleetPage({ searchParams }: PageProps) {
     if (matched) categoryId = matched.id;
   }
 
-  // Construct query filters (show only active vehicles)
-  const where: any = { status: "AVAILABLE" };
+  // Construct query filters (show only active vehicles in Sedan or SUV category)
+  const where: any = { 
+    status: "AVAILABLE",
+    category: { slug: { in: ["sedan", "suv"] } }
+  };
   if (categoryId) where.categoryId = categoryId;
 
   const vehicles = await prisma.fleetVehicle.findMany({
@@ -47,7 +53,7 @@ export default async function FleetPage({ searchParams }: PageProps) {
             Our Fleet Showcase
           </h1>
           <p className="text-slate-400 max-w-2xl mx-auto text-sm">
-            Providing vetted hatchbacks, comfortable sedans, premium SUVs, luxury vehicles, and spacious tempo travellers.
+            Providing executive sedans and spacious SUVs for business commutes, airport runs, and outstation trips.
           </p>
         </div>
 
@@ -111,9 +117,6 @@ export default async function FleetPage({ searchParams }: PageProps) {
                         <Users className="w-3.5 h-3.5 text-accent" />
                         <span>{v.capacity} Seater capacity</span>
                       </div>
-                      <span className="text-[10px] bg-white/5 py-1 px-2 border border-white/5 text-slate-300">
-                        {v.registrationNumber}
-                      </span>
                     </div>
 
                     <h2 className="text-xl font-bold text-slate-50 group-hover:text-accent transition-colors leading-snug">

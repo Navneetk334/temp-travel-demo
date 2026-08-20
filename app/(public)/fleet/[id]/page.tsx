@@ -2,7 +2,8 @@ import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
-import { Car, Users, Clock, Compass, ArrowRight, ShieldCheck, Mail, Phone, MapPin } from "lucide-react";
+import { Users, ShieldCheck } from "lucide-react";
+import VehicleInquiryForm from "@/components/shared/vehicle-inquiry-form";
 
 interface PageProps {
   params: Promise<{
@@ -48,7 +49,6 @@ export default async function VehicleDetailPage({ params }: PageProps) {
                 <Users className="w-4 h-4 text-accent" />
                 <span>{vehicle.capacity} Seater Capacity</span>
               </span>
-              <span className="text-slate-500">Reg: {vehicle.registrationNumber}</span>
             </div>
           </div>
 
@@ -66,10 +66,10 @@ export default async function VehicleDetailPage({ params }: PageProps) {
           
           {/* Vehicle Specifications */}
           <div className="lg:col-span-8 space-y-12">
-            {/* Image display */}
+            {/* Image display - Render uploaded vehicle image first! */}
             <div className="relative h-[300px] md:h-[450px] bg-slate-900 rounded-xl overflow-hidden border border-white/5">
               <img
-                src={vehicle.category.imageUrl || "/images/fleet-suv.png"}
+                src={vehicle.imageUrl || vehicle.category.imageUrl || "/images/fleet-suv.png"}
                 alt={`${vehicle.make} ${vehicle.model} showcase`}
                 className="w-full h-full object-cover opacity-85"
               />
@@ -110,102 +110,14 @@ export default async function VehicleDetailPage({ params }: PageProps) {
             )}
           </div>
 
-          {/* Booking / Inquiry Form */}
+          {/* Booking / Inquiry Form Client Component */}
           <div className="lg:col-span-4">
-            <div className="bg-slate-900 border border-white/5 p-6 rounded-2xl space-y-6 sticky top-24 glassmorphism">
-              <div className="space-y-1">
-                <h3 className="text-xl font-bold text-slate-50">Inquire Cab Booking</h3>
-                <p className="text-xs text-slate-400">Request a corporate quote or hourly local pricing details.</p>
-              </div>
-
-              <form className="space-y-4" action={async (formData) => {
-                "use server";
-                console.log("Rental lead captured via server actions");
-              }}>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Your Name</label>
-                  <input
-                    type="text"
-                    required
-                    name="customerName"
-                    placeholder="John Doe"
-                    className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3.5 text-xs text-slate-100 focus:outline-none focus:border-primary transition-all"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Email Address</label>
-                  <input
-                    type="email"
-                    required
-                    name="email"
-                    placeholder="john@example.com"
-                    className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3.5 text-xs text-slate-100 focus:outline-none focus:border-primary transition-all"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Phone Number</label>
-                  <input
-                    type="tel"
-                    required
-                    name="phone"
-                    placeholder="+919999999999"
-                    className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3.5 text-xs text-slate-100 focus:outline-none focus:border-primary transition-all"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pickup Location</label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
-                    <input
-                      type="text"
-                      required
-                      name="pickupLocation"
-                      placeholder="e.g. Mumbai Airport"
-                      className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 pl-9 pr-3.5 text-xs text-slate-100 focus:outline-none focus:border-primary transition-all"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Drop Location (Optional)</label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
-                    <input
-                      type="text"
-                      name="dropLocation"
-                      placeholder="e.g. Lonavala"
-                      className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 pl-9 pr-3.5 text-xs text-slate-100 focus:outline-none focus:border-primary transition-all"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pickup Date & Time</label>
-                  <input
-                    type="datetime-local"
-                    required
-                    name="pickupDateTime"
-                    className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3.5 text-xs text-slate-100 focus:outline-none focus:border-primary transition-all"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full flex items-center justify-center gap-1.5 bg-accent hover:bg-amber-600 text-slate-950 font-bold py-2.5 rounded-lg text-xs tracking-wider uppercase shadow-lg transition-all"
-                >
-                  <span>Request Rental Quote</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </form>
-
-              <div className="flex gap-2.5 text-[10px] text-slate-400 items-start border-t border-white/5 pt-4">
-                <ShieldCheck className="w-4 h-4 text-accent shrink-0" />
-                <span>Our dispatch operators will check availability and verify pricing details within 15 minutes of submission.</span>
-              </div>
-            </div>
+            <VehicleInquiryForm
+              vehicleId={vehicle.id}
+              vehicleName={`${vehicle.make} ${vehicle.model}`}
+              categoryId={vehicle.categoryId}
+              categoryName={vehicle.category.name}
+            />
           </div>
 
         </div>

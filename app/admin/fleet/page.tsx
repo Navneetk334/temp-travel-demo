@@ -65,9 +65,6 @@ interface Category {
 const DEFAULT_CATEGORIES: Category[] = [
   { id: "36194d98-0236-4566-8231-e515cfc2e979", name: "Sedan" },
   { id: "4a315fe8-3c73-4cf9-97a1-1ddb8d107df5", name: "SUV" },
-  { id: "b423f34c-ec9d-4bec-88a6-e2c51b261a49", name: "Hatchback" },
-  { id: "82205d3d-61ce-48f8-bf78-aca806da5aa1", name: "Luxury" },
-  { id: "9589dc24-d4c1-435f-9837-aec4207e2d46", name: "Tempo Traveller" }
 ];
 
 interface Driver {
