@@ -42,6 +42,41 @@ function validatePhone(phone: string): boolean {
   return digitsOnly.length === 10;
 }
 
+const INDIAN_STATES_AND_UTS = [
+  "andhra pradesh", "arunachal pradesh", "assam", "bihar", "chhattisgarh",
+  "goa", "gujarat", "haryana", "himachal pradesh", "jharkhand", "karnataka",
+  "kerala", "madhya pradesh", "maharashtra", "manipur", "meghalaya", "mizoram",
+  "nagaland", "odisha", "orissa", "punjab", "rajasthan", "sikkim", "tamil nadu",
+  "telangana", "tripura", "uttar pradesh", "uttarakhand", "uttaranchal", "west bengal",
+  "delhi", "nct of delhi", "national capital territory of delhi", "jammu and kashmir",
+  "jammu & kashmir", "ladakh", "chandigarh", "puducherry", "pondicherry",
+  "andaman and nicobar islands", "dadra and nagar haveli and daman and diu", "lakshadweep"
+];
+
+function isStateOnly(locationStr: string): boolean {
+  if (!locationStr) return false;
+  const clean = locationStr
+    .toLowerCase()
+    .replace(/,/g, " ")
+    .replace(/\s+/g, " ")
+    .replace(/\bindia\b/gi, "")
+    .trim();
+
+  return INDIAN_STATES_AND_UTS.includes(clean);
+}
+
+function extractState(locationStr: string): string | null {
+  if (!locationStr) return null;
+  const lower = locationStr.toLowerCase();
+  for (const st of INDIAN_STATES_AND_UTS) {
+    const regex = new RegExp(`\\b${st.replace(/&/g, "&")}\\b`, "i");
+    if (regex.test(lower)) {
+      return st;
+    }
+  }
+  return null;
+}
+
 const POPULAR_COMPANIES = [
   "Accenture",
   "Acme Solutions",
@@ -263,6 +298,8 @@ const POPULAR_COMPANIES = [
 export default function BookingWidget() {
   const [activeTab, setActiveTab] = useState<BookingTab>("corporate");
   const [pickupDropSubTab, setPickupDropSubTab] = useState<"individual" | "working">("individual");
+  const [localSubTab, setLocalSubTab] = useState<"individual" | "working">("individual");
+  const [outstationSubTab, setOutstationSubTab] = useState<"individual" | "working">("individual");
   const [showCompanySuggestions, setShowCompanySuggestions] = useState(false);
   const [companyGoogleSuggestions, setCompanyGoogleSuggestions] = useState<any[]>([]);
   const [companyLoading, setCompanyLoading] = useState(false);
@@ -322,7 +359,10 @@ export default function BookingWidget() {
     name: "",
     email: "",
     phone: "",
+    company: "",
+    gender: "",
     pickupLocation: "",
+    dropLocation: "",
     vehicleCategory: "",
     vehicleCategoryId: "",
     vehicleClass: "",
@@ -337,6 +377,8 @@ export default function BookingWidget() {
     name: "",
     email: "",
     phone: "",
+    company: "",
+    gender: "",
     pickup: "",
     drop: "",
     date: "",
@@ -636,6 +678,14 @@ export default function BookingWidget() {
           throw new Error("Please enter your Company Name.");
         }
 
+        if (isStateOnly(corpData.pickup)) {
+          throw new Error("Please enter a specific location or landmark for Pickup Address (e.g. 'Connaught Place, New Delhi' instead of just 'Delhi').");
+        }
+
+        if (isStateOnly(corpData.drop)) {
+          throw new Error("Please enter a specific location or landmark for Drop Address (e.g. 'Hazratganj, Lucknow' instead of just 'Uttar Pradesh').");
+        }
+
         // 1. Pickup/Drop Time Validation
         const startMins = timeToMinutes(corpData.shiftStartHour, corpData.shiftStartMinute, corpData.shiftStartAmpm);
         const endMins = timeToMinutes(corpData.shiftEndHour, corpData.shiftEndMinute, corpData.shiftEndAmpm);
@@ -678,6 +728,27 @@ export default function BookingWidget() {
       } else if (activeTab === "local") {
         url = "/api/rental/lead";
 
+        if (localSubTab === "working" && !localData.company.trim()) {
+          throw new Error("Please enter your Company Name.");
+        }
+
+        if (isStateOnly(localData.pickupLocation)) {
+          throw new Error("Please enter a specific location or landmark for Pickup Address (e.g. 'Bandra West, Mumbai' instead of just 'Maharashtra').");
+        }
+
+        if (localData.dropLocation && isStateOnly(localData.dropLocation)) {
+          throw new Error("Please enter a specific location or landmark for Drop Address (e.g. 'Andheri East, Mumbai' instead of just 'Maharashtra').");
+        }
+
+        // Same-State Validation for Local Rentals
+        if (localData.pickupLocation && localData.dropLocation) {
+          const pSt = extractState(localData.pickupLocation);
+          const dSt = extractState(localData.dropLocation);
+          if (pSt && dSt && pSt !== dSt) {
+            throw new Error(`Local Hourly Rentals are restricted to trips within the same state (Pickup: ${pSt.toUpperCase()}, Drop: ${dSt.toUpperCase()}). For inter-state trips across state borders, please switch to the Outstation tab.`);
+          }
+        }
+
         if (!validateName(localData.name)) {
           throw new Error("Contact Name can only contain alphabetic characters.");
         }
@@ -695,14 +766,26 @@ export default function BookingWidget() {
           email: localData.email.trim(),
           phone: formattedPhone,
           pickupLocation: localData.pickupLocation.trim(),
-          dropLocation: null,
+          dropLocation: localData.dropLocation.trim() || null,
           pickupDateTime: new Date(`${localData.pickupDate}T${localData.pickupTime}`).toISOString(),
           returnDateTime: null,
           vehicleCategoryId: localData.vehicleCategoryId,
-          tripType: `Local Hourly Rental (${localData.duration})${localData.vehicleClass ? ` - Class: ${localData.vehicleClass}` : ""}${localData.vehicleModel ? `, Model: ${localData.vehicleModel}` : ""}`
+          tripType: `Local Hourly Rental (${localData.duration}) - ${localSubTab === "working" ? `Corporate (${localData.company.trim()})` : "Individual"}${localData.vehicleClass ? ` - Class: ${localData.vehicleClass}` : ""}${localData.vehicleModel ? `, Model: ${localData.vehicleModel}` : ""}`
         };
       } else if (activeTab === "outstation") {
         url = "/api/rental/lead";
+
+        if (outstationSubTab === "working" && !outstationData.company.trim()) {
+          throw new Error("Please enter your Company Name.");
+        }
+
+        if (isStateOnly(outstationData.pickup)) {
+          throw new Error("Please enter a specific location or landmark for Pickup Address (e.g. 'Connaught Place, New Delhi' instead of just 'Delhi').");
+        }
+
+        if (isStateOnly(outstationData.drop)) {
+          throw new Error("Please enter a specific location or landmark for Drop Address (e.g. 'Hazratganj, Lucknow' instead of just 'Uttar Pradesh').");
+        }
 
         if (!validateName(outstationData.name)) {
           throw new Error("Contact Name can only contain alphabetic characters.");
@@ -728,7 +811,7 @@ export default function BookingWidget() {
             ? new Date(`${outstationData.returnDate}T23:59:00`).toISOString()
             : null,
           vehicleCategoryId: outstationData.vehicleCategoryId || (categories[0]?.id || ""),
-          tripType: `Outstation ${outstationData.type === "ROUND_TRIP" ? "Round Trip" : "One Way"}${outstationData.vehicleCategory ? ` - ${outstationData.vehicleCategory}` : ""}${outstationData.vehicleClass ? ` (${outstationData.vehicleClass})` : ""}${outstationData.vehicleModel ? `, Model: ${outstationData.vehicleModel}` : ""}`
+          tripType: `Outstation ${outstationData.type === "ROUND_TRIP" ? "Round Trip" : "One Way"} - ${outstationSubTab === "working" ? `Corporate (${outstationData.company.trim()})` : "Individual"}${outstationData.vehicleCategory ? ` - ${outstationData.vehicleCategory}` : ""}${outstationData.vehicleClass ? ` (${outstationData.vehicleClass})` : ""}${outstationData.vehicleModel ? `, Model: ${outstationData.vehicleModel}` : ""}`
         };
       } else if (activeTab === "tours") {
         url = "/api/bookings";
@@ -1212,6 +1295,62 @@ export default function BookingWidget() {
           {/* Local Rentals Tab */}
           {activeTab === "local" && (
             <div className="space-y-6">
+              {/* Sub-Tabs Selector (Individual vs Corporate) */}
+              <div className="flex items-center gap-3 p-1.5 bg-slate-950/80 rounded-xl border border-white/10 w-fit">
+                <button
+                  type="button"
+                  onClick={() => setLocalSubTab("individual")}
+                  className={`flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-all ${localSubTab === "individual"
+                    ? "bg-accent text-slate-950 shadow-lg scale-105"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                    }`}
+                >
+                  <User className="w-3.5 h-3.5" />
+                  <span>Individual</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLocalSubTab("working")}
+                  className={`flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-all ${localSubTab === "working"
+                    ? "bg-accent text-slate-950 shadow-lg scale-105"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                    }`}
+                >
+                  <Building2 className="w-3.5 h-3.5" />
+                  <span>Corporate</span>
+                </button>
+              </div>
+
+              {/* Corporate Sub-Tab Fields */}
+              {localSubTab === "working" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-950/40 p-4 rounded-xl border border-white/10">
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Company Name *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Enter Company Name"
+                      value={localData.company}
+                      onChange={(e) => setLocalData({ ...localData, company: e.target.value })}
+                      className="w-full h-[42px] bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Passenger Gender *</label>
+                    <select
+                      required
+                      value={localData.gender}
+                      onChange={(e) => setLocalData({ ...localData, gender: e.target.value })}
+                      className="w-full h-[42px] bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="" disabled className="bg-slate-900">- Select Gender -</option>
+                      <option value="Mr." className="bg-slate-900">Mr.</option>
+                      <option value="Mrs./Ms." className="bg-slate-900">Mrs./Ms.</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+
               {/* Row 1: Full Name, Email Address, Mobile Number in 1 line */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
@@ -1250,8 +1389,8 @@ export default function BookingWidget() {
                 </div>
               </div>
 
-              {/* Row 2: Pickup Address, Pickup Date, Pickup Time in 1 line */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Row 2: Pickup Address, Drop Address, Pickup Date, Pickup Time */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Pickup Address *</label>
                   <LocationInput
@@ -1259,6 +1398,14 @@ export default function BookingWidget() {
                     placeholder="Enter pickup location"
                     value={localData.pickupLocation}
                     onChange={(val) => setLocalData({ ...localData, pickupLocation: val })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Drop Address (Same State Only)</label>
+                  <LocationInput
+                    placeholder="Enter drop location (optional)"
+                    value={localData.dropLocation}
+                    onChange={(val) => setLocalData({ ...localData, dropLocation: val })}
                   />
                 </div>
                 <div className="space-y-2">
@@ -1356,7 +1503,7 @@ export default function BookingWidget() {
                   </div>
                 </div>
 
-                {/* Column 3: Vehicle Model (Dynamic based on Admin Catalogue Uploads & Category / Class selection) */}
+                {/* Column 3: Vehicle Model */}
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Vehicle Model *</label>
                   <div className="relative h-[42px]">
@@ -1389,26 +1536,25 @@ export default function BookingWidget() {
                 </div>
               </div>
 
-              {/* Rental Package Selection */}
-              <div className="space-y-2 pt-2 border-t border-white/5">
+              {/* Rental Package Selection (Centered, 4h and 8h packages only) */}
+              <div className="space-y-2 pt-4 border-t border-white/5 text-center">
                 <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Rental Package *</label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
                   {[
-                    { id: "8hr_80km", label: "8 Hrs / 80 Kms", desc: "Full Day Standard" },
-                    { id: "12hr_120km", label: "12 Hrs / 120 Kms", desc: "Extended Full Day" },
-                    { id: "4hr_40km", label: "4 Hrs / 40 Kms", desc: "Half Day Express" }
+                    { id: "4hr_40km", label: "4 Hrs / 40 Kms", desc: "Half Day Express" },
+                    { id: "8hr_80km", label: "8 Hrs / 80 Kms", desc: "Full Day Standard" }
                   ].map((pkg) => (
                     <button
                       key={pkg.id}
                       type="button"
                       onClick={() => setLocalData({ ...localData, duration: pkg.id })}
-                      className={`py-2 px-3 rounded-lg border text-center transition-all ${localData.duration === pkg.id || (!localData.duration && pkg.id === "8hr_80km")
-                        ? "bg-accent/20 border-accent text-amber-400 font-bold shadow-md"
+                      className={`flex-1 w-full py-3 px-5 rounded-xl border text-center transition-all ${localData.duration === pkg.id || (!localData.duration && pkg.id === "8hr_80km")
+                        ? "bg-accent/20 border-accent text-amber-400 font-bold shadow-lg shadow-amber-400/10 scale-105"
                         : "bg-slate-950/40 border-white/10 text-slate-300 hover:bg-white/5"
                         }`}
                     >
-                      <div className="text-xs font-bold">{pkg.label}</div>
-                      <div className="text-[10px] text-slate-400">{pkg.desc}</div>
+                      <div className="text-sm font-extrabold">{pkg.label}</div>
+                      <div className="text-[10px] text-slate-400 mt-0.5">{pkg.desc}</div>
                     </button>
                   ))}
                 </div>
@@ -1419,6 +1565,62 @@ export default function BookingWidget() {
           {/* Outstation Tab */}
           {activeTab === "outstation" && (
             <div className="space-y-6">
+              {/* Sub-Tabs Selector (Individual vs Corporate) */}
+              <div className="flex items-center gap-3 p-1.5 bg-slate-950/80 rounded-xl border border-white/10 w-fit">
+                <button
+                  type="button"
+                  onClick={() => setOutstationSubTab("individual")}
+                  className={`flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-all ${outstationSubTab === "individual"
+                    ? "bg-accent text-slate-950 shadow-lg scale-105"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                    }`}
+                >
+                  <User className="w-3.5 h-3.5" />
+                  <span>Individual</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOutstationSubTab("working")}
+                  className={`flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-all ${outstationSubTab === "working"
+                    ? "bg-accent text-slate-950 shadow-lg scale-105"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                    }`}
+                >
+                  <Building2 className="w-3.5 h-3.5" />
+                  <span>Corporate</span>
+                </button>
+              </div>
+
+              {/* Corporate Sub-Tab Fields */}
+              {outstationSubTab === "working" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-950/40 p-4 rounded-xl border border-white/10">
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Company Name *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Enter Company Name"
+                      value={outstationData.company}
+                      onChange={(e) => setOutstationData({ ...outstationData, company: e.target.value })}
+                      className="w-full h-[42px] bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Passenger Gender *</label>
+                    <select
+                      required
+                      value={outstationData.gender}
+                      onChange={(e) => setOutstationData({ ...outstationData, gender: e.target.value })}
+                      className="w-full h-[42px] bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="" disabled className="bg-slate-900">- Select Gender -</option>
+                      <option value="Mr." className="bg-slate-900">Mr.</option>
+                      <option value="Mrs./Ms." className="bg-slate-900">Mrs./Ms.</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+
               {/* Row 1: Trip Type Tabs, Pickup Date, Pickup Time, (and Return Date if Round Trip) in 1 line */}
               <div className={`grid grid-cols-1 md:grid-cols-2 ${outstationData.type === "ROUND_TRIP" ? "lg:grid-cols-4" : "lg:grid-cols-3"} gap-6 items-start`}>
                 {/* Column 1: Trip Type Segmented Tabs */}

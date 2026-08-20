@@ -25,6 +25,29 @@ function validateEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 }
 
+const INDIAN_STATES_AND_UTS = [
+  "andhra pradesh", "arunachal pradesh", "assam", "bihar", "chhattisgarh",
+  "goa", "gujarat", "haryana", "himachal pradesh", "jharkhand", "karnataka",
+  "kerala", "madhya pradesh", "maharashtra", "manipur", "meghalaya", "mizoram",
+  "nagaland", "odisha", "orissa", "punjab", "rajasthan", "sikkim", "tamil nadu",
+  "telangana", "tripura", "uttar pradesh", "uttarakhand", "uttaranchal", "west bengal",
+  "delhi", "nct of delhi", "national capital territory of delhi", "jammu and kashmir",
+  "jammu & kashmir", "ladakh", "chandigarh", "puducherry", "pondicherry",
+  "andaman and nicobar islands", "dadra and nagar haveli and daman and diu", "lakshadweep"
+];
+
+function isStateOnly(locationStr: string): boolean {
+  if (!locationStr) return false;
+  const clean = locationStr
+    .toLowerCase()
+    .replace(/,/g, " ")
+    .replace(/\s+/g, " ")
+    .replace(/\bindia\b/gi, "")
+    .trim();
+
+  return INDIAN_STATES_AND_UTS.includes(clean);
+}
+
 export default function CorporateLeadForm({ cityFormatted, defaultServiceType }: CorporateLeadFormProps) {
   const [formData, setFormData] = useState({
     companyName: "",
@@ -33,7 +56,7 @@ export default function CorporateLeadForm({ cityFormatted, defaultServiceType }:
     phone: "",
     employeeCount: "",
     pickupLocations: "",
-    gender: "Male",
+    gender: "Mr.",
     shiftStartHour: "09",
     shiftStartMinute: "00",
     shiftStartAmpm: "AM",
@@ -52,6 +75,12 @@ export default function CorporateLeadForm({ cityFormatted, defaultServiceType }:
     setLoading(true);
     setError(null);
     setSuccess(false);
+
+    if (formData.pickupLocations && isStateOnly(formData.pickupLocations)) {
+      setError("Please enter a specific address, area, or landmark for Pickup Location (not just the state name, e.g. 'Connaught Place, New Delhi' instead of 'Delhi').");
+      setLoading(false);
+      return;
+    }
 
     // 1. Shift Time Validation
     const startMins = timeToMinutes(formData.shiftStartHour, formData.shiftStartMinute, formData.shiftStartAmpm);
