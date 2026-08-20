@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Breadcrumbs from "@/components/shared/breadcrumbs";
 import Link from "next/link";
 import Image from "next/image";
@@ -14,16 +14,13 @@ import {
   Settings, 
   ArrowUpRight, 
   Sparkles, 
-  ChevronDown, 
   ShieldCheck, 
   CheckCircle2 
 } from "lucide-react";
 
 export default function ServicesStyle4Page() {
-  const [expandedId, setExpandedId] = useState<string | null>("1");
-
   const breadcrumbsList = [
-    { label: "Services Preview 4 (Stitch Dual-Tone Bento + Spec Drawer)", path: "/services4" },
+    { label: "Services Preview 4 (Stitch Equal Grid Bento)", path: "/services4" },
   ];
 
   const services = [
@@ -141,10 +138,6 @@ export default function ServicesStyle4Page() {
     }
   ];
 
-  const toggleDrawer = (id: string) => {
-    setExpandedId(expandedId === id ? null : id);
-  };
-
   return (
     <div className="bg-slate-950 text-slate-100 min-h-screen">
       <Breadcrumbs items={breadcrumbsList} />
@@ -153,86 +146,77 @@ export default function ServicesStyle4Page() {
       <section className="py-12 px-4 sm:px-8 lg:px-12 xl:px-16 max-w-[1750px] mx-auto text-center space-y-4">
         <span className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.3em] text-amber-400 bg-amber-500/10 border border-amber-500/20 px-4 py-1.5 rounded-full">
           <Sparkles className="w-3.5 h-3.5" />
-          <span>Stitch Design System: Dual-Tone Bento & Spec Drawer</span>
+          <span>Stitch Design System: Uniform Bento Grid</span>
         </span>
         <h1 className="text-4xl sm:text-6xl font-black text-slate-50 tracking-tight">
-          Stitch Executive <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500">Mobility Bento</span>
+          Stitch Executive <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-200 to-amber-500">Mobility Grid</span>
         </h1>
         <p className="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto">
-          Tactile dark bento cards with inline expandable specification drawers and glowing ghost borders.
+          Tactile dark bento cards with visible inclusions, uniform card heights, and glowing ghost borders.
         </p>
       </section>
 
-      {/* Bento Grid with Expandable Drawers */}
-      <section className="pb-24 px-4 sm:px-8 lg:px-12 xl:px-16 max-w-[1750px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
+      {/* Uniform Grid with Direct Specs Display */}
+      <section className="pb-24 px-4 sm:px-8 lg:px-12 xl:px-16 max-w-[1750px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
         {services.map((item) => {
           const Icon = item.icon;
-          const isExpanded = expandedId === item.id;
 
           return (
             <div
               key={item.id}
-              className={`bg-slate-900/60 backdrop-blur-xl border rounded-3xl p-6 transition-all duration-300 shadow-2xl relative overflow-hidden flex flex-col justify-between ${item.accentBorder}`}
+              className={`bg-slate-900/60 backdrop-blur-xl border rounded-3xl p-6 transition-all duration-300 shadow-2xl relative overflow-hidden flex flex-col justify-between h-full ${item.accentBorder}`}
             >
               {/* Radial Accent Glow */}
               <div className={`absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl ${item.accentGlow} rounded-full blur-3xl pointer-events-none`} />
 
-              <div className="space-y-4 relative z-10">
-                {/* Header Badge */}
-                <div className="flex justify-between items-center">
-                  <div className="p-2.5 rounded-xl bg-slate-950 border border-white/10 text-amber-400">
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  <span className="text-[9px] font-black uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full">
-                    {item.badge}
-                  </span>
-                </div>
-
-                {/* Service Image Banner */}
-                <div className="relative h-44 w-full rounded-2xl overflow-hidden border border-white/10 my-2">
-                  <Image
-                    src={item.image}
-                    alt={item.title}
-                    fill
-                    className="object-cover hover:scale-105 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
-                  <span className="absolute bottom-2 left-3 text-[10px] font-mono text-slate-300 uppercase tracking-widest">
-                    {item.category}
-                  </span>
-                </div>
-
+              <div className="space-y-4 relative z-10 flex-1 flex flex-col justify-between">
                 <div>
-                  <h3 className="text-xl font-black text-slate-50">{item.title}</h3>
-                  <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
-                    {item.description}
-                  </p>
+                  {/* Header Badge */}
+                  <div className="flex justify-between items-center mb-3">
+                    <div className="p-2.5 rounded-xl bg-slate-950 border border-white/10 text-amber-400">
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full">
+                      {item.badge}
+                    </span>
+                  </div>
+
+                  {/* Service Image Banner */}
+                  <div className="relative h-44 w-full rounded-2xl overflow-hidden border border-white/10 my-3">
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      fill
+                      className="object-cover hover:scale-105 transition-transform duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
+                    <span className="absolute bottom-2 left-3 text-[10px] font-mono text-slate-300 uppercase tracking-widest">
+                      {item.category}
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xl font-black text-slate-50">{item.title}</h3>
+                    <p className="text-xs text-slate-400 mt-1.5 leading-relaxed min-h-[48px]">
+                      {item.description}
+                    </p>
+                  </div>
                 </div>
 
-                {/* Expandable Spec Drawer Trigger */}
-                <button
-                  onClick={() => toggleDrawer(item.id)}
-                  className="w-full py-2 bg-slate-950/80 hover:bg-slate-950 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-wider text-slate-300 flex items-center justify-center gap-1.5 transition-all"
-                >
-                  <span>{isExpanded ? "Hide Included Specs" : "View Included Specs"}</span>
-                  <ChevronDown className={`w-3.5 h-3.5 text-amber-400 transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`} />
-                </button>
-
-                {/* Expanded Specifications Drawer */}
-                {isExpanded && (
-                  <div className="space-y-2 pt-2 border-t border-white/10 animate-fadeIn">
-                    {item.features.map((feat, fIdx) => (
-                      <div key={fIdx} className="flex items-center gap-2 text-[11px] text-slate-200 bg-slate-950/90 p-2.5 rounded-lg border border-white/5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                        <span>{feat}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                {/* Always-Visible Specifications & Inclusions List */}
+                <div className="space-y-2 pt-3 border-t border-white/10 my-2">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Included Specs</span>
+                  {item.features.map((feat, fIdx) => (
+                    <div key={fIdx} className="flex items-center gap-2 text-[11px] text-slate-200 bg-slate-950/90 p-2.5 rounded-lg border border-white/5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <span>{feat}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              {/* Action Button */}
-              <div className="pt-6 relative z-10">
+              {/* Action Button at Bottom */}
+              <div className="pt-4 relative z-10">
                 <Link
                   href={item.ctaLink}
                   className="flex items-center justify-between w-full bg-amber-400 hover:bg-amber-500 text-slate-950 font-black px-4 py-3 rounded-xl text-xs uppercase tracking-wider transition-all duration-300 shadow-lg shadow-amber-400/10"
