@@ -110,37 +110,41 @@ export default async function FleetPage({ searchParams }: PageProps) {
                   </div>
                 </div>
 
-                <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center text-xs font-semibold text-slate-400">
-                      <div className="flex items-center gap-1">
-                        <Users className="w-3.5 h-3.5 text-accent" />
+                <div className="p-6 space-y-5 flex-1 flex flex-col justify-between">
+                  {/* Vehicle Name Centered */}
+                  <h2 className="text-xl font-bold text-slate-50 group-hover:text-accent transition-colors text-center leading-snug">
+                    {v.make} {v.model}
+                  </h2>
+                  
+                  {/* 2-Column Split: Left (Capacity & Availability) | Right (Rates) */}
+                  <div className="grid grid-cols-2 gap-3 items-center pt-2 border-t border-white/5">
+                    {/* Left Side: Seating capacity and Availability */}
+                    <div className="space-y-2 text-left">
+                      <div className="flex items-center gap-1.5 text-xs text-slate-300 font-medium">
+                        <Users className="w-3.5 h-3.5 text-accent shrink-0" />
                         <span>{v.capacity} Seater capacity</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[10px] text-green-400 font-extrabold uppercase tracking-wider">
+                        <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                        <span>Available</span>
                       </div>
                     </div>
 
-                    <h2 className="text-xl font-bold text-slate-50 group-hover:text-accent transition-colors leading-snug">
-                      {v.make} {v.model}
-                    </h2>
-                    
-                    {/* Rates */}
-                    <div className="grid grid-cols-2 gap-2 text-xs font-medium text-slate-400 pt-2">
+                    {/* Right Side: Local rate and Outstation rate */}
+                    <div className="space-y-1 text-right text-xs font-medium text-slate-400">
                       <div>Local rate: <span className="text-slate-200 font-bold">₹{Number(v.category.baseKmsRate)}/km</span></div>
                       <div>Outstation: <span className="text-slate-200 font-bold">₹{Number(v.category.outstationKmRate)}/km</span></div>
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t border-white/5 flex items-center justify-between mt-auto">
-                    <span className="flex items-center gap-1 text-[10px] text-green-400 font-bold uppercase tracking-wider">
-                      <ShieldCheck className="w-3.5 h-3.5" />
-                      <span>Available</span>
-                    </span>
+                  {/* Bottom Center: Inquire Now Button */}
+                  <div className="pt-4 border-t border-white/5 flex justify-center mt-auto">
                     <Link
                       href={`/fleet/${v.id}`}
-                      className="text-primary hover:text-blue-400 text-xs font-bold tracking-wider uppercase flex items-center gap-1 group-hover:gap-1.5 transition-all"
+                      className="bg-accent/10 hover:bg-accent text-accent hover:text-slate-950 border border-accent/30 font-bold py-2 px-6 rounded-lg text-xs tracking-wider uppercase flex items-center gap-1.5 transition-all shadow-md group-hover:bg-accent group-hover:text-slate-950"
                     >
                       <span>Inquire Now</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
+                      <ArrowRight className="w-4 h-4" />
                     </Link>
                   </div>
                 </div>
