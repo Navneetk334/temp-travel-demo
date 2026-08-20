@@ -80,18 +80,13 @@ export default function AdminLayout({
   const navItems: SidebarItem[] = [
     { name: "Dashboard Overview", href: "/admin", icon: LayoutDashboard },
     { name: "Bookings Dispatch", href: "/admin/bookings-dispatch", icon: CalendarRange },
-    // { name: "Tour Packages", href: "/admin/tours", icon: Compass }, // Hidden as per user directive
-    { name: "Fleet Vehicles", href: "/admin/fleet", icon: Car },
-    { name: "Driver Management", href: "/admin/drivers", icon: UserCheck },
+    { name: "Fleet Roster & Status", href: "/admin/fleet", icon: Car },
+    { name: "Driver Roster", href: "/admin/drivers", icon: UserCheck },
     { name: "Corporate Leads", href: "/admin/corporate-leads", icon: Building2 },
     { name: "Rental Leads", href: "/admin/rental-leads", icon: PhoneCall },
     { name: "Contact Leads", href: "/admin/contact-leads", icon: Mail },
-    { name: "Blog Posts CMS", href: "/admin/blog", icon: BookOpen },
-    { name: "Gallery Catalog", href: "/admin/gallery", icon: ImageIcon },
-    { name: "Testimonials Moderation", href: "/admin/testimonials", icon: MessageSquare },
-    { name: "Payments Ledger", href: "/admin/payments", icon: CreditCard },
-    { name: "Site Settings", href: "/admin/settings", icon: Settings, roles: ["SUPER_ADMIN"] },
-  ].filter((item) => item.name !== "Tour Packages");
+    { name: "Payments & Cash Ledger", href: "/admin/payments", icon: CreditCard },
+  ];
 
   // Filter items by role (RBAC)
   const visibleNavItems = navItems.filter(
