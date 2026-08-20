@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import BookingWidget from "@/components/shared/booking-widget";
 import { JsonLd } from "@/components/shared/json-ld";
 import Header from "@/components/shared/header";
@@ -191,6 +192,15 @@ export default function Homepage() {
   return (
     <div className="bg-slate-950 text-slate-100 min-h-screen font-sans selection:bg-amber-500 selection:text-slate-950">
       <JsonLd data={businessSchema} />
+
+      {/* Floating Demo Switcher Ribbon */}
+      <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-slate-900/90 border border-amber-400/40 p-2 rounded-full shadow-2xl backdrop-blur-xl text-xs font-bold text-slate-200">
+        <span className="px-2 text-amber-400 font-extrabold uppercase text-[10px] tracking-wider">ENTRANCE ANIMATION DEMOS:</span>
+        <Link href="/home2" className="px-2.5 py-1 bg-white/10 hover:bg-amber-400 hover:text-slate-950 text-slate-200 rounded-full font-bold transition-all">Style 1 (Shutter)</Link>
+        <Link href="/home3" className="px-2.5 py-1 bg-white/10 hover:bg-amber-400 hover:text-slate-950 text-slate-200 rounded-full font-bold transition-all">Style 2 (Iris)</Link>
+        <Link href="/home4" className="px-2.5 py-1 bg-white/10 hover:bg-amber-400 hover:text-slate-950 text-slate-200 rounded-full font-bold transition-all">Style 3 (Beam)</Link>
+        <Link href="/home5" className="px-2.5 py-1 bg-white/10 hover:bg-amber-400 hover:text-slate-950 text-slate-200 rounded-full font-bold transition-all">Style 4 (Headlight)</Link>
+      </div>
 
       {/* Header */}
       <Header />
