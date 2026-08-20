@@ -228,13 +228,13 @@ export default function Homepage() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={beamDone ? { opacity: 1, scale: 1 } : {}}
               transition={{ duration: 0.4 }}
-              className="relative z-10 text-center space-y-2"
+              className="relative z-10 text-center flex flex-col items-center justify-center"
             >
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-2 mb-4">
                 <Zap className="w-6 h-6 text-amber-400 animate-bounce" />
                 <span className="text-3xl font-black uppercase tracking-widest text-slate-50">TEMP TRAVEL</span>
               </div>
-              <p className="text-xs uppercase font-extrabold tracking-[0.4em] text-amber-400">Excellence in Transit</p>
+              <p className="text-xs uppercase font-extrabold tracking-[0.4em] text-amber-400 mt-4">Excellence in Transit</p>
             </motion.div>
           </motion.div>
         )}
