@@ -1355,36 +1355,34 @@ export default function BookingWidget() {
                 </button>
               </div>
 
-              {/* Corporate Sub-Tab Fields */}
+              {/* Working Sub-Tab: Company Name in Center */}
               {localSubTab === "working" && (
-                <div className="space-y-4 bg-slate-950/40 p-4 rounded-xl border border-white/10">
-                  <CompanyNameSelector
-                    value={localData.company}
-                    onChange={(val) => setLocalData({ ...localData, company: val })}
-                    showSuggestions={showCompanySuggestions}
-                    setShowSuggestions={setShowCompanySuggestions}
-                    googleSuggestions={companyGoogleSuggestions}
-                  />
-                  <div className="flex justify-center w-full">
-                    <div className="space-y-2 relative w-full max-w-xl">
-                      <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4 text-center">Passenger Gender *</label>
-                      <select
-                        required
-                        value={localData.gender}
-                        onChange={(e) => setLocalData({ ...localData, gender: e.target.value })}
-                        className="w-full h-[42px] bg-slate-950/50 border border-white/10 rounded-lg px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer text-center"
-                      >
-                        <option value="" disabled className="bg-slate-900">- Select Gender -</option>
-                        <option value="Mr." className="bg-slate-900">Mr.</option>
-                        <option value="Mrs./Ms." className="bg-slate-900">Mrs./Ms.</option>
-                      </select>
-                    </div>
+                <CompanyNameSelector
+                  value={localData.company}
+                  onChange={(val) => setLocalData({ ...localData, company: val })}
+                  showSuggestions={showCompanySuggestions}
+                  setShowSuggestions={setShowCompanySuggestions}
+                  googleSuggestions={companyGoogleSuggestions}
+                />
+              )}
+
+              {/* Section Divider with Centered Title "Passenger Details" (Only shown for Working sub-tab) */}
+              {localSubTab === "working" && (
+                <div className="relative py-2">
+                  <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div className="w-full border-t border-white/10" />
+                  </div>
+                  <div className="relative flex justify-center">
+                    <span className="bg-slate-900 px-4 text-xs font-bold uppercase tracking-wider text-amber-400 border border-white/10 rounded-full py-1 flex items-center gap-1.5 shadow-md">
+                      <User className="w-3.5 h-3.5" />
+                      Passenger Details
+                    </span>
                   </div>
                 </div>
               )}
 
-              {/* Row 1: Full Name, Email Address, Mobile Number in 1 line */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Row 1: Full Name, Email Address, Mobile Number, Passenger Gender */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Full Name *</label>
                   <input
@@ -1418,6 +1416,21 @@ export default function BookingWidget() {
                     onChange={(e) => setLocalData({ ...localData, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
                     className="w-full h-[42px] bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"
                   />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Passenger Gender *</label>
+                  <div className="relative h-[42px]">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+                    <select
+                      value={localData.gender || "Mr."}
+                      onChange={(e) => setLocalData({ ...localData, gender: e.target.value })}
+                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-10 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="Mr." className="bg-slate-900">Mr.</option>
+                      <option value="Mrs./Ms." className="bg-slate-900">Mrs./Ms.</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
                 </div>
               </div>
 
@@ -1623,30 +1636,28 @@ export default function BookingWidget() {
                 </button>
               </div>
 
-              {/* Corporate Sub-Tab Fields */}
+              {/* Working Sub-Tab: Company Name in Center */}
               {outstationSubTab === "working" && (
-                <div className="space-y-4 bg-slate-950/40 p-4 rounded-xl border border-white/10">
-                  <CompanyNameSelector
-                    value={outstationData.company}
-                    onChange={(val) => setOutstationData({ ...outstationData, company: val })}
-                    showSuggestions={showCompanySuggestions}
-                    setShowSuggestions={setShowCompanySuggestions}
-                    googleSuggestions={companyGoogleSuggestions}
-                  />
-                  <div className="flex justify-center w-full">
-                    <div className="space-y-2 relative w-full max-w-xl">
-                      <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4 text-center">Passenger Gender *</label>
-                      <select
-                        required
-                        value={outstationData.gender}
-                        onChange={(e) => setOutstationData({ ...outstationData, gender: e.target.value })}
-                        className="w-full h-[42px] bg-slate-950/50 border border-white/10 rounded-lg px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer text-center"
-                      >
-                        <option value="" disabled className="bg-slate-900">- Select Gender -</option>
-                        <option value="Mr." className="bg-slate-900">Mr.</option>
-                        <option value="Mrs./Ms." className="bg-slate-900">Mrs./Ms.</option>
-                      </select>
-                    </div>
+                <CompanyNameSelector
+                  value={outstationData.company}
+                  onChange={(val) => setOutstationData({ ...outstationData, company: val })}
+                  showSuggestions={showCompanySuggestions}
+                  setShowSuggestions={setShowCompanySuggestions}
+                  googleSuggestions={companyGoogleSuggestions}
+                />
+              )}
+
+              {/* Section Divider with Centered Title "Passenger Details" (Only shown for Working sub-tab) */}
+              {outstationSubTab === "working" && (
+                <div className="relative py-2">
+                  <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div className="w-full border-t border-white/10" />
+                  </div>
+                  <div className="relative flex justify-center">
+                    <span className="bg-slate-900 px-4 text-xs font-bold uppercase tracking-wider text-amber-400 border border-white/10 rounded-full py-1 flex items-center gap-1.5 shadow-md">
+                      <User className="w-3.5 h-3.5" />
+                      Passenger Details
+                    </span>
                   </div>
                 </div>
               )}
@@ -1734,8 +1745,8 @@ export default function BookingWidget() {
                 )}
               </div>
 
-              {/* Row 2: Full Name, Email, Mobile Number in 1 line */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Row 2: Full Name, Email, Mobile Number, Passenger Gender */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Full Name *</label>
                   <input
@@ -1769,6 +1780,21 @@ export default function BookingWidget() {
                     onChange={(e) => setOutstationData({ ...outstationData, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
                     className="w-full h-[42px] bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"
                   />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block h-4 leading-4">Passenger Gender *</label>
+                  <div className="relative h-[42px]">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+                    <select
+                      value={outstationData.gender || "Mr."}
+                      onChange={(e) => setOutstationData({ ...outstationData, gender: e.target.value })}
+                      className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-10 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="Mr." className="bg-slate-900">Mr.</option>
+                      <option value="Mrs./Ms." className="bg-slate-900">Mrs./Ms.</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
                 </div>
               </div>
 
