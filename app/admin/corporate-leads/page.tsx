@@ -86,6 +86,7 @@ export default function AdminCorporateLeadsPage() {
       const queryParams = new URLSearchParams({
         search,
         status: statusFilter,
+        leadType: "pickup_drop",
         sortBy,
         sortOrder,
         page: currentPage.toString(),

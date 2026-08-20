@@ -21,7 +21,10 @@ import {
   User, 
   Bell,
   Mail,
-  UserCheck
+  UserCheck,
+  Clock,
+  Briefcase,
+  MapPin
 } from "lucide-react";
 
 interface SidebarItem {
@@ -83,7 +86,10 @@ export default function AdminLayout({
     { name: "Fleet Roster & Status", href: "/admin/fleet", icon: Car },
     { name: "Driver Roster", href: "/admin/drivers", icon: UserCheck },
     { name: "Pickup & Drop Leads", href: "/admin/corporate-leads", icon: Building2 },
-    { name: "Rental Leads", href: "/admin/rental-leads", icon: PhoneCall },
+    { name: "Local Rentals Leads", href: "/admin/local-rental-leads", icon: Clock },
+    { name: "Outstation Leads", href: "/admin/outstation-leads", icon: Compass },
+    { name: "Corporate Inquiry Leads", href: "/admin/corporate-inquiry-leads", icon: Briefcase },
+    { name: "Tour Package Leads", href: "/admin/tour-leads", icon: MapPin },
     { name: "Contact Leads", href: "/admin/contact-leads", icon: Mail },
     { name: "Payments & Cash Ledger", href: "/admin/payments", icon: CreditCard },
   ];

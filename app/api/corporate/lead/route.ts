@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("search") || "";
     const status = searchParams.get("status") || "";
+    const leadType = searchParams.get("leadType") || "";
     const sortBy = searchParams.get("sortBy") || "createdAt";
     const sortOrder = searchParams.get("sortOrder") === "asc" ? "asc" : "desc";
     const page = parseInt(searchParams.get("page") || "1", 10);
@@ -23,6 +24,12 @@ export async function GET(req: NextRequest) {
     
     if (status) {
       where.status = status;
+    }
+
+    if (leadType === "pickup_drop") {
+      where.serviceType = { contains: "Pickup & Drop", mode: "insensitive" };
+    } else if (leadType === "corporate_inquiry") {
+      where.NOT = { serviceType: { contains: "Pickup & Drop", mode: "insensitive" } };
     }
 
     if (search) {
