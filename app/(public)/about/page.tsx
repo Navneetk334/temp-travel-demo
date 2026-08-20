@@ -16,7 +16,9 @@ import {
   ChevronRight,
   Globe,
   Star,
-  Sparkles
+  Cpu,
+  Zap,
+  CheckCircle2
 } from "lucide-react";
 
 export const metadata = getSEOMetadata({
@@ -62,12 +64,48 @@ export default async function AboutPage() {
   ];
 
   const timelineMilestones = [
-    { year: "2012", title: "Company Founding", desc: "Started operations in New Delhi with a fleet of 5 vehicles targeting local corporate rentals." },
-    { year: "2015", title: "B2B Expansion", desc: "Contracted with top IT hubs to deliver daily employee shuttle logistics." },
-    { year: "2018", title: "Multi-City Hubs", desc: "Launched full operations in Mumbai and Pune, expanding fleet size past 100+ commercial units." },
-    { year: "2021", title: "Smart Commute Launch", desc: "Integrated real-time GPS fleet tracking and automated roster parsing into our client dispatch portal." },
-    { year: "2024", title: "Pan-India Reach", desc: "Scaled operations across 30+ regional hubs, serving 120+ active enterprise clients." },
-    { year: "2026", title: "Eco-Friendly Transit", desc: "Commenced integration of commercial Electric Vehicles (EVs) for carbon-neutral employee commutes." },
+    {
+      year: "2012",
+      title: "Company Founding & Fleet Launch",
+      desc: "Started operations in New Delhi with a modest fleet of 5 premium sedans targeting executive airport transfers and local corporate rentals.",
+      metric: "5 Initial Vehicles",
+      icon: Building2,
+    },
+    {
+      year: "2015",
+      title: "Enterprise B2B Expansion",
+      desc: "Contracted with top IT hubs in Gurgaon and Noida to deliver daily employee shuttle logistics with guaranteed zero-downtime SLAs.",
+      metric: "15+ B2B Contracts",
+      icon: Award,
+    },
+    {
+      year: "2018",
+      title: "Multi-City Metro Hubs",
+      desc: "Launched full regional operations in Mumbai Metro and Pune City, expanding commercial fleet size past 100+ commercial units.",
+      metric: "100+ Commercial Units",
+      icon: MapPin,
+    },
+    {
+      year: "2021",
+      title: "Smart Commute & Dispatch Engine",
+      desc: "Integrated real-time GPS fleet tracking, automated roster parsing, and digital billing ledgers into our client admin dispatch portal.",
+      metric: "100% Automated Roster",
+      icon: Cpu,
+    },
+    {
+      year: "2024",
+      title: "Pan-India Enterprise Reach",
+      desc: "Scaled active operations across 30+ regional hubs, serving 120+ active enterprise clients and 500K+ completed passenger rides.",
+      metric: "30+ Regional Hubs",
+      icon: Globe,
+    },
+    {
+      year: "2026",
+      title: "Carbon-Neutral EV Transit",
+      desc: "Commenced rapid rollout of commercial Electric Vehicles (EVs) and hybrid fleets for eco-friendly corporate employee commutes.",
+      metric: "Zero-Emission Fleet",
+      icon: Zap,
+    },
   ];
 
   return (
@@ -185,63 +223,86 @@ export default async function AboutPage() {
           </div>
         </section>
 
-        {/* Journey Timeline */}
+        {/* Style 1: Our Growth Journey (Alternating Glowing Timeline) */}
         <section className="py-20 bg-slate-950">
-          <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 space-y-12">
-            <div className="text-center space-y-4">
-              <h2 className="text-3xl font-extrabold text-slate-50">Our Growth Journey</h2>
-              <p className="text-slate-400 max-w-2xl mx-auto text-sm">
-                How we scaled from a startup rental desk to an ISO-compliant enterprise logistics network.
+          <div className="max-w-6xl mx-auto px-4 sm:px-8 lg:px-12 space-y-12">
+            <div className="text-center space-y-4 max-w-3xl mx-auto">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-50 tracking-tight">Our Growth Journey</h2>
+              <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
+                How TEMP TRAVEL evolved from a local rental startup into India's leading ISO-compliant corporate transit & tour management partner.
               </p>
-
-              {/* Design Style Selector Preview Links */}
-              <div className="pt-2">
-                <div className="glassmorphism p-3.5 rounded-2xl border border-white/10 inline-flex flex-wrap gap-2 justify-center items-center text-xs shadow-xl">
-                  <span className="font-bold text-accent uppercase tracking-widest mr-1 flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Explore 4 Design Styles:</span>
-                  </span>
-                  <Link
-                    href="/about/growth-journey-style-1"
-                    className="py-1 px-3 rounded-full font-bold bg-white/10 hover:bg-accent hover:text-slate-950 text-slate-200 border border-white/10 transition-all"
-                  >
-                    Style 1: Alternating Timeline
-                  </Link>
-                  <Link
-                    href="/about/growth-journey-style-2"
-                    className="py-1 px-3 rounded-full font-bold bg-white/10 hover:bg-accent hover:text-slate-950 text-slate-200 border border-white/10 transition-all"
-                  >
-                    Style 2: Interactive Roadmap Track
-                  </Link>
-                  <Link
-                    href="/about/growth-journey-style-3"
-                    className="py-1 px-3 rounded-full font-bold bg-white/10 hover:bg-accent hover:text-slate-950 text-slate-200 border border-white/10 transition-all"
-                  >
-                    Style 3: Bento Metric Grid
-                  </Link>
-                  <Link
-                    href="/about/growth-journey-style-4"
-                    className="py-1 px-3 rounded-full font-bold bg-white/10 hover:bg-accent hover:text-slate-950 text-slate-200 border border-white/10 transition-all"
-                  >
-                    Style 4: Futuristic Tech Railway
-                  </Link>
-                </div>
-              </div>
             </div>
 
-            <div className="relative border-l border-white/10 md:border-l-0 md:grid md:grid-cols-3 md:gap-8 space-y-8 md:space-y-0 pl-6 md:pl-0 pt-4">
-              {timelineMilestones.map((milestone, idx) => (
-                <div key={idx} className="relative md:bg-slate-900/30 md:border md:border-white/5 md:rounded-xl md:p-6 hover:border-primary/20 transition-all">
-                  <div className="absolute -left-9 md:left-6 -top-1 md:-top-5 w-6 h-6 rounded-full bg-slate-950 border-2 border-accent flex items-center justify-center text-[10px] font-bold text-accent">
-                    {idx + 1}
-                  </div>
-                  <div className="space-y-2">
-                    <span className="text-accent font-mono font-extrabold text-lg block">{milestone.year}</span>
-                    <h4 className="font-bold text-slate-100">{milestone.title}</h4>
-                    <p className="text-xs text-slate-400 leading-relaxed">{milestone.desc}</p>
-                  </div>
-                </div>
-              ))}
+            {/* Vertical Alternating Zig-Zag Timeline */}
+            <div className="relative pt-8 pb-12">
+
+              {/* Central Glowing Vertical Line */}
+              <div className="absolute left-1/2 top-12 bottom-12 w-0.5 -translate-x-1/2 bg-gradient-to-b from-accent via-blue-500 to-emerald-400 hidden md:block opacity-40" />
+
+              <div className="space-y-12 relative">
+                {timelineMilestones.map((item, idx) => {
+                  const isEven = idx % 2 === 0;
+                  const Icon = item.icon;
+
+                  return (
+                    <div
+                      key={idx}
+                      className={`flex flex-col md:flex-row items-center ${
+                        isEven ? "md:flex-row-reverse" : ""
+                      }`}
+                    >
+                      {/* Left or Right Card Content */}
+                      <div className="w-full md:w-1/2 p-4">
+                        <div className="bg-slate-900/60 border border-white/10 hover:border-accent/40 rounded-2xl p-6 sm:p-8 space-y-4 shadow-xl transition-all group glassmorphism hover:-translate-y-1">
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="p-2.5 bg-accent/10 border border-accent/20 rounded-xl text-accent group-hover:scale-110 transition-transform">
+                                <Icon className="w-5 h-5" />
+                              </div>
+                              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                                Phase 0{idx + 1}
+                              </span>
+                            </div>
+                            <span className="text-2xl font-black font-mono text-accent">
+                              {item.year}
+                            </span>
+                          </div>
+
+                          <div className="space-y-2">
+                            <h3 className="text-xl font-bold text-slate-50 group-hover:text-amber-400 transition-colors">
+                              {item.title}
+                            </h3>
+                            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                              {item.desc}
+                            </p>
+                          </div>
+
+                          <div className="pt-3 border-t border-white/5 flex items-center justify-between">
+                            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 py-1 px-3 rounded-full">
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>{item.metric}</span>
+                            </span>
+                            <span className="text-[10px] text-slate-500 font-mono">Verified Milestone</span>
+                          </div>
+
+                        </div>
+                      </div>
+
+                      {/* Central Node Badge */}
+                      <div className="relative z-10 my-4 md:my-0 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-full bg-slate-950 border-2 border-accent flex items-center justify-center font-mono font-bold text-xs text-accent shadow-lg shadow-amber-500/10 group-hover:scale-125 transition-transform">
+                          {item.year.slice(2)}
+                        </div>
+                      </div>
+
+                      {/* Spacer for opposite side */}
+                      <div className="w-full md:w-1/2 p-4 hidden md:block" />
+                    </div>
+                  );
+                })}
+              </div>
+
             </div>
           </div>
         </section>
@@ -283,40 +344,13 @@ export default async function AboutPage() {
               </p>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-3">
+            <div className="flex flex-wrap gap-3 justify-center">
               {companyInfo.serviceAreas.map((area: string, idx: number) => (
-                <div key={idx} className="bg-slate-900 border border-white/5 px-4 py-2 rounded-lg text-slate-300 font-semibold text-xs flex items-center gap-2 hover:border-accent transition-colors">
+                <div key={idx} className="glassmorphism py-2 px-5 rounded-full border border-white/5 text-slate-300 text-xs font-semibold flex items-center gap-2 hover:border-primary/20 transition-all">
                   <MapPin className="w-3.5 h-3.5 text-accent" />
                   <span>{area}</span>
                 </div>
               ))}
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-t from-slate-950 via-slate-900/30 to-slate-950 border-t border-white/5">
-          <div className="max-w-4xl mx-auto px-4 text-center space-y-8">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-50">
-              Ready to Upgrade Your Corporate Logistics?
-            </h2>
-            <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-              Join 120+ active enterprise clients benefiting from our compliance audits, smart routing systems, and verified chauffeur services.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-              <Link
-                href="/corporate-inquiry"
-                className="w-full sm:w-auto bg-primary hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-sm tracking-wider shadow-lg transition-all border border-white/10 flex items-center justify-center gap-2"
-              >
-                <span>Request B2B Roster Proposal</span>
-                <ChevronRight className="w-4 h-4" />
-              </Link>
-              <Link
-                href="/contact"
-                className="w-full sm:w-auto bg-slate-900 border border-white/10 text-slate-200 hover:text-accent font-bold py-3 px-8 rounded-lg text-sm tracking-wider transition-all flex items-center justify-center gap-2"
-              >
-                <span>Speak to Tour Manager</span>
-              </Link>
             </div>
           </div>
         </section>
