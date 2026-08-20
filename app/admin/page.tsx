@@ -14,29 +14,45 @@ import {
   Mail,
   ArrowRight,
   MessageSquare,
+  Clock,
+  Compass,
+  Briefcase,
+  MapPin,
   HelpCircle
 } from "lucide-react";
 import Link from "next/link";
 
 export default async function AdminDashboardPage() {
-  // 1. Fetch counts for dashboard cards
+  // 1. Fetch counts for all specific lead modules & metrics
+  const pickupDropCount = await prisma.corporateLead.count({
+    where: { serviceType: { contains: "Pickup & Drop", mode: "insensitive" } }
+  });
+
+  const corporateInquiryCount = await prisma.corporateLead.count({
+    where: { NOT: { serviceType: { contains: "Pickup & Drop", mode: "insensitive" } } }
+  });
+
+  const localRentalCount = await prisma.rentalLead.count({
+    where: { tripType: { contains: "Local", mode: "insensitive" } }
+  });
+
+  const outstationCount = await prisma.rentalLead.count({
+    where: { tripType: { contains: "Outstation", mode: "insensitive" } }
+  });
+
+  const tourLeadsCount = await prisma.booking.count({
+    where: { type: "TOUR_PACKAGE" }
+  });
+
   const totalContactLeads = await prisma.contactLead.count();
-  const totalCorporateLeads = await prisma.corporateLead.count();
-  const totalRentalLeads = await prisma.rentalLead.count();
   const totalBookings = await prisma.booking.count();
   const totalFleetVehicles = await prisma.fleetVehicle.count();
-  const totalBlogPosts = await prisma.blogPost.count();
-  const totalGalleryMedia = await prisma.gallery.count();
-  const totalTestimonials = await prisma.testimonial.count();
   
   const paymentAggregation = await prisma.razorpayPayment.aggregate({
     _sum: { amount: true },
     where: { status: "SUCCESS" }
   });
   const totalPaymentsAmount = Number(paymentAggregation._sum.amount || 0);
-  const totalPaymentsCount = await prisma.razorpayPayment.count({
-    where: { status: "SUCCESS" }
-  });
 
   // 2. Fetch recent bookings dispatches
   const recentBookings = await prisma.booking.findMany({
@@ -54,44 +70,80 @@ export default async function AdminDashboardPage() {
     }
   });
 
-  // 3. Fetch recent submissions from different lead pipelines
-  const recentCorpLeads = await prisma.corporateLead.findMany({
-    take: 3,
+  // 3. Fetch recent submissions from distinct lead pipelines
+  const recentPickupDropLeads = await prisma.corporateLead.findMany({
+    take: 2,
+    where: { serviceType: { contains: "Pickup & Drop", mode: "insensitive" } },
     orderBy: { createdAt: "desc" }
   });
 
-  const recentRentalLeads = await prisma.rentalLead.findMany({
-    take: 3,
+  const recentCorporateInquiryLeads = await prisma.corporateLead.findMany({
+    take: 2,
+    where: { NOT: { serviceType: { contains: "Pickup & Drop", mode: "insensitive" } } },
+    orderBy: { createdAt: "desc" }
+  });
+
+  const recentLocalLeads = await prisma.rentalLead.findMany({
+    take: 2,
+    where: { tripType: { contains: "Local", mode: "insensitive" } },
+    orderBy: { createdAt: "desc" },
+    include: { vehicleCategory: { select: { name: true } } }
+  });
+
+  const recentOutstationLeads = await prisma.rentalLead.findMany({
+    take: 2,
+    where: { tripType: { contains: "Outstation", mode: "insensitive" } },
     orderBy: { createdAt: "desc" },
     include: { vehicleCategory: { select: { name: true } } }
   });
 
   const recentContactLeads = await prisma.contactLead.findMany({
-    take: 3,
+    take: 2,
     orderBy: { createdAt: "desc" }
   });
 
   // 4. Fetch lead conversions counts for bar chart
-  const corpTotal = await prisma.corporateLead.count();
-  const corpQualified = await prisma.corporateLead.count({ 
-    where: { status: { in: ["QUALIFIED", "NEGOTIATION", "WON"] } } 
+  const pickupDropConverted = await prisma.corporateLead.count({ 
+    where: { 
+      serviceType: { contains: "Pickup & Drop", mode: "insensitive" },
+      status: { in: ["QUALIFIED", "NEGOTIATION", "WON"] } 
+    } 
   });
 
-  const rentalTotal = await prisma.rentalLead.count();
-  const rentalContacted = await prisma.rentalLead.count({ where: { status: "CONTACTED" } });
+  const localConverted = await prisma.rentalLead.count({ 
+    where: { 
+      tripType: { contains: "Local", mode: "insensitive" },
+      status: { in: ["CONTACTED", "QUALIFIED", "WON"] } 
+    } 
+  });
 
-  const contactTotal = await prisma.contactLead.count();
+  const outstationConverted = await prisma.rentalLead.count({ 
+    where: { 
+      tripType: { contains: "Outstation", mode: "insensitive" },
+      status: { in: ["CONTACTED", "QUALIFIED", "WON"] } 
+    } 
+  });
+
+  const corpInquiryConverted = await prisma.corporateLead.count({ 
+    where: { 
+      NOT: { serviceType: { contains: "Pickup & Drop", mode: "insensitive" } },
+      status: { in: ["QUALIFIED", "NEGOTIATION", "WON"] } 
+    } 
+  });
+
   const contactContacted = await prisma.contactLead.count({ 
     where: { status: { in: ["READ", "CONTACTED", "QUALIFIED"] } } 
   });
 
   const leadConversionsData = [
-    { name: "Pickup & Drop Leads", total: corpTotal, converted: corpQualified },
-    { name: "Rental Leads", total: rentalTotal, converted: rentalContacted },
-    { name: "Contact Leads", total: contactTotal, converted: contactContacted }
+    { name: "Pickup & Drop", total: pickupDropCount, converted: pickupDropConverted },
+    { name: "Local Rentals", total: localRentalCount, converted: localConverted },
+    { name: "Outstation", total: outstationCount, converted: outstationConverted },
+    { name: "Corporate B2B", total: corporateInquiryCount, converted: corpInquiryConverted },
+    { name: "Contact Msgs", total: totalContactLeads, converted: contactContacted }
   ];
 
-  // 5. Fetch revenue history and bookings count for line chart (Jan-Dec for current year)
+  // 5. Fetch revenue history and bookings count for line chart
   const allBookings = await prisma.booking.findMany({
     select: {
       netAmount: true,
@@ -110,56 +162,72 @@ export default async function AdminDashboardPage() {
       revenue,
       bookings: monthBookings.length
     };
-  }).slice(0, 6); // show first 6 months
+  }).slice(0, 6);
 
-  // Counter cards configurations (6 equally distributed cards)
+  // Counter cards configurations (8 distinct cards matching our lead structure)
   const cards = [
     {
-      title: "Contact Leads",
-      value: totalContactLeads.toString(),
-      change: "General web queries",
-      icon: Mail,
-      color: "text-blue-400",
-      href: "/admin/contact-leads"
-    },
-    {
       title: "Pickup & Drop Leads",
-      value: totalCorporateLeads.toString(),
-      change: "B2B transit accounts",
+      value: pickupDropCount.toString(),
+      change: "B2B transit leads",
       icon: Building2,
       color: "text-yellow-400",
       href: "/admin/corporate-leads"
     },
     {
-      title: "Rental Leads",
-      value: totalRentalLeads.toString(),
-      change: "B2C hourly & outstation",
-      icon: PhoneCall,
+      title: "Local Rentals Leads",
+      value: localRentalCount.toString(),
+      change: "Hourly 4h/40k & 8h/80k",
+      icon: Clock,
       color: "text-purple-400",
-      href: "/admin/rental-leads"
+      href: "/admin/local-rental-leads"
     },
     {
-      title: "Total Bookings",
-      value: totalBookings.toString(),
-      change: "All rides generated",
-      icon: Calendar,
-      color: "text-green-400",
-      href: "/admin/bookings-dispatch"
+      title: "Outstation Leads",
+      value: outstationCount.toString(),
+      change: "Intercity 1-way/round",
+      icon: Compass,
+      color: "text-cyan-400",
+      href: "/admin/outstation-leads"
+    },
+    {
+      title: "Corporate Inquiry Leads",
+      value: corporateInquiryCount.toString(),
+      change: "Enterprise contracts",
+      icon: Briefcase,
+      color: "text-amber-400",
+      href: "/admin/corporate-inquiry-leads"
+    },
+    {
+      title: "Tour Package Leads",
+      value: tourLeadsCount.toString(),
+      change: "Domestic & intl tours",
+      icon: MapPin,
+      color: "text-emerald-400",
+      href: "/admin/tour-leads"
+    },
+    {
+      title: "Contact Leads",
+      value: totalContactLeads.toString(),
+      change: "General queries",
+      icon: Mail,
+      color: "text-blue-400",
+      href: "/admin/contact-leads"
     },
     {
       title: "Fleet Vehicles",
       value: totalFleetVehicles.toString(),
       change: "Commercial fleet cars",
       icon: Car,
-      color: "text-cyan-400",
+      color: "text-indigo-400",
       href: "/admin/fleet"
     },
     {
       title: "Total Payments",
       value: `₹${totalPaymentsAmount.toLocaleString("en-IN")}`,
-      change: `${totalPaymentsCount} successful logs`,
+      change: "Successful Razorpay logs",
       icon: DollarSign,
-      color: "text-emerald-400",
+      color: "text-emerald-300",
       href: "/admin/payments"
     }
   ];
@@ -172,27 +240,27 @@ export default async function AdminDashboardPage() {
           <h1 className="text-3xl font-extrabold text-slate-50 tracking-tight">
             Dashboard Overview
           </h1>
-          <p className="text-xs text-slate-400 mt-1">Live database metrics, inquiry submissions, and ride allocations.</p>
+          <p className="text-xs text-slate-400 mt-1">Live database metrics, isolated inquiry pipelines, and ride dispatches.</p>
         </div>
       </div>
 
-      {/* Grid of counter cards equally distributed */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+      {/* Grid of counter cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-8 gap-4">
         {cards.map((c, i) => {
           const Icon = c.icon;
           return (
             <Link 
               key={i} 
               href={c.href}
-              className="glassmorphism p-5 rounded-xl border border-white/5 space-y-3 shadow-md flex justify-between items-start hover:border-primary/30 transition-all block group"
+              className="glassmorphism p-4 rounded-xl border border-white/5 space-y-2 shadow-md flex justify-between items-start hover:border-primary/40 transition-all block group"
             >
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">{c.title}</span>
-                <div className="text-xl font-extrabold text-slate-50 group-hover:text-accent transition-colors">{c.value}</div>
-                <div className="text-[9px] text-slate-500 font-semibold">{c.change}</div>
+                <div className="text-lg font-extrabold text-slate-50 group-hover:text-accent transition-colors">{c.value}</div>
+                <div className="text-[9px] text-slate-500 font-semibold truncate">{c.change}</div>
               </div>
-              <div className={`p-2.5 bg-white/5 border border-white/5 rounded-lg ${c.color}`}>
-                <Icon className="w-4.5 h-4.5" />
+              <div className={`p-2 bg-white/5 border border-white/5 rounded-lg shrink-0 ${c.color}`}>
+                <Icon className="w-4 h-4" />
               </div>
             </Link>
           );
@@ -273,36 +341,66 @@ export default async function AdminDashboardPage() {
 
         {/* Recent Submissions Widget */}
         <div className="lg:col-span-4 glassmorphism p-6 rounded-xl border border-white/5 space-y-4">
-          <h2 className="text-lg font-bold text-slate-50">Recent Lead Submissions</h2>
-          <div className="space-y-4">
+          <h2 className="text-lg font-bold text-slate-50">Recent Pipeline Submissions</h2>
+          <div className="space-y-3">
             
-            {/* Corporate Leads Group */}
-            {recentCorpLeads.map((lead) => (
+            {/* Pickup & Drop Leads Group */}
+            {recentPickupDropLeads.map((lead) => (
               <div key={lead.id} className="bg-slate-950/45 p-3 rounded-lg border border-white/5 text-xs space-y-1 hover:border-yellow-500/20 transition-all">
                 <div className="flex justify-between items-center">
                   <span className="font-extrabold text-yellow-400 uppercase tracking-widest text-[9px] flex items-center gap-1">
                     <Building2 className="w-3 h-3" />
-                    <span>Corporate B2B</span>
+                    <span>Pickup & Drop</span>
                   </span>
-                  <span className="text-[9px] text-slate-500">{new Date(lead.createdAt).toLocaleDateString()}</span>
+                  <span className="text-[9px] text-slate-500">{new Date(lead.createdAt).toLocaleDateString("en-IN")}</span>
                 </div>
                 <div className="font-bold text-slate-200">{lead.companyName}</div>
-                <div className="text-[10px] text-slate-400">POC: {lead.contactName} &bull; {lead.phone}</div>
+                <div className="text-[10px] text-slate-400">SPOC: {lead.contactName} &bull; {lead.phone}</div>
               </div>
             ))}
 
-            {/* Rental Leads Group */}
-            {recentRentalLeads.map((lead) => (
+            {/* Local Rental Leads Group */}
+            {recentLocalLeads.map((lead) => (
               <div key={lead.id} className="bg-slate-950/45 p-3 rounded-lg border border-white/5 text-xs space-y-1 hover:border-purple-500/20 transition-all">
                 <div className="flex justify-between items-center">
                   <span className="font-extrabold text-purple-400 uppercase tracking-widest text-[9px] flex items-center gap-1">
-                    <PhoneCall className="w-3 h-3" />
-                    <span>Rental B2C</span>
+                    <Clock className="w-3 h-3" />
+                    <span>Local Rental</span>
                   </span>
-                  <span className="text-[9px] text-slate-500">{new Date(lead.createdAt).toLocaleDateString()}</span>
+                  <span className="text-[9px] text-slate-500">{new Date(lead.createdAt).toLocaleDateString("en-IN")}</span>
                 </div>
                 <div className="font-bold text-slate-200">{lead.customerName}</div>
-                <div className="text-[10px] text-slate-400">{lead.vehicleCategory?.name || "Cab"} &bull; {lead.tripType} &bull; {lead.phone}</div>
+                <div className="text-[10px] text-slate-400">{lead.tripType || "Local"} &bull; {lead.phone}</div>
+              </div>
+            ))}
+
+            {/* Outstation Leads Group */}
+            {recentOutstationLeads.map((lead) => (
+              <div key={lead.id} className="bg-slate-950/45 p-3 rounded-lg border border-white/5 text-xs space-y-1 hover:border-cyan-500/20 transition-all">
+                <div className="flex justify-between items-center">
+                  <span className="font-extrabold text-cyan-400 uppercase tracking-widest text-[9px] flex items-center gap-1">
+                    <Compass className="w-3 h-3" />
+                    <span>Outstation</span>
+                  </span>
+                  <span className="text-[9px] text-slate-500">{new Date(lead.createdAt).toLocaleDateString("en-IN")}</span>
+                </div>
+                <div className="font-bold text-slate-200">{lead.customerName}</div>
+                <div className="text-[10px] text-slate-400">{lead.pickupLocation} → {lead.dropLocation || "N/A"}</div>
+              </div>
+            ))}
+
+            {/* Corporate Inquiry Leads Group */}
+            {recentCorporateInquiryLeads.map((lead) => (
+              <div key={lead.id} className="bg-slate-950/45 p-3 rounded-lg border border-white/5 text-xs space-y-1 hover:border-amber-500/20 transition-all">
+                <div className="flex justify-between items-center">
+                  <span className="font-extrabold text-amber-400 uppercase tracking-widest text-[9px] flex items-center gap-1">
+                    <Briefcase className="w-3 h-3" />
+                    <span>Corporate B2B</span>
+                  </span>
+                  <span className="text-[9px] text-slate-500">{new Date(lead.createdAt).toLocaleDateString("en-IN")}</span>
+                </div>
+                <div className="font-bold text-slate-200">{lead.companyName}</div>
+                <div className="text-[10px] text-slate-400">SPOC: {lead.contactName} &bull; {lead.serviceType}</div>
               </div>
             ))}
 
@@ -314,15 +412,15 @@ export default async function AdminDashboardPage() {
                     <Mail className="w-3 h-3" />
                     <span>General Query</span>
                   </span>
-                  <span className="text-[9px] text-slate-500">{new Date(lead.createdAt).toLocaleDateString()}</span>
+                  <span className="text-[9px] text-slate-500">{new Date(lead.createdAt).toLocaleDateString("en-IN")}</span>
                 </div>
                 <div className="font-bold text-slate-200">{lead.name}</div>
                 <div className="text-[10px] text-slate-400 line-clamp-1 italic text-slate-400">"{lead.message}"</div>
               </div>
             ))}
 
-            {recentCorpLeads.length === 0 && recentRentalLeads.length === 0 && recentContactLeads.length === 0 && (
-              <div className="text-center p-4 text-xs text-slate-500">No submissions found.</div>
+            {recentPickupDropLeads.length === 0 && recentLocalLeads.length === 0 && recentOutstationLeads.length === 0 && recentCorporateInquiryLeads.length === 0 && recentContactLeads.length === 0 && (
+              <div className="text-center p-4 text-xs text-slate-500">No recent submissions found.</div>
             )}
 
           </div>
