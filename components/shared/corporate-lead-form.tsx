@@ -213,9 +213,8 @@ export default function CorporateLeadForm({ cityFormatted, defaultServiceType }:
                 className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer"
               >
                 <option value="" disabled hidden className="bg-slate-900">- Please Select -</option>
-                <option value="Male" className="bg-slate-900">Male</option>
-                <option value="Female" className="bg-slate-900">Female</option>
-                <option value="Other" className="bg-slate-900">Other</option>
+                <option value="Mr." className="bg-slate-900">Mr.</option>
+                <option value="Mrs./Ms." className="bg-slate-900">Mrs./Ms.</option>
               </select>
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
             </div>
