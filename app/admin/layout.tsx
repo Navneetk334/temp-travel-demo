@@ -82,7 +82,7 @@ export default function AdminLayout({
     { name: "Bookings Dispatch", href: "/admin/bookings-dispatch", icon: CalendarRange },
     { name: "Fleet Roster & Status", href: "/admin/fleet", icon: Car },
     { name: "Driver Roster", href: "/admin/drivers", icon: UserCheck },
-    { name: "Corporate Leads", href: "/admin/corporate-leads", icon: Building2 },
+    { name: "Pickup & Drop Leads", href: "/admin/corporate-leads", icon: Building2 },
     { name: "Rental Leads", href: "/admin/rental-leads", icon: PhoneCall },
     { name: "Contact Leads", href: "/admin/contact-leads", icon: Mail },
     { name: "Payments & Cash Ledger", href: "/admin/payments", icon: CreditCard },

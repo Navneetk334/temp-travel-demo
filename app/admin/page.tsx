@@ -86,7 +86,7 @@ export default async function AdminDashboardPage() {
   });
 
   const leadConversionsData = [
-    { name: "Corporate Leads", total: corpTotal, converted: corpQualified },
+    { name: "Pickup & Drop Leads", total: corpTotal, converted: corpQualified },
     { name: "Rental Leads", total: rentalTotal, converted: rentalContacted },
     { name: "Contact Leads", total: contactTotal, converted: contactContacted }
   ];
@@ -123,7 +123,7 @@ export default async function AdminDashboardPage() {
       href: "/admin/contact-leads"
     },
     {
-      title: "Corporate Leads",
+      title: "Pickup & Drop Leads",
       value: totalCorporateLeads.toString(),
       change: "B2B transit accounts",
       icon: Building2,

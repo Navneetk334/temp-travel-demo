@@ -278,7 +278,7 @@ export default function AdminCorporateLeadsPage() {
         <div>
           <h1 className="text-3xl font-extrabold text-slate-50 tracking-tight flex items-center gap-2.5">
             <Building2 className="w-8 h-8 text-accent" />
-            <span>Corporate Mobility Lead CRM</span>
+            <span>Pickup & Drop (Corporate) Leads CRM</span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">
             Manage B2B employee transport inquiries, status pipeline, sales call logs, and data exports.
