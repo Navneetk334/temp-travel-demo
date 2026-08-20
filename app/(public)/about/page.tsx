@@ -324,7 +324,13 @@ export default async function AboutPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-              {companyInfo.values.map((val: string, idx: number) => {
+              {[
+                "Safety First", 
+                "Integrity & Transparency", 
+                "Customer Obsession", 
+                "Operational Excellence",
+                "Employee & Driver Empowerment"
+              ].map((val: string, idx: number) => {
                 const valueDescriptions: Record<string, string> = {
                   "Safety First": "Zero-tolerance safety protocols, defensive driver vetting, and real-time vehicle GPS tracking.",
                   "Integrity & Transparency": "Guaranteed transparent billing ledgers, ISO-compliant SLAs, and honest client communication.",
