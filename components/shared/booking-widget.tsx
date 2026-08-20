@@ -989,8 +989,31 @@ export default function BookingWidget() {
     }
   };
 
+  // Sync activeTab with URL search params (e.g., ?tab=pickup_drop, ?tab=local, ?tab=outstation)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const handleTabCheck = () => {
+        const params = new URLSearchParams(window.location.search);
+        const tabParam = params.get("tab");
+        if (tabParam === "pickup_drop" || tabParam === "corporate") {
+          setActiveTab("corporate");
+        } else if (tabParam === "local") {
+          setActiveTab("local");
+        } else if (tabParam === "outstation") {
+          setActiveTab("outstation");
+        } else if (tabParam === "tours") {
+          setActiveTab("tours");
+        }
+      };
+
+      handleTabCheck();
+      window.addEventListener("popstate", handleTabCheck);
+      return () => window.removeEventListener("popstate", handleTabCheck);
+    }
+  }, []);
+
   return (
-    <div className="w-full max-w-5xl mx-auto glassmorphism rounded-2xl shadow-2xl border border-white/10 text-slate-100 relative">
+    <div id="booking-widget" className="w-full max-w-5xl mx-auto glassmorphism rounded-2xl shadow-2xl border border-white/10 text-slate-100 relative scroll-mt-28">
       {/* Tabs */}
       <div className="grid grid-cols-1 md:grid-cols-3 bg-slate-950/80 border-b border-white/5">
         <button

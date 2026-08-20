@@ -76,7 +76,7 @@ export default function ServicesPage() {
       description: "Optimized route planning, bulk shift schedules, and safety-audited cab operations for individual and corporate staff commutes.",
       features: ["Real-time GPS tracking logs", "Late-night security escort protocols", "Roster optimization & fuel savings"],
       ctaText: "Book Pickup & Drop",
-      ctaLink: "/book"
+      ctaLink: "/#book-widget?tab=pickup_drop"
     },
     {
       id: "3",
@@ -90,7 +90,7 @@ export default function ServicesPage() {
       description: "Timely airport pick-ups and drops at major metropolitan terminals with flight delay monitoring systems.",
       features: ["Complimentary flight tracking adjust", "Paging/meet-and-greet on request", "Fixed, transparent pricing models"],
       ctaText: "Book Airport Transfer",
-      ctaLink: "/book"
+      ctaLink: "/#book-widget?tab=pickup_drop"
     },
     {
       id: "4",
@@ -104,7 +104,7 @@ export default function ServicesPage() {
       description: "Chauffeur-driven local hourly packages (e.g. 8 Hrs / 80 Kms) for city shopping, business meetings, and event travels.",
       features: ["Choose hatchbacks, sedans, or SUVs", "Professional driver navigations", "Flexible extra hour/km billing"],
       ctaText: "Rent Local Cab",
-      ctaLink: "/book"
+      ctaLink: "/#book-widget?tab=local"
     },
     {
       id: "5",
@@ -118,7 +118,7 @@ export default function ServicesPage() {
       description: "Comfortable commercial vehicles with outstation licenses for intercity business trips, family trips, and weekend getaways.",
       features: ["One-way and round-trip routes", "Verified highway-trained drivers", "Toll/permit inclusive options"],
       ctaText: "Book Outstation Trip",
-      ctaLink: "/book"
+      ctaLink: "/#book-widget?tab=outstation"
     },
     {
       id: "6",
