@@ -62,15 +62,22 @@ export async function GET(req: NextRequest) {
       take: limit,
     });
 
-    // Pipeline counts for stats header
+    // Pipeline counts for stats header (filtered by leadType if specified)
+    const countWhere: any = {};
+    if (leadType === "pickup_drop") {
+      countWhere.serviceType = { contains: "Pickup & Drop", mode: "insensitive" };
+    } else if (leadType === "corporate_inquiry") {
+      countWhere.NOT = { serviceType: { contains: "Pickup & Drop", mode: "insensitive" } };
+    }
+
     const [newCount, contactedCount, qualifiedCount, negotiationCount, wonCount, lostCount, archivedCount] = await Promise.all([
-      prisma.corporateLead.count({ where: { status: "NEW" } }),
-      prisma.corporateLead.count({ where: { status: "CONTACTED" } }),
-      prisma.corporateLead.count({ where: { status: "QUALIFIED" } }),
-      prisma.corporateLead.count({ where: { status: "NEGOTIATION" } }),
-      prisma.corporateLead.count({ where: { status: "WON" } }),
-      prisma.corporateLead.count({ where: { status: "LOST" } }),
-      prisma.corporateLead.count({ where: { status: "ARCHIVED" } }),
+      prisma.corporateLead.count({ where: { ...countWhere, status: "NEW" } }),
+      prisma.corporateLead.count({ where: { ...countWhere, status: "CONTACTED" } }),
+      prisma.corporateLead.count({ where: { ...countWhere, status: "QUALIFIED" } }),
+      prisma.corporateLead.count({ where: { ...countWhere, status: "NEGOTIATION" } }),
+      prisma.corporateLead.count({ where: { ...countWhere, status: "WON" } }),
+      prisma.corporateLead.count({ where: { ...countWhere, status: "LOST" } }),
+      prisma.corporateLead.count({ where: { ...countWhere, status: "ARCHIVED" } }),
     ]);
 
     const totalPages = Math.ceil(totalCount / limit) || 1;

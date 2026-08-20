@@ -65,15 +65,20 @@ export async function GET(req: NextRequest) {
       take: limit,
     });
 
-    // Pipeline counts for stats header
+    // Pipeline counts for stats header (filtered by tripType if specified)
+    const countWhere: any = {};
+    if (tripType) {
+      countWhere.tripType = { contains: tripType, mode: "insensitive" };
+    }
+
     const [newCount, contactedCount, qualifiedCount, negotiationCount, wonCount, lostCount, archivedCount] = await Promise.all([
-      prisma.rentalLead.count({ where: { status: "NEW" } }),
-      prisma.rentalLead.count({ where: { status: "CONTACTED" } }),
-      prisma.rentalLead.count({ where: { status: "QUALIFIED" } }),
-      prisma.rentalLead.count({ where: { status: "NEGOTIATION" } }),
-      prisma.rentalLead.count({ where: { status: "WON" } }),
-      prisma.rentalLead.count({ where: { status: "LOST" } }),
-      prisma.rentalLead.count({ where: { status: "ARCHIVED" } }),
+      prisma.rentalLead.count({ where: { ...countWhere, status: "NEW" } }),
+      prisma.rentalLead.count({ where: { ...countWhere, status: "CONTACTED" } }),
+      prisma.rentalLead.count({ where: { ...countWhere, status: "QUALIFIED" } }),
+      prisma.rentalLead.count({ where: { ...countWhere, status: "NEGOTIATION" } }),
+      prisma.rentalLead.count({ where: { ...countWhere, status: "WON" } }),
+      prisma.rentalLead.count({ where: { ...countWhere, status: "LOST" } }),
+      prisma.rentalLead.count({ where: { ...countWhere, status: "ARCHIVED" } }),
     ]);
 
     const totalPages = Math.ceil(totalCount / limit) || 1;
