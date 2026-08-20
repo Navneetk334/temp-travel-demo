@@ -15,7 +15,8 @@ import {
   Briefcase,
   ChevronRight,
   Globe,
-  Star
+  Star,
+  Sparkles
 } from "lucide-react";
 
 export const metadata = getSEOMetadata({
@@ -192,6 +193,40 @@ export default async function AboutPage() {
               <p className="text-slate-400 max-w-2xl mx-auto text-sm">
                 How we scaled from a startup rental desk to an ISO-compliant enterprise logistics network.
               </p>
+
+              {/* Design Style Selector Preview Links */}
+              <div className="pt-2">
+                <div className="glassmorphism p-3.5 rounded-2xl border border-white/10 inline-flex flex-wrap gap-2 justify-center items-center text-xs shadow-xl">
+                  <span className="font-bold text-accent uppercase tracking-widest mr-1 flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Explore 4 Design Styles:</span>
+                  </span>
+                  <Link
+                    href="/about/growth-journey-style-1"
+                    className="py-1 px-3 rounded-full font-bold bg-white/10 hover:bg-accent hover:text-slate-950 text-slate-200 border border-white/10 transition-all"
+                  >
+                    Style 1: Alternating Timeline
+                  </Link>
+                  <Link
+                    href="/about/growth-journey-style-2"
+                    className="py-1 px-3 rounded-full font-bold bg-white/10 hover:bg-accent hover:text-slate-950 text-slate-200 border border-white/10 transition-all"
+                  >
+                    Style 2: Interactive Roadmap Track
+                  </Link>
+                  <Link
+                    href="/about/growth-journey-style-3"
+                    className="py-1 px-3 rounded-full font-bold bg-white/10 hover:bg-accent hover:text-slate-950 text-slate-200 border border-white/10 transition-all"
+                  >
+                    Style 3: Bento Metric Grid
+                  </Link>
+                  <Link
+                    href="/about/growth-journey-style-4"
+                    className="py-1 px-3 rounded-full font-bold bg-white/10 hover:bg-accent hover:text-slate-950 text-slate-200 border border-white/10 transition-all"
+                  >
+                    Style 4: Futuristic Tech Railway
+                  </Link>
+                </div>
+              </div>
             </div>
 
             <div className="relative border-l border-white/10 md:border-l-0 md:grid md:grid-cols-3 md:gap-8 space-y-8 md:space-y-0 pl-6 md:pl-0 pt-4">
