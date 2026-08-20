@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import BookingWidget from "@/components/shared/booking-widget";
 import { JsonLd } from "@/components/shared/json-ld";
 import Header from "@/components/shared/header";
@@ -23,12 +24,29 @@ import {
   Sparkles,
   CheckCircle2,
   ChevronDown,
-  Shield
+  Shield,
+  Aperture
 } from "lucide-react";
 
 export default function Homepage() {
+  const [loading, setLoading] = useState(true);
+  const [progress, setProgress] = useState(0);
   const [activeTab, setActiveTab] = useState<"sedan" | "suv" | "luxury">("sedan");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setTimeout(() => setLoading(false), 400);
+          return 100;
+        }
+        return prev + 5;
+      });
+    }, 40);
+    return () => clearInterval(interval);
+  }, []);
 
   const DEFAULT_FEATURED = [
     { id: "1", name: "Maruti Suzuki Swift Dzire", category: "Compact Sedan", seats: "4 Passengers", rate: "₹12/km", img: "/images/fleet-suv.png" },
@@ -193,14 +211,42 @@ export default function Homepage() {
     <div className="bg-slate-950 text-slate-100 min-h-screen font-sans selection:bg-amber-500 selection:text-slate-950">
       <JsonLd data={businessSchema} />
 
-      {/* Floating Demo Switcher Ribbon */}
-      <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-slate-900/90 border border-amber-400/40 p-2 rounded-full shadow-2xl backdrop-blur-xl text-xs font-bold text-slate-200">
-        <span className="px-2 text-amber-400 font-extrabold uppercase text-[10px] tracking-wider">ENTRANCE ANIMATION DEMOS:</span>
-        <Link href="/home2" className="px-2.5 py-1 bg-white/10 hover:bg-amber-400 hover:text-slate-950 text-slate-200 rounded-full font-bold transition-all">Style 1 (Shutter)</Link>
-        <Link href="/home3" className="px-2.5 py-1 bg-white/10 hover:bg-amber-400 hover:text-slate-950 text-slate-200 rounded-full font-bold transition-all">Style 2 (Iris)</Link>
-        <Link href="/home4" className="px-2.5 py-1 bg-white/10 hover:bg-amber-400 hover:text-slate-950 text-slate-200 rounded-full font-bold transition-all">Style 3 (Beam)</Link>
-        <Link href="/home5" className="px-2.5 py-1 bg-white/10 hover:bg-amber-400 hover:text-slate-950 text-slate-200 rounded-full font-bold transition-all">Style 4 (Headlight)</Link>
-      </div>
+      {/* ENTRANCE ANIMATION: APERTURE IRIS LENS WIPE */}
+      <AnimatePresence>
+        {loading && (
+          <motion.div
+            initial={{ clipPath: "circle(150% at 50% 50%)" }}
+            exit={{ clipPath: "circle(0% at 50% 50%)" }}
+            transition={{ duration: 0.9, ease: [0.87, 0, 0.13, 1] }}
+            className="fixed inset-0 z-[100] bg-slate-950 flex flex-col items-center justify-center pointer-events-auto"
+          >
+            {/* Outer Spinning Lens Ring */}
+            <div className="relative flex items-center justify-center">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                className="w-44 h-44 rounded-full border-2 border-dashed border-amber-400/40 absolute"
+              />
+              <motion.div
+                animate={{ rotate: -360 }}
+                transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+                className="w-56 h-56 rounded-full border border-white/10 absolute"
+              />
+
+              {/* Central Glowing Icon */}
+              <div className="bg-slate-900 border border-amber-400/50 p-6 rounded-full shadow-2xl shadow-amber-400/20 flex flex-col items-center justify-center text-center">
+                <Aperture className="w-10 h-10 text-amber-400 animate-pulse" />
+                <span className="text-xl font-black font-mono text-amber-400 mt-2">{progress}%</span>
+              </div>
+            </div>
+
+            <div className="mt-8 text-center space-y-1">
+              <span className="text-sm font-extrabold uppercase tracking-[0.3em] text-slate-200 block">Chauffeur Mobility Hub</span>
+              <span className="text-[10px] font-mono text-amber-400 uppercase tracking-widest block">TEMP TRAVEL DISPATCH ENGINE</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Header */}
       <Header />
@@ -224,7 +270,13 @@ export default function Homepage() {
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 w-full max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 text-center space-y-6 mb-12">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.88, rotateX: 15 }}
+          animate={!loading ? { opacity: 1, scale: 1, rotateX: 0 } : {}}
+          transition={{ duration: 0.9, ease: "easeOut", delay: 0.1 }}
+          style={{ perspective: 1000 }}
+          className="relative z-10 w-full max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 text-center space-y-6 mb-12"
+        >
           {/* Floating Luxury Tag */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-full text-amber-400 text-xs font-extrabold uppercase tracking-widest backdrop-blur-md shadow-lg shadow-amber-500/5">
             <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
@@ -257,12 +309,18 @@ export default function Homepage() {
               <span>Pan-India Metropolitan Coverage</span>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Booking Widget Wrapper */}
-        <div id="book-widget" className="relative z-10 w-full max-w-5xl mx-auto scroll-mt-24">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={!loading ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          id="book-widget"
+          className="relative z-10 w-full max-w-5xl mx-auto scroll-mt-24"
+        >
           <BookingWidget />
-        </div>
+        </motion.div>
       </section>
 
       {/* Floating High-Contrast Stats Banner */}
