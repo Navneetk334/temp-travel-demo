@@ -39,7 +39,7 @@ export default function DashboardCharts({ monthlyRevenueData, leadConversionsDat
                 contentStyle={{ backgroundColor: "#0f172a", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "8px" }} 
                 labelStyle={{ color: "#94a3b8", fontWeight: "bold" }}
               />
-              <Line type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={3} name="Revenue (INR)" activeDot={{ r: 8 }} />
+              <Line type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={3} name="Revenue (₹)" activeDot={{ r: 8 }} />
               <Line type="monotone" dataKey="bookings" stroke="#f59e0b" strokeWidth={2} name="Total Rides" />
             </LineChart>
           </ResponsiveContainer>
