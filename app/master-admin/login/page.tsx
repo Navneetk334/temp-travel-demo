@@ -16,7 +16,13 @@ import {
   AlertCircle,
   Radio,
   Building2,
-  Car
+  Car,
+  Terminal,
+  Zap,
+  Coffee,
+  Smile,
+  ShieldAlert,
+  Flame
 } from "lucide-react";
 
 export default function MasterAdminLoginPage() {
@@ -31,9 +37,18 @@ export default function MasterAdminLoginPage() {
     name: "",
     email: "",
     password: "",
-    securityPin: "",
     role: "SUPER_ADMIN"
   });
+
+  // Calculate funny password strength indicator
+  const getPasswordHumor = (pass: string) => {
+    if (!pass) return { label: "Awaiting Master Password...", color: "text-slate-500", progress: 0 };
+    if (pass.length < 4) return { label: "🚗 Too weak! Even a parking valet could guess this!", color: "text-red-400", progress: 25 };
+    if (pass.length < 8) return { label: "🔑 Getting warmer... Chauffeur level clearance!", color: "text-amber-400", progress: 65 };
+    return { label: "🦁 FORT KNOX CLEARANCE GRANTED! Lion Defense Active!", color: "text-emerald-400 font-bold", progress: 100 };
+  };
+
+  const passwordInfo = getPasswordHumor(form.password);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +62,6 @@ export default function MasterAdminLoginPage() {
     }
 
     try {
-      // Simulate/Trigger master session auth
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -55,24 +69,23 @@ export default function MasterAdminLoginPage() {
       });
 
       if (res.ok) {
-        setSuccessMsg("Master Authentication Verified! Unlocking Command Center...");
+        setSuccessMsg("🎉 Master Key Verified! Opening Command Center...");
         setTimeout(() => {
           router.push("/master-admin");
         }, 1200);
       } else {
-        // Fallback for demo login if db user not seeded
+        // Fallback for demo mode
         if (form.email.includes("@") && form.password.length >= 4) {
-          setSuccessMsg("Master Key Verified! Redirecting to Master Control...");
+          setSuccessMsg("🚀 Security Clearance Granted! Launching Master HQ...");
           setTimeout(() => {
             router.push("/master-admin");
           }, 1200);
         } else {
-          setError("Invalid Master Key or Email address. Access Denied.");
+          setError("Access Denied! Incorrect Master Key or Security Clearance Email.");
         }
       }
     } catch (err) {
-      // Emergency bypass for master login in demo
-      setSuccessMsg("Master Security Clearance Granted! Launching HQ...");
+      setSuccessMsg("🚀 Emergency Bypass Verified! Opening Master HQ...");
       setTimeout(() => {
         router.push("/master-admin");
       }, 1000);
@@ -87,7 +100,7 @@ export default function MasterAdminLoginPage() {
       setError("All request fields are required.");
       return;
     }
-    setSuccessMsg("Master Admin Account Access Requested! Super Admin approval pending.");
+    setSuccessMsg("✨ Access Request Submitted! Super Admin review in progress.");
     setTimeout(() => {
       setMode("login");
       setSuccessMsg("");
@@ -96,22 +109,44 @@ export default function MasterAdminLoginPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center p-4 relative overflow-hidden font-sans selection:bg-amber-500 selection:text-slate-950">
-      {/* Animated Glowing Laser Background Gradients */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-amber-500/20 via-amber-600/5 to-transparent rounded-full blur-3xl pointer-events-none animate-pulse" />
-      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+      {/* 1. Animated Ambient Orb Background Effects */}
+      <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-amber-500/15 rounded-full blur-[140px] pointer-events-none animate-pulse" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-purple-600/15 rounded-full blur-[140px] pointer-events-none animate-pulse" />
       
-      {/* Security Matrix Lines Visualizer */}
-      <div className="absolute inset-0 bg-[radial-gradient(#f59e0b_1px,transparent_1px)] [background-size:32px_32px] opacity-10 pointer-events-none" />
+      {/* 2. Cyber Laser Scanning Line Effect */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="w-full h-1 bg-gradient-to-r from-transparent via-amber-400/40 to-transparent absolute top-0 animate-[ping_6s_infinite]" />
+      </div>
+
+      {/* 3. Cyber Grid Dot Matrix */}
+      <div className="absolute inset-0 bg-[radial-gradient(#f59e0b_1px,transparent_1px)] [background-size:36px_36px] opacity-10 pointer-events-none" />
+
+      {/* Funny Floating Security Status Ticker */}
+      <div className="absolute top-6 left-1/2 -translate-x-1/2 hidden md:flex items-center gap-6 bg-slate-900/80 backdrop-blur-xl border border-amber-500/30 px-6 py-2 rounded-full text-[11px] font-mono text-slate-300 shadow-2xl z-20">
+        <div className="flex items-center gap-1.5 text-amber-400 font-bold">
+          <Zap className="w-3.5 h-3.5 animate-bounce" />
+          <span>Radar: 100% Online</span>
+        </div>
+        <span className="text-slate-600">&bull;</span>
+        <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
+          <Coffee className="w-3.5 h-3.5" />
+          <span>HQ Coffee: Brewing</span>
+        </div>
+        <span className="text-slate-600">&bull;</span>
+        <div className="flex items-center gap-1.5 text-purple-400 font-bold">
+          <Flame className="w-3.5 h-3.5" />
+          <span>Hacker Countermeasures: Active 🦁</span>
+        </div>
+      </div>
 
       <div className="w-full max-w-md relative z-10 space-y-6">
-        {/* Brand Logo Header */}
+        {/* Clean Untampered Brand Logo */}
         <div className="text-center space-y-3">
-          <div className="inline-flex items-center justify-center p-4 bg-slate-900/90 border border-amber-500/30 rounded-3xl shadow-2xl shadow-amber-500/10 relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-amber-500 to-amber-600 rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-500" />
+          <div className="inline-flex items-center justify-center p-4 bg-slate-900/90 border border-amber-500/30 rounded-3xl shadow-2xl">
             <img
               src="/images/logo.png"
               alt="TEMP TRAVEL"
-              className="h-14 w-auto object-contain relative z-10 drop-shadow-[0_4px_16px_rgba(245,158,11,0.4)]"
+              className="h-14 w-auto object-contain drop-shadow-[0_4px_12px_rgba(245,158,11,0.3)]"
             />
           </div>
 
@@ -124,18 +159,21 @@ export default function MasterAdminLoginPage() {
               {mode === "login" ? "Master Control Sign In" : "Request Admin Access"}
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Encrypted biometric & clearance portal for Temp Travel Pvt Ltd operations.
+              Encrypted clearance portal for Temp Travel Pvt Ltd operations.
             </p>
           </div>
         </div>
 
         {/* Auth Form Card */}
-        <div className="bg-slate-900/90 backdrop-blur-2xl border border-amber-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
-          {/* Tab Switcher */}
+        <div className="bg-slate-900/90 backdrop-blur-2xl border border-amber-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden">
+          {/* Top Decorative Border Highlight */}
+          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600" />
+
+          {/* Mode Tab Switcher */}
           <div className="flex bg-slate-950 p-1 rounded-xl border border-white/10">
             <button
               onClick={() => { setMode("login"); setError(""); setSuccessMsg(""); }}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                 mode === "login" ? "bg-amber-500 text-slate-950 font-black shadow-md" : "text-slate-400 hover:text-white"
               }`}
             >
@@ -143,7 +181,7 @@ export default function MasterAdminLoginPage() {
             </button>
             <button
               onClick={() => { setMode("signup"); setError(""); setSuccessMsg(""); }}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                 mode === "signup" ? "bg-amber-500 text-slate-950 font-black shadow-md" : "text-slate-400 hover:text-white"
               }`}
             >
@@ -201,11 +239,26 @@ export default function MasterAdminLoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-amber-400"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-amber-400 cursor-pointer"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+
+                {/* Interactive Password Humor Indicator */}
+                {form.password && (
+                  <div className="space-y-1 pt-1">
+                    <div className="h-1.5 w-full bg-slate-950 rounded-full overflow-hidden border border-white/5">
+                      <div
+                        className="h-full bg-gradient-to-r from-amber-500 to-emerald-400 transition-all duration-300"
+                        style={{ width: `${passwordInfo.progress}%` }}
+                      />
+                    </div>
+                    <div className={`text-[10px] font-mono ${passwordInfo.color}`}>
+                      {passwordInfo.label}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <button
@@ -213,7 +266,7 @@ export default function MasterAdminLoginPage() {
                 disabled={loading}
                 className="w-full py-3.5 bg-gradient-to-r from-amber-500 via-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black rounded-xl text-xs uppercase tracking-widest transition-all shadow-xl shadow-amber-500/20 flex items-center justify-center gap-2 group cursor-pointer"
               >
-                <span>{loading ? "Verifying Credentials..." : "Authenticate & Open Master Admin"}</span>
+                <span>{loading ? "Decrypting Clearance..." : "Authenticate & Open Master Admin"}</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </form>
@@ -244,7 +297,7 @@ export default function MasterAdminLoginPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-slate-300 font-extrabold uppercase text-[10px] tracking-wider">Requested Security Role</label>
+                <label className="text-slate-300 font-extrabold uppercase text-[10px] tracking-wider">Requested Role</label>
                 <select
                   value={form.role}
                   onChange={(e) => setForm({ ...form, role: e.target.value })}
@@ -258,7 +311,7 @@ export default function MasterAdminLoginPage() {
 
               <button
                 type="submit"
-                className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-widest shadow-xl shadow-amber-500/20"
+                className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-widest shadow-xl shadow-amber-500/20 cursor-pointer"
               >
                 Submit Access Request
               </button>
