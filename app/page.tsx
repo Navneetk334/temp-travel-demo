@@ -230,11 +230,12 @@ export default function Homepage() {
               transition={{ duration: 0.6 }}
               className="relative z-10 text-center flex flex-col items-center justify-center"
             >
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <Zap className="w-6 h-6 text-amber-400 animate-bounce" />
-                <span className="text-3xl font-black uppercase tracking-widest text-slate-50">TEMP TRAVEL</span>
-              </div>
-              <p className="text-xs uppercase font-extrabold tracking-[0.4em] text-amber-400 mt-4">Excellence in Transit</p>
+              <img
+                src="/images/logo.png"
+                alt="TEMP TRAVEL CAR RENTALS"
+                className="h-12 sm:h-14 w-auto object-contain mb-2"
+              />
+              <p className="text-xs uppercase font-extrabold tracking-[0.4em] text-amber-400 mt-2">Excellence in Transit</p>
             </motion.div>
           </motion.div>
         )}
