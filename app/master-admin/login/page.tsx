@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Script from "next/script";
 import {
   ShieldCheck,
   Lock,
@@ -25,13 +26,25 @@ import {
   Flame
 } from "lucide-react";
 
+declare global {
+  interface Window {
+    VANTA: any;
+    THREE: any;
+  }
+}
+
 export default function MasterAdminLoginPage() {
   const router = useRouter();
+  const vantaContainerRef = useRef<HTMLDivElement>(null);
+  const vantaEffectRef = useRef<any>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [vantaLoaded, setVantaLoaded] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -40,7 +53,117 @@ export default function MasterAdminLoginPage() {
     role: "SUPER_ADMIN"
   });
 
-  // Calculate funny password strength indicator
+  // Init Vanta.js WAVES 3D Low-Poly Background
+  const initVanta = () => {
+    if (window.VANTA && window.VANTA.WAVES && vantaContainerRef.current && !vantaEffectRef.current) {
+      try {
+        vantaEffectRef.current = window.VANTA.WAVES({
+          el: vantaContainerRef.current,
+          mouseControls: true,
+          touchControls: true,
+          gyroControls: false,
+          minHeight: 200.00,
+          minWidth: 200.00,
+          scale: 1.00,
+          scaleMobile: 1.00,
+          color: 0x091325, // Deep Dark Blue Sapphire & Amber Low-Poly Waves
+          shininess: 35.00,
+          waveHeight: 18.00,
+          waveSpeed: 0.90,
+          zoom: 0.95
+        });
+        setVantaLoaded(true);
+      } catch (e) {
+        console.error("Vanta init error:", e);
+      }
+    }
+  };
+
+  useEffect(() => {
+    initVanta();
+    return () => {
+      if (vantaEffectRef.current) {
+        vantaEffectRef.current.destroy();
+        vantaEffectRef.current = null;
+      }
+    };
+  }, []);
+
+  // HTML5 Canvas 3D Low-Poly Triangulated Animated Wave Fallback
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animationFrameId: number;
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
+    const handleResize = () => {
+      if (!canvas) return;
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    const cols = 28;
+    const rows = 18;
+    let t = 0;
+
+    const render = () => {
+      t += 0.015;
+      ctx.fillStyle = "#020617";
+      ctx.fillRect(0, 0, width, height);
+
+      const cellW = width / cols;
+      const cellH = height / rows;
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const x = c * cellW;
+          const y = r * cellH;
+
+          const z1 = Math.sin(t + c * 0.3 + r * 0.2) * 16;
+          const z2 = Math.cos(t + (c + 1) * 0.3 + r * 0.2) * 16;
+          const z3 = Math.sin(t + c * 0.3 + (r + 1) * 0.2) * 16;
+
+          // Shading intensity
+          const brightness = Math.floor(15 + (z1 + 16) * 1.5);
+          ctx.fillStyle = `rgb(${brightness + 10}, ${brightness + 20}, ${brightness + 45})`;
+          ctx.strokeStyle = "rgba(245, 158, 11, 0.08)";
+          ctx.lineWidth = 0.5;
+
+          ctx.beginPath();
+          ctx.moveTo(x, y + z1);
+          ctx.lineTo(x + cellW, y + z2);
+          ctx.lineTo(x, y + cellH + z3);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.moveTo(x + cellW, y + z2);
+          ctx.lineTo(x + cellW, y + cellH + z2);
+          ctx.lineTo(x, y + cellH + z3);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        }
+      }
+
+      animationFrameId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
   const getPasswordHumor = (pass: string) => {
     if (!pass) return { label: "Awaiting Master Password...", color: "text-slate-500", progress: 0 };
     if (pass.length < 4) return { label: "🚗 Too weak! Even a parking valet could guess this!", color: "text-red-400", progress: 25 };
@@ -74,7 +197,6 @@ export default function MasterAdminLoginPage() {
           router.push("/master-admin");
         }, 1200);
       } else {
-        // Fallback for demo mode
         if (form.email.includes("@") && form.password.length >= 4) {
           setSuccessMsg("🚀 Security Clearance Granted! Launching Master HQ...");
           setTimeout(() => {
@@ -109,23 +231,38 @@ export default function MasterAdminLoginPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center p-4 relative overflow-hidden font-sans selection:bg-amber-500 selection:text-slate-950">
-      {/* 1. Animated Ambient Orb Background Effects */}
-      <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-amber-500/15 rounded-full blur-[140px] pointer-events-none animate-pulse" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-purple-600/15 rounded-full blur-[140px] pointer-events-none animate-pulse" />
-      
-      {/* 2. Cyber Laser Scanning Line Effect */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="w-full h-1 bg-gradient-to-r from-transparent via-amber-400/40 to-transparent absolute top-0 animate-[ping_6s_infinite]" />
-      </div>
+      {/* Dynamic Scripts for Vanta.js 3D Waves */}
+      <Script
+        src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"
+        strategy="afterInteractive"
+        onLoad={() => {
+          if (window.VANTA) initVanta();
+        }}
+      />
+      <Script
+        src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js"
+        strategy="afterInteractive"
+        onLoad={() => {
+          initVanta();
+        }}
+      />
 
-      {/* 3. Cyber Grid Dot Matrix */}
-      <div className="absolute inset-0 bg-[radial-gradient(#f59e0b_1px,transparent_1px)] [background-size:36px_36px] opacity-10 pointer-events-none" />
+      {/* 1. Vanta.js 3D WAVES Canvas Container */}
+      <div ref={vantaContainerRef} className="absolute inset-0 z-0 pointer-events-auto" />
 
-      {/* Funny Floating Security Status Ticker */}
-      <div className="absolute top-6 left-1/2 -translate-x-1/2 hidden md:flex items-center gap-6 bg-slate-900/80 backdrop-blur-xl border border-amber-500/30 px-6 py-2 rounded-full text-[11px] font-mono text-slate-300 shadow-2xl z-20">
+      {/* 2. Fallback 3D Low-Poly Waves Canvas */}
+      {!vantaLoaded && (
+        <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none opacity-90" />
+      )}
+
+      {/* 3. Ambient Gold Glow Layer */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-amber-500/10 rounded-full blur-[160px] pointer-events-none z-0" />
+
+      {/* Security Ticker Banner */}
+      <div className="absolute top-6 left-1/2 -translate-x-1/2 hidden md:flex items-center gap-6 bg-slate-900/85 backdrop-blur-2xl border border-amber-500/30 px-6 py-2 rounded-full text-[11px] font-mono text-slate-300 shadow-2xl z-20">
         <div className="flex items-center gap-1.5 text-amber-400 font-bold">
           <Zap className="w-3.5 h-3.5 animate-bounce" />
-          <span>Radar: 100% Online</span>
+          <span>Vanta 3D Waves Active</span>
         </div>
         <span className="text-slate-600">&bull;</span>
         <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
@@ -135,14 +272,14 @@ export default function MasterAdminLoginPage() {
         <span className="text-slate-600">&bull;</span>
         <div className="flex items-center gap-1.5 text-purple-400 font-bold">
           <Flame className="w-3.5 h-3.5" />
-          <span>Hacker Countermeasures: Active 🦁</span>
+          <span>Lion Defense Force: Armed 🦁</span>
         </div>
       </div>
 
       <div className="w-full max-w-md relative z-10 space-y-6">
         {/* Clean Untampered Brand Logo */}
         <div className="text-center space-y-3">
-          <div className="inline-flex items-center justify-center p-4 bg-slate-900/90 border border-amber-500/30 rounded-3xl shadow-2xl">
+          <div className="inline-flex items-center justify-center p-4 bg-slate-900/90 border border-amber-500/30 rounded-3xl shadow-2xl backdrop-blur-xl">
             <img
               src="/images/logo.png"
               alt="TEMP TRAVEL"
@@ -166,7 +303,6 @@ export default function MasterAdminLoginPage() {
 
         {/* Auth Form Card */}
         <div className="bg-slate-900/90 backdrop-blur-2xl border border-amber-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden">
-          {/* Top Decorative Border Highlight */}
           <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600" />
 
           {/* Mode Tab Switcher */}
@@ -245,7 +381,6 @@ export default function MasterAdminLoginPage() {
                   </button>
                 </div>
 
-                {/* Interactive Password Humor Indicator */}
                 {form.password && (
                   <div className="space-y-1 pt-1">
                     <div className="h-1.5 w-full bg-slate-950 rounded-full overflow-hidden border border-white/5">
