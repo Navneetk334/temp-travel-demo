@@ -16,6 +16,16 @@ import {
   AlertCircle
 } from "lucide-react";
 
+interface DotNode {
+  originX: number;
+  originY: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  radius: number;
+}
+
 export default function MasterAdminLoginPage() {
   const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -33,7 +43,7 @@ export default function MasterAdminLoginPage() {
     role: "SUPER_ADMIN"
   });
 
-  // Framer Dot-Grid-BG Interactive Matrix Canvas Engine
+  // Framer Dot-Grid-BG Repulsion & Wobble Physics Engine
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -44,82 +54,107 @@ export default function MasterAdminLoginPage() {
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
 
-    let mouseX = width / 2;
-    let mouseY = height / 2;
-    let targetMouseX = mouseX;
-    let targetMouseY = mouseY;
+    let mouseX = -9999;
+    let mouseY = -9999;
 
     const handleMouseMove = (e: MouseEvent) => {
-      targetMouseX = e.clientX;
-      targetMouseY = e.clientY;
+      mouseX = e.clientX;
+      mouseY = e.clientY;
     };
 
-    const handleResize = () => {
-      if (!canvas) return;
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+    const handleMouseLeave = () => {
+      mouseX = -9999;
+      mouseY = -9999;
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("resize", handleResize);
+    let dots: DotNode[] = [];
+    const gap = 24; // Crisp Framer dot grid spacing
 
-    const gap = 32; // Grid spacing in px
-    let t = 0;
-
-    const render = () => {
-      t += 0.03;
-      // Smooth lerp mouse coordinates
-      mouseX += (targetMouseX - mouseX) * 0.1;
-      mouseY += (targetMouseY - mouseY) * 0.1;
-
-      // Dark background fill
-      ctx.fillStyle = "#020617";
-      ctx.fillRect(0, 0, width, height);
-
+    const initDots = () => {
+      dots = [];
       const cols = Math.ceil(width / gap) + 1;
       const rows = Math.ceil(height / gap) + 1;
 
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
-          const x = c * gap;
-          const y = r * gap;
-
-          // Calculate distance to mouse cursor
-          const dx = mouseX - x;
-          const dy = mouseY - y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-
-          // Pulse wave offset
-          const wave = Math.sin(t + c * 0.15 + r * 0.15) * 0.5 + 0.5;
-          const radiusMax = 180;
-
-          let dotRadius = 1.6;
-          let alpha = 0.15 + wave * 0.12;
-          let color = `rgba(245, 158, 11, ${alpha})`; // Gold/Amber accent
-
-          if (dist < radiusMax) {
-            const factor = 1 - dist / radiusMax;
-            dotRadius = 1.6 + factor * 3.2;
-            alpha = 0.3 + factor * 0.7;
-            color = `rgba(245, 158, 11, ${alpha})`;
-
-            // Draw line to mouse if close enough
-            if (dist < 100) {
-              ctx.strokeStyle = `rgba(245, 158, 11, ${0.15 * (1 - dist / 100)})`;
-              ctx.lineWidth = 0.8;
-              ctx.beginPath();
-              ctx.moveTo(x, y);
-              ctx.lineTo(mouseX, mouseY);
-              ctx.stroke();
-            }
-          }
-
-          // Draw Grid Dot
-          ctx.fillStyle = color;
-          ctx.beginPath();
-          ctx.arc(x, y, dotRadius, 0, Math.PI * 2);
-          ctx.fill();
+          const posX = c * gap;
+          const posY = r * gap;
+          dots.push({
+            originX: posX,
+            originY: posY,
+            x: posX,
+            y: posY,
+            vx: 0,
+            vy: 0,
+            radius: 1.2
+          });
         }
+      }
+    };
+
+    initDots();
+
+    const handleResize = () => {
+      if (!canvas) return;
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      initDots();
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseleave", handleMouseLeave);
+    window.addEventListener("resize", handleResize);
+
+    const render = () => {
+      // Pure dark background
+      ctx.fillStyle = "#020617";
+      ctx.fillRect(0, 0, width, height);
+
+      const maxRepelDist = 130; // Repulsion aura radius
+      const springK = 0.08;     // Return force stiffness
+      const damping = 0.82;     // Wobble damping factor
+
+      for (let i = 0; i < dots.length; i++) {
+        const dot = dots[i];
+
+        // Calculate distance vector to mouse cursor
+        const dx = dot.x - mouseX;
+        const dy = dot.y - mouseY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        // Repulsion physics: Push dot AWAY from cursor
+        if (dist < maxRepelDist && dist > 0) {
+          const repelForce = (1 - dist / maxRepelDist) * 9;
+          const angle = Math.atan2(dy, dx);
+          dot.vx += Math.cos(angle) * repelForce;
+          dot.vy += Math.sin(angle) * repelForce;
+        }
+
+        // Spring physics: Pull dot back to origin position
+        dot.vx += (dot.originX - dot.x) * springK;
+        dot.vy += (dot.originY - dot.y) * springK;
+
+        // Apply velocity damping for wobbling feel
+        dot.vx *= damping;
+        dot.vy *= damping;
+
+        // Update dot position
+        dot.x += dot.vx;
+        dot.y += dot.vy;
+
+        // Calculate displacement offset for dynamic brightness
+        const dispX = dot.x - dot.originX;
+        const dispY = dot.y - dot.originY;
+        const displacement = Math.sqrt(dispX * dispX + dispY * dispY);
+
+        // Render pure crisp white/monochrome dot with brightness on wobble
+        const alpha = Math.min(0.85, 0.22 + (displacement / 20) * 0.5);
+        const radius = dot.radius + Math.min(1.2, displacement / 15);
+
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(dot.x, dot.y, radius, 0, Math.PI * 2);
+        ctx.fill();
       }
 
       animationFrameId = requestAnimationFrame(render);
@@ -129,6 +164,7 @@ export default function MasterAdminLoginPage() {
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseleave", handleMouseLeave);
       window.removeEventListener("resize", handleResize);
       cancelAnimationFrame(animationFrameId);
     };
@@ -201,11 +237,11 @@ export default function MasterAdminLoginPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center p-4 relative overflow-hidden font-sans selection:bg-amber-500 selection:text-slate-950">
-      {/* 1. Framer Interactive Dot-Grid-BG Canvas */}
+      {/* 1. Framer Interactive Repulsion Dot-Grid Canvas */}
       <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-auto" />
 
-      {/* 2. Ambient Gold Spotlight Glow Effect */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-amber-500/10 rounded-full blur-[150px] pointer-events-none z-0" />
+      {/* 2. Soft Ambient Vignette Layer */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_40%,#020617_100%)] pointer-events-none z-0" />
 
       <div className="w-full max-w-md relative z-10 space-y-6">
         {/* Clean Untampered Brand Logo */}
