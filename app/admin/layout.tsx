@@ -104,14 +104,14 @@ export default function AdminLayout({
       {/* 1. Sidebar Panel for Desktop (Fixed) */}
       <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-slate-900 border-r border-white/5 z-30 shrink-0">
         {/* Brand identity */}
-        <div className="h-20 px-6 border-b border-white/5 flex items-center gap-2">
-          <div className="bg-primary p-1.5 rounded-lg text-primary-foreground">
-            <Car className="w-5 h-5 text-accent" />
-          </div>
-          <div>
-            <span className="font-extrabold text-sm tracking-tight text-slate-50 uppercase">Temp Travel</span>
-            <span className="block text-[8px] font-bold text-accent tracking-widest uppercase -mt-0.5">Admin Control</span>
-          </div>
+        <div className="h-20 px-6 border-b border-white/5 flex items-center">
+          <Link href="/admin" className="inline-block" title="Admin Home">
+            <img
+              src="/images/logo.png"
+              alt="TEMP TRAVEL CAR RENTALS"
+              className="h-9 w-auto object-contain"
+            />
+          </Link>
         </div>
 
         {/* Navigation list */}
@@ -204,9 +204,12 @@ export default function AdminLayout({
             </button>
 
             <div className="space-y-8 mt-4">
-              <div className="flex items-center gap-2">
-                <Car className="w-5 h-5 text-accent" />
-                <span className="font-extrabold text-sm tracking-tight text-slate-50 uppercase">Temp Travel</span>
+              <div className="flex items-center">
+                <img
+                  src="/images/logo.png"
+                  alt="TEMP TRAVEL CAR RENTALS"
+                  className="h-8 w-auto object-contain"
+                />
               </div>
 
               <nav className="space-y-1.5">

@@ -55,7 +55,7 @@ export default async function AboutPage() {
     "@type": "Organization",
     "name": "TEMP TRAVEL CAR RENTALS PVT LTD",
     "url": "https://temptravels.com",
-    "logo": "https://temptravels.com/images/hero-cover.png",
+    "logo": "https://temptravels.com/images/logo.png",
     "contactPoint": {
       "@type": "ContactPoint",
       "telephone": "+91-9999999999",

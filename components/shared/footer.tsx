@@ -14,15 +14,13 @@ export default function Footer() {
       <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
         {/* Brand Column */}
         <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <div className="bg-primary p-2 rounded-lg text-primary-foreground border border-accent/20">
-              <Car className="w-5 h-5 text-accent" />
-            </div>
-            <div>
-              <span className="font-extrabold text-lg tracking-tight text-slate-50 uppercase">Temp Travel</span>
-              <span className="block text-[8px] font-bold text-accent tracking-widest uppercase -mt-1">Car Rentals</span>
-            </div>
-          </div>
+          <Link href="/" className="inline-block" title="Temp Travel Home">
+            <img
+              src="/images/logo.png"
+              alt="TEMP TRAVEL CAR RENTALS"
+              className="h-10 sm:h-12 w-auto object-contain"
+            />
+          </Link>
           <p className="text-slate-400 leading-relaxed">
             TEMP TRAVEL CAR RENTALS PVT LTD is India's leading corporate transit and leisure travel management partner, specializing in compliant, safe, and efficient mobility.
           </p>

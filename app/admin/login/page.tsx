@@ -45,11 +45,13 @@ function LoginForm() {
     <div className="w-full max-w-md bg-slate-900 border border-white/10 rounded-2xl p-8 shadow-2xl space-y-6">
       {/* Brand Header */}
       <div className="text-center space-y-2">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/20 border border-primary/30 text-accent mb-2">
-          <Car className="w-6 h-6" />
-        </div>
-        <h1 className="text-2xl font-extrabold tracking-tight text-slate-50">
-          Temp Travel Admin
+        <img
+          src="/images/logo.png"
+          alt="TEMP TRAVEL CAR RENTALS"
+          className="h-14 w-auto object-contain mx-auto mb-2"
+        />
+        <h1 className="text-xl font-extrabold tracking-tight text-slate-50">
+          Admin Control Center
         </h1>
         <p className="text-xs text-slate-400">
           Sign in to access operational dashboard & CRM systems

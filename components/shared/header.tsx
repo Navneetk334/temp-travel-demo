@@ -49,18 +49,12 @@ export default function Header() {
         </nav>
 
         {/* Centered Brand Logo (Functions as Home Link) */}
-        <Link href="/" className="flex items-center gap-2 px-2 group shrink-0" title="Temp Travel Home">
-          <div className="bg-primary p-1.5 rounded-lg text-primary-foreground border border-accent/30 group-hover:scale-105 transition-transform shadow-md">
-            <Car className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
-          </div>
-          <div className="text-left">
-            <span className="font-black text-sm sm:text-base tracking-tight text-slate-50 uppercase block leading-none">
-              Temp Travel
-            </span>
-            <span className="block text-[8px] font-extrabold text-accent tracking-widest uppercase mt-0.5 leading-none">
-              Car Rentals
-            </span>
-          </div>
+        <Link href="/" className="flex items-center px-2 group shrink-0" title="Temp Travel Home">
+          <img
+            src="/images/logo.png"
+            alt="TEMP TRAVEL CAR RENTALS"
+            className="h-7 sm:h-9 w-auto object-contain group-hover:scale-105 transition-transform"
+          />
         </Link>
 
         {/* Right Navigation Links */}
