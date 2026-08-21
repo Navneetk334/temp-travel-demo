@@ -9,11 +9,15 @@ import {
   Filter,
   CheckCircle2,
   AlertTriangle,
-  Clock
+  Clock,
+  Download
 } from "lucide-react";
 
 export default function MasterAuditLogsPage() {
-  const auditLogs = [
+  const [search, setSearch] = useState("");
+  const [severityFilter, setSeverityFilter] = useState("ALL");
+
+  const [auditLogs, setAuditLogs] = useState([
     {
       id: "LOG-9941",
       timestamp: "2026-08-21 14:45:12",
@@ -54,7 +58,29 @@ export default function MasterAuditLogsPage() {
       ipAddress: "52.66.12.18",
       severity: "INFO"
     }
-  ];
+  ]);
+
+  const filteredLogs = auditLogs.filter((log) => {
+    const matchesSearch =
+      log.user.toLowerCase().includes(search.toLowerCase()) ||
+      log.action.toLowerCase().includes(search.toLowerCase()) ||
+      log.details.toLowerCase().includes(search.toLowerCase());
+    const matchesSeverity = severityFilter === "ALL" || log.severity === severityFilter;
+    return matchesSearch && matchesSeverity;
+  });
+
+  const exportAuditCSV = () => {
+    const headers = ["Event ID", "Timestamp", "User", "Role", "Action", "Details", "IP Address"];
+    const rows = filteredLogs.map(l => [l.id, l.timestamp, l.user, l.role, l.action, `"${l.details}"`, l.ipAddress]);
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Master_Audit_Logs_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="space-y-8">
@@ -75,10 +101,45 @@ export default function MasterAuditLogsPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 bg-slate-900 border border-white/10 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold">
-            <Lock className="w-3.5 h-3.5 text-amber-400" />
-            <span>SSL / TLS 1.3 Active</span>
+          <button
+            onClick={exportAuditCSV}
+            className="flex items-center gap-2 bg-slate-900 border border-white/10 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold hover:text-white transition-all"
+          >
+            <Download className="w-3.5 h-3.5 text-amber-400" />
+            <span>Export Audit Log</span>
           </button>
+        </div>
+      </div>
+
+      {/* Search & Severity Filter Bar */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-2xl border border-white/10">
+        <div className="relative w-full sm:w-80">
+          <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            placeholder="Search audit action, user or details..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full bg-slate-950 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
+          />
+        </div>
+
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <Filter className="w-4 h-4 text-slate-400" />
+          <span className="text-xs text-slate-400 font-bold uppercase">Severity:</span>
+          {["ALL", "INFO", "IMPORTANT"].map((st) => (
+            <button
+              key={st}
+              onClick={() => setSeverityFilter(st)}
+              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase transition-all ${
+                severityFilter === st
+                  ? "bg-amber-500 text-slate-950 font-black"
+                  : "bg-slate-950 text-slate-400 hover:text-white"
+              }`}
+            >
+              {st}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -104,7 +165,7 @@ export default function MasterAuditLogsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {auditLogs.map((log) => (
+              {filteredLogs.map((log) => (
                 <tr key={log.id} className="hover:bg-white/5 transition-colors">
                   <td className="py-4 px-4 font-mono">
                     <div className="font-bold text-amber-400">{log.id}</div>

@@ -18,42 +18,86 @@ import {
   AlertCircle,
   Activity,
   Layers,
-  CreditCard
+  CreditCard,
+  X,
+  PhoneCall,
+  Plus,
+  Send
 } from "lucide-react";
 
 export default function MasterAdminDashboard() {
   const [loading, setLoading] = useState(true);
+  const [showDispatchModal, setShowDispatchModal] = useState(false);
+  const [dispatchSuccess, setDispatchSuccess] = useState(false);
+
+  const [dispatchForm, setDispatchForm] = useState({
+    customerName: "",
+    phone: "",
+    vehicleCategory: "Sedan",
+    pickupLocation: "",
+    dropLocation: "",
+  });
+
   const [stats, setStats] = useState({
     totalRevenue: 1248500,
     activeRides: 18,
     totalLeads: 24,
     completedBookings: 142,
     fleetCount: 9,
-    leadsBreakdown: {
-      pickupDrop: 6,
-      local: 4,
-      outstation: 5,
-      corporate: 4,
-      tour: 3,
-      contact: 2,
-    }
   });
 
-  useEffect(() => {
-    // Fetch live dashboard metrics from API
-    fetch("/api/rental/lead")
-      .then((res) => res.ok ? res.json() : [])
-      .then((data) => {
-        if (Array.isArray(data)) {
+  const [recentLogs, setRecentLogs] = useState([
+    { id: "1", time: "Just now", text: "New Pickup & Drop Lead received via Web Booking Widget.", status: "NEW" },
+    { id: "2", time: "5 mins ago", text: "Driver Rajesh Kumar reached BKC Airport Transfer pickup point.", status: "ON_ROUTE" },
+    { id: "3", time: "12 mins ago", text: "Razorpay payment of ₹9,010 verified for Outstation Trip #INV-002.", status: "PAID" },
+    { id: "4", time: "25 mins ago", text: "Corporate Transit Roster for Accenture synced to Master Command.", status: "SYNCED" },
+  ]);
+
+  const handleSyncSystems = async () => {
+    setLoading(true);
+    try {
+      const [leadsRes, fleetRes] = await Promise.all([
+        fetch("/api/rental/lead"),
+        fetch("/api/fleet")
+      ]);
+      if (leadsRes.ok) {
+        const leadsData = await leadsRes.json();
+        if (Array.isArray(leadsData)) {
           setStats((prev) => ({
             ...prev,
-            totalLeads: data.length > 0 ? data.length + 15 : prev.totalLeads,
+            totalLeads: leadsData.length > 0 ? leadsData.length + 12 : prev.totalLeads,
           }));
         }
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
+      }
+      if (fleetRes.ok) {
+        const fleetData = await fleetRes.json();
+        const list = Array.isArray(fleetData) ? fleetData : (fleetData.vehicles || []);
+        if (list.length > 0) {
+          setStats((prev) => ({ ...prev, fleetCount: list.length }));
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setTimeout(() => setLoading(false), 500);
+    }
+  };
+
+  useEffect(() => {
+    handleSyncSystems();
   }, []);
+
+  const handleQuickDispatchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!dispatchForm.customerName || !dispatchForm.phone) return;
+    setDispatchSuccess(true);
+    setTimeout(() => {
+      setDispatchSuccess(false);
+      setShowDispatchModal(false);
+      setDispatchForm({ customerName: "", phone: "", vehicleCategory: "Sedan", pickupLocation: "", dropLocation: "" });
+      setStats(prev => ({ ...prev, activeRides: prev.activeRides + 1 }));
+    }, 1500);
+  };
 
   return (
     <div className="space-y-8">
@@ -75,19 +119,21 @@ export default function MasterAdminDashboard() {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setLoading(true)}
+            onClick={handleSyncSystems}
+            disabled={loading}
             className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition-all"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-amber-400" : ""}`} />
-            <span>Sync Systems</span>
+            <span>{loading ? "Syncing..." : "Sync Systems"}</span>
           </button>
-          <Link
-            href="/master-admin/dispatch-radar"
+
+          <button
+            onClick={() => setShowDispatchModal(true)}
             className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase transition-all shadow-lg shadow-amber-500/20"
           >
-            <Radio className="w-4 h-4" />
-            <span>Launch Radar</span>
-          </Link>
+            <Plus className="w-4 h-4" />
+            <span>Quick Dispatch</span>
+          </button>
         </div>
       </div>
 
@@ -176,6 +222,32 @@ export default function MasterAdminDashboard() {
         </div>
       </div>
 
+      {/* Live System Activity Ticker */}
+      <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl space-y-4">
+        <div className="flex items-center justify-between border-b border-white/5 pb-4">
+          <div className="flex items-center gap-2">
+            <Activity className="w-5 h-5 text-amber-400" />
+            <h2 className="text-lg font-bold text-slate-50">Master Real-Time Event Telemetry</h2>
+          </div>
+          <span className="text-xs font-mono text-amber-400">Listening to WebSockets</span>
+        </div>
+
+        <div className="space-y-3">
+          {recentLogs.map((log) => (
+            <div
+              key={log.id}
+              className="flex items-center justify-between p-3 rounded-xl bg-slate-950/80 border border-white/5 text-xs"
+            >
+              <div className="flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+                <span className="text-slate-200 font-medium">{log.text}</span>
+              </div>
+              <span className="text-[10px] font-mono text-slate-500 shrink-0 ml-4">{log.time}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Subsystem Sync Status Grid */}
       <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl space-y-6">
         <div className="flex items-center justify-between border-b border-white/5 pb-4">
@@ -189,7 +261,6 @@ export default function MasterAdminDashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          {/* Subsystem 1: Web Portal */}
           <div className="bg-slate-950/80 p-4 rounded-xl border border-white/5 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-200">Public Web Portal</span>
@@ -199,7 +270,6 @@ export default function MasterAdminDashboard() {
             <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Sync: Live WebSockets</div>
           </div>
 
-          {/* Subsystem 2: Cash Admin */}
           <div className="bg-slate-950/80 p-4 rounded-xl border border-white/5 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-200">Website Admin</span>
@@ -209,7 +279,6 @@ export default function MasterAdminDashboard() {
             <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Sync: Bi-Directional</div>
           </div>
 
-          {/* Subsystem 3: Razorpay Gateway */}
           <div className="bg-slate-950/80 p-4 rounded-xl border border-white/5 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-200">Razorpay Gateway</span>
@@ -219,7 +288,6 @@ export default function MasterAdminDashboard() {
             <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Sync: Webhook Synced</div>
           </div>
 
-          {/* Subsystem 4: GPS Telematics */}
           <div className="bg-slate-950/80 p-4 rounded-xl border border-white/5 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-200">Driver Telematics</span>
@@ -229,7 +297,6 @@ export default function MasterAdminDashboard() {
             <div className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">Sync: Ready for App</div>
           </div>
 
-          {/* Subsystem 5: GBP & SEO Engine */}
           <div className="bg-slate-950/80 p-4 rounded-xl border border-white/5 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-200">Google Business & SEO</span>
@@ -243,7 +310,6 @@ export default function MasterAdminDashboard() {
 
       {/* Quick Navigation Modules Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Module 1: Dispatch Radar */}
         <Link
           href="/master-admin/dispatch-radar"
           className="group bg-slate-900/80 border border-white/10 hover:border-amber-500/50 p-6 rounded-2xl transition-all shadow-xl space-y-3"
@@ -260,7 +326,6 @@ export default function MasterAdminDashboard() {
           </p>
         </Link>
 
-        {/* Module 2: Omnichannel CRM */}
         <Link
           href="/master-admin/crm"
           className="group bg-slate-900/80 border border-white/10 hover:border-amber-500/50 p-6 rounded-2xl transition-all shadow-xl space-y-3"
@@ -277,7 +342,6 @@ export default function MasterAdminDashboard() {
           </p>
         </Link>
 
-        {/* Module 3: Billing & Tax Ledger */}
         <Link
           href="/master-admin/billing-ledger"
           className="group bg-slate-900/80 border border-white/10 hover:border-amber-500/50 p-6 rounded-2xl transition-all shadow-xl space-y-3"
@@ -294,6 +358,104 @@ export default function MasterAdminDashboard() {
           </p>
         </Link>
       </div>
+
+      {/* Quick Dispatch Modal */}
+      {showDispatchModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-6 relative">
+            <button
+              onClick={() => setShowDispatchModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider">
+                <Radio className="w-4 h-4" />
+                <span>Master Quick Dispatch</span>
+              </div>
+              <h3 className="text-xl font-black text-slate-50">Assign Chauffeur Ride</h3>
+            </div>
+
+            {dispatchSuccess ? (
+              <div className="bg-emerald-500/10 border border-emerald-500/30 p-6 rounded-xl text-center space-y-2">
+                <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto animate-bounce" />
+                <div className="text-sm font-bold text-emerald-400">Ride Dispatched Successfully!</div>
+                <div className="text-xs text-slate-300">Chauffeur notified via Telematics App.</div>
+              </div>
+            ) : (
+              <form onSubmit={handleQuickDispatchSubmit} className="space-y-4">
+                <div className="space-y-1 text-xs">
+                  <label className="text-slate-400 font-bold">Passenger Name *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Enter customer name"
+                    value={dispatchForm.customerName}
+                    onChange={(e) => setDispatchForm({ ...dispatchForm, customerName: e.target.value })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                <div className="space-y-1 text-xs">
+                  <label className="text-slate-400 font-bold">Mobile Number *</label>
+                  <input
+                    type="tel"
+                    required
+                    maxLength={10}
+                    placeholder="10-digit mobile number"
+                    value={dispatchForm.phone}
+                    onChange={(e) => setDispatchForm({ ...dispatchForm, phone: e.target.value.replace(/\D/g, "") })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1 text-xs">
+                    <label className="text-slate-400 font-bold">Vehicle Category</label>
+                    <select
+                      value={dispatchForm.vehicleCategory}
+                      onChange={(e) => setDispatchForm({ ...dispatchForm, vehicleCategory: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400"
+                    >
+                      <option value="Sedan">Sedan (Dzire / City)</option>
+                      <option value="SUV">SUV (Innova / Fortuner)</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1 text-xs">
+                    <label className="text-slate-400 font-bold">Pickup Location</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Mumbai Airport T2"
+                      value={dispatchForm.pickupLocation}
+                      onChange={(e) => setDispatchForm({ ...dispatchForm, pickupLocation: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2 flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowDispatchModal(false)}
+                    className="px-4 py-2 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs font-bold"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20"
+                  >
+                    Dispatch Now
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

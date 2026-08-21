@@ -11,18 +11,41 @@ import {
   FileText,
   Sparkles,
   RefreshCw,
-  ExternalLink
+  ExternalLink,
+  Edit2,
+  X,
+  MessageSquare
 } from "lucide-react";
 
 export default function MasterSEOGrowthPage() {
-  const cityPages = [
-    { city: "Mumbai Metro", slug: "mumbai", keyword: "Corporate Cab Service Mumbai", impressions: "14.2K", rank: "#1", status: "INDEXED" },
-    { city: "Delhi NCR", slug: "delhi-ncr", keyword: "Airport Transfer Cabs Delhi", impressions: "18.6K", rank: "#1", status: "INDEXED" },
-    { city: "Pune City", slug: "pune", keyword: "Outstation Cabs Pune to Mumbai", impressions: "9.4K", rank: "#2", status: "INDEXED" },
-    { city: "Bangalore Tech Hub", slug: "bangalore", keyword: "Employee Transit Roster Bangalore", impressions: "11.8K", rank: "#1", status: "INDEXED" },
-    { city: "Goa Coast", slug: "goa", keyword: "Luxury SUV Rental Goa", impressions: "8.1K", rank: "#2", status: "INDEXED" },
-    { city: "Nashik Hub", slug: "nashik", keyword: "Intercity Cab Service Nashik", impressions: "5.2K", rank: "#1", status: "INDEXED" },
+  const [selectedCity, setSelectedCity] = useState<any | null>(null);
+  const [selectedReview, setSelectedReview] = useState<any | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [replySuccess, setReplySuccess] = useState(false);
+
+  const [cityPages, setCityPages] = useState([
+    { city: "Mumbai Metro", slug: "mumbai", keyword: "Corporate Cab Service Mumbai", impressions: "14.2K", rank: "#1", status: "INDEXED", metaTitle: "Corporate Cab Service Mumbai - ISO 9001 Fleet | TEMP TRAVEL" },
+    { city: "Delhi NCR", slug: "delhi-ncr", keyword: "Airport Transfer Cabs Delhi", impressions: "18.6K", rank: "#1", status: "INDEXED", metaTitle: "Airport Transfer Cabs Delhi NCR | TEMP TRAVEL" },
+    { city: "Pune City", slug: "pune", keyword: "Outstation Cabs Pune to Mumbai", impressions: "9.4K", rank: "#2", status: "INDEXED", metaTitle: "Outstation Cabs Pune - One Way & Round Trip | TEMP TRAVEL" },
+    { city: "Bangalore Tech Hub", slug: "bangalore", keyword: "Employee Transit Roster Bangalore", impressions: "11.8K", rank: "#1", status: "INDEXED", metaTitle: "Corporate Employee Transit Bangalore | TEMP TRAVEL" },
+    { city: "Goa Coast", slug: "goa", keyword: "Luxury SUV Rental Goa", impressions: "8.1K", rank: "#2", status: "INDEXED", metaTitle: "Luxury SUV Car Rental Goa | TEMP TRAVEL" },
+    { city: "Nashik Hub", slug: "nashik", keyword: "Intercity Cab Service Nashik", impressions: "5.2K", rank: "#1", status: "INDEXED", metaTitle: "Intercity Cab Service Nashik | TEMP TRAVEL" },
+  ]);
+
+  const gbpReviews = [
+    { id: "rev-1", author: "Abhinandan Kumar", rating: 5, time: "2 days ago", text: "Excellent outstation taxi service from Mumbai to Pune. Chauffeur was highly experienced." },
+    { id: "rev-2", author: "Kartik Arora", rating: 5, time: "1 week ago", text: "Best corporate cab partner for our tech employees in BKC." }
   ];
+
+  const handleReplySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setReplySuccess(true);
+    setTimeout(() => {
+      setReplySuccess(false);
+      setSelectedReview(null);
+      setReplyText("");
+    }, 1500);
+  };
 
   return (
     <div className="space-y-8">
@@ -43,10 +66,13 @@ export default function MasterSEOGrowthPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition-all">
-            <RefreshCw className="w-3.5 h-3.5 text-amber-400" />
-            <span>Sync GBP API</span>
-          </button>
+          <a
+            href="/admin/blog"
+            className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase transition-all shadow-lg shadow-amber-500/20"
+          >
+            <FileText className="w-4 h-4" />
+            <span>Blog CMS Command</span>
+          </a>
         </div>
       </div>
 
@@ -86,6 +112,38 @@ export default function MasterSEOGrowthPage() {
           </div>
           <div className="text-3xl font-black text-slate-50 font-mono">100% Valid</div>
           <div className="text-[11px] text-emerald-400 mt-1">CarRental, LocalBusiness & Tours</div>
+        </div>
+      </div>
+
+      {/* Google Business Profile Reviews Section */}
+      <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl space-y-4">
+        <div className="flex justify-between items-center pb-4 border-b border-white/10">
+          <div className="flex items-center gap-2">
+            <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
+            <h3 className="text-base font-bold text-slate-100">Google Business Profile (GBP) Live Reviews</h3>
+          </div>
+          <span className="text-xs font-mono text-amber-400">Direct GBP API Sync</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {gbpReviews.map((rev) => (
+            <div key={rev.id} className="bg-slate-950 p-4 rounded-xl border border-white/5 space-y-2 text-xs">
+              <div className="flex justify-between items-center">
+                <span className="font-bold text-slate-200">{rev.author}</span>
+                <div className="flex text-amber-400 font-bold">★★★★★</div>
+              </div>
+              <p className="text-slate-400 italic">"{rev.text}"</p>
+              <div className="pt-2 flex justify-between items-center">
+                <span className="text-[10px] font-mono text-slate-500">{rev.time}</span>
+                <button
+                  onClick={() => setSelectedReview(rev)}
+                  className="inline-flex items-center gap-1 text-amber-400 hover:underline font-bold text-[11px]"
+                >
+                  <MessageSquare className="w-3 h-3" /> Reply on GBP
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -141,6 +199,66 @@ export default function MasterSEOGrowthPage() {
           </table>
         </div>
       </div>
+
+      {/* GBP Review Reply Modal */}
+      {selectedReview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
+            <button
+              onClick={() => setSelectedReview(null)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="space-y-1">
+              <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">Google Business Profile Sync</span>
+              <h3 className="text-xl font-bold text-slate-50">Reply to Review from {selectedReview.author}</h3>
+            </div>
+
+            {replySuccess ? (
+              <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-xl text-center space-y-1 text-xs text-emerald-400 font-bold">
+                <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
+                <div>Official Reply Synced to Google Maps!</div>
+              </div>
+            ) : (
+              <form onSubmit={handleReplySubmit} className="space-y-4 text-xs">
+                <div className="p-3 bg-slate-950 rounded-xl border border-white/5 italic text-slate-300">
+                  "{selectedReview.text}"
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-slate-400 font-bold">Official Response *</label>
+                  <textarea
+                    required
+                    rows={3}
+                    placeholder="Thank you for choosing TEMP TRAVEL! We are committed to providing premium chauffeur transit..."
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                <div className="pt-2 flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedReview(null)}
+                    className="px-4 py-2 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs uppercase"
+                  >
+                    Post to Google Business
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

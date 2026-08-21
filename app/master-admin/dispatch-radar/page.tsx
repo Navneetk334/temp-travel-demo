@@ -13,14 +13,20 @@ import {
   Clock,
   Navigation,
   RefreshCw,
-  PhoneCall
+  PhoneCall,
+  X,
+  UserCheck,
+  Plus
 } from "lucide-react";
 
 export default function MasterDispatchRadarPage() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("ALL");
+  const [selectedDriver, setSelectedDriver] = useState<any | null>(null);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [assignSuccess, setAssignSuccess] = useState(false);
 
-  const activeDispatchDrivers = [
+  const [drivers, setDrivers] = useState([
     {
       id: "DRV-101",
       driverName: "Rajesh Kumar",
@@ -81,9 +87,13 @@ export default function MasterDispatchRadarPage() {
       tripType: "VIP Delegation",
       customerName: "Dr. Aris Thorne"
     }
-  ];
+  ]);
 
-  const filtered = activeDispatchDrivers.filter((drv) => {
+  const toggleDriverStatus = (id: string, newStatus: string) => {
+    setDrivers(prev => prev.map(d => d.id === id ? { ...d, status: newStatus } : d));
+  };
+
+  const filtered = drivers.filter((drv) => {
     const matchesSearch =
       drv.driverName.toLowerCase().includes(search.toLowerCase()) ||
       drv.vehicleModel.toLowerCase().includes(search.toLowerCase()) ||
@@ -112,9 +122,12 @@ export default function MasterDispatchRadarPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition-all">
-            <RefreshCw className="w-3.5 h-3.5 text-amber-400" />
-            <span>Poll Telematics</span>
+          <button
+            onClick={() => setShowAssignModal(true)}
+            className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-lg shadow-amber-500/20"
+          >
+            <UserCheck className="w-4 h-4" />
+            <span>Assign Duty Roster</span>
           </button>
         </div>
       </div>
@@ -127,12 +140,11 @@ export default function MasterDispatchRadarPage() {
             <span>Pan-India Chauffeur Telematics Grid</span>
           </div>
           <span className="text-xs font-mono text-slate-400">
-            Active Vehicles: <span className="text-amber-400 font-bold">{activeDispatchDrivers.length}</span>
+            Active Vehicles: <span className="text-amber-400 font-bold">{drivers.length}</span>
           </span>
         </div>
 
         <div className="relative h-64 w-full bg-slate-950/90 rounded-2xl border border-amber-500/20 overflow-hidden flex items-center justify-center">
-          {/* Radar Scanning Ring Animations */}
           <div className="absolute w-96 h-96 rounded-full border border-amber-500/10 animate-ping" />
           <div className="absolute w-64 h-64 rounded-full border border-amber-500/20" />
           <div className="absolute w-32 h-32 rounded-full border border-amber-500/30" />
@@ -197,17 +209,21 @@ export default function MasterDispatchRadarPage() {
                 </div>
               </div>
 
-              <span
-                className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-full border ${
+              <select
+                value={drv.status}
+                onChange={(e) => toggleDriverStatus(drv.id, e.target.value)}
+                className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-full border focus:outline-none cursor-pointer bg-slate-950 ${
                   drv.status === "IN_TRANSIT"
-                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                    ? "text-emerald-400 border-emerald-500/30"
                     : drv.status === "ASSIGNED"
-                    ? "bg-blue-500/10 text-blue-400 border-blue-500/30"
-                    : "bg-amber-500/10 text-amber-400 border-amber-500/30"
+                    ? "text-blue-400 border-blue-500/30"
+                    : "text-amber-400 border-amber-500/30"
                 }`}
               >
-                {drv.status.replace("_", " ")}
-              </span>
+                <option value="IN_TRANSIT">IN TRANSIT</option>
+                <option value="ASSIGNED">ASSIGNED</option>
+                <option value="AVAILABLE">AVAILABLE</option>
+              </select>
             </div>
 
             <div className="space-y-2 bg-slate-950/80 p-3 rounded-xl border border-white/5 text-xs">

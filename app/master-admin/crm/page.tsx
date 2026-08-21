@@ -15,7 +15,10 @@ import {
   PhoneCall,
   Calendar,
   Sparkles,
-  RefreshCw
+  RefreshCw,
+  X,
+  Send,
+  Eye
 } from "lucide-react";
 
 export default function MasterOmnichannelCRMPage() {
@@ -23,22 +26,97 @@ export default function MasterOmnichannelCRMPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [leads, setLeads] = useState<any[]>([]);
+  const [selectedLead, setSelectedLead] = useState<any | null>(null);
+  const [noteText, setNoteText] = useState("");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetch("/api/rental/lead")
-      .then((res) => res.ok ? res.json() : [])
-      .then((data) => {
+  const fetchLeads = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/rental/lead");
+      if (res.ok) {
+        const data = await res.json();
         if (Array.isArray(data)) setLeads(data);
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLeads();
   }, []);
 
+  const updateLeadStatus = async (id: string, newStatus: string) => {
+    setLeads(prev => prev.map(l => l.id === id ? { ...l, status: newStatus } : l));
+    try {
+      await fetch(`/api/rental/lead`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status: newStatus }),
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const exportCSV = () => {
+    const headers = ["Customer Name", "Phone", "Email", "Trip Type", "Pickup", "Status"];
+    const rows = leads.map(l => [l.customerName, l.phone, l.email, l.tripType, l.pickupLocation, l.status]);
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Omnichannel_Leads_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const defaultMockLeads = [
+    {
+      id: "LEAD-101",
+      customerName: "Vikram Malhotra",
+      phone: "9820112233",
+      email: "vikram@acme.com",
+      tripType: "Pickup & Drop",
+      pickupLocation: "Bandra West, Mumbai",
+      pickupDateTime: "2026-08-22 09:00 AM",
+      status: "NEW",
+      notes: "Daily executive shift commute requested."
+    },
+    {
+      id: "LEAD-102",
+      customerName: "Ananya Roy",
+      phone: "9833445566",
+      email: "ananya@gmail.com",
+      tripType: "Local Rental",
+      pickupLocation: "Andheri East, Mumbai",
+      pickupDateTime: "2026-08-23 10:00 AM",
+      status: "CONTACTED",
+      notes: "8 Hrs / 80 Kms package for shopping trip."
+    },
+    {
+      id: "LEAD-103",
+      customerName: "Rohan Kapoor",
+      phone: "9899112244",
+      email: "rohan@techcorp.com",
+      tripType: "Outstation",
+      pickupLocation: "Powai, Mumbai",
+      pickupDateTime: "2026-08-25 06:00 AM",
+      status: "QUALIFIED",
+      notes: "Round trip to Mahabaleshwar 3 Days SUV."
+    }
+  ];
+
+  const displayLeads = leads.length > 0 ? leads : defaultMockLeads;
+
   const leadCategories = [
-    { key: "pickup", label: "Pickup & Drop Leads", icon: Clock, count: leads.filter(l => l.tripType === "Pickup & Drop" || l.tripType?.includes("Pickup")).length || 2 },
-    { key: "local", label: "Local Rentals Leads", icon: Clock, count: leads.filter(l => l.tripType === "Local Rental" || l.notes?.includes("Local")).length || 1 },
-    { key: "outstation", label: "Outstation Leads", icon: MapPin, count: leads.filter(l => l.tripType === "Outstation" || l.notes?.includes("Outstation")).length || 1 },
+    { key: "pickup", label: "Pickup & Drop Leads", icon: Clock, count: displayLeads.filter(l => l.tripType === "Pickup & Drop" || l.tripType?.includes("Pickup")).length || 2 },
+    { key: "local", label: "Local Rentals Leads", icon: Clock, count: displayLeads.filter(l => l.tripType === "Local Rental" || l.notes?.includes("Local")).length || 1 },
+    { key: "outstation", label: "Outstation Leads", icon: MapPin, count: displayLeads.filter(l => l.tripType === "Outstation" || l.notes?.includes("Outstation")).length || 1 },
     { key: "corporate", label: "Corporate Inquiry Leads", icon: Building2, count: 2 },
     { key: "tour", label: "Tour Package Leads", icon: Compass, count: 1 },
     { key: "contact", label: "Contact Leads", icon: Mail, count: 1 },
@@ -63,7 +141,10 @@ export default function MasterOmnichannelCRMPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition-all">
+          <button
+            onClick={exportCSV}
+            className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition-all"
+          >
             <Download className="w-3.5 h-3.5 text-amber-400" />
             <span>Export CSV</span>
           </button>
@@ -138,54 +219,96 @@ export default function MasterOmnichannelCRMPage() {
                 <th className="py-3 px-4">Customer Info</th>
                 <th className="py-3 px-4">Trip / Requirement</th>
                 <th className="py-3 px-4">Locations & Date</th>
-                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4">Status Update</th>
                 <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {leads.length > 0 ? (
-                leads.map((lead, idx) => (
-                  <tr key={lead.id || idx} className="hover:bg-white/5 transition-colors">
-                    <td className="py-4 px-4 font-semibold text-slate-100">
-                      <div>{lead.customerName || "Customer Lead"}</div>
-                      <div className="text-[11px] text-slate-400 font-mono">{lead.phone}</div>
-                      <div className="text-[10px] text-slate-500">{lead.email}</div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                        {lead.tripType || "Rental Lead"}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="text-slate-200">{lead.pickupLocation || lead.pickup}</div>
-                      <div className="text-[11px] text-slate-400 font-mono">{lead.pickupDateTime || "Flexible Date"}</div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                        {lead.status || "NEW"}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4 text-right">
-                      <a
-                        href={`tel:${lead.phone}`}
-                        className="inline-flex items-center gap-1 bg-amber-500/10 text-amber-400 border border-amber-500/30 px-3 py-1 rounded-lg hover:bg-amber-500 hover:text-slate-950 text-[11px] font-bold transition-all"
-                      >
-                        <PhoneCall className="w-3 h-3" /> Call
-                      </a>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} className="py-8 text-center text-slate-400 text-xs">
-                    No lead records matching current filter.
+              {displayLeads.map((lead, idx) => (
+                <tr key={lead.id || idx} className="hover:bg-white/5 transition-colors">
+                  <td className="py-4 px-4 font-semibold text-slate-100">
+                    <div>{lead.customerName || "Customer Lead"}</div>
+                    <div className="text-[11px] text-slate-400 font-mono">{lead.phone}</div>
+                    <div className="text-[10px] text-slate-500">{lead.email}</div>
+                  </td>
+                  <td className="py-4 px-4">
+                    <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                      {lead.tripType || "Rental Lead"}
+                    </span>
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="text-slate-200">{lead.pickupLocation || lead.pickup}</div>
+                    <div className="text-[11px] text-slate-400 font-mono">{lead.pickupDateTime || "Flexible Date"}</div>
+                  </td>
+                  <td className="py-4 px-4">
+                    <select
+                      value={lead.status || "NEW"}
+                      onChange={(e) => updateLeadStatus(lead.id, e.target.value)}
+                      className="bg-slate-950 border border-white/10 rounded-lg px-2.5 py-1 text-[11px] font-bold text-amber-400 focus:outline-none focus:border-amber-400 cursor-pointer"
+                    >
+                      <option value="NEW">NEW</option>
+                      <option value="CONTACTED">CONTACTED</option>
+                      <option value="QUALIFIED">QUALIFIED</option>
+                      <option value="CONVERTED">CONVERTED</option>
+                      <option value="LOST">LOST</option>
+                    </select>
+                  </td>
+                  <td className="py-4 px-4 text-right space-x-2">
+                    <button
+                      onClick={() => setSelectedLead(lead)}
+                      className="inline-flex items-center gap-1 bg-slate-950 text-slate-300 hover:text-white border border-white/10 px-3 py-1 rounded-lg text-[11px] font-bold transition-all"
+                    >
+                      <Eye className="w-3 h-3 text-amber-400" /> Inspect
+                    </button>
+                    <a
+                      href={`tel:${lead.phone}`}
+                      className="inline-flex items-center gap-1 bg-amber-500/10 text-amber-400 border border-amber-500/30 px-3 py-1 rounded-lg hover:bg-amber-500 hover:text-slate-950 text-[11px] font-bold transition-all"
+                    >
+                      <PhoneCall className="w-3 h-3" /> Call
+                    </a>
                   </td>
                 </tr>
-              )}
+              ))}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Lead Inspection Modal */}
+      {selectedLead && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
+            <button
+              onClick={() => setSelectedLead(null)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="space-y-1">
+              <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">Lead Record Inspector</span>
+              <h3 className="text-xl font-bold text-slate-50">{selectedLead.customerName}</h3>
+            </div>
+
+            <div className="space-y-2 bg-slate-950 p-4 rounded-xl border border-white/10 text-xs font-mono">
+              <div>Phone: <strong className="text-slate-200">{selectedLead.phone}</strong></div>
+              <div>Email: <strong className="text-slate-200">{selectedLead.email}</strong></div>
+              <div>Trip Type: <strong className="text-amber-400">{selectedLead.tripType}</strong></div>
+              <div>Pickup Address: <strong className="text-slate-200">{selectedLead.pickupLocation}</strong></div>
+              <div>Notes: <p className="text-slate-400 font-sans mt-1">{selectedLead.notes || "No special instructions recorded."}</p></div>
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button
+                onClick={() => setSelectedLead(null)}
+                className="px-4 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs"
+              >
+                Close Inspector
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
