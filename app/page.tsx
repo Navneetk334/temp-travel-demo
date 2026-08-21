@@ -220,20 +220,20 @@ export default function Homepage() {
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
               transition={{ duration: 1.2, ease: "easeInOut" }}
-              className="w-full h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent absolute shadow-[0_0_25px_rgba(245,158,11,0.8)]"
+              className="w-full h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent absolute top-1/2 -translate-y-1/2 shadow-[0_0_25px_rgba(245,158,11,0.8)]"
             />
 
-            {/* Glowing Brand Name Overlay */}
+            {/* Glowing Brand Logo (Centered in the area above the golden line) */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.85, y: -10 }}
-              animate={beamDone ? { opacity: 1, scale: 1, y: 0 } : {}}
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={beamDone ? { opacity: 1, scale: 1 } : {}}
               transition={{ duration: 0.6 }}
-              className="relative z-10 text-center flex flex-col items-center justify-center -mb-8 sm:-mb-12"
+              className="absolute top-[25vh] left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 text-center flex items-center justify-center pointer-events-none"
             >
               <img
                 src="/images/logo.png"
-                alt="TEMP TRAVEL CAR RENTALS"
-                className="h-20 sm:h-28 md:h-32 w-auto object-contain drop-shadow-[0_10px_25px_rgba(245,158,11,0.25)]"
+                alt="TEMP TRAVEL"
+                className="h-20 sm:h-28 md:h-36 w-auto object-contain drop-shadow-[0_10px_30px_rgba(245,158,11,0.3)]"
               />
             </motion.div>
           </motion.div>
