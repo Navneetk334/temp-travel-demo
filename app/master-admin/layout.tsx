@@ -17,7 +17,9 @@ import {
   Bell,
   Sparkles,
   Activity,
-  ChevronRight
+  ChevronRight,
+  UserCheck,
+  Settings
 } from "lucide-react";
 
 export default function MasterAdminLayout({
@@ -57,10 +59,12 @@ export default function MasterAdminLayout({
     { name: "Master Overview", href: "/master-admin", icon: LayoutDashboard },
     { name: "Dispatch Radar", href: "/master-admin/dispatch-radar", icon: Radio },
     { name: "Omnichannel CRM", href: "/master-admin/crm", icon: Users },
-    { name: "Fleet & Drivers", href: "/master-admin/fleet-roster", icon: Car },
+    { name: "Fleet Vehicles", href: "/master-admin/fleet-roster", icon: Car },
+    { name: "Driver Roster", href: "/master-admin/drivers", icon: UserCheck },
     { name: "Billing & Ledger", href: "/master-admin/billing-ledger", icon: CreditCard },
     { name: "SEO & Growth", href: "/master-admin/seo-growth", icon: Globe },
     { name: "Audit Logs", href: "/master-admin/audit-logs", icon: ShieldCheck },
+    { name: "Settings & Vault", href: "/master-admin/settings", icon: Settings },
   ];
 
   return (
