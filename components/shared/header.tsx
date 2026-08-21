@@ -29,7 +29,7 @@ export default function Header() {
 
   return (
     <header className="fixed top-4 inset-x-0 z-50 px-4 flex justify-center pointer-events-none">
-      <div className="pointer-events-auto bg-slate-950/70 backdrop-blur-xl border border-white/10 rounded-full px-6 py-2.5 shadow-2xl shadow-slate-950/80 flex items-center gap-6 sm:gap-8 max-w-fit mx-auto transition-all duration-300 hover:border-amber-400/30">
+      <div className="pointer-events-auto bg-slate-950/80 backdrop-blur-xl border border-white/15 rounded-full px-7 py-3 sm:py-3.5 shadow-2xl shadow-slate-950/90 flex items-center gap-6 sm:gap-8 max-w-fit mx-auto transition-all duration-300 hover:border-amber-400/40">
         
         {/* Left Navigation Links */}
         <nav className="hidden md:flex items-center gap-6 sm:gap-8 text-xs font-black uppercase tracking-wider text-slate-300">
@@ -53,7 +53,7 @@ export default function Header() {
           <img
             src="/images/logo.png"
             alt="TEMP TRAVEL CAR RENTALS"
-            className="h-7 sm:h-9 w-auto object-contain group-hover:scale-105 transition-transform"
+            className="h-10 sm:h-12 md:h-13 w-auto object-contain group-hover:scale-105 transition-transform drop-shadow-md"
           />
         </Link>
 

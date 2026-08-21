@@ -225,17 +225,16 @@ export default function Homepage() {
 
             {/* Glowing Brand Name Overlay */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={beamDone ? { opacity: 1, scale: 1 } : {}}
+              initial={{ opacity: 0, scale: 0.85, y: -10 }}
+              animate={beamDone ? { opacity: 1, scale: 1, y: 0 } : {}}
               transition={{ duration: 0.6 }}
-              className="relative z-10 text-center flex flex-col items-center justify-center"
+              className="relative z-10 text-center flex flex-col items-center justify-center -mb-8 sm:-mb-12"
             >
               <img
                 src="/images/logo.png"
                 alt="TEMP TRAVEL CAR RENTALS"
-                className="h-12 sm:h-14 w-auto object-contain mb-2"
+                className="h-20 sm:h-28 md:h-32 w-auto object-contain drop-shadow-[0_10px_25px_rgba(245,158,11,0.25)]"
               />
-              <p className="text-xs uppercase font-extrabold tracking-[0.4em] text-amber-400 mt-2">Excellence in Transit</p>
             </motion.div>
           </motion.div>
         )}
