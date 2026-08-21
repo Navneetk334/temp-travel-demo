@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import Script from "next/script";
 import {
   ShieldCheck,
   Lock,
@@ -14,29 +13,11 @@ import {
   ArrowRight,
   UserCheck,
   CheckCircle2,
-  AlertCircle,
-  Radio,
-  Building2,
-  Car,
-  Terminal,
-  Zap,
-  Coffee,
-  Smile,
-  ShieldAlert,
-  Flame
+  AlertCircle
 } from "lucide-react";
-
-declare global {
-  interface Window {
-    VANTA: any;
-    THREE: any;
-  }
-}
 
 export default function MasterAdminLoginPage() {
   const router = useRouter();
-  const vantaContainerRef = useRef<HTMLDivElement>(null);
-  const vantaEffectRef = useRef<any>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -44,7 +25,6 @@ export default function MasterAdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
-  const [vantaLoaded, setVantaLoaded] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -53,43 +33,7 @@ export default function MasterAdminLoginPage() {
     role: "SUPER_ADMIN"
   });
 
-  // Init Vanta.js WAVES 3D Low-Poly Background
-  const initVanta = () => {
-    if (window.VANTA && window.VANTA.WAVES && vantaContainerRef.current && !vantaEffectRef.current) {
-      try {
-        vantaEffectRef.current = window.VANTA.WAVES({
-          el: vantaContainerRef.current,
-          mouseControls: true,
-          touchControls: true,
-          gyroControls: false,
-          minHeight: 200.00,
-          minWidth: 200.00,
-          scale: 1.00,
-          scaleMobile: 1.00,
-          color: 0x091325, // Deep Dark Blue Sapphire & Amber Low-Poly Waves
-          shininess: 35.00,
-          waveHeight: 18.00,
-          waveSpeed: 0.90,
-          zoom: 0.95
-        });
-        setVantaLoaded(true);
-      } catch (e) {
-        console.error("Vanta init error:", e);
-      }
-    }
-  };
-
-  useEffect(() => {
-    initVanta();
-    return () => {
-      if (vantaEffectRef.current) {
-        vantaEffectRef.current.destroy();
-        vantaEffectRef.current = null;
-      }
-    };
-  }, []);
-
-  // HTML5 Canvas 3D Low-Poly Triangulated Animated Wave Fallback
+  // Framer Dot-Grid-BG Interactive Matrix Canvas Engine
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -100,56 +44,81 @@ export default function MasterAdminLoginPage() {
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
 
+    let mouseX = width / 2;
+    let mouseY = height / 2;
+    let targetMouseX = mouseX;
+    let targetMouseY = mouseY;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      targetMouseX = e.clientX;
+      targetMouseY = e.clientY;
+    };
+
     const handleResize = () => {
       if (!canvas) return;
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
     };
 
+    window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("resize", handleResize);
 
-    const cols = 28;
-    const rows = 18;
+    const gap = 32; // Grid spacing in px
     let t = 0;
 
     const render = () => {
-      t += 0.015;
+      t += 0.03;
+      // Smooth lerp mouse coordinates
+      mouseX += (targetMouseX - mouseX) * 0.1;
+      mouseY += (targetMouseY - mouseY) * 0.1;
+
+      // Dark background fill
       ctx.fillStyle = "#020617";
       ctx.fillRect(0, 0, width, height);
 
-      const cellW = width / cols;
-      const cellH = height / rows;
+      const cols = Math.ceil(width / gap) + 1;
+      const rows = Math.ceil(height / gap) + 1;
 
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
-          const x = c * cellW;
-          const y = r * cellH;
+          const x = c * gap;
+          const y = r * gap;
 
-          const z1 = Math.sin(t + c * 0.3 + r * 0.2) * 16;
-          const z2 = Math.cos(t + (c + 1) * 0.3 + r * 0.2) * 16;
-          const z3 = Math.sin(t + c * 0.3 + (r + 1) * 0.2) * 16;
+          // Calculate distance to mouse cursor
+          const dx = mouseX - x;
+          const dy = mouseY - y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
 
-          // Shading intensity
-          const brightness = Math.floor(15 + (z1 + 16) * 1.5);
-          ctx.fillStyle = `rgb(${brightness + 10}, ${brightness + 20}, ${brightness + 45})`;
-          ctx.strokeStyle = "rgba(245, 158, 11, 0.08)";
-          ctx.lineWidth = 0.5;
+          // Pulse wave offset
+          const wave = Math.sin(t + c * 0.15 + r * 0.15) * 0.5 + 0.5;
+          const radiusMax = 180;
 
+          let dotRadius = 1.6;
+          let alpha = 0.15 + wave * 0.12;
+          let color = `rgba(245, 158, 11, ${alpha})`; // Gold/Amber accent
+
+          if (dist < radiusMax) {
+            const factor = 1 - dist / radiusMax;
+            dotRadius = 1.6 + factor * 3.2;
+            alpha = 0.3 + factor * 0.7;
+            color = `rgba(245, 158, 11, ${alpha})`;
+
+            // Draw line to mouse if close enough
+            if (dist < 100) {
+              ctx.strokeStyle = `rgba(245, 158, 11, ${0.15 * (1 - dist / 100)})`;
+              ctx.lineWidth = 0.8;
+              ctx.beginPath();
+              ctx.moveTo(x, y);
+              ctx.lineTo(mouseX, mouseY);
+              ctx.stroke();
+            }
+          }
+
+          // Draw Grid Dot
+          ctx.fillStyle = color;
           ctx.beginPath();
-          ctx.moveTo(x, y + z1);
-          ctx.lineTo(x + cellW, y + z2);
-          ctx.lineTo(x, y + cellH + z3);
-          ctx.closePath();
+          ctx.arc(x, y, dotRadius, 0, Math.PI * 2);
           ctx.fill();
-          ctx.stroke();
-
-          ctx.beginPath();
-          ctx.moveTo(x + cellW, y + z2);
-          ctx.lineTo(x + cellW, y + cellH + z2);
-          ctx.lineTo(x, y + cellH + z3);
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
         }
       }
 
@@ -159,6 +128,7 @@ export default function MasterAdminLoginPage() {
     render();
 
     return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("resize", handleResize);
       cancelAnimationFrame(animationFrameId);
     };
@@ -231,32 +201,11 @@ export default function MasterAdminLoginPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center p-4 relative overflow-hidden font-sans selection:bg-amber-500 selection:text-slate-950">
-      {/* Dynamic Scripts for Vanta.js 3D Waves */}
-      <Script
-        src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"
-        strategy="afterInteractive"
-        onLoad={() => {
-          if (window.VANTA) initVanta();
-        }}
-      />
-      <Script
-        src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js"
-        strategy="afterInteractive"
-        onLoad={() => {
-          initVanta();
-        }}
-      />
+      {/* 1. Framer Interactive Dot-Grid-BG Canvas */}
+      <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-auto" />
 
-      {/* 1. Vanta.js 3D WAVES Canvas Container */}
-      <div ref={vantaContainerRef} className="absolute inset-0 z-0 pointer-events-auto" />
-
-      {/* 2. Fallback 3D Low-Poly Waves Canvas */}
-      {!vantaLoaded && (
-        <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none opacity-90" />
-      )}
-
-      {/* 3. Ambient Gold Glow Layer */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-amber-500/10 rounded-full blur-[160px] pointer-events-none z-0" />
+      {/* 2. Ambient Gold Spotlight Glow Effect */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-amber-500/10 rounded-full blur-[150px] pointer-events-none z-0" />
 
       <div className="w-full max-w-md relative z-10 space-y-6">
         {/* Clean Untampered Brand Logo */}
