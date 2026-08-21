@@ -110,7 +110,7 @@ export default function MasterAdminLoginPage() {
       ctx.fillStyle = "#020617";
       ctx.fillRect(0, 0, width, height);
 
-      const maxRepelDist = 130; // Repulsion aura radius
+      const maxRepelDist = 70;  // Tighter, precise cursor repulsion focus aura
       const springK = 0.08;     // Return force stiffness
       const damping = 0.82;     // Wobble damping factor
 
@@ -124,7 +124,7 @@ export default function MasterAdminLoginPage() {
 
         // Repulsion physics: Push dot AWAY from cursor
         if (dist < maxRepelDist && dist > 0) {
-          const repelForce = (1 - dist / maxRepelDist) * 9;
+          const repelForce = (1 - dist / maxRepelDist) * 6;
           const angle = Math.atan2(dy, dx);
           dot.vx += Math.cos(angle) * repelForce;
           dot.vy += Math.sin(angle) * repelForce;
