@@ -228,7 +228,7 @@ export default function Homepage() {
               initial={{ opacity: 0, scale: 0.85 }}
               animate={beamDone ? { opacity: 1, scale: 1 } : {}}
               transition={{ duration: 0.6 }}
-              className="absolute top-[25vh] left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 text-center flex items-center justify-center pointer-events-none"
+              className="absolute inset-x-0 top-0 h-[50vh] flex items-center justify-center z-10 pointer-events-none"
             >
               <img
                 src="/images/logo.png"
