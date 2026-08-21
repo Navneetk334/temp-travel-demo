@@ -258,24 +258,6 @@ export default function MasterAdminLoginPage() {
       {/* 3. Ambient Gold Glow Layer */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-amber-500/10 rounded-full blur-[160px] pointer-events-none z-0" />
 
-      {/* Security Ticker Banner */}
-      <div className="absolute top-6 left-1/2 -translate-x-1/2 hidden md:flex items-center gap-6 bg-slate-900/85 backdrop-blur-2xl border border-amber-500/30 px-6 py-2 rounded-full text-[11px] font-mono text-slate-300 shadow-2xl z-20">
-        <div className="flex items-center gap-1.5 text-amber-400 font-bold">
-          <Zap className="w-3.5 h-3.5 animate-bounce" />
-          <span>Vanta 3D Waves Active</span>
-        </div>
-        <span className="text-slate-600">&bull;</span>
-        <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
-          <Coffee className="w-3.5 h-3.5" />
-          <span>HQ Coffee: Brewing</span>
-        </div>
-        <span className="text-slate-600">&bull;</span>
-        <div className="flex items-center gap-1.5 text-purple-400 font-bold">
-          <Flame className="w-3.5 h-3.5" />
-          <span>Lion Defense Force: Armed 🦁</span>
-        </div>
-      </div>
-
       <div className="w-full max-w-md relative z-10 space-y-6">
         {/* Clean Untampered Brand Logo */}
         <div className="text-center space-y-3">
