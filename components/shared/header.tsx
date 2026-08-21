@@ -38,8 +38,8 @@ export default function Header() {
               key={link.href}
               href={link.href}
               className={`transition-colors py-1 ${pathname === link.href || (link.href !== "/" && pathname?.startsWith(link.href))
-                  ? "text-accent font-extrabold"
-                  : "hover:text-accent font-bold"
+                ? "text-accent font-extrabold"
+                : "hover:text-accent font-bold"
                 }`}
             >
               {link.name}
@@ -63,8 +63,8 @@ export default function Header() {
               key={link.href}
               href={link.href}
               className={`transition-colors py-1 ${pathname === link.href || (link.href !== "/" && pathname?.startsWith(link.href))
-                  ? "text-accent font-extrabold"
-                  : "hover:text-accent font-bold"
+                ? "text-accent font-extrabold"
+                : "hover:text-accent font-bold"
                 }`}
             >
               {link.name}
