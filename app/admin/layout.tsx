@@ -104,12 +104,12 @@ export default function AdminLayout({
       {/* 1. Sidebar Panel for Desktop (Fixed) */}
       <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-slate-900 border-r border-white/5 z-30 shrink-0">
         {/* Brand identity */}
-        <div className="h-20 px-6 border-b border-white/5 flex items-center">
-          <Link href="/admin" className="inline-block" title="Admin Home">
+        <div className="h-20 px-4 border-b border-white/5 flex items-center justify-center text-center">
+          <Link href="/admin" className="inline-flex items-center justify-center" title="Admin Home">
             <img
               src="/images/logo.png"
-              alt="TEMP TRAVEL CAR RENTALS"
-              className="h-9 w-auto object-contain"
+              alt="TEMP TRAVEL"
+              className="h-10 sm:h-11 w-auto object-contain mx-auto"
             />
           </Link>
         </div>
@@ -204,11 +204,11 @@ export default function AdminLayout({
             </button>
 
             <div className="space-y-8 mt-4">
-              <div className="flex items-center">
+              <div className="flex items-center justify-center">
                 <img
                   src="/images/logo.png"
-                  alt="TEMP TRAVEL CAR RENTALS"
-                  className="h-8 w-auto object-contain"
+                  alt="TEMP TRAVEL"
+                  className="h-10 w-auto object-contain mx-auto"
                 />
               </div>
 
