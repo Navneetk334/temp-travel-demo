@@ -61,9 +61,10 @@ The platform digitizes operations and provides centralized management.
 | Phase | Scope |
 |---|---|
 | **Phase 1** | Public Business Website (Landing, Rentals, Fleet, Tours, Corporate, Blog, Contact, Legal) |
-| **Phase 2** | Admin CRM & Lead Management System (Leads, Dispatch, Fleet, CMS) |
+| **Phase 2** | Cash/Website Admin CRM & Lead Management System (Leads, Dispatch, Fleet, CMS) |
 | **Phase 3** | Payment Gateway (Razorpay) & Billing / GST Invoicing Software |
 | **Phase 4** | SEO & Digital Growth Package (Local SEO, City Landing Pages, Schema, Content) |
+| **Phase 5** | Master Admin Panel, Live Driver GPS Telematics, GBP API Sync & Mobile Apps Gateway |
 
 ---
 
