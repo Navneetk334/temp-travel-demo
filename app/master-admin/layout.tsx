@@ -19,7 +19,9 @@ import {
   Activity,
   ChevronRight,
   UserCheck,
-  Settings
+  Settings,
+  FileCheck,
+  FileText
 } from "lucide-react";
 
 export default function MasterAdminLayout({
@@ -55,6 +57,11 @@ export default function MasterAdminLayout({
     router.push("/master-admin/login");
   };
 
+  // If on login page, render full screen without master sidebar
+  if (pathname === "/master-admin/login") {
+    return <>{children}</>;
+  }
+
   const navItems = [
     { name: "Master Overview", href: "/master-admin", icon: LayoutDashboard },
     { name: "Dispatch Radar", href: "/master-admin/dispatch-radar", icon: Radio },
@@ -63,8 +70,10 @@ export default function MasterAdminLayout({
     { name: "Driver Roster", href: "/master-admin/drivers", icon: UserCheck },
     { name: "Billing & Ledger", href: "/master-admin/billing-ledger", icon: CreditCard },
     { name: "SEO & Growth", href: "/master-admin/seo-growth", icon: Globe },
+    { name: "Master Blog CMS", href: "/master-admin/blog", icon: FileText },
+    { name: "Document Vault", href: "/master-admin/vault", icon: FileCheck },
     { name: "Audit Logs", href: "/master-admin/audit-logs", icon: ShieldCheck },
-    { name: "Settings & Vault", href: "/master-admin/settings", icon: Settings },
+    { name: "System Settings", href: "/master-admin/settings", icon: Settings },
   ];
 
   return (

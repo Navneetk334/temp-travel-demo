@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import {
   Globe,
   Star,
@@ -66,13 +67,13 @@ export default function MasterSEOGrowthPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <a
-            href="/admin/blog"
+          <Link
+            href="/master-admin/blog"
             className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase transition-all shadow-lg shadow-amber-500/20"
           >
             <FileText className="w-4 h-4" />
-            <span>Blog CMS Command</span>
-          </a>
+            <span>Launch Master Blog CMS</span>
+          </Link>
         </div>
       </div>
 
