@@ -53,7 +53,7 @@ export default function Header() {
           <img
             src="/images/logo.png"
             alt="TEMP TRAVEL CAR RENTALS"
-            className="h-10 sm:h-12 md:h-13 w-auto object-contain group-hover:scale-105 transition-transform drop-shadow-md"
+            className="h-12 sm:h-14 md:h-16 w-auto object-contain group-hover:scale-105 transition-transform drop-shadow-md"
           />
         </Link>
 

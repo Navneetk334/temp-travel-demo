@@ -109,7 +109,7 @@ export default function AdminLayout({
             <img
               src="/images/logo.png"
               alt="TEMP TRAVEL"
-              className="h-10 sm:h-11 w-auto object-contain mx-auto"
+              className="h-13 sm:h-15 w-auto object-contain mx-auto"
             />
           </Link>
         </div>
@@ -208,7 +208,7 @@ export default function AdminLayout({
                 <img
                   src="/images/logo.png"
                   alt="TEMP TRAVEL"
-                  className="h-10 w-auto object-contain mx-auto"
+                  className="h-13 w-auto object-contain mx-auto"
                 />
               </div>
 
