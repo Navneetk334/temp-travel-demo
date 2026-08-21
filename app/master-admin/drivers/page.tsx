@@ -30,6 +30,9 @@ export default function MasterDriversPage() {
       phone: "9820112233",
       licenseNumber: "MH-0220190045123",
       licenseExpiry: "2029-08-15",
+      vehicleCategory: "Pickup & Drop / Airport Transfer",
+      vehicleClass: "Sedan",
+      vehicleModel: "Maruti Suzuki Dzire",
       assignedVehicle: "MH 02 CZ 4421 (Swift Dzire)",
       policeVerification: "VERIFIED",
       status: "ON_DUTY",
@@ -43,6 +46,9 @@ export default function MasterDriversPage() {
       phone: "9833445566",
       licenseNumber: "MH-0420180098765",
       licenseExpiry: "2028-12-01",
+      vehicleCategory: "Outstation Trip",
+      vehicleClass: "SUV",
+      vehicleModel: "Toyota Innova Crysta",
       assignedVehicle: "MH 04 ER 8890 (Innova Crysta)",
       policeVerification: "VERIFIED",
       status: "ON_DUTY",
@@ -56,6 +62,9 @@ export default function MasterDriversPage() {
       phone: "9899112244",
       licenseNumber: "MH-0120200033445",
       licenseExpiry: "2030-05-10",
+      vehicleCategory: "Corporate Transit",
+      vehicleClass: "Sedan",
+      vehicleModel: "Honda City",
       assignedVehicle: "MH 01 AB 1234 (Honda City)",
       policeVerification: "VERIFIED",
       status: "STANDBY",
@@ -69,6 +78,9 @@ export default function MasterDriversPage() {
       phone: "9766554433",
       licenseNumber: "MH-0220170077889",
       licenseExpiry: "2027-02-18",
+      vehicleCategory: "VIP Delegation",
+      vehicleClass: "Luxury SUV",
+      vehicleModel: "Toyota Fortuner 4x4",
       assignedVehicle: "MH 02 FG 9900 (Fortuner 4x4)",
       policeVerification: "VERIFIED",
       status: "ON_DUTY",
@@ -82,10 +94,11 @@ export default function MasterDriversPage() {
     name: "",
     phone: "",
     licenseNumber: "",
-    licenseExpiry: "2029-12-31",
-    assignedVehicle: "Unassigned",
     address: "",
-    experienceYears: "5",
+    vehicleCategory: "Pickup & Drop / Airport Transfer",
+    vehicleClass: "Sedan",
+    vehicleModel: "Maruti Suzuki Dzire",
+    licenseExpiry: "2029-12-31",
     policeVerification: "VERIFIED"
   });
 
@@ -97,16 +110,29 @@ export default function MasterDriversPage() {
       phone: newDriver.phone,
       licenseNumber: newDriver.licenseNumber || "MH-0220220011223",
       licenseExpiry: newDriver.licenseExpiry,
-      assignedVehicle: newDriver.assignedVehicle,
+      vehicleCategory: newDriver.vehicleCategory,
+      vehicleClass: newDriver.vehicleClass,
+      vehicleModel: newDriver.vehicleModel,
+      assignedVehicle: `${newDriver.vehicleClass} - ${newDriver.vehicleModel}`,
       policeVerification: newDriver.policeVerification,
       status: "STANDBY",
-      experienceYears: parseInt(newDriver.experienceYears, 10) || 5,
+      experienceYears: 5,
       address: newDriver.address || "Mumbai Hub",
       emergencyContact: "On Record"
     };
     setDrivers([created, ...drivers]);
     setShowAddModal(false);
-    setNewDriver({ name: "", phone: "", licenseNumber: "", licenseExpiry: "2029-12-31", assignedVehicle: "Unassigned", address: "", experienceYears: "5", policeVerification: "VERIFIED" });
+    setNewDriver({
+      name: "",
+      phone: "",
+      licenseNumber: "",
+      address: "",
+      vehicleCategory: "Pickup & Drop / Airport Transfer",
+      vehicleClass: "Sedan",
+      vehicleModel: "Maruti Suzuki Dzire",
+      licenseExpiry: "2029-12-31",
+      policeVerification: "VERIFIED"
+    });
   };
 
   const filtered = drivers.filter(d => {
@@ -129,14 +155,14 @@ export default function MasterDriversPage() {
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Add chauffeurs, verify commercial driving licenses, police background records, and duty rosters.
+            Add chauffeurs, verify commercial driving licenses, police background records, and assigned vehicle specs.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase transition-all shadow-lg shadow-amber-500/20"
+            className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase transition-all shadow-lg shadow-amber-500/20 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Add New Driver</span>
@@ -179,12 +205,12 @@ export default function MasterDriversPage() {
                   <span className="text-amber-400 font-bold truncate max-w-[120px]">{drv.licenseNumber}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400 font-sans">Assigned Cab:</span>
-                  <span className="text-slate-200 font-bold truncate max-w-[120px]">{drv.assignedVehicle}</span>
+                  <span className="text-slate-400 font-sans">Assigned Model:</span>
+                  <span className="text-slate-200 font-bold truncate max-w-[120px]">{drv.vehicleModel}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400 font-sans">Exp:</span>
-                  <span className="text-slate-200">{drv.experienceYears} Years</span>
+                  <span className="text-slate-400 font-sans">Class / Duty:</span>
+                  <span className="text-slate-200">{drv.vehicleClass}</span>
                 </div>
               </div>
 
@@ -199,7 +225,7 @@ export default function MasterDriversPage() {
             <div className="pt-2 border-t border-white/5 flex items-center justify-between">
               <button
                 onClick={() => setSelectedDriver(drv)}
-                className="text-[11px] font-bold text-slate-300 hover:text-amber-400 transition-colors"
+                className="text-[11px] font-bold text-slate-300 hover:text-amber-400 transition-colors cursor-pointer"
               >
                 Inspect File
               </button>
@@ -214,95 +240,144 @@ export default function MasterDriversPage() {
         ))}
       </div>
 
-      {/* Add Driver Modal */}
+      {/* Add Driver Modal with Structured Vehicle Assignment */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
+          <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-xl shadow-2xl space-y-6 relative text-slate-100 max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setShowAddModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white"
+              className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <div className="space-y-1">
+            <div className="space-y-1 border-b border-white/10 pb-3">
               <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">Master Chauffeur Roster</span>
-              <h3 className="text-xl font-bold text-slate-50">Register Commercial Driver</h3>
+              <h3 className="text-2xl font-black text-slate-50">Register New Driver</h3>
             </div>
 
-            <form onSubmit={handleAddDriverSubmit} className="space-y-4 text-xs">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-slate-400 font-bold">Chauffeur Full Name *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Ramesh Pawar"
-                    value={newDriver.name}
-                    onChange={(e) => setNewDriver({ ...newDriver, name: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
-                  />
+            <form onSubmit={handleAddDriverSubmit} className="space-y-5 text-xs">
+              {/* Top Section: Personal Details */}
+              <div className="space-y-3">
+                <h4 className="text-amber-400 font-extrabold uppercase text-[11px] tracking-wider flex items-center gap-1.5">
+                  <UserCheck className="w-4 h-4" /> Personal & Driving License Details
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Driver Name *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Ramesh Pawar"
+                      value={newDriver.name}
+                      onChange={(e) => setNewDriver({ ...newDriver, name: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Mobile Number *</label>
+                    <input
+                      type="tel"
+                      required
+                      maxLength={10}
+                      placeholder="10-digit mobile number"
+                      value={newDriver.phone}
+                      onChange={(e) => setNewDriver({ ...newDriver, phone: e.target.value.replace(/\D/g, "") })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold font-mono"
+                    />
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-slate-400 font-bold">Mobile Number *</label>
-                  <input
-                    type="tel"
-                    required
-                    maxLength={10}
-                    placeholder="10-digit phone"
-                    value={newDriver.phone}
-                    onChange={(e) => setNewDriver({ ...newDriver, phone: e.target.value.replace(/\D/g, "") })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
-                  />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Driver License Number *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="MH-0220200012345"
+                      value={newDriver.licenseNumber}
+                      onChange={(e) => setNewDriver({ ...newDriver, licenseNumber: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Current Residential Address *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Street, Area, City"
+                      value={newDriver.address}
+                      onChange={(e) => setNewDriver({ ...newDriver, address: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-slate-400 font-bold">Driving License # *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="MH-0220200012345"
-                    value={newDriver.licenseNumber}
-                    onChange={(e) => setNewDriver({ ...newDriver, licenseNumber: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-slate-400 font-bold">Assigned Vehicle</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. MH 02 CZ 4421"
-                    value={newDriver.assignedVehicle}
-                    onChange={(e) => setNewDriver({ ...newDriver, assignedVehicle: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
-                  />
+              {/* Separate Section Below: Assigned Vehicle Selection */}
+              <div className="space-y-3 p-4 bg-slate-950 rounded-2xl border border-amber-500/20">
+                <h4 className="text-amber-400 font-extrabold uppercase text-[11px] tracking-wider flex items-center gap-1.5">
+                  <Car className="w-4 h-4" /> Assigned Vehicle Specs
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Vehicle Category</label>
+                    <select
+                      value={newDriver.vehicleCategory}
+                      onChange={(e) => setNewDriver({ ...newDriver, vehicleCategory: e.target.value })}
+                      className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
+                    >
+                      <option value="Pickup & Drop / Airport Transfer">Airport / Transfer</option>
+                      <option value="Local Rental">Local Rental</option>
+                      <option value="Outstation Trip">Outstation Trip</option>
+                      <option value="Corporate Transit">Corporate Transit</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Vehicle Class</label>
+                    <select
+                      value={newDriver.vehicleClass}
+                      onChange={(e) => setNewDriver({ ...newDriver, vehicleClass: e.target.value })}
+                      className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
+                    >
+                      <option value="Sedan">Sedan</option>
+                      <option value="SUV">SUV</option>
+                      <option value="Luxury SUV">Luxury SUV</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Vehicle Model</label>
+                    <select
+                      value={newDriver.vehicleModel}
+                      onChange={(e) => setNewDriver({ ...newDriver, vehicleModel: e.target.value })}
+                      className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
+                    >
+                      <option value="Maruti Suzuki Dzire">Maruti Swift Dzire</option>
+                      <option value="Honda City">Honda City</option>
+                      <option value="Toyota Innova Crysta">Toyota Innova Crysta</option>
+                      <option value="Toyota Fortuner 4x4">Toyota Fortuner 4x4</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-slate-400 font-bold">Residential Address</label>
-                <input
-                  type="text"
-                  placeholder="Street, City, Pin"
-                  value={newDriver.address}
-                  onChange={(e) => setNewDriver({ ...newDriver, address: e.target.value })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
-                />
-              </div>
-
-              <div className="pt-2 flex justify-end gap-3">
+              <div className="pt-2 flex justify-end gap-3 border-t border-white/10">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs"
+                  className="px-5 py-2.5 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs font-bold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs uppercase"
+                  className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer"
                 >
                   Save Chauffeur Profile
                 </button>
@@ -318,7 +393,7 @@ export default function MasterDriversPage() {
           <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4 relative text-slate-100">
             <button
               onClick={() => setSelectedDriver(null)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white"
+              className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -331,17 +406,16 @@ export default function MasterDriversPage() {
             <div className="space-y-2 bg-slate-950 p-4 rounded-xl border border-white/10 text-xs font-mono">
               <div>Phone: <strong className="text-amber-400">+91-{selectedDriver.phone}</strong></div>
               <div>License #: <strong className="text-slate-200">{selectedDriver.licenseNumber}</strong></div>
-              <div>License Expiry: <strong className="text-slate-200">{selectedDriver.licenseExpiry}</strong></div>
-              <div>Assigned Cab: <strong className="text-slate-200">{selectedDriver.assignedVehicle}</strong></div>
+              <div>Assigned Class: <strong className="text-slate-200">{selectedDriver.vehicleClass || "Sedan"}</strong></div>
+              <div>Assigned Model: <strong className="text-amber-400">{selectedDriver.vehicleModel || selectedDriver.assignedVehicle}</strong></div>
               <div>Police Clearance: <strong className="text-emerald-400">{selectedDriver.policeVerification}</strong></div>
               <div>Address: <p className="text-slate-400 font-sans mt-1">{selectedDriver.address}</p></div>
-              <div>Emergency Contact: <span className="text-slate-300 font-sans">{selectedDriver.emergencyContact}</span></div>
             </div>
 
             <div className="pt-2 flex justify-end">
               <button
                 onClick={() => setSelectedDriver(null)}
-                className="px-4 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs"
+                className="px-4 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs cursor-pointer"
               >
                 Close File
               </button>

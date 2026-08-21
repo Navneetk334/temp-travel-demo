@@ -52,7 +52,7 @@ export default function MasterAdminLayout({
     } catch (e) {
       console.error(e);
     }
-    router.push("/admin/login");
+    router.push("/master-admin/login");
   };
 
   const navItems = [

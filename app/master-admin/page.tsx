@@ -22,20 +22,35 @@ import {
   X,
   PhoneCall,
   Plus,
-  Send
+  MapPin,
+  Search
 } from "lucide-react";
 
 export default function MasterAdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [showDispatchModal, setShowDispatchModal] = useState(false);
   const [dispatchSuccess, setDispatchSuccess] = useState(false);
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+
+  const popularLocations = [
+    "Chhatrapati Shivaji Maharaj Intl Airport (T2)",
+    "Chhatrapati Shivaji Maharaj Intl Airport (T1)",
+    "Bandra Kurla Complex (BKC), Mumbai",
+    "Lower Parel, Business District, Mumbai",
+    "Andheri East Station / Sahar Hub",
+    "Powai Hiranandani Estate, Mumbai",
+    "Thane West Station Square",
+    "Pune Junction Railway Station",
+    "Navi Mumbai Corporate Park"
+  ];
 
   const [dispatchForm, setDispatchForm] = useState({
     customerName: "",
     phone: "",
-    vehicleCategory: "Sedan",
+    vehicleCategory: "Pickup & Drop / Airport Transfer",
+    vehicleClass: "Sedan",
+    vehicleModel: "Maruti Suzuki Dzire",
     pickupLocation: "",
-    dropLocation: "",
   });
 
   const [stats, setStats] = useState({
@@ -87,15 +102,71 @@ export default function MasterAdminDashboard() {
     handleSyncSystems();
   }, []);
 
-  const handleQuickDispatchSubmit = (e: React.FormEvent) => {
+  const handleQuickDispatchSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!dispatchForm.customerName || !dispatchForm.phone) return;
+    if (!dispatchForm.customerName || !dispatchForm.phone || !dispatchForm.pickupLocation) return;
+
+    const payload = {
+      customerName: dispatchForm.customerName,
+      phone: dispatchForm.phone,
+      tripType: dispatchForm.vehicleCategory,
+      pickupLocation: dispatchForm.pickupLocation,
+      notes: `Dispatched from Master HQ: Class=${dispatchForm.vehicleClass}, Model=${dispatchForm.vehicleModel}`,
+      status: "NEW",
+    };
+
+    try {
+      // POST lead to database
+      await fetch("/api/rental/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      // Also persist dispatch entry locally for immediate view
+      const existing = JSON.parse(localStorage.getItem("master_dispatches") || "[]");
+      existing.unshift({
+        id: `DISP-${Date.now()}`,
+        driverName: "Assigned Chauffeur",
+        phone: dispatchForm.phone,
+        vehicleModel: dispatchForm.vehicleModel,
+        regNumber: "MH 02 CZ 9988",
+        currentLocation: dispatchForm.pickupLocation,
+        destination: "Destination Hub",
+        status: "ASSIGNED",
+        speed: "0 km/h",
+        eta: "10 Mins to Pickup",
+        tripType: dispatchForm.vehicleCategory,
+        customerName: dispatchForm.customerName
+      });
+      localStorage.setItem("master_dispatches", JSON.stringify(existing));
+    } catch (err) {
+      console.error(err);
+    }
+
     setDispatchSuccess(true);
+    setRecentLogs(prev => [
+      {
+        id: String(Date.now()),
+        time: "Just now",
+        text: `Dispatched ${dispatchForm.vehicleModel} (${dispatchForm.vehicleClass}) for passenger ${dispatchForm.customerName} at ${dispatchForm.pickupLocation}.`,
+        status: "DISPATCHED"
+      },
+      ...prev
+    ]);
+
     setTimeout(() => {
       setDispatchSuccess(false);
       setShowDispatchModal(false);
-      setDispatchForm({ customerName: "", phone: "", vehicleCategory: "Sedan", pickupLocation: "", dropLocation: "" });
-      setStats(prev => ({ ...prev, activeRides: prev.activeRides + 1 }));
+      setDispatchForm({
+        customerName: "",
+        phone: "",
+        vehicleCategory: "Pickup & Drop / Airport Transfer",
+        vehicleClass: "Sedan",
+        vehicleModel: "Maruti Suzuki Dzire",
+        pickupLocation: "",
+      });
+      setStats(prev => ({ ...prev, activeRides: prev.activeRides + 1, totalLeads: prev.totalLeads + 1 }));
     }, 1500);
   };
 
@@ -121,7 +192,7 @@ export default function MasterAdminDashboard() {
           <button
             onClick={handleSyncSystems}
             disabled={loading}
-            className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition-all"
+            className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-amber-400" : ""}`} />
             <span>{loading ? "Syncing..." : "Sync Systems"}</span>
@@ -129,7 +200,7 @@ export default function MasterAdminDashboard() {
 
           <button
             onClick={() => setShowDispatchModal(true)}
-            className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase transition-all shadow-lg shadow-amber-500/20"
+            className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase transition-all shadow-lg shadow-amber-500/20 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Quick Dispatch</span>
@@ -139,7 +210,6 @@ export default function MasterAdminDashboard() {
 
       {/* 4 Primary Master KPI Telemetry Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Total Revenue Card */}
         <div className="bg-slate-900/80 backdrop-blur-xl border border-amber-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden group hover:border-amber-500/60 transition-all">
           <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-amber-500/20 transition-all" />
           <div className="flex justify-between items-start mb-4">
@@ -159,7 +229,6 @@ export default function MasterAdminDashboard() {
           </div>
         </div>
 
-        {/* Active Dispatch Rides Card */}
         <div className="bg-slate-900/80 backdrop-blur-xl border border-amber-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden group hover:border-amber-500/60 transition-all">
           <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-blue-500/20 transition-all" />
           <div className="flex justify-between items-start mb-4">
@@ -180,7 +249,6 @@ export default function MasterAdminDashboard() {
           </div>
         </div>
 
-        {/* Omnichannel Leads Card */}
         <div className="bg-slate-900/80 backdrop-blur-xl border border-amber-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden group hover:border-amber-500/60 transition-all">
           <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-purple-500/20 transition-all" />
           <div className="flex justify-between items-start mb-4">
@@ -200,7 +268,6 @@ export default function MasterAdminDashboard() {
           </div>
         </div>
 
-        {/* Fleet Count & Vetting Card */}
         <div className="bg-slate-900/80 backdrop-blur-xl border border-amber-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden group hover:border-amber-500/60 transition-all">
           <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-emerald-500/20 transition-all" />
           <div className="flex justify-between items-start mb-4">
@@ -359,94 +426,156 @@ export default function MasterAdminDashboard() {
         </Link>
       </div>
 
-      {/* Quick Dispatch Modal */}
+      {/* Enhanced Quick Dispatch Modal */}
       {showDispatchModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-6 relative">
+          <div className="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 sm:p-8 w-full max-w-xl shadow-2xl space-y-6 relative text-slate-100 max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setShowDispatchModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white"
+              className="absolute top-5 right-5 text-slate-400 hover:text-white"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="space-y-1">
-              <div className="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider">
-                <Radio className="w-4 h-4" />
-                <span>Master Quick Dispatch</span>
+              <div className="flex items-center gap-2 text-amber-400 text-xs font-black uppercase tracking-wider">
+                <Radio className="w-4 h-4 animate-pulse" />
+                <span>Master HQ Quick Dispatch Engine</span>
               </div>
-              <h3 className="text-xl font-black text-slate-50">Assign Chauffeur Ride</h3>
+              <h3 className="text-2xl font-black text-slate-50">Instant Chauffeur Booking</h3>
             </div>
 
             {dispatchSuccess ? (
-              <div className="bg-emerald-500/10 border border-emerald-500/30 p-6 rounded-xl text-center space-y-2">
-                <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto animate-bounce" />
-                <div className="text-sm font-bold text-emerald-400">Ride Dispatched Successfully!</div>
-                <div className="text-xs text-slate-300">Chauffeur notified via Telematics App.</div>
+              <div className="bg-emerald-500/10 border border-emerald-500/30 p-6 rounded-2xl text-center space-y-2">
+                <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto animate-bounce" />
+                <div className="text-base font-bold text-emerald-400">Booking & Dispatch Synced to Database!</div>
+                <div className="text-xs text-slate-300">Visible across Master Dashboard, Omnichannel CRM & Telematics Radar.</div>
               </div>
             ) : (
-              <form onSubmit={handleQuickDispatchSubmit} className="space-y-4">
-                <div className="space-y-1 text-xs">
-                  <label className="text-slate-400 font-bold">Passenger Name *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Enter customer name"
-                    value={dispatchForm.customerName}
-                    onChange={(e) => setDispatchForm({ ...dispatchForm, customerName: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400"
-                  />
-                </div>
-
-                <div className="space-y-1 text-xs">
-                  <label className="text-slate-400 font-bold">Mobile Number *</label>
-                  <input
-                    type="tel"
-                    required
-                    maxLength={10}
-                    placeholder="10-digit mobile number"
-                    value={dispatchForm.phone}
-                    onChange={(e) => setDispatchForm({ ...dispatchForm, phone: e.target.value.replace(/\D/g, "") })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1 text-xs">
-                    <label className="text-slate-400 font-bold">Vehicle Category</label>
-                    <select
-                      value={dispatchForm.vehicleCategory}
-                      onChange={(e) => setDispatchForm({ ...dispatchForm, vehicleCategory: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400"
-                    >
-                      <option value="Sedan">Sedan (Dzire / City)</option>
-                      <option value="SUV">SUV (Innova / Fortuner)</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1 text-xs">
-                    <label className="text-slate-400 font-bold">Pickup Location</label>
+              <form onSubmit={handleQuickDispatchSubmit} className="space-y-4 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-slate-300 font-bold uppercase text-[10px]">Passenger Name *</label>
                     <input
                       type="text"
-                      placeholder="e.g. Mumbai Airport T2"
-                      value={dispatchForm.pickupLocation}
-                      onChange={(e) => setDispatchForm({ ...dispatchForm, pickupLocation: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400"
+                      required
+                      placeholder="e.g. Vikram Malhotra"
+                      value={dispatchForm.customerName}
+                      onChange={(e) => setDispatchForm({ ...dispatchForm, customerName: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-slate-300 font-bold uppercase text-[10px]">Mobile Number *</label>
+                    <input
+                      type="tel"
+                      required
+                      maxLength={10}
+                      placeholder="10-digit phone number"
+                      value={dispatchForm.phone}
+                      onChange={(e) => setDispatchForm({ ...dispatchForm, phone: e.target.value.replace(/\D/g, "") })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold font-mono"
                     />
                   </div>
                 </div>
 
-                <div className="pt-2 flex justify-end gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-slate-300 font-bold uppercase text-[10px]">Vehicle Category</label>
+                    <select
+                      value={dispatchForm.vehicleCategory}
+                      onChange={(e) => setDispatchForm({ ...dispatchForm, vehicleCategory: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold"
+                    >
+                      <option value="Pickup & Drop / Airport Transfer">Airport / Transfer</option>
+                      <option value="Local Rental">Local Rental (8h/80km)</option>
+                      <option value="Outstation Trip">Outstation Intercity</option>
+                      <option value="Corporate Transit">Corporate Transit</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-slate-300 font-bold uppercase text-[10px]">Vehicle Class</label>
+                    <select
+                      value={dispatchForm.vehicleClass}
+                      onChange={(e) => setDispatchForm({ ...dispatchForm, vehicleClass: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold"
+                    >
+                      <option value="Sedan">Sedan (Dzire/City)</option>
+                      <option value="SUV">SUV (Innova/Crysta)</option>
+                      <option value="Luxury SUV">Luxury SUV (Fortuner)</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-slate-300 font-bold uppercase text-[10px]">Vehicle Model</label>
+                    <select
+                      value={dispatchForm.vehicleModel}
+                      onChange={(e) => setDispatchForm({ ...dispatchForm, vehicleModel: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold"
+                    >
+                      <option value="Maruti Suzuki Dzire">Maruti Swift Dzire</option>
+                      <option value="Honda City">Honda City</option>
+                      <option value="Toyota Innova Crysta">Toyota Innova Crysta</option>
+                      <option value="Toyota Fortuner 4x4">Toyota Fortuner 4x4</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Interactive Pickup Location Autocomplete Search */}
+                <div className="space-y-1.5 relative">
+                  <label className="text-slate-300 font-bold uppercase text-[10px]">
+                    Pickup Location (Web Booking Engine Search) *
+                  </label>
+                  <div className="relative">
+                    <MapPin className="w-4 h-4 text-amber-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      required
+                      placeholder="Type or select pickup hub..."
+                      value={dispatchForm.pickupLocation}
+                      onFocus={() => setShowLocationSuggestions(true)}
+                      onChange={(e) => {
+                        setDispatchForm({ ...dispatchForm, pickupLocation: e.target.value });
+                        setShowLocationSuggestions(true);
+                      }}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold"
+                    />
+                  </div>
+
+                  {showLocationSuggestions && (
+                    <div className="absolute z-30 left-0 right-0 top-full mt-1 bg-slate-950 border border-amber-500/30 rounded-xl shadow-2xl overflow-hidden max-h-48 overflow-y-auto divide-y divide-white/5">
+                      {popularLocations
+                        .filter(loc => loc.toLowerCase().includes(dispatchForm.pickupLocation.toLowerCase()))
+                        .map((loc, idx) => (
+                          <div
+                            key={idx}
+                            onClick={() => {
+                              setDispatchForm({ ...dispatchForm, pickupLocation: loc });
+                              setShowLocationSuggestions(false);
+                            }}
+                            className="px-3.5 py-2.5 hover:bg-amber-500/10 text-slate-200 hover:text-amber-400 cursor-pointer flex items-center gap-2 font-medium"
+                          >
+                            <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                            <span>{loc}</span>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-4 flex justify-end gap-3 border-t border-white/10">
                   <button
                     type="button"
                     onClick={() => setShowDispatchModal(false)}
-                    className="px-4 py-2 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs font-bold"
+                    className="px-5 py-2.5 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs font-bold"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20"
+                    className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer"
                   >
                     Dispatch Now
                   </button>

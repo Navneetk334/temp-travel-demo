@@ -27,7 +27,6 @@ export default function MasterOmnichannelCRMPage() {
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [leads, setLeads] = useState<any[]>([]);
   const [selectedLead, setSelectedLead] = useState<any | null>(null);
-  const [noteText, setNoteText] = useState("");
   const [loading, setLoading] = useState(true);
 
   const fetchLeads = async () => {
@@ -64,29 +63,43 @@ export default function MasterOmnichannelCRMPage() {
 
   const exportCSV = () => {
     const headers = ["Customer Name", "Phone", "Email", "Trip Type", "Pickup", "Status"];
-    const rows = leads.map(l => [l.customerName, l.phone, l.email, l.tripType, l.pickupLocation, l.status]);
+    const rows = displayLeads.map(l => [l.customerName, l.phone, l.email, l.tripType, l.pickupLocation, l.status]);
     const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Omnichannel_Leads_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute("download", `Omnichannel_Leads_${activeLeadTab}_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
   const defaultMockLeads = [
+    // Pickup & Drop
     {
       id: "LEAD-101",
       customerName: "Vikram Malhotra",
       phone: "9820112233",
       email: "vikram@acme.com",
-      tripType: "Pickup & Drop",
+      tripType: "Pickup & Drop / Airport Transfer",
       pickupLocation: "Bandra West, Mumbai",
       pickupDateTime: "2026-08-22 09:00 AM",
       status: "NEW",
-      notes: "Daily executive shift commute requested."
+      notes: "Airport Transfer to T2 Terminal."
     },
+    {
+      id: "LEAD-104",
+      customerName: "Priya Sharma",
+      phone: "9811223344",
+      email: "priya@gmail.com",
+      tripType: "Pickup & Drop",
+      pickupLocation: "BKC Complex, Mumbai",
+      pickupDateTime: "2026-08-23 02:30 PM",
+      status: "CONTACTED",
+      notes: "Pickup from BKC to Sahar Hub."
+    },
+
+    // Local Rentals
     {
       id: "LEAD-102",
       customerName: "Ananya Roy",
@@ -99,27 +112,111 @@ export default function MasterOmnichannelCRMPage() {
       notes: "8 Hrs / 80 Kms package for shopping trip."
     },
     {
+      id: "LEAD-105",
+      customerName: "Sanjay Gupta",
+      phone: "9844556677",
+      email: "sanjay@retail.com",
+      tripType: "Local Rental",
+      pickupLocation: "Lower Parel, Mumbai",
+      pickupDateTime: "2026-08-24 11:00 AM",
+      status: "QUALIFIED",
+      notes: "12 Hrs / 120 Kms Innova Crysta local rental."
+    },
+
+    // Outstation
+    {
       id: "LEAD-103",
       customerName: "Rohan Kapoor",
       phone: "9899112244",
       email: "rohan@techcorp.com",
-      tripType: "Outstation",
+      tripType: "Outstation Trip",
       pickupLocation: "Powai, Mumbai",
       pickupDateTime: "2026-08-25 06:00 AM",
       status: "QUALIFIED",
       notes: "Round trip to Mahabaleshwar 3 Days SUV."
+    },
+    {
+      id: "LEAD-106",
+      customerName: "Amitabh Sen",
+      phone: "9855667788",
+      email: "amitabh@sen.com",
+      tripType: "Outstation Trip",
+      pickupLocation: "Thane West, Mumbai",
+      pickupDateTime: "2026-08-26 07:00 AM",
+      status: "CONVERTED",
+      notes: "One way Pune to Mumbai Innova Crysta."
+    },
+
+    // Corporate
+    {
+      id: "LEAD-107",
+      customerName: "Accenture HR Desk",
+      phone: "9866778899",
+      email: "transit@accenture.com",
+      tripType: "Corporate Inquiry",
+      pickupLocation: "Vikhroli IT Park",
+      pickupDateTime: "Monthly Roster",
+      status: "QUALIFIED",
+      notes: "50 Shift cabs monthly agreement inquiry."
+    },
+
+    // Tour Package
+    {
+      id: "LEAD-108",
+      customerName: "Deepak Mehta",
+      phone: "9877889900",
+      email: "deepak@mehta.com",
+      tripType: "Tour Package",
+      pickupLocation: "Mumbai Airport T2",
+      pickupDateTime: "2026-09-01",
+      status: "NEW",
+      notes: "Kerala 5 Days Domestic Tour Package."
+    },
+
+    // Contact Leads
+    {
+      id: "LEAD-109",
+      customerName: "Sunita Reddy",
+      phone: "9888990011",
+      email: "sunita@reddy.com",
+      tripType: "Contact Inquiry",
+      pickupLocation: "General Inquiry",
+      pickupDateTime: "N/A",
+      status: "NEW",
+      notes: "Inquiry regarding luxury VIP fleet rental tariffs."
     }
   ];
 
-  const displayLeads = leads.length > 0 ? leads : defaultMockLeads;
+  const allLeads = leads.length > 0 ? [...leads, ...defaultMockLeads] : defaultMockLeads;
+
+  // Filter leads dynamically based on active tab
+  const displayLeads = allLeads.filter((l) => {
+    const type = (l.tripType || "").toLowerCase();
+    const notes = (l.notes || "").toLowerCase();
+
+    if (activeLeadTab === "pickup") return type.includes("pickup") || type.includes("airport") || notes.includes("airport");
+    if (activeLeadTab === "local") return type.includes("local") || notes.includes("local");
+    if (activeLeadTab === "outstation") return type.includes("outstation") || notes.includes("outstation");
+    if (activeLeadTab === "corporate") return type.includes("corporate") || notes.includes("corporate");
+    if (activeLeadTab === "tour") return type.includes("tour") || notes.includes("tour");
+    if (activeLeadTab === "contact") return type.includes("contact") || type.includes("inquiry");
+    return true;
+  }).filter((l) => {
+    const matchesSearch =
+      l.customerName?.toLowerCase().includes(search.toLowerCase()) ||
+      l.phone?.includes(search) ||
+      l.email?.toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = statusFilter === "ALL" || l.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   const leadCategories = [
-    { key: "pickup", label: "Pickup & Drop Leads", icon: Clock, count: displayLeads.filter(l => l.tripType === "Pickup & Drop" || l.tripType?.includes("Pickup")).length || 2 },
-    { key: "local", label: "Local Rentals Leads", icon: Clock, count: displayLeads.filter(l => l.tripType === "Local Rental" || l.notes?.includes("Local")).length || 1 },
-    { key: "outstation", label: "Outstation Leads", icon: MapPin, count: displayLeads.filter(l => l.tripType === "Outstation" || l.notes?.includes("Outstation")).length || 1 },
-    { key: "corporate", label: "Corporate Inquiry Leads", icon: Building2, count: 2 },
-    { key: "tour", label: "Tour Package Leads", icon: Compass, count: 1 },
-    { key: "contact", label: "Contact Leads", icon: Mail, count: 1 },
+    { key: "pickup", label: "Pickup & Drop Leads", icon: Clock, count: allLeads.filter(l => (l.tripType || "").toLowerCase().includes("pickup") || (l.tripType || "").toLowerCase().includes("airport")).length },
+    { key: "local", label: "Local Rentals Leads", icon: Clock, count: allLeads.filter(l => (l.tripType || "").toLowerCase().includes("local")).length },
+    { key: "outstation", label: "Outstation Leads", icon: MapPin, count: allLeads.filter(l => (l.tripType || "").toLowerCase().includes("outstation")).length },
+    { key: "corporate", label: "Corporate Inquiry Leads", icon: Building2, count: allLeads.filter(l => (l.tripType || "").toLowerCase().includes("corporate")).length },
+    { key: "tour", label: "Tour Package Leads", icon: Compass, count: allLeads.filter(l => (l.tripType || "").toLowerCase().includes("tour")).length },
+    { key: "contact", label: "Contact Leads", icon: Mail, count: allLeads.filter(l => (l.tripType || "").toLowerCase().includes("contact") || (l.tripType || "").toLowerCase().includes("inquiry")).length },
   ];
 
   return (
@@ -143,7 +240,7 @@ export default function MasterOmnichannelCRMPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={exportCSV}
-            className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition-all"
+            className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer"
           >
             <Download className="w-3.5 h-3.5 text-amber-400" />
             <span>Export CSV</span>
@@ -160,7 +257,7 @@ export default function MasterOmnichannelCRMPage() {
             <button
               key={cat.key}
               onClick={() => setActiveLeadTab(cat.key as any)}
-              className={`p-4 rounded-2xl border text-left transition-all flex flex-col justify-between ${
+              className={`p-4 rounded-2xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
                 isActive
                   ? "bg-amber-500 text-slate-950 border-amber-400 font-black shadow-lg shadow-amber-500/20"
                   : "bg-slate-900/80 text-slate-300 border-white/10 hover:border-amber-500/40"
@@ -199,7 +296,7 @@ export default function MasterOmnichannelCRMPage() {
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
-                className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase transition-all ${
+                className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase transition-all cursor-pointer ${
                   statusFilter === st
                     ? "bg-amber-500 text-slate-950 font-black"
                     : "bg-slate-950 text-slate-400 hover:text-white"
@@ -224,51 +321,59 @@ export default function MasterOmnichannelCRMPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {displayLeads.map((lead, idx) => (
-                <tr key={lead.id || idx} className="hover:bg-white/5 transition-colors">
-                  <td className="py-4 px-4 font-semibold text-slate-100">
-                    <div>{lead.customerName || "Customer Lead"}</div>
-                    <div className="text-[11px] text-slate-400 font-mono">{lead.phone}</div>
-                    <div className="text-[10px] text-slate-500">{lead.email}</div>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                      {lead.tripType || "Rental Lead"}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4">
-                    <div className="text-slate-200">{lead.pickupLocation || lead.pickup}</div>
-                    <div className="text-[11px] text-slate-400 font-mono">{lead.pickupDateTime || "Flexible Date"}</div>
-                  </td>
-                  <td className="py-4 px-4">
-                    <select
-                      value={lead.status || "NEW"}
-                      onChange={(e) => updateLeadStatus(lead.id, e.target.value)}
-                      className="bg-slate-950 border border-white/10 rounded-lg px-2.5 py-1 text-[11px] font-bold text-amber-400 focus:outline-none focus:border-amber-400 cursor-pointer"
-                    >
-                      <option value="NEW">NEW</option>
-                      <option value="CONTACTED">CONTACTED</option>
-                      <option value="QUALIFIED">QUALIFIED</option>
-                      <option value="CONVERTED">CONVERTED</option>
-                      <option value="LOST">LOST</option>
-                    </select>
-                  </td>
-                  <td className="py-4 px-4 text-right space-x-2">
-                    <button
-                      onClick={() => setSelectedLead(lead)}
-                      className="inline-flex items-center gap-1 bg-slate-950 text-slate-300 hover:text-white border border-white/10 px-3 py-1 rounded-lg text-[11px] font-bold transition-all"
-                    >
-                      <Eye className="w-3 h-3 text-amber-400" /> Inspect
-                    </button>
-                    <a
-                      href={`tel:${lead.phone}`}
-                      className="inline-flex items-center gap-1 bg-amber-500/10 text-amber-400 border border-amber-500/30 px-3 py-1 rounded-lg hover:bg-amber-500 hover:text-slate-950 text-[11px] font-bold transition-all"
-                    >
-                      <PhoneCall className="w-3 h-3" /> Call
-                    </a>
+              {displayLeads.length > 0 ? (
+                displayLeads.map((lead, idx) => (
+                  <tr key={lead.id || idx} className="hover:bg-white/5 transition-colors">
+                    <td className="py-4 px-4 font-semibold text-slate-100">
+                      <div>{lead.customerName || "Customer Lead"}</div>
+                      <div className="text-[11px] text-slate-400 font-mono">{lead.phone}</div>
+                      <div className="text-[10px] text-slate-500">{lead.email}</div>
+                    </td>
+                    <td className="py-4 px-4">
+                      <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                        {lead.tripType || "Rental Lead"}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4">
+                      <div className="text-slate-200">{lead.pickupLocation || lead.pickup}</div>
+                      <div className="text-[11px] text-slate-400 font-mono">{lead.pickupDateTime || "Flexible Date"}</div>
+                    </td>
+                    <td className="py-4 px-4">
+                      <select
+                        value={lead.status || "NEW"}
+                        onChange={(e) => updateLeadStatus(lead.id, e.target.value)}
+                        className="bg-slate-950 border border-white/10 rounded-lg px-2.5 py-1 text-[11px] font-bold text-amber-400 focus:outline-none focus:border-amber-400 cursor-pointer"
+                      >
+                        <option value="NEW">NEW</option>
+                        <option value="CONTACTED">CONTACTED</option>
+                        <option value="QUALIFIED">QUALIFIED</option>
+                        <option value="CONVERTED">CONVERTED</option>
+                        <option value="LOST">LOST</option>
+                      </select>
+                    </td>
+                    <td className="py-4 px-4 text-right space-x-2">
+                      <button
+                        onClick={() => setSelectedLead(lead)}
+                        className="inline-flex items-center gap-1 bg-slate-950 text-slate-300 hover:text-white border border-white/10 px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer"
+                      >
+                        <Eye className="w-3 h-3 text-amber-400" /> Inspect
+                      </button>
+                      <a
+                        href={`tel:${lead.phone}`}
+                        className="inline-flex items-center gap-1 bg-amber-500/10 text-amber-400 border border-amber-500/30 px-3 py-1 rounded-lg hover:bg-amber-500 hover:text-slate-950 text-[11px] font-bold transition-all"
+                      >
+                        <PhoneCall className="w-3 h-3" /> Call
+                      </a>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="py-8 text-center text-slate-400 text-xs">
+                    No lead records found for this category tab.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
@@ -280,7 +385,7 @@ export default function MasterOmnichannelCRMPage() {
           <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
             <button
               onClick={() => setSelectedLead(null)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white"
+              className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -301,7 +406,7 @@ export default function MasterOmnichannelCRMPage() {
             <div className="pt-2 flex justify-end">
               <button
                 onClick={() => setSelectedLead(null)}
-                className="px-4 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs"
+                className="px-4 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs cursor-pointer"
               >
                 Close Inspector
               </button>
