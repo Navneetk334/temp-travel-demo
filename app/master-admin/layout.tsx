@@ -66,23 +66,23 @@ export default function MasterAdminLayout({
   return (
     <div className="min-h-screen bg-slate-950 flex font-sans selection:bg-amber-500 selection:text-slate-950">
       {/* 1. Master Desktop Sidebar Panel (Fixed) */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-68 lg:fixed lg:inset-y-0 bg-slate-900/90 backdrop-blur-2xl border-r border-amber-500/20 z-40 shrink-0 shadow-2xl">
+      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-slate-900/95 backdrop-blur-2xl border-r border-amber-500/20 z-40 shrink-0 shadow-2xl">
         {/* Brand Header */}
-        <div className="h-24 px-4 border-b border-amber-500/20 flex flex-col justify-center items-center text-center relative bg-gradient-to-b from-amber-500/10 via-transparent to-transparent">
+        <div className="h-20 px-4 border-b border-amber-500/20 flex flex-col justify-center items-center text-center relative bg-gradient-to-b from-amber-500/10 via-transparent to-transparent">
           <Link href="/master-admin" className="inline-flex items-center justify-center group" title="Master Admin Home">
             <img
               src="/images/logo.png"
               alt="TEMP TRAVEL"
-              className="h-[52px] w-auto object-contain mx-auto group-hover:scale-105 transition-transform drop-shadow-[0_4px_12px_rgba(245,158,11,0.3)]"
+              className="h-[44px] w-auto object-contain mx-auto group-hover:scale-105 transition-transform drop-shadow-[0_4px_12px_rgba(245,158,11,0.3)]"
             />
           </Link>
-          <span className="text-[9px] font-black uppercase tracking-[0.3em] text-amber-400 mt-1">
+          <span className="text-[8px] font-black uppercase tracking-[0.25em] text-amber-400 mt-1">
             Master Control Center
           </span>
         </div>
 
         {/* Navigation Links */}
-        <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+        <nav className="flex-1 px-3.5 py-5 space-y-1.5 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -90,24 +90,24 @@ export default function MasterAdminLayout({
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold tracking-wide transition-all duration-200 group ${
+                className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all duration-200 group ${
                   isActive
                     ? "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-lg shadow-amber-500/20 font-black"
                     : "text-slate-300 hover:text-white hover:bg-white/5"
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <Icon className={`w-4.5 h-4.5 ${isActive ? "text-slate-950" : "text-amber-400 group-hover:scale-110"} transition-transform`} />
+                <div className="flex items-center gap-2.5">
+                  <Icon className={`w-4 h-4 ${isActive ? "text-slate-950" : "text-amber-400 group-hover:scale-110"} transition-transform`} />
                   <span>{item.name}</span>
                 </div>
-                {isActive && <ChevronRight className="w-4 h-4 text-slate-950" />}
+                {isActive && <ChevronRight className="w-3.5 h-3.5 text-slate-950" />}
               </Link>
             );
           })}
         </nav>
 
         {/* System Telemetry & User Card */}
-        <div className="p-4 border-t border-amber-500/20 bg-slate-950/60 space-y-3">
+        <div className="p-3.5 border-t border-amber-500/20 bg-slate-950/60 space-y-2.5">
           <div className="flex items-center justify-between text-[10px] font-bold text-slate-400">
             <div className="flex items-center gap-1.5 text-emerald-400">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -117,8 +117,8 @@ export default function MasterAdminLayout({
           </div>
 
           <div className="flex items-center justify-between pt-2 border-t border-white/5">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-black text-xs">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-black text-xs">
                 M
               </div>
               <div>
@@ -128,7 +128,7 @@ export default function MasterAdminLayout({
             </div>
             <button
               onClick={handleLogout}
-              className="text-slate-400 hover:text-amber-400 p-1.5 rounded-lg hover:bg-white/5 transition-colors"
+              className="text-slate-400 hover:text-amber-400 p-1 rounded-lg hover:bg-white/5 transition-colors"
               title="Sign Out"
             >
               <LogOut className="w-4 h-4" />
@@ -138,7 +138,7 @@ export default function MasterAdminLayout({
       </aside>
 
       {/* 2. Main Content Wrapper */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-68 overflow-x-hidden min-h-screen">
+      <div className="flex-1 flex flex-col min-w-0 lg:pl-64 overflow-x-hidden min-h-screen">
         {/* Header Toolbar */}
         <header className="h-20 bg-slate-900/80 backdrop-blur-xl border-b border-amber-500/20 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-30 shadow-xl">
           <button
