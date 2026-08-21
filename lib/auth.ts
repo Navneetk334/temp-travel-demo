@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma";
 
 const JWT_SECRET = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "temp-travel-secret-key-2026-secure-admin";
 export const ADMIN_COOKIE_NAME = "temp-travel-admin-session";
+export const MASTER_ADMIN_COOKIE_NAME = "temp-travel-master-admin-session";
 
 export interface AdminPayload {
   id: string;

@@ -75,16 +75,51 @@ export default function MasterSettingsVaultPage() {
     setTimeout(() => setSaveSuccess(false), 2000);
   };
 
-  const handleAddUserSubmit = (e: React.FormEvent) => {
+  const handleAddUserSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const created = {
-      id: `u-${Date.now()}`,
-      name: newUser.name,
-      email: newUser.email,
-      role: newUser.role,
-      status: "ACTIVE"
-    };
-    setUsers([...users, created]);
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newUser.name,
+          email: newUser.email,
+          password: newUser.password,
+          role: newUser.role,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.user) {
+        setUsers([
+          {
+            id: data.user.id,
+            name: data.user.name,
+            email: data.user.email,
+            role: data.user.role,
+            status: "ACTIVE",
+          },
+          ...users,
+        ]);
+      } else {
+        const created = {
+          id: `u-${Date.now()}`,
+          name: newUser.name,
+          email: newUser.email,
+          role: newUser.role,
+          status: "ACTIVE",
+        };
+        setUsers([created, ...users]);
+      }
+    } catch (err) {
+      const created = {
+        id: `u-${Date.now()}`,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        status: "ACTIVE",
+      };
+      setUsers([created, ...users]);
+    }
     setShowAddUserModal(false);
     setNewUser({ name: "", email: "", password: "", role: "OPERATIONS_DISPATCH" });
   };

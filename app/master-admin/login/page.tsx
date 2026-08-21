@@ -276,17 +276,15 @@ export default function MasterAdminLoginPage() {
           <div className="flex bg-slate-950 p-1 rounded-xl border border-white/10">
             <button
               onClick={() => { setMode("login"); setError(""); setSuccessMsg(""); }}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                mode === "login" ? "bg-amber-500 text-slate-950 font-black shadow-md" : "text-slate-400 hover:text-white"
-              }`}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${mode === "login" ? "bg-amber-500 text-slate-950 font-black shadow-md" : "text-slate-400 hover:text-white"
+                }`}
             >
               Sign In
             </button>
             <button
               onClick={() => { setMode("signup"); setError(""); setSuccessMsg(""); }}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                mode === "signup" ? "bg-amber-500 text-slate-950 font-black shadow-md" : "text-slate-400 hover:text-white"
-              }`}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${mode === "signup" ? "bg-amber-500 text-slate-950 font-black shadow-md" : "text-slate-400 hover:text-white"
+                }`}
             >
               Request Access
             </button>

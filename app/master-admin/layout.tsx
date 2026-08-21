@@ -50,7 +50,7 @@ export default function MasterAdminLayout({
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/admin/logout", { method: "POST" });
+      await fetch("/api/master-admin/logout", { method: "POST" });
     } catch (e) {
       console.error(e);
     }
