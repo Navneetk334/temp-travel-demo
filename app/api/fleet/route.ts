@@ -66,13 +66,11 @@ export async function GET(req: NextRequest) {
       prisma.fleetVehicle.count({ where: { status: "INACTIVE" } }),
     ]);
 
-    const totalPages = Math.ceil(totalCount / limit) || 1;
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       vehicles,
       pagination: {
         totalCount,
-        totalPages,
+        totalPages: Math.ceil(totalCount / limit) || 1,
         currentPage: page,
         limit,
       },

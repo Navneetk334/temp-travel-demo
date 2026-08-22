@@ -16,8 +16,75 @@ import {
   Edit2
 } from "lucide-react";
 
+const defaultFleetList = [
+  {
+    id: "v-1",
+    make: "Maruti Suzuki",
+    model: "Swift Dzire",
+    registrationNumber: "MH 02 CZ 4421",
+    capacity: 4,
+    categoryName: "Sedan",
+    perKmRate: 12,
+    baseDailyRate: 2200,
+    driverAllowance: 400,
+    nightAllowance: 250,
+    fuelType: "CNG / Petrol",
+    isAvailable: true,
+    permitStatus: "VALID",
+    insuranceExpiry: "2027-03-15"
+  },
+  {
+    id: "v-2",
+    make: "Honda",
+    model: "City / Verna",
+    registrationNumber: "MH 01 AB 1234",
+    capacity: 4,
+    categoryName: "Sedan",
+    perKmRate: 18,
+    baseDailyRate: 3500,
+    driverAllowance: 500,
+    nightAllowance: 300,
+    fuelType: "Petrol",
+    isAvailable: true,
+    permitStatus: "VALID",
+    insuranceExpiry: "2026-11-20"
+  },
+  {
+    id: "v-3",
+    make: "Toyota",
+    model: "Innova Crysta",
+    registrationNumber: "MH 04 ER 8890",
+    capacity: 7,
+    categoryName: "SUV",
+    perKmRate: 22,
+    baseDailyRate: 4800,
+    driverAllowance: 600,
+    nightAllowance: 400,
+    fuelType: "Diesel",
+    isAvailable: true,
+    permitStatus: "VALID",
+    insuranceExpiry: "2027-01-10"
+  },
+  {
+    id: "v-4",
+    make: "Toyota",
+    model: "Fortuner 4x4",
+    registrationNumber: "MH 02 FG 9900",
+    capacity: 7,
+    categoryName: "Luxury SUV",
+    perKmRate: 45,
+    baseDailyRate: 9500,
+    driverAllowance: 1000,
+    nightAllowance: 600,
+    fuelType: "Diesel",
+    isAvailable: true,
+    permitStatus: "VALID",
+    insuranceExpiry: "2026-12-05"
+  }
+];
+
 export default function MasterFleetRosterPage() {
-  const [vehicles, setVehicles] = useState<any[]>([]);
+  const [vehicles, setVehicles] = useState<any[]>(defaultFleetList);
   const [showModal, setShowModal] = useState(false);
 
   const [newVehicle, setNewVehicle] = useState({
@@ -36,73 +103,6 @@ export default function MasterFleetRosterPage() {
     fitnessExpiry: "2027-12-31",
     permitExpiry: "2028-03-15"
   });
-
-  const defaultFleetList = [
-    {
-      id: "v-1",
-      make: "Maruti Suzuki",
-      model: "Swift Dzire",
-      registrationNumber: "MH 02 CZ 4421",
-      capacity: 4,
-      categoryName: "Sedan",
-      perKmRate: 12,
-      baseDailyRate: 2200,
-      driverAllowance: 400,
-      nightAllowance: 250,
-      fuelType: "CNG / Petrol",
-      isAvailable: true,
-      permitStatus: "VALID",
-      insuranceExpiry: "2027-03-15"
-    },
-    {
-      id: "v-2",
-      make: "Honda",
-      model: "City / Verna",
-      registrationNumber: "MH 01 AB 1234",
-      capacity: 4,
-      categoryName: "Sedan",
-      perKmRate: 18,
-      baseDailyRate: 3500,
-      driverAllowance: 500,
-      nightAllowance: 300,
-      fuelType: "Petrol",
-      isAvailable: true,
-      permitStatus: "VALID",
-      insuranceExpiry: "2026-11-20"
-    },
-    {
-      id: "v-3",
-      make: "Toyota",
-      model: "Innova Crysta",
-      registrationNumber: "MH 04 ER 8890",
-      capacity: 7,
-      categoryName: "SUV",
-      perKmRate: 22,
-      baseDailyRate: 4800,
-      driverAllowance: 600,
-      nightAllowance: 400,
-      fuelType: "Diesel",
-      isAvailable: true,
-      permitStatus: "VALID",
-      insuranceExpiry: "2027-01-10"
-    },
-    {
-      id: "v-4",
-      make: "Toyota",
-      model: "Fortuner 4x4",
-      registrationNumber: "MH 02 FG 9900",
-      capacity: 7,
-      categoryName: "Luxury SUV",
-      perKmRate: 45,
-      baseDailyRate: 9500,
-      driverAllowance: 1000,
-      nightAllowance: 600,
-      fuelType: "Diesel",
-      isAvailable: true,
-      permitStatus: "VALID",
-      insuranceExpiry: "2026-12-05"
-    }
-  ];
 
   useEffect(() => {
     fetch("/api/fleet")
