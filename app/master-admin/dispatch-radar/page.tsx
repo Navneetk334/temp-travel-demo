@@ -55,76 +55,7 @@ export default function MasterDispatchRadarPage() {
     tripType: "Airport Transfer"
   });
 
-  const [drivers, setDrivers] = useState([
-    {
-      id: "DRV-101",
-      driverName: "Rajesh Kumar",
-      phone: "+91-9820112233",
-      vehicleModel: "Maruti Suzuki Dzire",
-      vehicleCategory: "Sedan",
-      regNumber: "MH 02 CZ 4421",
-      currentLocation: "Bandra Kurla Complex (BKC), Mumbai",
-      destination: "Chhatrapati Shivaji Maharaj Intl Airport T2",
-      status: "IN_TRANSIT",
-      speed: "42 km/h",
-      eta: "14 Mins",
-      tripType: "Airport Transfer",
-      customerName: "Ananya Sharma",
-      lat: 19.0657,
-      lng: 72.8682
-    },
-    {
-      id: "DRV-102",
-      driverName: "Suresh Patil",
-      phone: "+91-9833445566",
-      vehicleModel: "Toyota Innova Crysta",
-      vehicleCategory: "SUV",
-      regNumber: "MH 04 ER 8890",
-      currentLocation: "Lower Parel, Mumbai",
-      destination: "Koregaon Park, Pune",
-      status: "IN_TRANSIT",
-      speed: "78 km/h",
-      eta: "1 Hr 40 Mins",
-      tripType: "Outstation Trip",
-      customerName: "Karan Malhotra",
-      lat: 18.9953,
-      lng: 72.8298
-    },
-    {
-      id: "DRV-103",
-      driverName: "Vikram Singh",
-      phone: "+91-9899112244",
-      vehicleModel: "Honda City",
-      vehicleCategory: "Sedan",
-      regNumber: "MH 01 AB 1234",
-      currentLocation: "Andheri East, Mumbai",
-      destination: "Standby Hub - Sahar",
-      status: "AVAILABLE",
-      speed: "0 km/h",
-      eta: "Ready for Dispatch",
-      tripType: "Corporate Standby",
-      customerName: "N/A",
-      lat: 19.1136,
-      lng: 72.8697
-    },
-    {
-      id: "DRV-104",
-      driverName: "Mahesh Yadav",
-      phone: "+91-9766554433",
-      vehicleModel: "Toyota Fortuner 4x4",
-      vehicleCategory: "SUV",
-      regNumber: "MH 02 FG 9900",
-      currentLocation: "Worli Sea Link Entrance",
-      destination: "Taj Mahal Palace, Colaba",
-      status: "ASSIGNED",
-      speed: "25 km/h",
-      eta: "8 Mins to Pickup",
-      tripType: "VIP Delegation",
-      customerName: "Dr. Aris Thorne",
-      lat: 19.0276,
-      lng: 72.8188
-    }
-  ]);
+  const [drivers, setDrivers] = useState<any[]>([]);
 
   // Load saved dispatches from localStorage
   useEffect(() => {

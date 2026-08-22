@@ -50,56 +50,7 @@ export default function MasterDriversPage() {
   // Multi-selection state
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  const [drivers, setDrivers] = useState([
-    {
-      id: "DRV-101",
-      name: "Rajesh Kumar",
-      dob: "1992-06-15",
-      phone: "9820112233",
-      photoName: "rajesh_photo.jpg",
-      photoUrl: "",
-      aadhaarNumber: "9988 7766 5544",
-      aadhaarDocName: "aadhaar_rajesh.pdf",
-      panNumber: "ABCDE1234F",
-      panDocName: "pan_rajesh.pdf",
-      licenseNumber: "MH-0220190045123",
-      licenseDocName: "license_rajesh.pdf",
-      licenseExpiry: "2029-08-15",
-      bankName: "HDFC Bank",
-      accountHolderName: "Rajesh Kumar",
-      accountNumber: "50100234567812",
-      ifscCode: "HDFC0000123",
-      vehicleCategory: "Sedan",
-      vehicleClass: "Executive",
-      vehicleModel: "Maruti Suzuki Dzire",
-      policeVerification: "VERIFIED",
-      status: "ON_DUTY"
-    },
-    {
-      id: "DRV-102",
-      name: "Suresh Patil",
-      dob: "1994-08-22",
-      phone: "9833445566",
-      photoName: "suresh_photo.jpg",
-      photoUrl: "",
-      aadhaarNumber: "8877 6655 4433",
-      aadhaarDocName: "aadhaar_suresh.pdf",
-      panNumber: "XYZPS9876K",
-      panDocName: "pan_suresh.pdf",
-      licenseNumber: "MH-0420180098765",
-      licenseDocName: "license_suresh.pdf",
-      licenseExpiry: "2028-12-01",
-      bankName: "ICICI Bank",
-      accountHolderName: "Suresh Patil",
-      accountNumber: "001102987654",
-      ifscCode: "ICIC0000456",
-      vehicleCategory: "SUV",
-      vehicleClass: "Premium",
-      vehicleModel: "Toyota Innova Crysta",
-      policeVerification: "VERIFIED",
-      status: "ON_DUTY"
-    }
-  ]);
+  const [drivers, setDrivers] = useState<any[]>([]);
 
   // Complete Form State with Photo Preview & DOB Age Calculation
   const [formData, setFormData] = useState({

@@ -55,18 +55,7 @@ export default function MasterDocumentVaultPage() {
         console.error(e);
       }
     } else {
-      setVehicleFolders([
-        {
-          name: "Toyota Innova Crysta",
-          regNumber: "MH 04 ER 8890",
-          docs: [
-            { title: "Vehicle RC Document", ref: "RC-MH04-8890", file: "rc_innova.pdf" },
-            { title: "Insurance Policy", ref: "POL-HDFC-8829102", file: "insurance_policy.pdf", exp: "2027-06-30" },
-            { title: "Fitness Certificate", ref: "FIT-MH04-2027", file: "fitness_cert.pdf", exp: "2027-12-31" },
-            { title: "All India Permit", ref: "AIP-PERMIT-2028", file: "all_india_permit.pdf", exp: "2028-03-15" }
-          ]
-        }
-      ]);
+      setVehicleFolders([]);
     }
 
     // 2. Auto-organize Drivers from Local Storage
@@ -89,18 +78,7 @@ export default function MasterDocumentVaultPage() {
         console.error(e);
       }
     } else {
-      setDriverFolders([
-        {
-          name: "Rajesh Kumar",
-          phone: "9820112233",
-          docs: [
-            { title: "Driver Photo", ref: "KYC-PHOTO", file: "rajesh_photo.jpg" },
-            { title: "Aadhaar Card", ref: "9988 7766 5544", file: "aadhaar_rajesh.pdf" },
-            { title: "PAN Card", ref: "ABCDE1234F", file: "pan_rajesh.pdf" },
-            { title: "Driving License", ref: "MH-0220190045123", file: "license_rajesh.pdf", exp: "2029-08-15" }
-          ]
-        }
-      ]);
+      setDriverFolders([]);
     }
 
     // 3. Auto-organize Office Staff from Local Storage
@@ -123,18 +101,7 @@ export default function MasterDocumentVaultPage() {
         console.error(e);
       }
     } else {
-      setStaffFolders([
-        {
-          name: "Navneet Kumar",
-          role: "Dispatch Manager",
-          docs: [
-            { title: "Staff Photo", ref: "STAFF-PHOTO", file: "navneet_photo.jpg" },
-            { title: "Aadhaar Card", ref: "1122 3344 5566", file: "aadhaar_navneet.pdf" },
-            { title: "PAN Card", ref: "ABCDE5678G", file: "pan_navneet.pdf" },
-            { title: "Employment Contract / Offer Letter", ref: "EMP-CONTRACT-HQ", file: "contract_navneet.pdf" }
-          ]
-        }
-      ]);
+      setStaffFolders([]);
     }
   }, []);
 

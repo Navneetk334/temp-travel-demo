@@ -54,19 +54,14 @@ export default function MasterAdminDashboard() {
   });
 
   const [stats, setStats] = useState({
-    totalRevenue: 1248500,
-    activeRides: 18,
-    totalLeads: 24,
-    completedBookings: 142,
-    fleetCount: 9,
+    totalRevenue: 0,
+    activeRides: 0,
+    totalLeads: 0,
+    completedBookings: 0,
+    fleetCount: 0,
   });
 
-  const [recentLogs, setRecentLogs] = useState([
-    { id: "1", time: "Just now", text: "New Pickup & Drop Lead received via Web Booking Widget.", status: "NEW" },
-    { id: "2", time: "5 mins ago", text: "Driver Rajesh Kumar reached BKC Airport Transfer pickup point.", status: "ON_ROUTE" },
-    { id: "3", time: "12 mins ago", text: "Razorpay payment of ₹9,010 verified for Outstation Trip #INV-002.", status: "PAID" },
-    { id: "4", time: "25 mins ago", text: "Corporate Transit Roster for Accenture synced to Master Command.", status: "SYNCED" },
-  ]);
+  const [recentLogs, setRecentLogs] = useState<any[]>([]);
 
   const handleSyncSystems = async () => {
     setLoading(true);

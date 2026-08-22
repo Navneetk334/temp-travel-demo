@@ -47,46 +47,7 @@ export default function MasterOfficeStaffPage() {
   // Multi-selection state
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  const [staffList, setStaffList] = useState<any[]>([
-    {
-      id: "STF-201",
-      name: "Navneet Kumar",
-      role: "Dispatch Manager",
-      dob: "1994-06-15",
-      phone: "9876543210",
-      email: "navneet@temptravels.com",
-      photoName: "navneet_photo.jpg",
-      photoUrl: "",
-      aadhaarNumber: "1122 3344 5566",
-      aadhaarDocName: "aadhaar_navneet.pdf",
-      panNumber: "ABCDE5678G",
-      panDocName: "pan_navneet.pdf",
-      contractDocName: "contract_navneet.pdf",
-      bankName: "HDFC Bank",
-      accountHolderName: "Navneet Kumar",
-      accountNumber: "501009876123",
-      ifscCode: "HDFC0000123"
-    },
-    {
-      id: "STF-202",
-      name: "Ayush Sharma",
-      role: "Fleet Operations Head",
-      dob: "1996-09-20",
-      phone: "9812345678",
-      email: "ayush@temptravels.com",
-      photoName: "ayush_photo.jpg",
-      photoUrl: "",
-      aadhaarNumber: "2233 4455 6677",
-      aadhaarDocName: "aadhaar_ayush.pdf",
-      panNumber: "XYZPS1234L",
-      panDocName: "pan_ayush.pdf",
-      contractDocName: "contract_ayush.pdf",
-      bankName: "ICICI Bank",
-      accountHolderName: "Ayush Sharma",
-      accountNumber: "001102987111",
-      ifscCode: "ICIC0000456"
-    }
-  ]);
+  const [staffList, setStaffList] = useState<any[]>([]);
 
   const [formData, setFormData] = useState({
     name: "",

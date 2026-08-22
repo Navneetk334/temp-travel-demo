@@ -153,11 +153,7 @@ export default function MasterAdminLayout({
 
       // 2. Scan Drivers
       const savedDrivers = localStorage.getItem("user_uploaded_drivers");
-      const defaultDrivers = [
-        { name: "Rajesh Kumar", dob: "1992-06-15", phone: "9820112233", role: "Executive Chauffeur", licenseExpiry: "2026-09-15" },
-        { name: "Suresh Patil", dob: "1994-08-22", phone: "9833445566", role: "Outstation Captain", licenseExpiry: "2026-10-01" }
-      ];
-      const drivers = savedDrivers ? JSON.parse(savedDrivers) : defaultDrivers;
+      const drivers = savedDrivers ? JSON.parse(savedDrivers) : [];
       drivers.forEach((d: any) => {
         const licDays = daysUntilExpiry(d.licenseExpiry);
         if (licDays !== null && licDays <= 30) {
@@ -185,11 +181,7 @@ export default function MasterAdminLayout({
 
       // 3. Scan Office Staff
       const savedStaff = localStorage.getItem("user_uploaded_office_staff");
-      const defaultStaff = [
-        { name: "Navneet Kumar", role: "Dispatch Manager", dob: "1994-08-22", phone: "9876543210" },
-        { name: "Ayush Sharma", role: "Fleet Operations Head", dob: "1996-09-20", phone: "9812345678" }
-      ];
-      const staffList = savedStaff ? JSON.parse(savedStaff) : defaultStaff;
+      const staffList = savedStaff ? JSON.parse(savedStaff) : [];
       staffList.forEach((stf: any) => {
         const bdayInfo = isBirthdayThisMonth(stf.dob);
         if (bdayInfo.isToday || bdayInfo.isComingUp) {
