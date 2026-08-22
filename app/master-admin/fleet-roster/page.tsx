@@ -495,6 +495,32 @@ export default function MasterFleetRosterPage() {
 
                   <div className="flex items-center gap-2">
                     <button
+                      onClick={() => {
+                        const currentFeatured = vehicles.filter(item => item.isFeatured);
+                        if (!v.isFeatured && currentFeatured.length >= 3) {
+                          alert("Maximum 3 vehicles can be featured on the homepage showcase. Please unstar a vehicle first.");
+                          return;
+                        }
+                        const newFeaturedState = !v.isFeatured;
+                        const updated = vehicles.map(item => item.id === v.id ? { ...item, isFeatured: newFeaturedState } : item);
+                        setVehicles(updated);
+                        localStorage.setItem("user_uploaded_fleet", JSON.stringify(updated));
+                        fetch(`/api/fleet/${v.id}`, {
+                          method: "PUT",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ ...v, isFeatured: newFeaturedState })
+                        }).catch(e => console.error(e));
+                      }}
+                      className={`p-1.5 bg-slate-950 border rounded-lg transition-all cursor-pointer ${
+                        v.isFeatured
+                          ? "border-amber-400 text-amber-400 bg-amber-500/10 shadow-sm"
+                          : "border-white/10 text-slate-500 hover:text-amber-400"
+                      }`}
+                      title={v.isFeatured ? "Featured on Homepage (Click to Unstar)" : "Star to Feature on Homepage (Max 3)"}
+                    >
+                      <Sparkles className={`w-4 h-4 ${v.isFeatured ? "fill-amber-400 text-amber-400 animate-pulse" : ""}`} />
+                    </button>
+                    <button
                       onClick={() => openEditModal(v)}
                       className="p-1.5 bg-slate-950 border border-white/10 hover:border-amber-400 rounded-lg text-slate-400 hover:text-amber-400 transition-all cursor-pointer"
                       title="Edit Vehicle Specs"

@@ -43,20 +43,8 @@ export default function Homepage() {
     };
   }, []);
 
-  const DEFAULT_FEATURED = [
-    { id: "1", name: "Maruti Suzuki Swift Dzire", category: "Compact Sedan", seats: "4 Passengers", rate: "₹12/km", img: "/images/fleet-suv.png" },
-    { id: "2", name: "Honda City / Hyundai Verna", category: "Executive Sedan", seats: "4 Passengers", rate: "₹18/km", img: "/images/hero-cover.png" },
-    { id: "3", name: "Toyota Innova Crysta", category: "Premium MPV", seats: "7 Passengers", rate: "₹22/km", img: "/images/fleet-suv.png" },
-    { id: "4", name: "Toyota Fortuner 4x4", category: "Luxury SUV", seats: "7 Passengers", rate: "₹45/km", img: "/images/fleet-suv.png" },
-    { id: "5", name: "Mahindra XUV700 AX7", category: "Premium SUV", seats: "7 Passengers", rate: "₹26/km", img: "/images/fleet-suv.png" },
-    { id: "6", name: "Hyundai Creta / Alcazar", category: "Mid SUV", seats: "6 Passengers", rate: "₹20/km", img: "/images/fleet-suv.png" },
-    { id: "7", name: "Mercedes-Benz E-Class Luxury", category: "Luxury Sedan", seats: "4 Passengers", rate: "₹75/km", img: "/images/hero-cover.png" },
-    { id: "8", name: "BMW 5 Series Executive", category: "Luxury Sedan", seats: "4 Passengers", rate: "₹80/km", img: "/images/hero-cover.png" },
-    { id: "9", name: "Force Motors Traveller 17S", category: "Executive Coach", seats: "17 Passengers", rate: "₹32/km", img: "/images/fleet-suv.png" }
-  ];
-
-  const [featuredVehicles, setFeaturedVehicles] = useState<any[]>(DEFAULT_FEATURED);
-  const [vehiclesLoading, setVehiclesLoading] = useState<boolean>(false);
+  const [featuredVehicles, setFeaturedVehicles] = useState<any[]>([]);
+  const [vehiclesLoading, setVehiclesLoading] = useState<boolean>(true);
 
   const [googleData, setGoogleData] = useState<{
     rating: number;
@@ -96,45 +84,60 @@ export default function Homepage() {
   });
 
   useEffect(() => {
+    // 1. Immediate local hydration for instant render without flash
+    const saved = localStorage.getItem("user_uploaded_fleet");
+    if (saved) {
+      try {
+        const localList = JSON.parse(saved);
+        if (Array.isArray(localList) && localList.length > 0) {
+          const starred = localList.filter((v: any) => v.isFeatured);
+          const displayItems = starred.length > 0 ? starred.slice(0, 3) : localList.slice(0, 3);
+          setFeaturedVehicles(displayItems.map((v: any) => ({
+            id: v.id,
+            name: `${v.make} ${v.model}`,
+            category: `${v.categoryName || "Sedan"} • ${v.vehicleClass || "Executive"}`,
+            seats: `${v.capacity} Passengers`,
+            rate: v.perKmRate ? `₹${Number(v.perKmRate)}/km` : v.baseDailyRate ? `₹${Number(v.baseDailyRate)}/day` : "On Request",
+            img: v.imageUrl || "/images/hero-car.png"
+          })));
+          setVehiclesLoading(false);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     fetch("/api/google-reviews")
-      .then((res) => {
-        if (res.ok) return res.json();
-        throw new Error("Failed to fetch reviews");
-      })
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.reviews && Array.isArray(data.reviews)) {
           setGoogleData(data);
         }
       })
-      .catch((err) => {
-        console.error("Google reviews load error:", err);
-      });
+      .catch((err) => console.error(err));
 
-    // Fetch featured homepage fleet vehicles selected in Admin Panel
+    // 2. Sync with live API
     fetch("/api/fleet?limit=100")
-      .then((res) => {
-        if (res.ok) return res.json();
-        throw new Error("Failed to fetch fleet");
-      })
+      .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        const vehicles = Array.isArray(data) ? data : (data.vehicles || []);
-        if (vehicles.length > 0) {
-          setFeaturedVehicles(vehicles.slice(0, 3).map((v: any) => ({
-            id: v.id,
-            name: `${v.make} ${v.model}`,
-            category: v.subCategory || v.category?.name || "Executive Fleet",
-            seats: `${v.capacity} Passengers`,
-            rate: v.perKmRate ? `₹${Number(v.perKmRate)}/km` : v.baseDailyRate ? `₹${Number(v.baseDailyRate)}/day` : "On Request",
-            img: v.imageUrl || "/images/hero-car.png"
-          })));
-        } else {
-          setFeaturedVehicles(DEFAULT_FEATURED.slice(0, 3));
+        if (data) {
+          const vehicles = Array.isArray(data) ? data : (data.vehicles || []);
+          if (vehicles.length > 0) {
+            const starred = vehicles.filter((v: any) => v.isFeatured);
+            const displayItems = starred.length > 0 ? starred.slice(0, 3) : vehicles.slice(0, 3);
+            setFeaturedVehicles(displayItems.map((v: any) => ({
+              id: v.id,
+              name: `${v.make} ${v.model}`,
+              category: `${v.categoryName || "Sedan"} • ${v.vehicleClass || "Executive"}`,
+              seats: `${v.capacity} Passengers`,
+              rate: v.perKmRate ? `₹${Number(v.perKmRate)}/km` : v.baseDailyRate ? `₹${Number(v.baseDailyRate)}/day` : "On Request",
+              img: v.imageUrl || "/images/hero-car.png"
+            })));
+          }
         }
       })
-      .catch((err) => {
-        console.error("Featured vehicles load error:", err);
-        setFeaturedVehicles(DEFAULT_FEATURED);
-      });
+      .catch((err) => console.error("Featured vehicles load error:", err))
+      .finally(() => setVehiclesLoading(false));
   }, []);
 
   const businessSchema = {
