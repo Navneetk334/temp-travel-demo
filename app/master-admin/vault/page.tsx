@@ -1,446 +1,308 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FileCheck,
   Search,
-  Filter,
-  Plus,
-  Upload,
-  User,
-  Car,
-  Building2,
+  Folder,
+  FolderOpen,
   FileText,
   ShieldCheck,
-  Calendar,
-  X,
-  CheckCircle2,
+  ChevronRight,
   Download,
   Eye,
   Trash2,
-  Tag
+  Car,
+  UserCheck,
+  Briefcase,
+  Sparkles,
+  Shield,
+  Upload,
+  Plus,
+  X
 } from "lucide-react";
 
 export default function MasterDocumentVaultPage() {
   const [search, setSearch] = useState("");
-  const [activeCategory, setActiveCategory] = useState<"ALL" | "VEHICLE" | "DRIVER" | "EMPLOYEE" | "COMPANY">("ALL");
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  const [selectedDoc, setSelectedDoc] = useState<any | null>(null);
+  const [activeRoot, setActiveRoot] = useState<"VEHICLES" | "DRIVERS" | "STAFF">("VEHICLES");
+  const [selectedSubFolder, setSelectedSubFolder] = useState<string | null>(null);
 
-  const [vaultDocs, setVaultDocs] = useState([
-    {
-      id: "DOC-101",
-      title: "Driver Aadhaar Card - Rajesh Kumar",
-      entityType: "DRIVER",
-      entityName: "Rajesh Kumar (Driver DRV-101)",
-      docTag: "Aadhaar Card",
-      refNumber: "9820-1122-3344",
-      issueDate: "2020-01-15",
-      expiryDate: "N/A (Lifetime)",
-      fileName: "aadhaar_rajesh_kumar.pdf",
-      fileSize: "1.4 MB",
-      status: "VERIFIED"
-    },
-    {
-      id: "DOC-102",
-      title: "Driver PAN Card - Rajesh Kumar",
-      entityType: "DRIVER",
-      entityName: "Rajesh Kumar (Driver DRV-101)",
-      docTag: "PAN Card",
-      refNumber: "ABCDE1234F",
-      issueDate: "2018-05-10",
-      expiryDate: "N/A (Lifetime)",
-      fileName: "pan_rajesh_kumar.pdf",
-      fileSize: "850 KB",
-      status: "VERIFIED"
-    },
-    {
-      id: "DOC-103",
-      title: "Commercial Vehicle RC Book - Toyota Innova Crysta",
-      entityType: "VEHICLE",
-      entityName: "MH 04 ER 8890 (Innova Crysta)",
-      docTag: "RC Certificate",
-      refNumber: "RC-MH04-2022-9901",
-      issueDate: "2022-03-10",
-      expiryDate: "2037-03-09",
-      fileName: "rc_innova_mh04er8890.pdf",
-      fileSize: "2.8 MB",
-      status: "VERIFIED"
-    },
-    {
-      id: "DOC-104",
-      title: "Comprehensive Commercial Insurance Policy - Fortuner",
-      entityType: "VEHICLE",
-      entityName: "MH 02 FG 9900 (Fortuner 4x4)",
-      docTag: "Insurance Policy",
-      refNumber: "POL-ICICI-2025-4421",
-      issueDate: "2025-01-10",
-      expiryDate: "2026-12-05",
-      fileName: "insurance_fortuner_mh02fg9900.pdf",
-      fileSize: "3.1 MB",
-      status: "VERIFIED"
-    },
-    {
-      id: "DOC-105",
-      title: "Employee Offer & Verification File - Navneet Kumar",
-      entityType: "EMPLOYEE",
-      entityName: "Navneet Kumar (Operations Manager)",
-      docTag: "Employment Verification",
-      refNumber: "EMP-2024-001",
-      issueDate: "2024-06-01",
-      expiryDate: "N/A",
-      fileName: "emp_file_navneet.pdf",
-      fileSize: "1.9 MB",
-      status: "VERIFIED"
-    },
-    {
-      id: "DOC-106",
-      title: "ISO 9001:2015 Commercial Fleet Quality Compliance Certificate",
-      entityType: "COMPANY",
-      entityName: "TEMP TRAVEL CAR RENTALS PVT LTD",
-      docTag: "ISO Compliance Certificate",
-      refNumber: "ISO-9001-IND-8842",
-      issueDate: "2024-09-01",
-      expiryDate: "2027-08-31",
-      fileName: "iso_certificate_temptravels.pdf",
-      fileSize: "4.2 MB",
-      status: "VERIFIED"
+  // Dynamic state for auto-archived folders
+  const [vehicleFolders, setVehicleFolders] = useState<any[]>([]);
+  const [driverFolders, setDriverFolders] = useState<any[]>([]);
+  const [staffFolders, setStaffFolders] = useState<any[]>([]);
+
+  useEffect(() => {
+    // 1. Auto-organize Vehicles from Local Storage
+    const savedFleet = localStorage.getItem("user_uploaded_fleet");
+    if (savedFleet) {
+      try {
+        const fleet = JSON.parse(savedFleet);
+        const folders = fleet.map((v: any) => ({
+          name: `${v.make} ${v.model}`,
+          regNumber: v.registrationNumber,
+          docs: [
+            { title: "Vehicle RC Document", ref: v.rcNumber || `RC-${v.registrationNumber}`, file: v.rcDocName || `rc_${v.registrationNumber.replace(/\s+/g, "_")}.pdf` },
+            { title: "Insurance Policy", ref: v.insuranceNumber || "POL-8829102", file: v.insuranceDocName || `insurance_${v.registrationNumber.replace(/\s+/g, "_")}.pdf`, exp: v.insuranceExpiry },
+            { title: "Fitness Certificate", ref: "FIT-COMPLIANCE", file: v.fitnessDocName || "fitness_cert.pdf", exp: v.fitnessExpiry },
+            { title: "All India Permit", ref: "AIP-NATIONAL", file: v.allIndiaPermitDocName || "all_india_permit.pdf", exp: v.allIndiaPermitExpiry || v.permitExpiry },
+            { title: "Yearly State Permit", ref: "PERMIT-ANNUAL", file: v.yearlyPermitDocName || "yearly_permit.pdf", exp: v.yearlyPermitExpiry },
+            { title: "PUC Pollution Certificate", ref: "PUC-GREEN", file: v.pucDocName || "puc_certificate.pdf", exp: v.pucExpiry }
+          ]
+        }));
+        setVehicleFolders(folders);
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      setVehicleFolders([
+        {
+          name: "Toyota Innova Crysta",
+          regNumber: "MH 04 ER 8890",
+          docs: [
+            { title: "Vehicle RC Document", ref: "RC-MH04-8890", file: "rc_innova.pdf" },
+            { title: "Insurance Policy", ref: "POL-HDFC-8829102", file: "insurance_policy.pdf", exp: "2027-06-30" },
+            { title: "Fitness Certificate", ref: "FIT-MH04-2027", file: "fitness_cert.pdf", exp: "2027-12-31" },
+            { title: "All India Permit", ref: "AIP-PERMIT-2028", file: "all_india_permit.pdf", exp: "2028-03-15" }
+          ]
+        }
+      ]);
     }
-  ]);
 
-  const [uploadForm, setUploadForm] = useState({
-    title: "",
-    entityType: "DRIVER",
-    entityName: "",
-    docTag: "Aadhaar Card",
-    refNumber: "",
-    expiryDate: "2028-12-31",
-    fileName: ""
-  });
+    // 2. Auto-organize Drivers from Local Storage
+    const savedDrivers = localStorage.getItem("user_uploaded_drivers");
+    if (savedDrivers) {
+      try {
+        const drivers = JSON.parse(savedDrivers);
+        const folders = drivers.map((d: any) => ({
+          name: d.name,
+          phone: d.phone,
+          docs: [
+            { title: "Driver Photo", ref: "KYC-PHOTO", file: d.photoName || `${d.name.toLowerCase().replace(/\s+/g, "_")}_photo.jpg` },
+            { title: "Aadhaar Card", ref: d.aadhaarNumber || "9988 7766 5544", file: d.aadhaarDocName || `aadhaar_${d.name.toLowerCase().replace(/\s+/g, "_")}.pdf` },
+            { title: "PAN Card", ref: d.panNumber || "ABCDE1234F", file: d.panDocName || `pan_${d.name.toLowerCase().replace(/\s+/g, "_")}.pdf` },
+            { title: "Driving License", ref: d.licenseNumber || "MH-0220190045123", file: d.licenseDocName || `license_${d.name.toLowerCase().replace(/\s+/g, "_")}.pdf`, exp: d.licenseExpiry }
+          ]
+        }));
+        setDriverFolders(folders);
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      setDriverFolders([
+        {
+          name: "Rajesh Kumar",
+          phone: "9820112233",
+          docs: [
+            { title: "Driver Photo", ref: "KYC-PHOTO", file: "rajesh_photo.jpg" },
+            { title: "Aadhaar Card", ref: "9988 7766 5544", file: "aadhaar_rajesh.pdf" },
+            { title: "PAN Card", ref: "ABCDE1234F", file: "pan_rajesh.pdf" },
+            { title: "Driving License", ref: "MH-0220190045123", file: "license_rajesh.pdf", exp: "2029-08-15" }
+          ]
+        }
+      ]);
+    }
 
-  const handleUploadSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const created = {
-      id: `DOC-${101 + vaultDocs.length}`,
-      title: uploadForm.title,
-      entityType: uploadForm.entityType,
-      entityName: uploadForm.entityName || "General File",
-      docTag: uploadForm.docTag,
-      refNumber: uploadForm.refNumber || "REF-9900",
-      issueDate: new Date().toISOString().slice(0, 10),
-      expiryDate: uploadForm.expiryDate,
-      fileName: uploadForm.fileName || "uploaded_document.pdf",
-      fileSize: "2.1 MB",
-      status: "VERIFIED"
-    };
-    setVaultDocs([created, ...vaultDocs]);
-    setShowUploadModal(false);
-    setUploadForm({ title: "", entityType: "DRIVER", entityName: "", docTag: "Aadhaar Card", refNumber: "", expiryDate: "2028-12-31", fileName: "" });
-  };
+    // 3. Auto-organize Office Staff from Local Storage
+    const savedStaff = localStorage.getItem("user_uploaded_office_staff");
+    if (savedStaff) {
+      try {
+        const staff = JSON.parse(savedStaff);
+        const folders = staff.map((s: any) => ({
+          name: s.name,
+          role: s.role,
+          docs: [
+            { title: "Staff Photo", ref: "STAFF-PHOTO", file: s.photoName || `${s.name.toLowerCase().replace(/\s+/g, "_")}_photo.jpg` },
+            { title: "Aadhaar Card", ref: s.aadhaarNumber || "1122 3344 5566", file: s.aadhaarDocName || `aadhaar_${s.name.toLowerCase().replace(/\s+/g, "_")}.pdf` },
+            { title: "PAN Card", ref: s.panNumber || "ABCDE5678G", file: s.panDocName || `pan_${s.name.toLowerCase().replace(/\s+/g, "_")}.pdf` },
+            { title: "Employment Contract / Offer Letter", ref: "EMP-CONTRACT-HQ", file: s.contractDocName || `contract_${s.name.toLowerCase().replace(/\s+/g, "_")}.pdf` }
+          ]
+        }));
+        setStaffFolders(folders);
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      setStaffFolders([
+        {
+          name: "Navneet Kumar",
+          role: "Dispatch Manager",
+          docs: [
+            { title: "Staff Photo", ref: "STAFF-PHOTO", file: "navneet_photo.jpg" },
+            { title: "Aadhaar Card", ref: "1122 3344 5566", file: "aadhaar_navneet.pdf" },
+            { title: "PAN Card", ref: "ABCDE5678G", file: "pan_navneet.pdf" },
+            { title: "Employment Contract / Offer Letter", ref: "EMP-CONTRACT-HQ", file: "contract_navneet.pdf" }
+          ]
+        }
+      ]);
+    }
+  }, []);
 
-  const filteredDocs = vaultDocs.filter((doc) => {
-    const matchesCategory = activeCategory === "ALL" || doc.entityType === activeCategory;
-    const matchesSearch =
-      doc.title.toLowerCase().includes(search.toLowerCase()) ||
-      doc.entityName.toLowerCase().includes(search.toLowerCase()) ||
-      doc.refNumber.toLowerCase().includes(search.toLowerCase()) ||
-      doc.docTag.toLowerCase().includes(search.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  const currentFolderList =
+    activeRoot === "VEHICLES"
+      ? vehicleFolders
+      : activeRoot === "DRIVERS"
+      ? driverFolders
+      : staffFolders;
+
+  const activeFolder = selectedSubFolder
+    ? currentFolderList.find(f => f.name === selectedSubFolder)
+    : currentFolderList[0];
 
   return (
-    <div className="space-y-8">
+    <div className="p-6 md:p-8 space-y-8 bg-slate-950 text-slate-100 min-h-screen">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-amber-500/20 pb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-amber-500/20 pb-6">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-black tracking-tight text-slate-50">
-              Master Document Vault & Compliance Center
+            <FileCheck className="w-7 h-7 text-amber-400" />
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-50 tracking-tight">
+              Master Document Vault & Auto-Archive
             </h1>
-            <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest">
-              256-Bit Encrypted Vault
-            </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Store, segregate, and instantly retrieve RCs, Insurance, Driver Aadhaar/PAN, Employee records, and Company Permits.
+            Automatically organized document repository for Vehicles, Drivers, and Office Staff.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 bg-slate-900 border border-white/10 p-1.5 rounded-2xl">
           <button
-            onClick={() => setShowUploadModal(true)}
-            className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase transition-all shadow-lg shadow-amber-500/20 cursor-pointer"
+            onClick={() => { setActiveRoot("VEHICLES"); setSelectedSubFolder(null); }}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+              activeRoot === "VEHICLES" ? "bg-amber-500 text-slate-950 shadow-md" : "text-slate-400 hover:text-white"
+            }`}
           >
-            <Upload className="w-4 h-4" />
-            <span>Upload Document to Vault</span>
+            <Car className="w-4 h-4" />
+            <span>Vehicles</span>
+          </button>
+          <button
+            onClick={() => { setActiveRoot("DRIVERS"); setSelectedSubFolder(null); }}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+              activeRoot === "DRIVERS" ? "bg-amber-500 text-slate-950 shadow-md" : "text-slate-400 hover:text-white"
+            }`}
+          >
+            <UserCheck className="w-4 h-4" />
+            <span>Drivers</span>
+          </button>
+          <button
+            onClick={() => { setActiveRoot("STAFF"); setSelectedSubFolder(null); }}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+              activeRoot === "STAFF" ? "bg-amber-500 text-slate-950 shadow-md" : "text-slate-400 hover:text-white"
+            }`}
+          >
+            <Briefcase className="w-4 h-4" />
+            <span>Office Staff</span>
           </button>
         </div>
       </div>
 
-      {/* Segregation Category Filter Tabs */}
-      <div className="flex flex-wrap items-center gap-3 bg-slate-900/80 p-2 rounded-2xl border border-white/10 w-fit">
-        {[
-          { key: "ALL", label: "All Documents", icon: FileCheck },
-          { key: "DRIVER", label: "Driver Files (DL, Aadhaar, PAN)", icon: User },
-          { key: "VEHICLE", label: "Vehicle Documents (RC, Insurance)", icon: Car },
-          { key: "EMPLOYEE", label: "Employee Records", icon: ShieldCheck },
-          { key: "COMPANY", label: "Company Licenses & ISO", icon: Building2 },
-        ].map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeCategory === tab.key;
-          return (
-            <button
-              key={tab.key}
-              onClick={() => setActiveCategory(tab.key as any)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                isActive
-                  ? "bg-amber-500 text-slate-950 font-black shadow-lg shadow-amber-500/20"
-                  : "text-slate-400 hover:text-white"
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
+      {/* Explorer Workspace */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left Side Sub-Folder Directory List */}
+        <div className="lg:col-span-4 bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-5 space-y-4 shadow-xl">
+          <div className="flex items-center justify-between border-b border-white/10 pb-3">
+            <span className="text-xs font-black uppercase text-amber-400 tracking-wider flex items-center gap-1.5">
+              <Folder className="w-4 h-4" /> Root Directory: {activeRoot}
+            </span>
+            <span className="text-[10px] font-mono font-bold bg-amber-500/10 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/20">
+              {currentFolderList.length} Folders
+            </span>
+          </div>
 
-      {/* Search Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-2xl border border-white/10">
-        <div className="relative w-full sm:w-96">
-          <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Search by Driver Name, Vehicle Reg #, Employee, or Ref #..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-slate-950 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
-          />
+          <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+            {currentFolderList.map((f, idx) => {
+              const isSelected = (selectedSubFolder || currentFolderList[0]?.name) === f.name;
+              return (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedSubFolder(f.name)}
+                  className={`w-full flex items-center justify-between p-3 rounded-xl border text-left text-xs transition-all cursor-pointer ${
+                    isSelected
+                      ? "bg-amber-500/15 border-amber-400 text-slate-50 font-extrabold shadow-lg"
+                      : "bg-slate-950 border-white/5 text-slate-300 hover:border-white/20"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    {isSelected ? (
+                      <FolderOpen className="w-4 h-4 text-amber-400 shrink-0" />
+                    ) : (
+                      <Folder className="w-4 h-4 text-slate-500 shrink-0" />
+                    )}
+                    <div>
+                      <div className="font-bold text-slate-100">{f.name}</div>
+                      <div className="text-[10px] font-mono text-slate-400">
+                        {f.regNumber || f.phone || f.role || "Automated Folder"}
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronRight className={`w-4 h-4 ${isSelected ? "text-amber-400" : "text-slate-600"}`} />
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        <span className="text-xs font-mono text-slate-400">
-          Showing <strong className="text-amber-400">{filteredDocs.length}</strong> Document Records
-        </span>
-      </div>
+        {/* Right Side Documents View Inside Folder */}
+        <div className="lg:col-span-8 bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 space-y-6 shadow-xl">
+          {activeFolder ? (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <div>
+                  <div className="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-widest">
+                    {activeRoot} &gt; {activeFolder.name}
+                  </div>
+                  <h3 className="text-xl font-black text-slate-50 mt-0.5 flex items-center gap-2">
+                    <FolderOpen className="w-5 h-5 text-amber-400" />
+                    <span>{activeFolder.name}</span>
+                  </h3>
+                </div>
 
-      {/* Documents Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredDocs.map((doc) => (
-          <div
-            key={doc.id}
-            className="bg-slate-900/80 backdrop-blur-xl border border-white/10 hover:border-amber-500/40 rounded-2xl p-6 shadow-xl space-y-4 transition-all flex flex-col justify-between"
-          >
-            <div className="space-y-3">
-              <div className="flex justify-between items-start">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 flex items-center gap-1">
-                  <Tag className="w-3 h-3" /> {doc.entityType}
+                <span className="text-xs font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4" /> 100% Vault Compliant
                 </span>
-                <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                  <CheckCircle2 className="w-3 h-3" /> {doc.status}
-                </span>
               </div>
 
-              <div>
-                <h3 className="font-extrabold text-slate-50 text-sm leading-snug">{doc.title}</h3>
-                <div className="text-[11px] font-mono text-amber-400/90 font-bold mt-0.5">{doc.entityName}</div>
-              </div>
+              {/* Documents List */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {activeFolder.docs.map((doc: any, idx: number) => (
+                  <div
+                    key={idx}
+                    className="bg-slate-950 p-4 rounded-xl border border-white/5 hover:border-amber-400/40 transition-all space-y-3 relative group"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold">
+                          <FileText className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h4 className="font-extrabold text-slate-100 text-xs">{doc.title}</h4>
+                          <div className="text-[10px] font-mono text-slate-400 mt-0.5">Ref: {doc.ref}</div>
+                        </div>
+                      </div>
+                    </div>
 
-              <div className="space-y-1.5 bg-slate-950 p-3.5 rounded-xl border border-white/5 text-xs font-mono">
-                <div className="flex justify-between text-slate-300">
-                  <span className="text-slate-400 font-sans">Document Tag:</span>
-                  <span className="font-bold text-slate-200">{doc.docTag}</span>
-                </div>
-                <div className="flex justify-between text-slate-300">
-                  <span className="text-slate-400 font-sans">Ref / ID #:</span>
-                  <span className="font-bold text-amber-400 truncate max-w-[140px]">{doc.refNumber}</span>
-                </div>
-                <div className="flex justify-between text-slate-300">
-                  <span className="text-slate-400 font-sans">Expiry Date:</span>
-                  <span className="font-bold text-slate-200">{doc.expiryDate}</span>
-                </div>
+                    <div className="text-[11px] font-mono text-amber-400/90 bg-amber-500/5 p-2 rounded-lg border border-amber-500/10 flex justify-between">
+                      <span>File Name:</span>
+                      <strong className="text-slate-200 truncate max-w-[150px]">{doc.file}</strong>
+                    </div>
+
+                    {doc.exp && (
+                      <div className="text-[10px] font-mono text-slate-400 flex justify-between">
+                        <span>Expiry Date:</span>
+                        <span className="text-emerald-400 font-bold">{doc.exp}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
-
-            <div className="pt-3 border-t border-white/5 flex items-center justify-between">
-              <span className="text-[10px] font-mono text-slate-500">{doc.fileName} ({doc.fileSize})</span>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setSelectedDoc(doc)}
-                  className="flex items-center gap-1 bg-slate-950 text-amber-400 hover:text-white border border-amber-500/30 px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer"
-                >
-                  <Eye className="w-3 h-3" /> View
-                </button>
-              </div>
+          ) : (
+            <div className="p-12 text-center text-slate-500 italic text-xs">
+              No folder selected. Select a folder from the left directory menu.
             </div>
-          </div>
-        ))}
+          )}
+        </div>
       </div>
-
-      {/* Upload Document Modal */}
-      {showUploadModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100 max-h-[90vh] overflow-y-auto">
-            <button
-              onClick={() => setShowUploadModal(false)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="space-y-1 border-b border-white/10 pb-3">
-              <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">Encrypted Vault Upload</span>
-              <h3 className="text-2xl font-black text-slate-50">Upload Document File</h3>
-            </div>
-
-            <form onSubmit={handleUploadSubmit} className="space-y-4 text-xs">
-              <div className="space-y-1">
-                <label className="text-slate-300 font-bold">Document Title *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Driver Aadhaar Card - Suresh Patil"
-                  value={uploadForm.title}
-                  onChange={(e) => setUploadForm({ ...uploadForm, title: e.target.value })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">Target Entity Category</label>
-                  <select
-                    value={uploadForm.entityType}
-                    onChange={(e) => setUploadForm({ ...uploadForm, entityType: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
-                  >
-                    <option value="DRIVER">DRIVER</option>
-                    <option value="VEHICLE">VEHICLE</option>
-                    <option value="EMPLOYEE">EMPLOYEE</option>
-                    <option value="COMPANY">COMPANY</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">Document Tag</label>
-                  <select
-                    value={uploadForm.docTag}
-                    onChange={(e) => setUploadForm({ ...uploadForm, docTag: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
-                  >
-                    <option value="Aadhaar Card">Aadhaar Card</option>
-                    <option value="PAN Card">PAN Card</option>
-                    <option value="Driving License">Driving License</option>
-                    <option value="Police Verification">Police Verification</option>
-                    <option value="RC Certificate">RC Certificate</option>
-                    <option value="Insurance Policy">Insurance Policy</option>
-                    <option value="Fitness Certificate">Fitness Certificate</option>
-                    <option value="Employment Verification">Employment File</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-slate-300 font-bold">Target Entity Name / Detail *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Suresh Patil / MH 04 ER 8890"
-                  value={uploadForm.entityName}
-                  onChange={(e) => setUploadForm({ ...uploadForm, entityName: e.target.value })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">Reference / Policy #</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. POL-998811"
-                    value={uploadForm.refNumber}
-                    onChange={(e) => setUploadForm({ ...uploadForm, refNumber: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">Expiry Date</label>
-                  <input
-                    type="date"
-                    value={uploadForm.expiryDate}
-                    onChange={(e) => setUploadForm({ ...uploadForm, expiryDate: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-slate-300 font-bold">Select PDF / Image File from Device *</label>
-                <input
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  required
-                  onChange={(e) => setUploadForm({ ...uploadForm, fileName: e.target.files?.[0]?.name || "document.pdf" })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-300 text-xs file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950"
-                />
-              </div>
-
-              <div className="pt-3 border-t border-white/10 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowUploadModal(false)}
-                  className="px-5 py-2.5 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs font-bold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer"
-                >
-                  Save Document to Vault
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Document Inspector Modal */}
-      {selectedDoc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4 relative text-slate-100">
-            <button
-              onClick={() => setSelectedDoc(null)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">Vault File Inspector</span>
-              <h3 className="text-xl font-bold text-slate-50">{selectedDoc.title}</h3>
-            </div>
-
-            <div className="space-y-2 bg-slate-950 p-4 rounded-xl border border-white/10 text-xs font-mono">
-              <div>Entity Category: <strong className="text-amber-400">{selectedDoc.entityType}</strong></div>
-              <div>Entity Reference: <strong className="text-slate-100">{selectedDoc.entityName}</strong></div>
-              <div>Document Tag: <strong className="text-slate-200">{selectedDoc.docTag}</strong></div>
-              <div>Ref / Policy #: <strong className="text-amber-400">{selectedDoc.refNumber}</strong></div>
-              <div>Expiry Date: <strong className="text-slate-200">{selectedDoc.expiryDate}</strong></div>
-              <div>File Name: <span className="text-slate-400">{selectedDoc.fileName}</span></div>
-            </div>
-
-            <div className="pt-2 flex justify-end">
-              <button
-                onClick={() => setSelectedDoc(null)}
-                className="px-4 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs cursor-pointer"
-              >
-                Close File
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -40,31 +40,43 @@ export default function MasterFleetRosterPage() {
   // Multi-select state
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  // Complete Vehicle Form State
+  // Complete Vehicle Form State with Expiries, Numbers, and Document Uploads
   const [formData, setFormData] = useState({
     make: "",
+    model: "",
     categoryName: "Sedan",
     vehicleClass: "Executive",
-    model: "",
     registrationNumber: "",
     transmission: "Manual",
     fuelType: "Diesel",
     capacity: "4",
     perKmRate: "14",
     perHourRate: "150",
-    baseDailyRate: "3500",
     driverAllowance: "500",
     nightAllowance: "300",
+    // RC Number & Doc
+    rcNumber: "",
+    rcDocName: "",
+    // Insurance
     insuranceProvider: "HDFC ERGO General Insurance",
     insuranceNumber: "POL-8829102",
+    insuranceDocName: "",
     insuranceExpiry: "2027-06-30",
+    // Fitness
     fitnessExpiry: "2027-12-31",
-    permitExpiry: "2028-03-15",
+    fitnessDocName: "",
+    // Permits & PUC
+    allIndiaPermitExpiry: "2028-03-15",
+    allIndiaPermitDocName: "",
+    yearlyPermitExpiry: "2027-03-15",
+    yearlyPermitDocName: "",
+    pucExpiry: "2026-11-30",
+    pucDocName: "",
+    // Device Image Upload
     imageName: "",
     imageUrl: ""
   });
 
-  // Automatically adjust default Vehicle Class when Category changes
   const handleCategoryChange = (cat: string) => {
     const defaultClass = CLASS_OPTIONS[cat]?.[0] || "Executive";
     setFormData(prev => ({ ...prev, categoryName: cat, vehicleClass: defaultClass }));
@@ -110,23 +122,31 @@ export default function MasterFleetRosterPage() {
     setEditingVehicle(null);
     setFormData({
       make: "",
+      model: "",
       categoryName: "Sedan",
       vehicleClass: "Executive",
-      model: "",
       registrationNumber: "",
       transmission: "Manual",
       fuelType: "Diesel",
       capacity: "4",
       perKmRate: "14",
       perHourRate: "150",
-      baseDailyRate: "3500",
       driverAllowance: "500",
       nightAllowance: "300",
+      rcNumber: "",
+      rcDocName: "",
       insuranceProvider: "HDFC ERGO General Insurance",
       insuranceNumber: "POL-8829102",
+      insuranceDocName: "",
       insuranceExpiry: "2027-06-30",
       fitnessExpiry: "2027-12-31",
-      permitExpiry: "2028-03-15",
+      fitnessDocName: "",
+      allIndiaPermitExpiry: "2028-03-15",
+      allIndiaPermitDocName: "",
+      yearlyPermitExpiry: "2027-03-15",
+      yearlyPermitDocName: "",
+      pucExpiry: "2026-11-30",
+      pucDocName: "",
       imageName: "",
       imageUrl: ""
     });
@@ -137,23 +157,31 @@ export default function MasterFleetRosterPage() {
     setEditingVehicle(v);
     setFormData({
       make: v.make || "",
+      model: v.model || "",
       categoryName: v.categoryName || "Sedan",
       vehicleClass: v.vehicleClass || CLASS_OPTIONS[v.categoryName || "Sedan"]?.[0] || "Executive",
-      model: v.model || "",
       registrationNumber: v.registrationNumber || "",
       transmission: v.transmission || "Manual",
       fuelType: v.fuelType || "Diesel",
       capacity: String(v.capacity || 4),
       perKmRate: String(v.perKmRate || 14),
       perHourRate: String(v.perHourRate || 150),
-      baseDailyRate: String(v.baseDailyRate || 3500),
       driverAllowance: String(v.driverAllowance || 500),
       nightAllowance: String(v.nightAllowance || 300),
+      rcNumber: v.rcNumber || "",
+      rcDocName: v.rcDocName || "",
       insuranceProvider: v.insuranceProvider || "HDFC ERGO General Insurance",
       insuranceNumber: v.insuranceNumber || "POL-8829102",
+      insuranceDocName: v.insuranceDocName || "",
       insuranceExpiry: v.insuranceExpiry || "2027-06-30",
       fitnessExpiry: v.fitnessExpiry || "2027-12-31",
-      permitExpiry: v.permitExpiry || "2028-03-15",
+      fitnessDocName: v.fitnessDocName || "",
+      allIndiaPermitExpiry: v.allIndiaPermitExpiry || "2028-03-15",
+      allIndiaPermitDocName: v.allIndiaPermitDocName || "",
+      yearlyPermitExpiry: v.yearlyPermitExpiry || "2027-03-15",
+      yearlyPermitDocName: v.yearlyPermitDocName || "",
+      pucExpiry: v.pucExpiry || "2026-11-30",
+      pucDocName: v.pucDocName || "",
       imageName: v.imageName || "",
       imageUrl: v.imageUrl || ""
     });
@@ -163,89 +191,102 @@ export default function MasterFleetRosterPage() {
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    let updatedList: any[] = [];
     if (editingVehicle) {
-      // Update existing vehicle
-      const updatedList = vehicles.map((v) => {
+      updatedList = vehicles.map((v) => {
         if (v.id === editingVehicle.id) {
           return {
             ...v,
             make: formData.make,
+            model: formData.model,
             categoryName: formData.categoryName,
             vehicleClass: formData.vehicleClass,
-            model: formData.model,
             registrationNumber: formData.registrationNumber,
             transmission: formData.transmission,
             fuelType: formData.fuelType,
             capacity: parseInt(formData.capacity) || 4,
-            perKmRate: parseFloat(formData.perKmRate) || 15,
+            perKmRate: parseFloat(formData.perKmRate) || 14,
             perHourRate: parseFloat(formData.perHourRate) || 150,
-            baseDailyRate: parseFloat(formData.baseDailyRate) || 3000,
             driverAllowance: parseFloat(formData.driverAllowance) || 500,
             nightAllowance: parseFloat(formData.nightAllowance) || 300,
+            rcNumber: formData.rcNumber,
+            rcDocName: formData.rcDocName,
             insuranceProvider: formData.insuranceProvider,
             insuranceNumber: formData.insuranceNumber,
+            insuranceDocName: formData.insuranceDocName,
             insuranceExpiry: formData.insuranceExpiry,
             fitnessExpiry: formData.fitnessExpiry,
-            permitExpiry: formData.permitExpiry,
+            fitnessDocName: formData.fitnessDocName,
+            permitExpiry: formData.allIndiaPermitExpiry,
+            allIndiaPermitExpiry: formData.allIndiaPermitExpiry,
+            allIndiaPermitDocName: formData.allIndiaPermitDocName,
+            yearlyPermitExpiry: formData.yearlyPermitExpiry,
+            yearlyPermitDocName: formData.yearlyPermitDocName,
+            pucExpiry: formData.pucExpiry,
+            pucDocName: formData.pucDocName,
             imageName: formData.imageName,
             imageUrl: formData.imageUrl
           };
         }
         return v;
       });
-      setVehicles(updatedList);
-      localStorage.setItem("user_uploaded_fleet", JSON.stringify(updatedList));
-
-      try {
-        await fetch(`/api/fleet/${editingVehicle.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData)
-        });
-      } catch (err) {
-        console.error("Update vehicle error:", err);
-      }
     } else {
-      // Create new vehicle
       const created = {
         id: `v-${Date.now()}`,
         make: formData.make || "Commercial Make",
+        model: formData.model || "Commercial Vehicle",
         categoryName: formData.categoryName,
         vehicleClass: formData.vehicleClass,
-        model: formData.model || "Commercial Vehicle",
         registrationNumber: formData.registrationNumber || `MH 04 XX ${Math.floor(1000 + Math.random() * 9000)}`,
         transmission: formData.transmission,
         fuelType: formData.fuelType,
         capacity: parseInt(formData.capacity) || 4,
-        perKmRate: parseFloat(formData.perKmRate) || 15,
+        perKmRate: parseFloat(formData.perKmRate) || 14,
         perHourRate: parseFloat(formData.perHourRate) || 150,
-        baseDailyRate: parseFloat(formData.baseDailyRate) || 3000,
         driverAllowance: parseFloat(formData.driverAllowance) || 500,
         nightAllowance: parseFloat(formData.nightAllowance) || 300,
+        rcNumber: formData.rcNumber,
+        rcDocName: formData.rcDocName,
         insuranceProvider: formData.insuranceProvider,
         insuranceNumber: formData.insuranceNumber,
+        insuranceDocName: formData.insuranceDocName,
         insuranceExpiry: formData.insuranceExpiry,
         fitnessExpiry: formData.fitnessExpiry,
-        permitExpiry: formData.permitExpiry,
+        fitnessDocName: formData.fitnessDocName,
+        permitExpiry: formData.allIndiaPermitExpiry,
+        allIndiaPermitExpiry: formData.allIndiaPermitExpiry,
+        allIndiaPermitDocName: formData.allIndiaPermitDocName,
+        yearlyPermitExpiry: formData.yearlyPermitExpiry,
+        yearlyPermitDocName: formData.yearlyPermitDocName,
+        pucExpiry: formData.pucExpiry,
+        pucDocName: formData.pucDocName,
         isAvailable: true,
         permitStatus: "VALID",
         imageName: formData.imageName,
         imageUrl: formData.imageUrl
       };
+      updatedList = [created, ...vehicles];
+    }
 
-      const updated = [created, ...vehicles];
-      setVehicles(updated);
-      localStorage.setItem("user_uploaded_fleet", JSON.stringify(updated));
+    setVehicles(updatedList);
+    localStorage.setItem("user_uploaded_fleet", JSON.stringify(updatedList));
 
-      try {
+    try {
+      if (editingVehicle) {
+        await fetch(`/api/fleet/${editingVehicle.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData)
+        });
+      } else {
         await fetch("/api/fleet", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(created)
+          body: JSON.stringify(updatedList[0])
         });
-      } catch (err) {
-        console.error("Save vehicle error:", err);
       }
+    } catch (err) {
+      console.error("Save vehicle API error:", err);
     }
 
     setShowModal(false);
@@ -262,7 +303,6 @@ export default function MasterFleetRosterPage() {
     }
   };
 
-  // Multi-selection handlers
   const handleSelectToggle = (id: string) => {
     if (selectedIds.includes(id)) {
       setSelectedIds(selectedIds.filter(i => i !== id));
@@ -288,17 +328,6 @@ export default function MasterFleetRosterPage() {
     }
   };
 
-  const handleBulkDelete = () => {
-    if (selectedIds.length === 0) return;
-    const confirmDel = confirm(`Are you sure you want to delete ${selectedIds.length} selected vehicle(s)?`);
-    if (confirmDel) {
-      const updated = vehicles.filter(v => !selectedIds.includes(v.id));
-      setVehicles(updated);
-      setSelectedIds([]);
-      localStorage.setItem("user_uploaded_fleet", JSON.stringify(updated));
-    }
-  };
-
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -306,14 +335,14 @@ export default function MasterFleetRosterPage() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-3xl font-black tracking-tight text-slate-50">
-              Commercial Fleet Vehicles & Tariff Roster
+              Commercial Fleet Roster & Vault Compliance
             </h1>
             <span className="bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest">
               {vehicles.length} Uploaded Vehicles
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Complete vehicle fleet specs, category & class hierarchy, commercial tariffs, and permit/insurance tracking.
+            Complete vehicle specs, Category/Class hierarchy, RC, Insurance, Permits, PUC uploads, and Document Vault auto-archiving.
           </p>
         </div>
 
@@ -323,7 +352,6 @@ export default function MasterFleetRosterPage() {
               if (confirm("Are you sure you want to clear all stored vehicle roster data? You will be able to upload your fresh vehicles clean.")) {
                 localStorage.removeItem("user_uploaded_fleet");
                 setVehicles([]);
-                fetch("/api/fleet/clear", { method: "POST" }).catch(e => console.error(e));
               }
             }}
             className="px-3.5 py-2 bg-slate-900 border border-white/10 hover:border-rose-400 text-slate-400 hover:text-rose-400 rounded-xl text-xs font-bold transition-all cursor-pointer"
@@ -340,33 +368,6 @@ export default function MasterFleetRosterPage() {
         </div>
       </div>
 
-      {/* Multi-Select Floating Action Bar */}
-      {selectedIds.length > 0 && (
-        <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-2xl flex items-center justify-between text-xs animate-in fade-in duration-200">
-          <div className="flex items-center gap-3">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
-            <span className="font-extrabold text-amber-300">
-              {selectedIds.length} vehicle(s) selected
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setSelectedIds([])}
-              className="px-3 py-1.5 bg-slate-950 text-slate-400 hover:text-white rounded-lg text-xs font-bold"
-            >
-              Clear Selection
-            </button>
-            <button
-              onClick={handleBulkDelete}
-              className="flex items-center gap-1.5 bg-rose-500 hover:bg-rose-600 text-white px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider shadow-lg transition-all cursor-pointer"
-            >
-              <Trash2 className="w-4 h-4" />
-              <span>Delete Selected ({selectedIds.length})</span>
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Search & Category Filter Toolbar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-2xl border border-white/10">
         <div className="relative w-full sm:w-80">
@@ -381,20 +382,6 @@ export default function MasterFleetRosterPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          {filteredVehicles.length > 0 && (
-            <button
-              onClick={handleSelectAll}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-950 text-slate-300 border border-white/10 rounded-xl text-xs font-bold hover:text-amber-400 transition-colors cursor-pointer"
-            >
-              {selectedIds.length === filteredVehicles.length ? (
-                <CheckSquare className="w-4 h-4 text-amber-400" />
-              ) : (
-                <Square className="w-4 h-4 text-slate-500" />
-              )}
-              <span>{selectedIds.length === filteredVehicles.length ? "Deselect All" : "Select All"}</span>
-            </button>
-          )}
-
           <div className="flex items-center gap-2">
             {["ALL", "SEDAN", "SUV"].map((cat) => (
               <button
@@ -420,7 +407,7 @@ export default function MasterFleetRosterPage() {
           <div className="space-y-1">
             <h3 className="text-xl font-bold text-slate-100">No Uploaded Vehicles Found</h3>
             <p className="text-xs text-slate-400 max-w-md mx-auto">
-              You haven't uploaded any fleet vehicles yet. Click "Add Vehicle" above to upload your fleet vehicles.
+              Your fleet roster is clean and empty. Click "Add Vehicle" above to upload your vehicles and documents.
             </p>
           </div>
           <button
@@ -455,15 +442,15 @@ export default function MasterFleetRosterPage() {
                         )}
                       </button>
                       <span className="text-[10px] font-mono text-amber-400 font-bold uppercase tracking-wider bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
-                        {v.categoryName || "Sedan"} &bull; {v.vehicleClass || v.subCategory || "Executive"}
+                        {v.categoryName || "Sedan"} &bull; {v.vehicleClass || "Executive"}
                       </span>
                     </div>
                     <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
-                      {v.isAvailable ? "READY FOR DUTY" : "ON ASSIGNMENT"}
+                      READY FOR DUTY
                     </span>
                   </div>
 
-                  {/* Vehicle Image Thumbnail Banner */}
+                  {/* Vehicle Image Banner */}
                   <div className="relative h-40 bg-slate-950 rounded-xl overflow-hidden border border-white/5 group">
                     <img
                       src={v.imageUrl || "/images/hero-car.png"}
@@ -491,14 +478,6 @@ export default function MasterFleetRosterPage() {
                   {/* Specs & Tariffs Grid */}
                   <div className="grid grid-cols-2 gap-2 bg-slate-950 p-3 rounded-xl border border-white/5 text-xs font-mono">
                     <div>
-                      <span className="text-slate-500 text-[10px] block font-sans">Seating Capacity</span>
-                      <span className="font-bold text-slate-200">{v.capacity} Passengers</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-500 text-[10px] block font-sans">Fuel & Gearbox</span>
-                      <span className="font-bold text-slate-200">{v.fuelType || "Diesel"} ({v.transmission || "Manual"})</span>
-                    </div>
-                    <div>
                       <span className="text-slate-500 text-[10px] block font-sans">Per Km Rate</span>
                       <span className="font-bold text-amber-400">₹{v.perKmRate} / Km</span>
                     </div>
@@ -507,20 +486,20 @@ export default function MasterFleetRosterPage() {
                       <span className="font-bold text-amber-400">₹{v.perHourRate || 150} / Hr</span>
                     </div>
                     <div>
-                      <span className="text-slate-500 text-[10px] block font-sans">Base Daily Slab</span>
-                      <span className="font-bold text-amber-400">₹{v.baseDailyRate} / Day</span>
+                      <span className="text-slate-500 text-[10px] block font-sans">Driver Day Allowance</span>
+                      <span className="font-bold text-slate-300">₹{v.driverAllowance || 500}</span>
                     </div>
                     <div>
-                      <span className="text-slate-500 text-[10px] block font-sans">Driver Day Allowance</span>
-                      <span className="font-bold text-slate-300">₹{v.driverAllowance}</span>
+                      <span className="text-slate-500 text-[10px] block font-sans">Night Halt Allowance</span>
+                      <span className="font-bold text-slate-300">₹{v.nightAllowance || 300}</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Footer Action Icons (Edit Icon & Delete Icon) */}
+                {/* Footer Action Icons */}
                 <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[11px]">
                   <span className="font-mono text-slate-400">
-                    Permit Exp: <strong className="text-emerald-400">{v.permitExpiry || "2028-03-15"}</strong>
+                    Permit Exp: <strong className="text-emerald-400">{v.allIndiaPermitExpiry || v.permitExpiry || "2028-03-15"}</strong>
                   </span>
 
                   <div className="flex items-center gap-2">
@@ -535,11 +514,6 @@ export default function MasterFleetRosterPage() {
                         const updated = vehicles.map(item => item.id === v.id ? { ...item, isFeatured: newFeaturedState } : item);
                         setVehicles(updated);
                         localStorage.setItem("user_uploaded_fleet", JSON.stringify(updated));
-                        fetch(`/api/fleet/${v.id}`, {
-                          method: "PUT",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ ...v, isFeatured: newFeaturedState })
-                        }).catch(e => console.error(e));
                       }}
                       className={`p-1.5 bg-slate-950 border rounded-lg transition-all cursor-pointer ${
                         v.isFeatured
@@ -553,7 +527,7 @@ export default function MasterFleetRosterPage() {
                     <button
                       onClick={() => openEditModal(v)}
                       className="p-1.5 bg-slate-950 border border-white/10 hover:border-amber-400 rounded-lg text-slate-400 hover:text-amber-400 transition-all cursor-pointer"
-                      title="Edit Vehicle Specs"
+                      title="Edit Vehicle Specs & Uploads"
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
@@ -572,7 +546,7 @@ export default function MasterFleetRosterPage() {
         </div>
       )}
 
-      {/* Complete Master Commercial Vehicle Entry & Edit Modal */}
+      {/* Complete Rearranged Add / Edit Vehicle Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-3xl shadow-2xl space-y-6 relative text-slate-100 max-h-[90vh] overflow-y-auto">
@@ -585,7 +559,7 @@ export default function MasterFleetRosterPage() {
 
             <div className="space-y-1 border-b border-white/10 pb-3">
               <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">
-                {editingVehicle ? "Edit Commercial Vehicle Specs" : "Master Commercial Fleet Entry"}
+                {editingVehicle ? "Edit Commercial Vehicle & Vault Uploads" : "Master Commercial Fleet Entry"}
               </span>
               <h3 className="text-2xl font-black text-slate-50">
                 {editingVehicle ? `Edit ${editingVehicle.make} ${editingVehicle.model}` : "Add Commercial Vehicle"}
@@ -593,15 +567,15 @@ export default function MasterFleetRosterPage() {
             </div>
 
             <form onSubmit={handleFormSubmit} className="space-y-5 text-xs">
-              {/* Section 1: Vehicle Make, Category & Class Hierarchy */}
+              {/* Section 1: Vehicle Brand, Model & Category Hierarchy */}
               <div className="space-y-3">
                 <h4 className="text-amber-400 font-extrabold uppercase text-[11px] tracking-wider flex items-center gap-1.5">
-                  <Car className="w-4 h-4" /> Vehicle Category, Class & Brand Identification
+                  <Car className="w-4 h-4" /> 1. Brand, Model Name & Category Hierarchy
                 </h4>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Vehicle Brand / Make *</label>
+                    <label className="text-slate-300 font-bold">1. Vehicle Brand (Make) *</label>
                     <input
                       type="text"
                       required
@@ -613,7 +587,21 @@ export default function MasterFleetRosterPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Vehicle Category *</label>
+                    <label className="text-slate-300 font-bold">2. Vehicle Model Name *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Innova Crysta / Swift Dzire / Fortuner"
+                      value={formData.model}
+                      onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">3. Vehicle Category *</label>
                     <select
                       value={formData.categoryName}
                       onChange={(e) => handleCategoryChange(e.target.value)}
@@ -625,7 +613,7 @@ export default function MasterFleetRosterPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Vehicle Class *</label>
+                    <label className="text-slate-300 font-bold">4. Vehicle Class *</label>
                     <select
                       value={formData.vehicleClass}
                       onChange={(e) => setFormData({ ...formData, vehicleClass: e.target.value })}
@@ -638,23 +626,9 @@ export default function MasterFleetRosterPage() {
                       ))}
                     </select>
                   </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Model Name *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Swift Dzire / Innova Crysta / Fortuner"
-                      value={formData.model}
-                      onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
-                    />
-                  </div>
 
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Registration Number *</label>
+                    <label className="text-slate-300 font-bold">5. Registration Number *</label>
                     <input
                       type="text"
                       required
@@ -667,15 +641,15 @@ export default function MasterFleetRosterPage() {
                 </div>
               </div>
 
-              {/* Section 2: Specs & Seating Capacity */}
+              {/* Section 2: Transmission, Fuel & Tariffs */}
               <div className="space-y-3 pt-3 border-t border-white/10">
                 <h4 className="text-amber-400 font-extrabold uppercase text-[11px] tracking-wider flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4" /> Technical Specs & Seating Capacity
+                  <IndianRupee className="w-4 h-4" /> 2. Technical Specs, Rates & Allowances
                 </h4>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Transmission *</label>
+                    <label className="text-slate-300 font-bold">6. Transmission *</label>
                     <select
                       value={formData.transmission}
                       onChange={(e) => setFormData({ ...formData, transmission: e.target.value })}
@@ -687,7 +661,7 @@ export default function MasterFleetRosterPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Fuel Type *</label>
+                    <label className="text-slate-300 font-bold">7. Fuel Type *</label>
                     <select
                       value={formData.fuelType}
                       onChange={(e) => setFormData({ ...formData, fuelType: e.target.value })}
@@ -702,7 +676,7 @@ export default function MasterFleetRosterPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Seating Capacity *</label>
+                    <label className="text-slate-300 font-bold">8. Seating Capacity *</label>
                     <input
                       type="number"
                       required
@@ -712,17 +686,10 @@ export default function MasterFleetRosterPage() {
                     />
                   </div>
                 </div>
-              </div>
 
-              {/* Section 3: Commercial Tariffs & Allowances */}
-              <div className="space-y-3 pt-3 border-t border-white/10">
-                <h4 className="text-amber-400 font-extrabold uppercase text-[11px] tracking-wider flex items-center gap-1.5">
-                  <IndianRupee className="w-4 h-4" /> Commercial Rates & Daily Allowances
-                </h4>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Per Km Rate (₹) *</label>
+                    <label className="text-slate-300 font-bold">9. Per Km Rate (₹) *</label>
                     <input
                       type="number"
                       required
@@ -733,7 +700,7 @@ export default function MasterFleetRosterPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Per Hour Rate (₹) *</label>
+                    <label className="text-slate-300 font-bold">10. Per Hour Rate (₹) *</label>
                     <input
                       type="number"
                       required
@@ -744,60 +711,70 @@ export default function MasterFleetRosterPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Base Daily Slab (₹) *</label>
-                    <input
-                      type="number"
-                      required
-                      value={formData.baseDailyRate}
-                      onChange={(e) => setFormData({ ...formData, baseDailyRate: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Driver Day Allowance (₹/Day)</label>
+                    <label className="text-slate-300 font-bold">11. Driver Day Allowance (₹)</label>
                     <input
                       type="number"
                       value={formData.driverAllowance}
                       onChange={(e) => setFormData({ ...formData, driverAllowance: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Night Halt Allowance (₹/Night)</label>
+                    <label className="text-slate-300 font-bold">12. Night Halt Allowance (₹)</label>
                     <input
                       type="number"
                       value={formData.nightAllowance}
                       onChange={(e) => setFormData({ ...formData, nightAllowance: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Section 4: Insurance, Permit & Compliance Dates */}
+              {/* Section 3: RC, Insurance & Expiry Documents */}
               <div className="space-y-3 pt-3 border-t border-white/10">
                 <h4 className="text-amber-400 font-extrabold uppercase text-[11px] tracking-wider flex items-center gap-1.5">
-                  <Shield className="w-4 h-4" /> Insurance, Commercial Permit & Compliance
+                  <Shield className="w-4 h-4" /> 3. Vehicle RC, Insurance & Expiry Document Vault Uploads
                 </h4>
 
+                {/* RC */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Insurance Provider Name</label>
+                    <label className="text-slate-300 font-bold">13a. Vehicle RC Number *</label>
                     <input
                       type="text"
-                      placeholder="e.g. HDFC ERGO / ICICI Lombard / Bajaj Allianz"
+                      placeholder="e.g. MH04/RC/8890"
+                      value={formData.rcNumber}
+                      onChange={(e) => setFormData({ ...formData, rcNumber: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">13b. Upload Vehicle RC Document</label>
+                    <input
+                      type="file"
+                      accept=".pdf,image/*"
+                      onChange={(e) => setFormData({ ...formData, rcDocName: e.target.files?.[0]?.name || "" })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
+                    />
+                  </div>
+                </div>
+
+                {/* Insurance */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">14. Insurance Provider Name</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. HDFC ERGO General Insurance"
                       value={formData.insuranceProvider}
                       onChange={(e) => setFormData({ ...formData, insuranceProvider: e.target.value })}
                       className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
                     />
                   </div>
-
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Insurance Policy Number</label>
+                    <label className="text-slate-300 font-bold">15a. Insurance Policy Number</label>
                     <input
                       type="text"
                       placeholder="e.g. POL-8829102"
@@ -806,11 +783,8 @@ export default function MasterFleetRosterPage() {
                       className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                     />
                   </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Insurance Expiry Date</label>
+                    <label className="text-slate-300 font-bold">15b. Insurance Expiry Date *</label>
                     <input
                       type="date"
                       value={formData.insuranceExpiry}
@@ -818,33 +792,98 @@ export default function MasterFleetRosterPage() {
                       className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                     />
                   </div>
+                </div>
 
+                {/* Fitness & All India Permit */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Fitness Expiry Date</label>
-                    <input
-                      type="date"
-                      value={formData.fitnessExpiry}
-                      onChange={(e) => setFormData({ ...formData, fitnessExpiry: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
-                    />
+                    <label className="text-slate-300 font-bold">16. Fitness Expiry Date & Upload</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="date"
+                        value={formData.fitnessExpiry}
+                        onChange={(e) => setFormData({ ...formData, fitnessExpiry: e.target.value })}
+                        className="w-1/2 bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                      />
+                      <input
+                        type="file"
+                        accept=".pdf,image/*"
+                        onChange={(e) => setFormData({ ...formData, fitnessDocName: e.target.files?.[0]?.name || "" })}
+                        className="w-1/2 bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Commercial Permit Expiry</label>
-                    <input
-                      type="date"
-                      value={formData.permitExpiry}
-                      onChange={(e) => setFormData({ ...formData, permitExpiry: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
-                    />
+                    <label className="text-slate-300 font-bold">17. All India Permit Expiry & Upload</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="date"
+                        value={formData.allIndiaPermitExpiry}
+                        onChange={(e) => setFormData({ ...formData, allIndiaPermitExpiry: e.target.value })}
+                        className="w-1/2 bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                      />
+                      <input
+                        type="file"
+                        accept=".pdf,image/*"
+                        onChange={(e) => setFormData({ ...formData, allIndiaPermitDocName: e.target.files?.[0]?.name || "" })}
+                        className="w-1/2 bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Yearly Permit & PUC */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">18. Yearly Permit Expiry & Upload</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="date"
+                        value={formData.yearlyPermitExpiry}
+                        onChange={(e) => setFormData({ ...formData, yearlyPermitExpiry: e.target.value })}
+                        className="w-1/2 bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                      />
+                      <input
+                        type="file"
+                        accept=".pdf,image/*"
+                        onChange={(e) => setFormData({ ...formData, yearlyPermitDocName: e.target.files?.[0]?.name || "" })}
+                        className="w-1/2 bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">19. PUC Expiry & Upload</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="date"
+                        value={formData.pucExpiry}
+                        onChange={(e) => setFormData({ ...formData, pucExpiry: e.target.value })}
+                        className="w-1/2 bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                      />
+                      <input
+                        type="file"
+                        accept=".pdf,image/*"
+                        onChange={(e) => setFormData({ ...formData, pucDocName: e.target.files?.[0]?.name || "" })}
+                        className="w-1/2 bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Section 5: Device Image Upload */}
-              <div className="space-y-1 pt-3 border-t border-white/10">
-                <label className="text-slate-300 font-bold block">Vehicle Image Upload from Device</label>
-                <div className="flex items-center gap-3">
+              {/* Section 4: Device Image Upload with Live Preview */}
+              <div className="space-y-2 pt-3 border-t border-white/10">
+                <label className="text-slate-300 font-bold block">20. Vehicle Image Upload from Device (with Live Preview)</label>
+                <div className="flex items-center gap-4 bg-slate-950 p-3 rounded-2xl border border-white/5">
+                  {formData.imageUrl ? (
+                    <img src={formData.imageUrl} alt="Vehicle Preview" className="w-20 h-14 object-cover rounded-xl border-2 border-amber-400" />
+                  ) : (
+                    <div className="w-20 h-14 bg-slate-900 border border-dashed border-white/20 rounded-xl flex items-center justify-center text-slate-500 font-bold text-[10px]">
+                      No Image
+                    </div>
+                  )}
                   <input
                     type="file"
                     accept="image/*"
@@ -853,25 +892,18 @@ export default function MasterFleetRosterPage() {
                       if (file) {
                         const reader = new FileReader();
                         reader.onload = (event) => {
-                          const dataUrl = event.target?.result as string;
                           setFormData(prev => ({
                             ...prev,
                             imageName: file.name,
-                            imageUrl: dataUrl
+                            imageUrl: event.target?.result as string
                           }));
                         };
                         reader.readAsDataURL(file);
                       }
                     }}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
+                    className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                   />
                 </div>
-                {formData.imageUrl && (
-                  <div className="mt-2 flex items-center gap-3 bg-slate-950 p-2 rounded-xl border border-white/5">
-                    <img src={formData.imageUrl} alt="Uploaded Preview" className="w-16 h-10 object-cover rounded-lg border border-amber-400/40" />
-                    <span className="text-[11px] font-mono text-amber-400">Selected Image: {formData.imageName || "Device Upload"}</span>
-                  </div>
-                )}
               </div>
 
               <div className="pt-4 border-t border-white/10 flex justify-end gap-3">
