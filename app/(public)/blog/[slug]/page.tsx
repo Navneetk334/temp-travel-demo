@@ -14,9 +14,14 @@ interface BlogPostPageProps {
 
 export async function generateMetadata({ params }: BlogPostPageProps) {
   const resolvedParams = await params;
-  const post = await prisma.blogPost.findUnique({
-    where: { slug: resolvedParams.slug },
-  });
+  let post = null;
+  try {
+    post = await prisma.blogPost.findUnique({
+      where: { slug: resolvedParams.slug },
+    });
+  } catch (e) {
+    console.error("Blog post metadata error:", e);
+  }
 
   if (!post) {
     return {};
@@ -33,37 +38,47 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const resolvedParams = await params;
-  const post = await prisma.blogPost.findUnique({
-    where: { slug: resolvedParams.slug },
-    include: {
-      author: {
-        select: { name: true, email: true },
+  let post: any = null;
+  try {
+    post = await prisma.blogPost.findUnique({
+      where: { slug: resolvedParams.slug },
+      include: {
+        author: {
+          select: { name: true, email: true },
+        },
+        category: {
+          select: { name: true, slug: true },
+        },
       },
-      category: {
-        select: { name: true, slug: true },
-      },
-    },
-  });
+    });
+  } catch (e) {
+    console.error("Blog post page error:", e);
+  }
 
   if (!post || !post.published) {
     notFound();
   }
 
   // Fetch related posts (same category, excluding current post)
-  const relatedPosts = await prisma.blogPost.findMany({
-    where: {
-      published: true,
-      categoryId: post.categoryId,
-      id: { not: post.id },
-    },
-    take: 3,
-    orderBy: { createdAt: "desc" },
-    include: {
-      category: {
-        select: { name: true },
+  let relatedPosts: any[] = [];
+  try {
+    relatedPosts = await prisma.blogPost.findMany({
+      where: {
+        published: true,
+        categoryId: post.categoryId,
+        id: { not: post.id },
       },
-    },
-  });
+      take: 3,
+      orderBy: { createdAt: "desc" },
+      include: {
+        category: {
+          select: { name: true },
+        },
+      },
+    });
+  } catch (e) {
+    console.error("Related blog posts error:", e);
+  }
 
   const blogPostingSchema = {
     "@context": "https://schema.org",
@@ -173,7 +188,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           {post.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 pt-6 border-t border-white/5 items-center text-xs">
               <span className="text-slate-400 font-semibold uppercase">Article Tags:</span>
-              {post.tags.map((t) => (
+              {post.tags.map((t: string) => (
                 <Link
                   key={t}
                   href={`/blog?tag=${t}`}

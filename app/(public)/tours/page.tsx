@@ -18,15 +18,20 @@ export default async function ToursPage({ searchParams }: PageProps) {
   const search = resolvedParams.search || "";
   const categorySlug = resolvedParams.category || "";
 
-  // Query categories for filter list
-  const categories = await prisma.packageCategory.findMany({
-    orderBy: { name: "asc" },
-  });
+  // Query categories for filter list safely
+  let categories: any[] = [];
+  try {
+    categories = await prisma.packageCategory.findMany({
+      orderBy: { name: "asc" },
+    });
+  } catch (e) {
+    console.error("Tours categories DB error:", e);
+  }
 
   // Find target category ID if slug specified
   let categoryId = "";
   if (categorySlug) {
-    const matchedCategory = categories.find((c) => c.slug === categorySlug);
+    const matchedCategory = categories.find((c: any) => c.slug === categorySlug);
     if (matchedCategory) {
       categoryId = matchedCategory.id;
     }
@@ -46,16 +51,21 @@ export default async function ToursPage({ searchParams }: PageProps) {
     ];
   }
 
-  // Query tour packages
-  const tours = await prisma.tourPackage.findMany({
-    where,
-    include: {
-      category: {
-        select: { name: true, slug: true },
+  // Query tour packages safely
+  let tours: any[] = [];
+  try {
+    tours = await prisma.tourPackage.findMany({
+      where,
+      include: {
+        category: {
+          select: { name: true, slug: true },
+        },
       },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+      orderBy: { createdAt: "desc" },
+    });
+  } catch (e) {
+    console.error("Tours packages DB error:", e);
+  }
 
   return (
     <div className="bg-slate-950 min-h-screen text-slate-100 py-12 px-4 sm:px-6 lg:px-8">

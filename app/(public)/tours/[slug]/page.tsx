@@ -17,10 +17,15 @@ interface PageProps {
 // Dynamic SEO Metadata Generation
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const resolvedParams = await params;
-  const tour = await prisma.tourPackage.findUnique({
-    where: { slug: resolvedParams.slug },
-    select: { seoTitle: true, seoDescription: true, title: true },
-  });
+  let tour = null;
+  try {
+    tour = await prisma.tourPackage.findUnique({
+      where: { slug: resolvedParams.slug },
+      select: { seoTitle: true, seoDescription: true, title: true },
+    });
+  } catch (e) {
+    console.error("Tour metadata error:", e);
+  }
 
   if (!tour) return {};
 
@@ -35,12 +40,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function TourDetailsPage({ params }: PageProps) {
   const resolvedParams = await params;
-  const tour = await prisma.tourPackage.findUnique({
-    where: { slug: resolvedParams.slug },
-    include: {
-      category: true,
-    },
-  });
+  let tour: any = null;
+  try {
+    tour = await prisma.tourPackage.findUnique({
+      where: { slug: resolvedParams.slug },
+      include: {
+        category: true,
+      },
+    });
+  } catch (e) {
+    console.error("Tour details DB error:", e);
+  }
 
   if (!tour) {
     notFound();
@@ -117,7 +127,7 @@ export default async function TourDetailsPage({ params }: PageProps) {
               />
             </div>
             <div className="grid grid-rows-2 gap-6">
-              {tour.images.slice(1, 3).map((img, idx) => (
+              {(tour.images || []).slice(1, 3).map((img: string, idx: number) => (
                 <div key={idx} className="relative bg-slate-900 rounded-xl overflow-hidden border border-white/5">
                   <img
                     src={img}
@@ -173,7 +183,7 @@ export default async function TourDetailsPage({ params }: PageProps) {
                   <span>Inclusions</span>
                 </h3>
                 <ul className="space-y-2.5">
-                  {tour.inclusions.map((item, idx) => (
+                  {(tour.inclusions || []).map((item: string, idx: number) => (
                     <li key={idx} className="flex gap-2 text-xs text-slate-300 items-start">
                       <CheckCircle2 className="w-4.5 h-4.5 text-green-500 shrink-0 mt-0.5" />
                       <span>{item}</span>
@@ -189,7 +199,7 @@ export default async function TourDetailsPage({ params }: PageProps) {
                   <span>Exclusions</span>
                 </h3>
                 <ul className="space-y-2.5">
-                  {tour.exclusions.map((item, idx) => (
+                  {(tour.exclusions || []).map((item: string, idx: number) => (
                     <li key={idx} className="flex gap-2 text-xs text-slate-300 items-start">
                       <XCircle className="w-4.5 h-4.5 text-destructive shrink-0 mt-0.5" />
                       <span>{item}</span>

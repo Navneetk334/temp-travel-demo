@@ -28,10 +28,15 @@ export const metadata = getSEOMetadata({
 });
 
 export default async function AboutPage() {
-  // Fetch company info from SiteSetting database table
-  const setting = await prisma.siteSetting.findUnique({
-    where: { key: "company_info" },
-  });
+  // Fetch company info from SiteSetting database table safely
+  let setting = null;
+  try {
+    setting = await prisma.siteSetting.findUnique({
+      where: { key: "company_info" },
+    });
+  } catch (e) {
+    console.error("About page DB error:", e);
+  }
 
   const companyInfo = (setting?.value as any) || {
     overview: "TEMP TRAVEL CAR RENTALS PVT LTD is a premier corporate transit and leisure travel management company based in India. We operate premium corporate commuter systems, airport transfers, and customized tours.",

@@ -339,22 +339,20 @@ export default function MasterDispatchRadarPage() {
             <div className="flex bg-slate-950 p-1 rounded-xl border border-white/10">
               <button
                 onClick={() => setMapMode("DAY")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  mapMode === "DAY"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${mapMode === "DAY"
                     ? "bg-amber-500 text-slate-950 font-black shadow-md"
                     : "text-slate-400 hover:text-white"
-                }`}
+                  }`}
               >
                 <Sun className="w-3.5 h-3.5" />
                 <span>☀️ Day Mode</span>
               </button>
               <button
                 onClick={() => setMapMode("NIGHT")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  mapMode === "NIGHT"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${mapMode === "NIGHT"
                     ? "bg-amber-500 text-slate-950 font-black shadow-md"
                     : "text-slate-400 hover:text-white"
-                }`}
+                  }`}
               >
                 <Moon className="w-3.5 h-3.5" />
                 <span>🌙 Night Mode</span>
@@ -394,11 +392,10 @@ export default function MasterDispatchRadarPage() {
             <button
               key={status}
               onClick={() => setFilterStatus(status)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                filterStatus === status
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${filterStatus === status
                   ? "bg-amber-500 text-slate-950 font-black"
                   : "bg-slate-950 text-slate-400 hover:text-white border border-white/5"
-              }`}
+                }`}
             >
               {status}
             </button>
@@ -416,13 +413,12 @@ export default function MasterDispatchRadarPage() {
             <div className="space-y-3">
               <div className="flex justify-between items-start">
                 <span
-                  className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${
-                    drv.status === "IN_TRANSIT"
+                  className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${drv.status === "IN_TRANSIT"
                       ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
                       : drv.status === "ASSIGNED"
-                      ? "bg-blue-500/10 text-blue-400 border-blue-500/30"
-                      : "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                  }`}
+                        ? "bg-blue-500/10 text-blue-400 border-blue-500/30"
+                        : "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                    }`}
                 >
                   {drv.status.replace("_", " ")}
                 </span>

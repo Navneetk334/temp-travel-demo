@@ -34,12 +34,17 @@ export default async function BlogIndexPage({ searchParams }: PageProps) {
   const activeTag = resolvedParams.tag || "";
   const searchQuery = resolvedParams.search || "";
 
-  // Fetch all categories for filter tabs
-  const categories = await prisma.blogCategory.findMany({
-    orderBy: { name: "asc" },
-  });
+  // Fetch all categories for filter tabs safely
+  let categories: any[] = [];
+  try {
+    categories = await prisma.blogCategory.findMany({
+      orderBy: { name: "asc" },
+    });
+  } catch (e) {
+    console.error("Blog categories DB error:", e);
+  }
 
-  // Query blog posts from DB
+  // Query blog posts from DB safely
   const where: any = { published: true };
 
   if (categorySlug) {
@@ -58,18 +63,23 @@ export default async function BlogIndexPage({ searchParams }: PageProps) {
     ];
   }
 
-  const posts = await prisma.blogPost.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-    include: {
-      author: {
-        select: { name: true },
+  let posts: any[] = [];
+  try {
+    posts = await prisma.blogPost.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      include: {
+        author: {
+          select: { name: true },
+        },
+        category: {
+          select: { name: true, slug: true },
+        },
       },
-      category: {
-        select: { name: true, slug: true },
-      },
-    },
-  });
+    });
+  } catch (e) {
+    console.error("Blog posts DB error:", e);
+  }
 
   const breadcrumbsList = [
     { label: "Blog", path: "/blog" },
@@ -200,7 +210,7 @@ export default async function BlogIndexPage({ searchParams }: PageProps) {
                 {/* Card footer */}
                 <div className="px-6 pb-6 pt-4 border-t border-white/5 flex justify-between items-center text-xs">
                   <div className="flex flex-wrap gap-1">
-                    {post.tags.slice(0, 2).map((t) => (
+                    {(post.tags || []).slice(0, 2).map((t: string) => (
                       <Link 
                         key={t} 
                         href={`/blog?tag=${t}`} 
