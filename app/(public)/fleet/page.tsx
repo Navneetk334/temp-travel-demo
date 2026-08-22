@@ -144,11 +144,23 @@ export default async function FleetPage({ searchParams }: PageProps) {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-mono font-bold px-3 py-1 rounded-full uppercase">
-                    {v.category?.name || "Executive Fleet"}
+                    {v.category?.name || v.categoryName || "Sedan"} &bull; {v.subCategory || v.vehicleClass || "Executive"}
                   </span>
                   <span className="text-xs font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
                     AVAILABLE
                   </span>
+                </div>
+
+                {/* Vehicle Image Banner */}
+                <div className="relative h-44 bg-slate-950 rounded-2xl overflow-hidden border border-white/5">
+                  <img
+                    src={v.imageUrl || "/images/hero-car.png"}
+                    alt={`${v.make} ${v.model}`}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={(e) => {
+                      (e.target as HTMLElement).setAttribute("src", "/images/hero-car.png");
+                    }}
+                  />
                 </div>
 
                 <div>
@@ -164,8 +176,12 @@ export default async function FleetPage({ searchParams }: PageProps) {
                     <strong className="text-slate-100">{v.capacity || 4} Passengers</strong>
                   </div>
                   <div className="flex justify-between text-slate-300">
-                    <span className="text-slate-400 font-sans">Condition & Safety:</span>
-                    <strong className="text-emerald-400">100% Sanitized & GPS Synced</strong>
+                    <span className="text-slate-400 font-sans">Fuel & Gearbox:</span>
+                    <strong className="text-slate-100">{v.fuelType || "Diesel"} ({v.transmission || "Manual"})</strong>
+                  </div>
+                  <div className="flex justify-between text-slate-300">
+                    <span className="text-slate-400 font-sans">Base Rate:</span>
+                    <strong className="text-amber-400">₹{v.perKmRate || 15}/km &bull; ₹{v.baseDailyRate || 3000}/day</strong>
                   </div>
                 </div>
               </div>

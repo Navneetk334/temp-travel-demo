@@ -36,13 +36,20 @@ export async function GET(req: NextRequest) {
         vehicleClass: clsName,
         subCategory: clsName,
         perKmRate: v.perKmRate || 15,
-        perHourRate: v.extraHrRate || 150,
+        perHourRate: (v as any).perHourRate || v.extraHrRate || 150,
         baseDailyRate: v.baseDailyRate || 3000,
-        driverAllowance: 500,
-        nightAllowance: 300,
+        driverAllowance: (v as any).driverAllowance || 500,
+        nightAllowance: (v as any).nightAllowance || 300,
         fuelType: v.fuelType || "Diesel",
         transmission: v.transmission || "MANUAL",
+        insuranceProvider: (v as any).insuranceProvider || "HDFC ERGO General Insurance",
+        insuranceNumber: (v as any).insuranceNumber || "POL-8829102",
+        insuranceExpiry: (v as any).insuranceExpiry || "2027-06-30",
+        fitnessExpiry: (v as any).fitnessExpiry || "2027-12-31",
+        permitExpiry: (v as any).permitExpiry || "2028-03-15",
+        permitStatus: (v as any).permitStatus || "VALID",
         status: v.status || "AVAILABLE",
+        isAvailable: v.status === "AVAILABLE",
         isFeatured: v.isFeatured ?? false,
         imageUrl: v.imageUrl || "/images/hero-car.png",
         driver: v.driver
@@ -124,7 +131,16 @@ export async function POST(req: NextRequest) {
         ...created,
         categoryName: categoryName || "Sedan",
         vehicleClass: cls,
-        subCategory: cls
+        subCategory: cls,
+        perHourRate: 150,
+        driverAllowance: 500,
+        nightAllowance: 300,
+        permitStatus: "VALID",
+        insuranceProvider: "HDFC ERGO General Insurance",
+        insuranceNumber: "POL-8829102",
+        insuranceExpiry: "2027-06-30",
+        fitnessExpiry: "2027-12-31",
+        permitExpiry: "2028-03-15"
       }
     });
   } catch (error) {
