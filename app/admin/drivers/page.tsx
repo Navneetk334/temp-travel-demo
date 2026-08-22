@@ -416,21 +416,8 @@ export default function AdminDriversPage() {
                       </td>
 
                       {/* Actions */}
-                      <td className="p-4 text-right space-x-2">
-                        <button
-                          onClick={() => openModal(d)}
-                          className="p-1.5 bg-slate-900 border border-white/10 rounded-lg text-slate-300 hover:text-amber-400 transition-colors"
-                          title="Edit Driver Profile & Credentials"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteDriver(d.id, d.name)}
-                          className="p-1.5 bg-slate-900 border border-white/10 rounded-lg text-slate-300 hover:text-rose-400 transition-colors"
-                          title="Delete Driver Account"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                      <td className="p-4 text-right">
+                        <span className="text-[10px] text-slate-500 font-mono">Read Only</span>
                       </td>
                     </tr>
                   ))

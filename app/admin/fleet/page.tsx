@@ -807,20 +807,6 @@ export default function AdminFleetPage() {
                           >
                             <Star className={`w-4 h-4 ${v.isFeatured ? "fill-amber-400" : ""}`} />
                           </button>
-                          <button
-                            onClick={() => openModal(v)}
-                            className="p-1.5 bg-slate-900 border border-white/5 rounded-lg text-slate-400 hover:text-accent transition-colors"
-                            title="Edit Vehicle Specs"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(v.id)}
-                            className="p-1.5 bg-slate-900 border border-white/5 rounded-lg text-slate-400 hover:text-red-400 transition-colors"
-                            title="Delete Vehicle"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
                         </td>
                       </tr>
                     ))

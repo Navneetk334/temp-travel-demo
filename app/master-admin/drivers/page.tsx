@@ -223,12 +223,25 @@ export default function MasterDriversPage() {
             </div>
 
             <div className="pt-2 border-t border-white/5 flex items-center justify-between">
-              <button
-                onClick={() => setSelectedDriver(drv)}
-                className="text-[11px] font-bold text-slate-300 hover:text-amber-400 transition-colors cursor-pointer"
-              >
-                Inspect File
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setSelectedDriver(drv)}
+                  className="text-[11px] font-bold text-slate-300 hover:text-amber-400 transition-colors cursor-pointer"
+                >
+                  Inspect File
+                </button>
+                <button
+                  onClick={() => {
+                    const confirmDel = confirm(`Are you sure you want to remove driver ${drv.name}?`);
+                    if (confirmDel) {
+                      setDrivers(drivers.filter(d => d.id !== drv.id));
+                    }
+                  }}
+                  className="text-[10px] font-bold text-rose-400 hover:text-rose-300 transition-colors cursor-pointer"
+                >
+                  Delete
+                </button>
+              </div>
               <a
                 href={`tel:${drv.phone}`}
                 className="flex items-center gap-1 bg-amber-500/10 text-amber-400 border border-amber-500/30 px-3 py-1 rounded-lg hover:bg-amber-500 hover:text-slate-950 text-[11px] font-bold transition-all"

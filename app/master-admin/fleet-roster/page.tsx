@@ -273,7 +273,20 @@ export default function MasterFleetRosterPage() {
 
               <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[11px] font-mono text-slate-400">
                 <span>Permit: <strong className="text-emerald-400">{v.permitStatus || "VALID"}</strong></span>
-                <span>Insurance: <strong className="text-slate-200">{v.insuranceExpiry || "2027-12-31"}</strong></span>
+                <button
+                  onClick={() => {
+                    const confirmDel = confirm(`Are you sure you want to delete ${v.make} ${v.model} (${v.registrationNumber})?`);
+                    if (confirmDel) {
+                      const updated = vehicles.filter(item => item.id !== v.id);
+                      setVehicles(updated);
+                      localStorage.setItem("user_uploaded_fleet", JSON.stringify(updated));
+                      fetch(`/api/fleet/${v.id}`, { method: "DELETE" }).catch(e => console.error(e));
+                    }
+                  }}
+                  className="text-rose-400 hover:text-rose-300 font-sans font-bold text-[10px] cursor-pointer"
+                >
+                  Delete Vehicle
+                </button>
               </div>
             </div>
           ))}
