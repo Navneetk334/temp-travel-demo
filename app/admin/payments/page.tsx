@@ -112,13 +112,32 @@ export default function AdminPaymentsPage() {
     .filter((r) => r.paymentMode === "CASH" && r.status === "PENDING_HANDOVER")
     .reduce((sum, r) => sum + r.amount, 0);
 
-  // Driver Cash Balances Roster
-  const driverBalances: DriverBalance[] = [
-    { driverName: "Ramesh Singh", completedTrips: 14, totalCashCollected: 45000, handedOverToOffice: 45000, pendingBalance: 0 },
-    { driverName: "Suresh Kumar", completedTrips: 9, totalCashCollected: 32000, handedOverToOffice: 23600, pendingBalance: 8400 },
-    { driverName: "Mahesh Yadav", completedTrips: 11, totalCashCollected: 28000, handedOverToOffice: 28000, pendingBalance: 0 },
-    { driverName: "Rajesh Sharma", completedTrips: 6, totalCashCollected: 18500, handedOverToOffice: 14500, pendingBalance: 4000 },
-  ];
+  // Driver Cash Balances Roster (Computed dynamically from payment records)
+  const driverBalances: DriverBalance[] = Array.from(
+    records.reduce((acc, r) => {
+      const name = r.driverName || "Unassigned Chauffeur";
+      if (!acc.has(name)) {
+        acc.set(name, {
+          driverName: name,
+          completedTrips: 0,
+          totalCashCollected: 0,
+          handedOverToOffice: 0,
+          pendingBalance: 0,
+        });
+      }
+      const curr = acc.get(name)!;
+      curr.completedTrips += 1;
+      if (r.paymentMode === "CASH") {
+        curr.totalCashCollected += r.amount;
+        if (r.status === "HANDED_OVER_TO_OFFICE") {
+          curr.handedOverToOffice += r.amount;
+        } else {
+          curr.pendingBalance += r.amount;
+        }
+      }
+      return acc;
+    }, new Map<string, DriverBalance>()).values()
+  );
 
   const handleLogCashSubmit = (e: React.FormEvent) => {
     e.preventDefault();

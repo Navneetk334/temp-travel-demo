@@ -93,8 +93,8 @@ export default function MasterDispatchRadarPage() {
 
     try {
       const map = window.L.map(mapRef.current, {
-        center: [19.2085, 72.8722],
-        zoom: 13,
+        center: [28.5910, 77.0250],
+        zoom: 14,
         zoomControl: true,
         attributionControl: false
       });
@@ -135,8 +135,8 @@ export default function MasterDispatchRadarPage() {
     markersRef.current = [];
 
     driverList.forEach(drv => {
-      const lat = drv.lat || 19.2085 + (Math.random() - 0.5) * 0.05;
-      const lng = drv.lng || 72.8722 + (Math.random() - 0.5) * 0.05;
+      const lat = drv.lat || 28.5910 + (Math.random() - 0.5) * 0.05;
+      const lng = drv.lng || 77.0250 + (Math.random() - 0.5) * 0.05;
 
       const customIcon = window.L.divIcon({
         className: "custom-leaflet-marker",
@@ -184,8 +184,8 @@ export default function MasterDispatchRadarPage() {
       eta: "15 Mins",
       tripType: assignForm.tripType,
       customerName: assignForm.customerName,
-      lat: 19.2085 + (Math.random() - 0.5) * 0.04,
-      lng: 72.8722 + (Math.random() - 0.5) * 0.04
+      lat: 28.5910 + (Math.random() - 0.5) * 0.04,
+      lng: 77.0250 + (Math.random() - 0.5) * 0.04
     };
 
     setDrivers([newDuty, ...drivers]);
@@ -261,7 +261,7 @@ export default function MasterDispatchRadarPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
           <div className="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wider">
             <Radio className="w-4 h-4 animate-pulse" />
-            <span>Interactive Google Maps Telematics View (Corporate HQ: Lokhandwala Complex, Kandivali East)</span>
+            <span>Interactive Google Maps Telematics View (HQ: Temp Travel Car Rentals Pvt Ltd)</span>
           </div>
 
           {/* Google Maps Day / Night Mode Toggle Switch */}
