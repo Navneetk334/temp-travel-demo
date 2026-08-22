@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     const sortBy = searchParams.get("sortBy") || "createdAt";
     const sortOrder = searchParams.get("sortOrder") === "asc" ? "asc" : "desc";
     const page = parseInt(searchParams.get("page") || "1", 10);
-    const limit = parseInt(searchParams.get("limit") || "10", 10);
+    const limit = parseInt(searchParams.get("limit") || "100", 10);
     const skip = (page - 1) * limit;
 
     const where: any = {};

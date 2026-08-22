@@ -108,7 +108,7 @@ export default async function FleetPage({ searchParams }: PageProps) {
 
   let dbVehicles: any[] = [];
   try {
-    const where: any = { status: "AVAILABLE" };
+    const where: any = {};
     if (categoryId) where.categoryId = categoryId;
     dbVehicles = await prisma.fleetVehicle.findMany({
       where,
