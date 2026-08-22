@@ -14,7 +14,10 @@ import {
   Clock,
   X,
   Edit2,
-  Upload
+  Trash2,
+  CheckSquare,
+  Square,
+  Sparkles
 } from "lucide-react";
 
 export default function MasterFleetRosterPage() {
@@ -22,9 +25,13 @@ export default function MasterFleetRosterPage() {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
   const [showModal, setShowModal] = useState(false);
+  const [editingVehicle, setEditingVehicle] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const [newVehicle, setNewVehicle] = useState({
+  // Multi-select state
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const [formData, setFormData] = useState({
     make: "",
     model: "",
     registrationNumber: "",
@@ -61,7 +68,6 @@ export default function MasterFleetRosterPage() {
         if (res.ok) {
           const data = await res.json();
           const apiList = data.vehicles || [];
-          // Combine API & Local persistent vehicles by reg number
           const regMap = new Map();
           localList.forEach(v => regMap.set(v.registrationNumber, v));
           apiList.forEach((v: any) => regMap.set(v.registrationNumber, v));
@@ -79,42 +85,9 @@ export default function MasterFleetRosterPage() {
     loadFleet();
   }, []);
 
-  const handleAddSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const created = {
-      id: `v-${Date.now()}`,
-      make: newVehicle.make || "Commercial Make",
-      model: newVehicle.model || "Commercial Vehicle",
-      registrationNumber: newVehicle.registrationNumber || `MH 04 XX ${Math.floor(1000 + Math.random() * 9000)}`,
-      capacity: parseInt(newVehicle.capacity) || 4,
-      categoryName: newVehicle.categoryName,
-      perKmRate: parseFloat(newVehicle.perKmRate) || 15,
-      baseDailyRate: parseFloat(newVehicle.baseDailyRate) || 3000,
-      driverAllowance: parseFloat(newVehicle.driverAllowance) || 500,
-      nightAllowance: parseFloat(newVehicle.nightAllowance) || 300,
-      fuelType: newVehicle.fuelType,
-      isAvailable: true,
-      permitStatus: "VALID",
-      insuranceExpiry: newVehicle.insuranceExpiry
-    };
-
-    const updated = [created, ...vehicles];
-    setVehicles(updated);
-    localStorage.setItem("user_uploaded_fleet", JSON.stringify(updated));
-
-    // Save to Database
-    try {
-      await fetch("/api/fleet", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(created)
-      });
-    } catch (err) {
-      console.error("Save vehicle error:", err);
-    }
-
-    setShowModal(false);
-    setNewVehicle({
+  const openAddModal = () => {
+    setEditingVehicle(null);
+    setFormData({
       make: "",
       model: "",
       registrationNumber: "",
@@ -131,6 +104,122 @@ export default function MasterFleetRosterPage() {
       permitExpiry: "2028-03-15",
       imageName: ""
     });
+    setShowModal(true);
+  };
+
+  const openEditModal = (v: any) => {
+    setEditingVehicle(v);
+    setFormData({
+      make: v.make || "",
+      model: v.model || "",
+      registrationNumber: v.registrationNumber || "",
+      categoryName: v.categoryName || "Sedan",
+      transmission: v.transmission || "Manual",
+      fuelType: v.fuelType || "Diesel",
+      capacity: String(v.capacity || 4),
+      perKmRate: String(v.perKmRate || 14),
+      baseDailyRate: String(v.baseDailyRate || 3500),
+      driverAllowance: String(v.driverAllowance || 500),
+      nightAllowance: String(v.nightAllowance || 300),
+      insuranceExpiry: v.insuranceExpiry || "2027-06-30",
+      fitnessExpiry: v.fitnessExpiry || "2027-12-31",
+      permitExpiry: v.permitExpiry || "2028-03-15",
+      imageName: ""
+    });
+    setShowModal(true);
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (editingVehicle) {
+      // Update existing vehicle
+      const updatedList = vehicles.map((v) => {
+        if (v.id === editingVehicle.id) {
+          return {
+            ...v,
+            make: formData.make,
+            model: formData.model,
+            registrationNumber: formData.registrationNumber,
+            categoryName: formData.categoryName,
+            capacity: parseInt(formData.capacity) || 4,
+            perKmRate: parseFloat(formData.perKmRate) || 15,
+            baseDailyRate: parseFloat(formData.baseDailyRate) || 3000,
+            driverAllowance: parseFloat(formData.driverAllowance) || 500,
+            nightAllowance: parseFloat(formData.nightAllowance) || 300,
+            fuelType: formData.fuelType,
+            insuranceExpiry: formData.insuranceExpiry
+          };
+        }
+        return v;
+      });
+      setVehicles(updatedList);
+      localStorage.setItem("user_uploaded_fleet", JSON.stringify(updatedList));
+
+      try {
+        await fetch(`/api/fleet/${editingVehicle.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData)
+        });
+      } catch (err) {
+        console.error("Update vehicle error:", err);
+      }
+    } else {
+      // Create new vehicle
+      const created = {
+        id: `v-${Date.now()}`,
+        make: formData.make || "Commercial Make",
+        model: formData.model || "Commercial Vehicle",
+        registrationNumber: formData.registrationNumber || `MH 04 XX ${Math.floor(1000 + Math.random() * 9000)}`,
+        capacity: parseInt(formData.capacity) || 4,
+        categoryName: formData.categoryName,
+        perKmRate: parseFloat(formData.perKmRate) || 15,
+        baseDailyRate: parseFloat(formData.baseDailyRate) || 3000,
+        driverAllowance: parseFloat(formData.driverAllowance) || 500,
+        nightAllowance: parseFloat(formData.nightAllowance) || 300,
+        fuelType: formData.fuelType,
+        isAvailable: true,
+        permitStatus: "VALID",
+        insuranceExpiry: formData.insuranceExpiry
+      };
+
+      const updated = [created, ...vehicles];
+      setVehicles(updated);
+      localStorage.setItem("user_uploaded_fleet", JSON.stringify(updated));
+
+      try {
+        await fetch("/api/fleet", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(created)
+        });
+      } catch (err) {
+        console.error("Save vehicle error:", err);
+      }
+    }
+
+    setShowModal(false);
+  };
+
+  const handleDeleteVehicle = (v: any) => {
+    const confirmDel = confirm(`Are you sure you want to delete ${v.make} ${v.model} (${v.registrationNumber})?`);
+    if (confirmDel) {
+      const updated = vehicles.filter(item => item.id !== v.id);
+      setVehicles(updated);
+      setSelectedIds(selectedIds.filter(id => id !== v.id));
+      localStorage.setItem("user_uploaded_fleet", JSON.stringify(updated));
+      fetch(`/api/fleet/${v.id}`, { method: "DELETE" }).catch(e => console.error(e));
+    }
+  };
+
+  // Multi-selection handlers
+  const handleSelectToggle = (id: string) => {
+    if (selectedIds.includes(id)) {
+      setSelectedIds(selectedIds.filter(i => i !== id));
+    } else {
+      setSelectedIds([...selectedIds, id]);
+    }
   };
 
   const filteredVehicles = vehicles.filter((v) => {
@@ -141,6 +230,25 @@ export default function MasterFleetRosterPage() {
     const matchesCat = categoryFilter === "ALL" || v.categoryName.toUpperCase() === categoryFilter.toUpperCase();
     return matchesSearch && matchesCat;
   });
+
+  const handleSelectAll = () => {
+    if (selectedIds.length === filteredVehicles.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredVehicles.map(v => v.id));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedIds.length === 0) return;
+    const confirmDel = confirm(`Are you sure you want to delete ${selectedIds.length} selected vehicle(s)?`);
+    if (confirmDel) {
+      const updated = vehicles.filter(v => !selectedIds.includes(v.id));
+      setVehicles(updated);
+      setSelectedIds([]);
+      localStorage.setItem("user_uploaded_fleet", JSON.stringify(updated));
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -162,7 +270,7 @@ export default function MasterFleetRosterPage() {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setShowModal(true)}
+            onClick={openAddModal}
             className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-lg shadow-amber-500/20 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
@@ -171,7 +279,34 @@ export default function MasterFleetRosterPage() {
         </div>
       </div>
 
-      {/* Search & Category Filter */}
+      {/* Multi-Select Floating Action Bar */}
+      {selectedIds.length > 0 && (
+        <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-2xl flex items-center justify-between text-xs animate-in fade-in duration-200">
+          <div className="flex items-center gap-3">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
+            <span className="font-extrabold text-amber-300">
+              {selectedIds.length} vehicle(s) selected
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSelectedIds([])}
+              className="px-3 py-1.5 bg-slate-950 text-slate-400 hover:text-white rounded-lg text-xs font-bold"
+            >
+              Clear Selection
+            </button>
+            <button
+              onClick={handleBulkDelete}
+              className="flex items-center gap-1.5 bg-rose-500 hover:bg-rose-600 text-white px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider shadow-lg transition-all cursor-pointer"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>Delete Selected ({selectedIds.length})</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Search & Category Filter Toolbar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-2xl border border-white/10">
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -184,20 +319,36 @@ export default function MasterFleetRosterPage() {
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          {["ALL", "SEDAN", "SUV"].map((cat) => (
+        <div className="flex items-center gap-3">
+          {filteredVehicles.length > 0 && (
             <button
-              key={cat}
-              onClick={() => setCategoryFilter(cat)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                categoryFilter === cat
-                  ? "bg-amber-500 text-slate-950 font-black"
-                  : "bg-slate-950 text-slate-400 hover:text-white border border-white/5"
-              }`}
+              onClick={handleSelectAll}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-950 text-slate-300 border border-white/10 rounded-xl text-xs font-bold hover:text-amber-400 transition-colors cursor-pointer"
             >
-              {cat}
+              {selectedIds.length === filteredVehicles.length ? (
+                <CheckSquare className="w-4 h-4 text-amber-400" />
+              ) : (
+                <Square className="w-4 h-4 text-slate-500" />
+              )}
+              <span>{selectedIds.length === filteredVehicles.length ? "Deselect All" : "Select All"}</span>
             </button>
-          ))}
+          )}
+
+          <div className="flex items-center gap-2">
+            {["ALL", "SEDAN", "SUV"].map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setCategoryFilter(cat)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  categoryFilter === cat
+                    ? "bg-amber-500 text-slate-950 font-black"
+                    : "bg-slate-950 text-slate-400 hover:text-white border border-white/5"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -212,7 +363,7 @@ export default function MasterFleetRosterPage() {
             </p>
           </div>
           <button
-            onClick={() => setShowModal(true)}
+            onClick={openAddModal}
             className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer"
           >
             + Upload Vehicle Now
@@ -220,80 +371,103 @@ export default function MasterFleetRosterPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredVehicles.map((v) => (
-            <div
-              key={v.id}
-              className="bg-slate-900/80 backdrop-blur-xl border border-white/10 hover:border-amber-500/40 rounded-2xl p-6 shadow-xl space-y-4 transition-all flex flex-col justify-between"
-            >
-              <div className="space-y-3">
-                <div className="flex justify-between items-start">
-                  <span className="text-[10px] font-mono text-amber-400 font-bold uppercase tracking-wider bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
-                    {v.categoryName || "Commercial"}
-                  </span>
-                  <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
-                    {v.isAvailable ? "READY FOR DUTY" : "ON ASSIGNMENT"}
-                  </span>
+          {filteredVehicles.map((v) => {
+            const isSelected = selectedIds.includes(v.id);
+            return (
+              <div
+                key={v.id}
+                className={`bg-slate-900/80 backdrop-blur-xl border rounded-2xl p-6 shadow-xl space-y-4 transition-all flex flex-col justify-between relative ${
+                  isSelected ? "border-amber-400 bg-amber-500/5 ring-1 ring-amber-400/40" : "border-white/10 hover:border-amber-500/40"
+                }`}
+              >
+                <div className="space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleSelectToggle(v.id)}
+                        className="text-slate-400 hover:text-amber-400 cursor-pointer"
+                      >
+                        {isSelected ? (
+                          <CheckSquare className="w-4 h-4 text-amber-400" />
+                        ) : (
+                          <Square className="w-4 h-4 text-slate-600" />
+                        )}
+                      </button>
+                      <span className="text-[10px] font-mono text-amber-400 font-bold uppercase tracking-wider bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
+                        {v.categoryName || "Commercial"}
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
+                      {v.isAvailable ? "READY FOR DUTY" : "ON ASSIGNMENT"}
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 className="font-extrabold text-slate-100 text-lg leading-tight">
+                      {v.make} {v.model}
+                    </h3>
+                    <div className="text-xs font-mono text-amber-400 font-bold mt-0.5">{v.registrationNumber}</div>
+                  </div>
+
+                  {/* Specs & Tariffs Grid */}
+                  <div className="grid grid-cols-2 gap-2 bg-slate-950 p-3 rounded-xl border border-white/5 text-xs font-mono">
+                    <div>
+                      <span className="text-slate-500 text-[10px] block font-sans">Seating Capacity</span>
+                      <span className="font-bold text-slate-200">{v.capacity} Passengers</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 text-[10px] block font-sans">Fuel Type</span>
+                      <span className="font-bold text-slate-200">{v.fuelType || "Diesel"}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 text-[10px] block font-sans">Per Km Rate</span>
+                      <span className="font-bold text-amber-400">₹{v.perKmRate} / Km</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 text-[10px] block font-sans">Base Daily Rate</span>
+                      <span className="font-bold text-amber-400">₹{v.baseDailyRate} / Day</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 text-[10px] block font-sans">Driver Day Allowance</span>
+                      <span className="font-bold text-slate-300">₹{v.driverAllowance}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 text-[10px] block font-sans">Night Halt Allowance</span>
+                      <span className="font-bold text-slate-300">₹{v.nightAllowance}</span>
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <h3 className="font-extrabold text-slate-100 text-lg leading-tight">
-                    {v.make} {v.model}
-                  </h3>
-                  <div className="text-xs font-mono text-amber-400 font-bold mt-0.5">{v.registrationNumber}</div>
-                </div>
+                {/* Footer Action Icons (Edit Icon & Delete Icon) */}
+                <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[11px]">
+                  <span className="font-mono text-slate-400">
+                    Permit: <strong className="text-emerald-400">{v.permitStatus || "VALID"}</strong>
+                  </span>
 
-                {/* Specs & Tariffs Grid */}
-                <div className="grid grid-cols-2 gap-2 bg-slate-950 p-3 rounded-xl border border-white/5 text-xs font-mono">
-                  <div>
-                    <span className="text-slate-500 text-[10px] block font-sans">Seating Capacity</span>
-                    <span className="font-bold text-slate-200">{v.capacity} Passengers</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-500 text-[10px] block font-sans">Fuel Type</span>
-                    <span className="font-bold text-slate-200">{v.fuelType || "Diesel"}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-500 text-[10px] block font-sans">Per Km Rate</span>
-                    <span className="font-bold text-amber-400">₹{v.perKmRate} / Km</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-500 text-[10px] block font-sans">Base Daily Rate</span>
-                    <span className="font-bold text-amber-400">₹{v.baseDailyRate} / Day</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-500 text-[10px] block font-sans">Driver Day Allowance</span>
-                    <span className="font-bold text-slate-300">₹{v.driverAllowance}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-500 text-[10px] block font-sans">Night Halt Allowance</span>
-                    <span className="font-bold text-slate-300">₹{v.nightAllowance}</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => openEditModal(v)}
+                      className="p-1.5 bg-slate-950 border border-white/10 hover:border-amber-400 rounded-lg text-slate-400 hover:text-amber-400 transition-all cursor-pointer"
+                      title="Edit Vehicle Specs"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteVehicle(v)}
+                      className="p-1.5 bg-slate-950 border border-white/10 hover:border-rose-400 rounded-lg text-slate-400 hover:text-rose-400 transition-all cursor-pointer"
+                      title="Delete Vehicle"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
               </div>
-
-              <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[11px] font-mono text-slate-400">
-                <span>Permit: <strong className="text-emerald-400">{v.permitStatus || "VALID"}</strong></span>
-                <button
-                  onClick={() => {
-                    const confirmDel = confirm(`Are you sure you want to delete ${v.make} ${v.model} (${v.registrationNumber})?`);
-                    if (confirmDel) {
-                      const updated = vehicles.filter(item => item.id !== v.id);
-                      setVehicles(updated);
-                      localStorage.setItem("user_uploaded_fleet", JSON.stringify(updated));
-                      fetch(`/api/fleet/${v.id}`, { method: "DELETE" }).catch(e => console.error(e));
-                    }
-                  }}
-                  className="text-rose-400 hover:text-rose-300 font-sans font-bold text-[10px] cursor-pointer"
-                >
-                  Delete Vehicle
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
-      {/* Add Commercial Vehicle Modal */}
+      {/* Add / Edit Commercial Vehicle Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-2xl shadow-2xl space-y-4 relative text-slate-100 max-h-[90vh] overflow-y-auto">
@@ -305,11 +479,15 @@ export default function MasterFleetRosterPage() {
             </button>
 
             <div className="space-y-1 border-b border-white/10 pb-3">
-              <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">Commercial Fleet Entry</span>
-              <h3 className="text-2xl font-black text-slate-50">Add Commercial Vehicle</h3>
+              <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">
+                {editingVehicle ? "Edit Vehicle Specs" : "Commercial Fleet Entry"}
+              </span>
+              <h3 className="text-2xl font-black text-slate-50">
+                {editingVehicle ? `Edit ${editingVehicle.make} ${editingVehicle.model}` : "Add Commercial Vehicle"}
+              </h3>
             </div>
 
-            <form onSubmit={handleAddSubmit} className="space-y-4 text-xs">
+            <form onSubmit={handleFormSubmit} className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-slate-300 font-bold">Vehicle Brand / Make *</label>
@@ -317,8 +495,8 @@ export default function MasterFleetRosterPage() {
                     type="text"
                     required
                     placeholder="e.g. Toyota / Maruti Suzuki"
-                    value={newVehicle.make}
-                    onChange={(e) => setNewVehicle({ ...newVehicle, make: e.target.value })}
+                    value={formData.make}
+                    onChange={(e) => setFormData({ ...formData, make: e.target.value })}
                     className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
                   />
                 </div>
@@ -329,8 +507,8 @@ export default function MasterFleetRosterPage() {
                     type="text"
                     required
                     placeholder="e.g. Innova Crysta / Dzire"
-                    value={newVehicle.model}
-                    onChange={(e) => setNewVehicle({ ...newVehicle, model: e.target.value })}
+                    value={formData.model}
+                    onChange={(e) => setFormData({ ...formData, model: e.target.value })}
                     className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
                   />
                 </div>
@@ -343,8 +521,8 @@ export default function MasterFleetRosterPage() {
                     type="text"
                     required
                     placeholder="e.g. MH 04 ER 8890"
-                    value={newVehicle.registrationNumber}
-                    onChange={(e) => setNewVehicle({ ...newVehicle, registrationNumber: e.target.value })}
+                    value={formData.registrationNumber}
+                    onChange={(e) => setFormData({ ...formData, registrationNumber: e.target.value })}
                     className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                   />
                 </div>
@@ -352,8 +530,8 @@ export default function MasterFleetRosterPage() {
                 <div className="space-y-1">
                   <label className="text-slate-300 font-bold">Vehicle Category *</label>
                   <select
-                    value={newVehicle.categoryName}
-                    onChange={(e) => setNewVehicle({ ...newVehicle, categoryName: e.target.value })}
+                    value={formData.categoryName}
+                    onChange={(e) => setFormData({ ...formData, categoryName: e.target.value })}
                     className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
                   >
                     <option value="Sedan">Sedan</option>
@@ -364,8 +542,8 @@ export default function MasterFleetRosterPage() {
                 <div className="space-y-1">
                   <label className="text-slate-300 font-bold">Fuel Type</label>
                   <select
-                    value={newVehicle.fuelType}
-                    onChange={(e) => setNewVehicle({ ...newVehicle, fuelType: e.target.value })}
+                    value={formData.fuelType}
+                    onChange={(e) => setFormData({ ...formData, fuelType: e.target.value })}
                     className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
                   >
                     <option value="Diesel">Diesel</option>
@@ -381,8 +559,8 @@ export default function MasterFleetRosterPage() {
                   <label className="text-slate-300 font-bold">Seating Capacity</label>
                   <input
                     type="number"
-                    value={newVehicle.capacity}
-                    onChange={(e) => setNewVehicle({ ...newVehicle, capacity: e.target.value })}
+                    value={formData.capacity}
+                    onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
                     className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
                   />
                 </div>
@@ -392,8 +570,8 @@ export default function MasterFleetRosterPage() {
                   <input
                     type="number"
                     required
-                    value={newVehicle.perKmRate}
-                    onChange={(e) => setNewVehicle({ ...newVehicle, perKmRate: e.target.value })}
+                    value={formData.perKmRate}
+                    onChange={(e) => setFormData({ ...formData, perKmRate: e.target.value })}
                     className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400"
                   />
                 </div>
@@ -402,8 +580,8 @@ export default function MasterFleetRosterPage() {
                   <label className="text-slate-300 font-bold">Base Daily Rate (₹)</label>
                   <input
                     type="number"
-                    value={newVehicle.baseDailyRate}
-                    onChange={(e) => setNewVehicle({ ...newVehicle, baseDailyRate: e.target.value })}
+                    value={formData.baseDailyRate}
+                    onChange={(e) => setFormData({ ...formData, baseDailyRate: e.target.value })}
                     className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400"
                   />
                 </div>
@@ -414,8 +592,8 @@ export default function MasterFleetRosterPage() {
                   <label className="text-slate-300 font-bold">Driver Allowance (₹/Day)</label>
                   <input
                     type="number"
-                    value={newVehicle.driverAllowance}
-                    onChange={(e) => setNewVehicle({ ...newVehicle, driverAllowance: e.target.value })}
+                    value={formData.driverAllowance}
+                    onChange={(e) => setFormData({ ...formData, driverAllowance: e.target.value })}
                     className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
                   />
                 </div>
@@ -424,8 +602,8 @@ export default function MasterFleetRosterPage() {
                   <label className="text-slate-300 font-bold">Night Halt Allowance (₹)</label>
                   <input
                     type="number"
-                    value={newVehicle.nightAllowance}
-                    onChange={(e) => setNewVehicle({ ...newVehicle, nightAllowance: e.target.value })}
+                    value={formData.nightAllowance}
+                    onChange={(e) => setFormData({ ...formData, nightAllowance: e.target.value })}
                     className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
                   />
                 </div>
@@ -436,7 +614,7 @@ export default function MasterFleetRosterPage() {
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={(e) => setNewVehicle({ ...newVehicle, imageName: e.target.files?.[0]?.name || "" })}
+                  onChange={(e) => setFormData({ ...formData, imageName: e.target.files?.[0]?.name || "" })}
                   className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950"
                 />
               </div>
@@ -453,7 +631,7 @@ export default function MasterFleetRosterPage() {
                   type="submit"
                   className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer"
                 >
-                  Save Commercial Vehicle
+                  {editingVehicle ? "Update Vehicle Specs" : "Save Commercial Vehicle"}
                 </button>
               </div>
             </form>
