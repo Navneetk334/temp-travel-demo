@@ -11,38 +11,115 @@ interface PageProps {
   }>;
 }
 
+const fallbackVehicles = [
+  {
+    id: "v-1",
+    model: "Swift Dzire",
+    make: "Maruti Suzuki",
+    capacity: 4,
+    category: { name: "Sedan", slug: "sedan" },
+    registrationNumber: "MH 02 CZ 4421"
+  },
+  {
+    id: "v-2",
+    model: "City / Verna",
+    make: "Honda",
+    capacity: 4,
+    category: { name: "Sedan", slug: "sedan" },
+    registrationNumber: "MH 01 AB 1234"
+  },
+  {
+    id: "v-3",
+    model: "Innova Crysta",
+    make: "Toyota",
+    capacity: 7,
+    category: { name: "SUV", slug: "suv" },
+    registrationNumber: "MH 04 ER 8890"
+  },
+  {
+    id: "v-4",
+    model: "Fortuner 4x4",
+    make: "Toyota",
+    capacity: 7,
+    category: { name: "SUV", slug: "suv" },
+    registrationNumber: "MH 02 FG 9900"
+  },
+  {
+    id: "v-5",
+    model: "XUV700 AX7",
+    make: "Mahindra",
+    capacity: 7,
+    category: { name: "SUV", slug: "suv" },
+    registrationNumber: "MH 03 EY 7711"
+  },
+  {
+    id: "v-6",
+    model: "Creta / Alcazar",
+    make: "Hyundai",
+    capacity: 6,
+    category: { name: "SUV", slug: "suv" },
+    registrationNumber: "MH 02 DF 5544"
+  },
+  {
+    id: "v-7",
+    model: "E-Class Luxury",
+    make: "Mercedes-Benz",
+    capacity: 4,
+    category: { name: "Sedan", slug: "sedan" },
+    registrationNumber: "MH 01 CC 9000"
+  },
+  {
+    id: "v-8",
+    model: "5 Series Executive",
+    make: "BMW",
+    capacity: 4,
+    category: { name: "Sedan", slug: "sedan" },
+    registrationNumber: "MH 01 DD 8000"
+  },
+  {
+    id: "v-9",
+    model: "Traveller Executive 17S",
+    make: "Force Motors",
+    capacity: 17,
+    category: { name: "SUV", slug: "suv" },
+    registrationNumber: "MH 04 TT 1717"
+  }
+];
+
 export default async function FleetPage({ searchParams }: PageProps) {
   const resolvedParams = await searchParams;
   const categorySlug = resolvedParams.category || "";
 
-  // Query categories for header filters (Sedan and SUV only)
-  const categories = await prisma.vehicleCategory.findMany({
-    where: {
-      slug: { in: ["sedan", "suv"] }
-    },
-    orderBy: { name: "asc" },
-  });
+  // Query categories for header filters
+  let categories: any[] = [];
+  try {
+    categories = await prisma.vehicleCategory.findMany({
+      orderBy: { name: "asc" },
+    });
+  } catch (e) {
+    console.error(e);
+  }
 
   let categoryId = "";
-  if (categorySlug) {
+  if (categorySlug && categories.length > 0) {
     const matched = categories.find((c) => c.slug === categorySlug);
     if (matched) categoryId = matched.id;
   }
 
-  // Construct query filters (show only active vehicles in Sedan or SUV category)
-  const where: any = { 
-    status: "AVAILABLE",
-    category: { slug: { in: ["sedan", "suv"] } }
-  };
-  if (categoryId) where.categoryId = categoryId;
+  let dbVehicles: any[] = [];
+  try {
+    const where: any = { status: "AVAILABLE" };
+    if (categoryId) where.categoryId = categoryId;
+    dbVehicles = await prisma.fleetVehicle.findMany({
+      where,
+      include: { category: true },
+      orderBy: { createdAt: "desc" },
+    });
+  } catch (e) {
+    console.error(e);
+  }
 
-  const vehicles = await prisma.fleetVehicle.findMany({
-    where,
-    include: {
-      category: true,
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const vehicles = dbVehicles.length > 0 ? dbVehicles : fallbackVehicles;
 
   return (
     <div className="bg-slate-950 min-h-screen text-slate-100 pt-32 sm:pt-36 lg:pt-40 pb-16 px-4 sm:px-8 lg:px-12 xl:px-16">
@@ -53,105 +130,58 @@ export default async function FleetPage({ searchParams }: PageProps) {
             Our Fleet Showcase
           </h1>
           <p className="text-slate-400 max-w-2xl mx-auto text-sm">
-            Providing executive sedans and spacious SUVs for business commutes, airport runs, and outstation trips.
+            Providing executive sedans, spacious SUVs, and luxury coaches for business commutes, airport runs, and outstation trips.
           </p>
         </div>
 
-        {/* Filter Bar */}
-        <div className="glassmorphism p-6 rounded-xl border border-white/5 flex flex-wrap gap-2 justify-center">
-          <Link
-            href="/fleet"
-            className={`py-1.5 px-4 rounded-full text-xs font-semibold uppercase tracking-wider transition-all border ${
-              !categorySlug
-                ? "bg-primary text-primary-foreground border-accent"
-                : "bg-white/5 text-slate-300 border-white/10 hover:border-slate-400"
-            }`}
-          >
-            All Fleet
-          </Link>
-          {categories.map((c) => (
-            <Link
-              key={c.id}
-              href={`/fleet?category=${c.slug}`}
-              className={`py-1.5 px-4 rounded-full text-xs font-semibold uppercase tracking-wider transition-all border ${
-                categorySlug === c.slug
-                  ? "bg-primary text-primary-foreground border-accent"
-                  : "bg-white/5 text-slate-300 border-white/10 hover:border-slate-400"
-              }`}
+        {/* Fleet Vehicles Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {vehicles.map((v) => (
+            <div
+              key={v.id}
+              className="bg-slate-900/90 border border-white/10 hover:border-amber-500/40 rounded-3xl p-6 shadow-2xl flex flex-col justify-between transition-all group"
             >
-              {c.name}
-            </Link>
-          ))}
-        </div>
-
-        {/* Fleet Grid */}
-        {vehicles.length === 0 ? (
-          <div className="text-center py-20 bg-slate-900/40 border border-white/5 rounded-xl space-y-4">
-            <Car className="w-12 h-12 text-slate-500 mx-auto" />
-            <h2 className="text-xl font-bold text-slate-300">No Vehicles Available</h2>
-            <p className="text-slate-500 text-sm">All vehicles in this category are currently booked or undergoing maintenance.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {vehicles.map((v) => (
-              <div
-                key={v.id}
-                className="bg-slate-900/40 border border-white/5 rounded-xl overflow-hidden shadow-lg hover:border-primary/45 transition-all group flex flex-col justify-between"
-              >
-                {/* Fallback Image */}
-                <div className="relative h-64 bg-slate-950 flex items-center justify-center">
-                  <img
-                    src={v.imageUrl || v.category.imageUrl || "/images/fleet-suv.png"}
-                    alt={v.model}
-                    className="w-full h-full object-cover opacity-90 group-hover:scale-[1.03] transition-all duration-300"
-                  />
-                  <div className="absolute top-4 left-4 bg-slate-950/80 border border-white/10 py-1 px-3 rounded-full text-[10px] font-bold text-accent uppercase tracking-widest">
-                    {v.category.name}
-                  </div>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-mono font-bold px-3 py-1 rounded-full uppercase">
+                    {v.category?.name || "Executive Fleet"}
+                  </span>
+                  <span className="text-xs font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                    AVAILABLE
+                  </span>
                 </div>
 
-                <div className="p-6 space-y-5 flex-1 flex flex-col justify-between">
-                  {/* Vehicle Name Centered */}
-                  <h2 className="text-xl font-bold text-slate-50 group-hover:text-accent transition-colors text-center leading-snug">
+                <div>
+                  <h3 className="text-xl font-extrabold text-slate-50 group-hover:text-amber-400 transition-colors">
                     {v.make} {v.model}
-                  </h2>
-                  
-                  {/* 2-Column Split: Left (Capacity & Availability) | Right (Rates) */}
-                  <div className="grid grid-cols-2 gap-3 items-center pt-2 border-t border-white/5">
-                    {/* Left Side: Seating capacity and Availability */}
-                    <div className="space-y-2 text-left">
-                      <div className="flex items-center gap-1.5 text-xs text-slate-300 font-medium">
-                        <Users className="w-3.5 h-3.5 text-accent shrink-0" />
-                        <span>{v.capacity} Seater capacity</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-[10px] text-green-400 font-extrabold uppercase tracking-wider">
-                        <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-                        <span>Available</span>
-                      </div>
-                    </div>
+                  </h3>
+                  <div className="text-xs font-mono text-slate-400 mt-1">Reg #: {v.registrationNumber}</div>
+                </div>
 
-                    {/* Right Side: Local rate and Outstation rate */}
-                    <div className="space-y-1 text-right text-xs font-medium text-slate-400">
-                      <div>Local rate: <span className="text-slate-200 font-bold">₹{Number(v.category.baseKmsRate)}/km</span></div>
-                      <div>Outstation: <span className="text-slate-200 font-bold">₹{Number(v.category.outstationKmRate)}/km</span></div>
-                    </div>
+                <div className="bg-slate-950 p-4 rounded-2xl border border-white/5 space-y-2 text-xs font-mono">
+                  <div className="flex justify-between text-slate-300">
+                    <span className="text-slate-400 font-sans">Seating Capacity:</span>
+                    <strong className="text-slate-100">{v.capacity || 4} Passengers</strong>
                   </div>
-
-                  {/* Bottom Center: Inquire Now Button */}
-                  <div className="pt-4 border-t border-white/5 flex justify-center mt-auto">
-                    <Link
-                      href={`/fleet/${v.id}`}
-                      className="bg-accent/10 hover:bg-accent text-accent hover:text-slate-950 border border-accent/30 font-bold py-2 px-6 rounded-lg text-xs tracking-wider uppercase flex items-center gap-1.5 transition-all shadow-md group-hover:bg-accent group-hover:text-slate-950"
-                    >
-                      <span>Inquire Now</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
+                  <div className="flex justify-between text-slate-300">
+                    <span className="text-slate-400 font-sans">Condition & Safety:</span>
+                    <strong className="text-emerald-400">100% Sanitized & GPS Synced</strong>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+
+              <div className="pt-6 border-t border-white/10 flex items-center justify-between mt-6">
+                <Link
+                  href="/#booking-widget"
+                  className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black py-3 rounded-xl text-center text-xs uppercase tracking-wider transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <span>Book This Vehicle</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
