@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import Script from "next/script";
 import {
   Radio,
   Car,
@@ -18,15 +19,28 @@ import {
   UserCheck,
   Plus,
   Compass,
-  Activity
+  Activity,
+  Layers,
+  Maximize2
 } from "lucide-react";
 
+declare global {
+  interface Window {
+    L: any;
+  }
+}
+
 export default function MasterDispatchRadarPage() {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const leafletInstanceRef = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
+
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("ALL");
   const [selectedDriver, setSelectedDriver] = useState<any | null>(null);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [assignSuccess, setAssignSuccess] = useState(false);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   const [assignForm, setAssignForm] = useState({
     driverName: "Rajesh Kumar",
@@ -52,7 +66,8 @@ export default function MasterDispatchRadarPage() {
       eta: "14 Mins",
       tripType: "Airport Transfer",
       customerName: "Ananya Sharma",
-      coords: { x: "30%", y: "45%" }
+      lat: 19.0657,
+      lng: 72.8682
     },
     {
       id: "DRV-102",
@@ -68,7 +83,8 @@ export default function MasterDispatchRadarPage() {
       eta: "1 Hr 40 Mins",
       tripType: "Outstation Trip",
       customerName: "Karan Malhotra",
-      coords: { x: "65%", y: "30%" }
+      lat: 18.9953,
+      lng: 72.8298
     },
     {
       id: "DRV-103",
@@ -84,7 +100,8 @@ export default function MasterDispatchRadarPage() {
       eta: "Ready for Dispatch",
       tripType: "Corporate Standby",
       customerName: "N/A",
-      coords: { x: "48%", y: "60%" }
+      lat: 19.1136,
+      lng: 72.8697
     },
     {
       id: "DRV-104",
@@ -100,12 +117,13 @@ export default function MasterDispatchRadarPage() {
       eta: "8 Mins to Pickup",
       tripType: "VIP Delegation",
       customerName: "Dr. Aris Thorne",
-      coords: { x: "75%", y: "70%" }
+      lat: 19.0276,
+      lng: 72.8188
     }
   ]);
 
+  // Load saved dispatches from localStorage
   useEffect(() => {
-    // Read persisted dispatches from localStorage
     const saved = localStorage.getItem("master_dispatches");
     if (saved) {
       try {
@@ -118,6 +136,80 @@ export default function MasterDispatchRadarPage() {
       }
     }
   }, []);
+
+  // Initialize Real Leaflet Interactive Dark Satellite Map
+  const initLeafletMap = () => {
+    if (!window.L || !mapRef.current) return;
+
+    if (leafletInstanceRef.current) {
+      leafletInstanceRef.current.remove();
+      leafletInstanceRef.current = null;
+    }
+
+    try {
+      // Center map on Mumbai Metropolitan Area [19.0760, 72.8777]
+      const map = window.L.map(mapRef.current, {
+        center: [19.0760, 72.8777],
+        zoom: 12,
+        zoomControl: true,
+        attributionControl: false
+      });
+
+      // Add CartoDB Dark Matter Map Tiles
+      window.L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+        maxZoom: 19,
+        subdomains: "abcd"
+      }).addTo(map);
+
+      leafletInstanceRef.current = map;
+      setMapLoaded(true);
+
+      // Render GPS Vehicle Markers on Real Map
+      renderMapMarkers(map, drivers);
+    } catch (e) {
+      console.error("Leaflet map initialization error:", e);
+    }
+  };
+
+  const renderMapMarkers = (map: any, driverList: any[]) => {
+    if (!window.L || !map) return;
+
+    // Clear previous markers
+    markersRef.current.forEach(m => map.removeLayer(m));
+    markersRef.current = [];
+
+    driverList.forEach(drv => {
+      const lat = drv.lat || 19.0760 + (Math.random() - 0.5) * 0.1;
+      const lng = drv.lng || 72.8777 + (Math.random() - 0.5) * 0.1;
+
+      // Custom HTML Glowing Vehicle Pin Icon
+      const customIcon = window.L.divIcon({
+        className: "custom-leaflet-marker",
+        html: `
+          <div class="relative group cursor-pointer">
+            <div class="w-8 h-8 rounded-full bg-slate-900 border-2 border-amber-400 shadow-2xl flex items-center justify-center text-amber-400 font-bold hover:scale-125 transition-transform">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+            </div>
+            <div class="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-slate-950/95 border border-amber-500/40 text-amber-400 text-[10px] font-mono font-bold px-2 py-0.5 rounded shadow-2xl whitespace-nowrap z-50">
+              ${drv.driverName} (${drv.regNumber})
+            </div>
+          </div>
+        `,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
+      });
+
+      const marker = window.L.marker([lat, lng], { icon: customIcon }).addTo(map);
+      marker.on("click", () => setSelectedDriver(drv));
+      markersRef.current.push(marker);
+    });
+  };
+
+  useEffect(() => {
+    if (leafletInstanceRef.current) {
+      renderMapMarkers(leafletInstanceRef.current, drivers);
+    }
+  }, [drivers]);
 
   const toggleDriverStatus = (id: string, newStatus: string) => {
     setDrivers(prev => prev.map(d => d.id === id ? { ...d, status: newStatus } : d));
@@ -141,7 +233,8 @@ export default function MasterDispatchRadarPage() {
       eta: "15 Mins",
       tripType: assignForm.tripType,
       customerName: assignForm.customerName,
-      coords: { x: "50%", y: "50%" }
+      lat: 19.0760 + (Math.random() - 0.5) * 0.08,
+      lng: 72.8777 + (Math.random() - 0.5) * 0.08
     };
 
     setDrivers([newDuty, ...drivers]);
@@ -171,12 +264,25 @@ export default function MasterDispatchRadarPage() {
 
   return (
     <div className="space-y-8">
+      {/* Leaflet CSS Inject */}
+      <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      />
+
+      {/* Leaflet JS Script Load */}
+      <Script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        strategy="afterInteractive"
+        onLoad={initLeafletMap}
+      />
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-amber-500/20 pb-6">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-3xl font-black tracking-tight text-slate-50">
-              Live Dispatch Radar & Telematics
+              Live Dispatch Radar & GPS Telematics Map
             </h1>
             <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
@@ -184,7 +290,7 @@ export default function MasterDispatchRadarPage() {
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Real-time GPS telemetry radar, on-route chauffeur dispatch logs, and live ETAs.
+            Real-time interactive GPS map, live chauffeur coordinates, on-route tracking, and ETAs.
           </p>
         </div>
 
@@ -199,55 +305,31 @@ export default function MasterDispatchRadarPage() {
         </div>
       </div>
 
-      {/* Interactive Telematics Radar Visualizer */}
+      {/* Real Interactive Leaflet Dark Map Visualizer */}
       <div className="bg-slate-900/90 backdrop-blur-2xl border border-amber-500/30 rounded-3xl p-6 shadow-2xl relative overflow-hidden space-y-4">
         <div className="flex justify-between items-center border-b border-white/10 pb-4">
           <div className="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wider">
             <Radio className="w-4 h-4 animate-pulse" />
-            <span>Interactive Pan-India Chauffeur Telematics Grid Map</span>
+            <span>Real OpenStreetMap & CartoDB Dark GPS Telematics Map</span>
           </div>
-          <span className="text-xs font-mono text-slate-400">
-            Active GPS Pins: <span className="text-amber-400 font-bold">{drivers.length}</span>
-          </span>
+          <div className="flex items-center gap-4 text-xs font-mono text-slate-400">
+            <span>Active GPS Vehicles: <strong className="text-amber-400">{drivers.length}</strong></span>
+            <span className="bg-slate-950 px-3 py-1 rounded-full border border-white/10 text-slate-300 font-bold">
+              Center: Mumbai Hub (19.0760° N, 72.8777° E)
+            </span>
+          </div>
         </div>
 
-        <div className="relative h-72 w-full bg-slate-950/90 rounded-2xl border border-amber-500/20 overflow-hidden flex items-center justify-center">
-          {/* Radar Scanning Ring Animations */}
-          <div className="absolute w-96 h-96 rounded-full border border-amber-500/10 animate-ping pointer-events-none" />
-          <div className="absolute w-64 h-64 rounded-full border border-amber-500/20 pointer-events-none" />
-          <div className="absolute w-32 h-32 rounded-full border border-amber-500/30 pointer-events-none" />
-          
-          {/* Radar Grid Crosshair Lines */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
+        {/* Real Leaflet Map Render Window */}
+        <div className="relative h-96 w-full rounded-2xl overflow-hidden border border-amber-500/30 shadow-2xl bg-slate-950">
+          <div ref={mapRef} className="w-full h-full z-10" />
 
-          {/* Interactive Vehicle Radar Pin Dots */}
-          {drivers.map((drv, idx) => (
-            <div
-              key={drv.id || idx}
-              onClick={() => setSelectedDriver(drv)}
-              style={{ left: drv.coords?.x || `${20 + idx * 18}%`, top: drv.coords?.y || `${30 + idx * 12}%` }}
-              className="absolute -translate-x-1/2 -translate-y-1/2 z-20 cursor-pointer group"
-              title={`Click to inspect ${drv.driverName} (${drv.vehicleModel})`}
-            >
-              <div className="relative flex items-center justify-center">
-                <span className="w-4 h-4 rounded-full bg-amber-400 animate-ping absolute opacity-75" />
-                <div className="w-6 h-6 rounded-full bg-amber-500 border-2 border-slate-950 flex items-center justify-center text-slate-950 font-black text-[10px] shadow-lg group-hover:scale-125 transition-transform">
-                  <Car className="w-3.5 h-3.5" />
-                </div>
-              </div>
-              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-slate-900/90 border border-amber-500/40 text-slate-100 text-[10px] font-mono font-bold px-2 py-0.5 rounded shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                {drv.driverName} ({drv.speed})
-              </div>
+          {!mapLoaded && (
+            <div className="absolute inset-0 z-20 bg-slate-950 flex flex-col items-center justify-center space-y-3">
+              <RefreshCw className="w-8 h-8 text-amber-400 animate-spin" />
+              <div className="text-xs font-mono text-amber-400 font-bold">Loading Satellite & Vector Map Tiles...</div>
             </div>
-          ))}
-
-          <div className="relative z-10 text-center space-y-2 pointer-events-none">
-            <Navigation className="w-10 h-10 text-amber-400 mx-auto animate-bounce" />
-            <h4 className="text-sm font-black text-slate-100 uppercase tracking-widest">Mumbai & Pan-India Metropolitan Hub Telematics Radar</h4>
-            <p className="text-xs text-slate-400 max-w-md mx-auto">
-              Live chauffeur app GPS connected. Click any pulsing radar dot above to inspect real-time vehicle telemetry.
-            </p>
-          </div>
+          )}
         </div>
       </div>
 
@@ -264,84 +346,82 @@ export default function MasterDispatchRadarPage() {
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Filter className="w-4 h-4 text-slate-400" />
-          <span className="text-xs text-slate-400 font-bold uppercase">Status:</span>
-          {["ALL", "IN_TRANSIT", "ASSIGNED", "AVAILABLE"].map((st) => (
+        <div className="flex items-center gap-2">
+          {["ALL", "IN_TRANSIT", "ASSIGNED", "AVAILABLE"].map((status) => (
             <button
-              key={st}
-              onClick={() => setFilterStatus(st)}
-              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase transition-all ${
-                filterStatus === st
+              key={status}
+              onClick={() => setFilterStatus(status)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                filterStatus === status
                   ? "bg-amber-500 text-slate-950 font-black"
-                  : "bg-slate-950 text-slate-400 hover:text-white"
+                  : "bg-slate-950 text-slate-400 hover:text-white border border-white/5"
               }`}
             >
-              {st}
+              {status}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Drivers Telematics List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Driver Roster Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {filtered.map((drv) => (
           <div
             key={drv.id}
-            className="bg-slate-900/80 backdrop-blur-xl border border-white/10 hover:border-amber-500/40 rounded-2xl p-6 shadow-xl space-y-4 transition-all"
+            className="bg-slate-900/80 backdrop-blur-xl border border-white/10 hover:border-amber-500/40 rounded-2xl p-5 shadow-xl space-y-4 transition-all flex flex-col justify-between"
           >
-            <div className="flex justify-between items-start">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold">
-                  <Car className="w-5 h-5" />
+            <div className="space-y-3">
+              <div className="flex justify-between items-start">
+                <span
+                  className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${
+                    drv.status === "IN_TRANSIT"
+                      ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
+                      : drv.status === "ASSIGNED"
+                      ? "bg-blue-500/10 text-blue-400 border-blue-500/30"
+                      : "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                  }`}
+                >
+                  {drv.status.replace("_", " ")}
+                </span>
+                <span className="text-[11px] font-mono text-slate-400 font-bold">{drv.speed}</span>
+              </div>
+
+              <div>
+                <h3 className="font-extrabold text-slate-100 text-sm">{drv.driverName}</h3>
+                <div className="text-xs text-amber-400/90 font-semibold">{drv.vehicleModel}</div>
+                <div className="text-[10px] font-mono text-slate-400 mt-0.5">{drv.regNumber}</div>
+              </div>
+
+              <div className="space-y-2 bg-slate-950 p-3 rounded-xl border border-white/5 text-[11px]">
+                <div className="flex items-start gap-2 text-slate-300">
+                  <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-[9px] text-slate-500 uppercase font-bold">Pickup / Location</div>
+                    <div className="font-medium text-slate-200 line-clamp-1">{drv.currentLocation}</div>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold text-slate-100 text-sm">{drv.driverName}</h3>
-                  <div className="text-[11px] text-slate-400 font-mono">{drv.vehicleModel} &bull; {drv.regNumber}</div>
+                <div className="flex items-start gap-2 text-slate-300">
+                  <Navigation className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-[9px] text-slate-500 uppercase font-bold">Destination</div>
+                    <div className="font-medium text-slate-200 line-clamp-1">{drv.destination}</div>
+                  </div>
                 </div>
               </div>
 
-              <select
-                value={drv.status}
-                onChange={(e) => toggleDriverStatus(drv.id, e.target.value)}
-                className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-full border focus:outline-none cursor-pointer bg-slate-950 ${
-                  drv.status === "IN_TRANSIT"
-                    ? "text-emerald-400 border-emerald-500/30"
-                    : drv.status === "ASSIGNED"
-                    ? "text-blue-400 border-blue-500/30"
-                    : "text-amber-400 border-amber-500/30"
-                }`}
-              >
-                <option value="IN_TRANSIT">IN TRANSIT</option>
-                <option value="ASSIGNED">ASSIGNED</option>
-                <option value="AVAILABLE">AVAILABLE</option>
-              </select>
+              <div className="flex justify-between items-center text-xs pt-1">
+                <span className="text-slate-400">ETA: <strong className="text-slate-200">{drv.eta}</strong></span>
+                <span className="text-slate-400">Pax: <strong className="text-slate-200">{drv.customerName}</strong></span>
+              </div>
             </div>
 
-            <div className="space-y-2 bg-slate-950/80 p-3 rounded-xl border border-white/5 text-xs">
-              <div className="flex items-center justify-between text-slate-300">
-                <span className="text-slate-400 font-semibold">Current Location:</span>
-                <span className="font-bold text-slate-200 truncate max-w-[200px]">{drv.currentLocation}</span>
-              </div>
-              <div className="flex items-center justify-between text-slate-300">
-                <span className="text-slate-400 font-semibold">Destination:</span>
-                <span className="font-bold text-amber-400 truncate max-w-[200px]">{drv.destination}</span>
-              </div>
-              <div className="flex items-center justify-between text-slate-300">
-                <span className="text-slate-400 font-semibold">Passenger:</span>
-                <span className="font-bold text-slate-200">{drv.customerName}</span>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-2 text-xs font-mono">
-              <span className="text-slate-400">Speed: <strong className="text-slate-200">{drv.speed}</strong></span>
-              <span className="text-slate-400">ETA: <strong className="text-emerald-400">{drv.eta}</strong></span>
-              <a
-                href={`tel:${drv.phone}`}
-                className="flex items-center gap-1 text-amber-400 hover:underline font-bold"
+            <div className="pt-3 border-t border-white/5 flex items-center justify-between gap-2">
+              <button
+                onClick={() => setSelectedDriver(drv)}
+                className="w-full bg-slate-950 hover:bg-white/5 text-amber-400 border border-amber-500/30 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                <PhoneCall className="w-3.5 h-3.5" /> Call Driver
-              </a>
+                <Activity className="w-3.5 h-3.5" /> Inspect GPS Ping
+              </button>
             </div>
           </div>
         ))}
@@ -350,91 +430,105 @@ export default function MasterDispatchRadarPage() {
       {/* Assign Duty Roster Modal */}
       {showAssignModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
+          <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100 max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setShowAssignModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white"
+              className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">Telematics Dispatch Command</span>
-              <h3 className="text-xl font-bold text-slate-50">Assign Chauffeur Duty Roster</h3>
+            <div className="space-y-1 border-b border-white/10 pb-3">
+              <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">Master Duty Roster</span>
+              <h3 className="text-2xl font-black text-slate-50">Assign Chauffeur Duty</h3>
             </div>
 
             {assignSuccess ? (
-              <div className="bg-emerald-500/10 border border-emerald-500/30 p-6 rounded-xl text-center space-y-2">
-                <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto animate-bounce" />
-                <div className="text-sm font-bold text-emerald-400">Duty Roster Assigned Successfully!</div>
-                <div className="text-xs text-slate-300">Driver notified on GPS Telematics App.</div>
+              <div className="p-8 text-center space-y-3">
+                <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto animate-bounce" />
+                <h4 className="text-lg font-bold text-slate-100">Duty Assigned & Dispatched!</h4>
+                <p className="text-xs text-slate-400">Driver app notified. GPS radar tracking active.</p>
               </div>
             ) : (
               <form onSubmit={handleAssignSubmit} className="space-y-4 text-xs">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-slate-400 font-bold">Select Driver *</label>
+                    <label className="text-slate-300 font-bold">Select Driver *</label>
                     <select
                       value={assignForm.driverName}
                       onChange={(e) => setAssignForm({ ...assignForm, driverName: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100"
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
                     >
                       <option value="Rajesh Kumar">Rajesh Kumar (Swift Dzire)</option>
                       <option value="Suresh Patil">Suresh Patil (Innova Crysta)</option>
                       <option value="Vikram Singh">Vikram Singh (Honda City)</option>
-                      <option value="Mahesh Yadav">Mahesh Yadav (Fortuner 4x4)</option>
+                      <option value="Mahesh Yadav">Mahesh Yadav (Fortuner)</option>
                     </select>
                   </div>
+
                   <div className="space-y-1">
-                    <label className="text-slate-400 font-bold">Passenger Name *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Ananya Sharma"
-                      value={assignForm.customerName}
-                      onChange={(e) => setAssignForm({ ...assignForm, customerName: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100"
-                    />
+                    <label className="text-slate-300 font-bold">Trip Type</label>
+                    <select
+                      value={assignForm.tripType}
+                      onChange={(e) => setAssignForm({ ...assignForm, tripType: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
+                    >
+                      <option value="Airport Transfer">Airport Transfer</option>
+                      <option value="Local Rental">Local Rental (8hr / 80km)</option>
+                      <option value="Outstation Trip">Outstation Trip</option>
+                      <option value="Corporate Transit">Corporate Transit</option>
+                    </select>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-slate-400 font-bold">Pickup Point *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. BKC Complex"
-                      value={assignForm.pickupLocation}
-                      onChange={(e) => setAssignForm({ ...assignForm, pickupLocation: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-slate-400 font-bold">Destination</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Airport Terminal 2"
-                      value={assignForm.destination}
-                      onChange={(e) => setAssignForm({ ...assignForm, destination: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100"
-                    />
-                  </div>
+                <div className="space-y-1">
+                  <label className="text-slate-300 font-bold">Passenger Name *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Vikram Malhotra"
+                    value={assignForm.customerName}
+                    onChange={(e) => setAssignForm({ ...assignForm, customerName: e.target.value })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
+                  />
                 </div>
 
-                <div className="pt-2 flex justify-end gap-3">
+                <div className="space-y-1">
+                  <label className="text-slate-300 font-bold">Pickup Location *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Chhatrapati Shivaji Maharaj Intl Airport (T2)"
+                    value={assignForm.pickupLocation}
+                    onChange={(e) => setAssignForm({ ...assignForm, pickupLocation: e.target.value })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-slate-300 font-bold">Destination Drop Location</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. BKC G-Block, Bandra East, Mumbai"
+                    value={assignForm.destination}
+                    onChange={(e) => setAssignForm({ ...assignForm, destination: e.target.value })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                <div className="pt-3 border-t border-white/10 flex justify-end gap-3">
                   <button
                     type="button"
                     onClick={() => setShowAssignModal(false)}
-                    className="px-4 py-2 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs"
+                    className="px-5 py-2.5 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs font-bold"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs uppercase"
+                    className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer"
                   >
-                    Confirm Duty Assignment
+                    Dispatch Duty Now
                   </button>
                 </div>
               </form>
@@ -443,38 +537,48 @@ export default function MasterDispatchRadarPage() {
         </div>
       )}
 
-      {/* Driver Telematics File Inspector Modal */}
+      {/* Driver Telematics Drawer */}
       {selectedDriver && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4 relative text-slate-100">
+          <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 relative text-slate-100">
             <button
               onClick={() => setSelectedDriver(null)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white"
+              className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="space-y-1">
-              <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">Live GPS Telematics Ping</span>
+              <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">Live GPS Telematics Telemetry</span>
               <h3 className="text-xl font-bold text-slate-50">{selectedDriver.driverName}</h3>
+              <div className="text-xs text-amber-400 font-mono font-bold">{selectedDriver.vehicleModel} &bull; {selectedDriver.regNumber}</div>
             </div>
 
             <div className="space-y-2 bg-slate-950 p-4 rounded-xl border border-white/10 text-xs font-mono">
-              <div>Phone: <strong className="text-amber-400">{selectedDriver.phone}</strong></div>
-              <div>Assigned Cab: <strong className="text-slate-200">{selectedDriver.vehicleModel} ({selectedDriver.regNumber})</strong></div>
-              <div>Current Location: <strong className="text-slate-200">{selectedDriver.currentLocation}</strong></div>
-              <div>Destination: <strong className="text-amber-400">{selectedDriver.destination}</strong></div>
-              <div>Passenger: <strong className="text-slate-200">{selectedDriver.customerName}</strong></div>
-              <div>Live Speed: <strong className="text-emerald-400">{selectedDriver.speed}</strong></div>
-              <div>ETA: <strong className="text-emerald-400">{selectedDriver.eta}</strong></div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Current Speed:</span>
+                <strong className="text-emerald-400">{selectedDriver.speed}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Estimated ETA:</span>
+                <strong className="text-amber-400">{selectedDriver.eta}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Passenger Name:</span>
+                <strong className="text-slate-100">{selectedDriver.customerName}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Current Location:</span>
+                <strong className="text-slate-200 truncate max-w-[180px]">{selectedDriver.currentLocation}</strong>
+              </div>
             </div>
 
             <div className="pt-2 flex justify-end">
               <button
                 onClick={() => setSelectedDriver(null)}
-                className="px-4 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs"
+                className="px-4 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs cursor-pointer"
               >
-                Close Radar Ping
+                Close Inspector
               </button>
             </div>
           </div>
