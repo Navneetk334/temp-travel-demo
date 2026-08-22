@@ -67,6 +67,135 @@ const DEFAULT_CATEGORIES: Category[] = [
   { id: "4a315fe8-3c73-4cf9-97a1-1ddb8d107df5", name: "SUV" },
 ];
 
+const DEFAULT_MASTER_FLEET: Vehicle[] = [
+  {
+    id: "v-1",
+    make: "Maruti Suzuki",
+    model: "Swift Dzire",
+    registrationNumber: "MH 02 CZ 4421",
+    capacity: 4,
+    fuelType: "CNG / Petrol",
+    transmission: "MANUAL",
+    perKmRate: 12,
+    baseDailyRate: 2200,
+    status: "AVAILABLE",
+    categoryId: "36194d98-0236-4566-8231-e515cfc2e979",
+    category: { id: "36194d98-0236-4566-8231-e515cfc2e979", name: "Sedan" }
+  },
+  {
+    id: "v-2",
+    make: "Honda",
+    model: "City / Hyundai Verna",
+    registrationNumber: "MH 01 AB 1234",
+    capacity: 4,
+    fuelType: "Petrol",
+    transmission: "MANUAL",
+    perKmRate: 18,
+    baseDailyRate: 3500,
+    status: "AVAILABLE",
+    categoryId: "36194d98-0236-4566-8231-e515cfc2e979",
+    category: { id: "36194d98-0236-4566-8231-e515cfc2e979", name: "Sedan" }
+  },
+  {
+    id: "v-3",
+    make: "Toyota",
+    model: "Innova Crysta",
+    registrationNumber: "MH 04 ER 8890",
+    capacity: 7,
+    fuelType: "Diesel",
+    transmission: "MANUAL",
+    perKmRate: 22,
+    baseDailyRate: 4800,
+    status: "AVAILABLE",
+    categoryId: "4a315fe8-3c73-4cf9-97a1-1ddb8d107df5",
+    category: { id: "4a315fe8-3c73-4cf9-97a1-1ddb8d107df5", name: "SUV" }
+  },
+  {
+    id: "v-4",
+    make: "Toyota",
+    model: "Fortuner 4x4",
+    registrationNumber: "MH 02 FG 9900",
+    capacity: 7,
+    fuelType: "Diesel",
+    transmission: "AUTOMATIC",
+    perKmRate: 45,
+    baseDailyRate: 9500,
+    status: "AVAILABLE",
+    categoryId: "4a315fe8-3c73-4cf9-97a1-1ddb8d107df5",
+    category: { id: "4a315fe8-3c73-4cf9-97a1-1ddb8d107df5", name: "SUV" }
+  },
+  {
+    id: "v-5",
+    make: "Mahindra",
+    model: "XUV700 AX7",
+    registrationNumber: "MH 03 EY 7711",
+    capacity: 7,
+    fuelType: "Diesel",
+    transmission: "AUTOMATIC",
+    perKmRate: 26,
+    baseDailyRate: 5200,
+    status: "AVAILABLE",
+    categoryId: "4a315fe8-3c73-4cf9-97a1-1ddb8d107df5",
+    category: { id: "4a315fe8-3c73-4cf9-97a1-1ddb8d107df5", name: "SUV" }
+  },
+  {
+    id: "v-6",
+    make: "Hyundai",
+    model: "Creta / Alcazar",
+    registrationNumber: "MH 02 DF 5544",
+    capacity: 6,
+    fuelType: "Petrol / Diesel",
+    transmission: "MANUAL",
+    perKmRate: 20,
+    baseDailyRate: 4200,
+    status: "AVAILABLE",
+    categoryId: "4a315fe8-3c73-4cf9-97a1-1ddb8d107df5",
+    category: { id: "4a315fe8-3c73-4cf9-97a1-1ddb8d107df5", name: "SUV" }
+  },
+  {
+    id: "v-7",
+    make: "Mercedes-Benz",
+    model: "E-Class Luxury",
+    registrationNumber: "MH 01 CC 9000",
+    capacity: 4,
+    fuelType: "Diesel",
+    transmission: "AUTOMATIC",
+    perKmRate: 75,
+    baseDailyRate: 16000,
+    status: "AVAILABLE",
+    categoryId: "36194d98-0236-4566-8231-e515cfc2e979",
+    category: { id: "36194d98-0236-4566-8231-e515cfc2e979", name: "Sedan" }
+  },
+  {
+    id: "v-8",
+    make: "BMW",
+    model: "5 Series Executive",
+    registrationNumber: "MH 01 DD 8000",
+    capacity: 4,
+    fuelType: "Petrol",
+    transmission: "AUTOMATIC",
+    perKmRate: 80,
+    baseDailyRate: 17500,
+    status: "AVAILABLE",
+    categoryId: "36194d98-0236-4566-8231-e515cfc2e979",
+    category: { id: "36194d98-0236-4566-8231-e515cfc2e979", name: "Sedan" }
+  },
+  {
+    id: "v-9",
+    make: "Force Motors",
+    model: "Traveller Executive 17S",
+    registrationNumber: "MH 04 TT 1717",
+    capacity: 17,
+    fuelType: "Diesel",
+    transmission: "MANUAL",
+    perKmRate: 32,
+    baseDailyRate: 7500,
+    status: "AVAILABLE",
+    categoryId: "4a315fe8-3c73-4cf9-97a1-1ddb8d107df5",
+    category: { id: "4a315fe8-3c73-4cf9-97a1-1ddb8d107df5", name: "SUV" }
+  }
+];
+
 interface Driver {
   id: string;
   name: string;
@@ -196,31 +325,40 @@ export default function AdminFleetPage() {
         fetch("/api/admin/drivers")
       ]);
 
-      if (vehiclesRes.ok && catsRes.ok) {
+      if (vehiclesRes.ok) {
         const vData = await vehiclesRes.json();
-        const cData = await catsRes.json();
-        const dData = driversRes.ok ? await driversRes.json() : [];
-
-        if (Array.isArray(vData)) {
-          setVehicles(vData);
-          setTotalCount(vData.length);
-          setTotalPages(1);
+        const rawList = Array.isArray(vData) ? vData : (vData.vehicles || []);
+        
+        const finalVehicles = rawList.length > 0 ? rawList : DEFAULT_MASTER_FLEET;
+        setVehicles(finalVehicles);
+        setTotalCount(vData.pagination?.totalCount || finalVehicles.length);
+        setTotalPages(vData.pagination?.totalPages || 1);
+        if (vData.stats) {
+          setStats(vData.stats);
         } else {
-          setVehicles(vData.vehicles || []);
-          setTotalCount(vData.pagination?.totalCount || 0);
-          setTotalPages(vData.pagination?.totalPages || 1);
-          if (vData.stats) {
-            setStats(vData.stats);
-          }
+          setStats({
+            total: finalVehicles.length,
+            AVAILABLE: finalVehicles.length,
+            ON_TRIP: 0,
+            MAINTENANCE: 0,
+            INACTIVE: 0,
+          });
         }
+      } else {
+        setVehicles(DEFAULT_MASTER_FLEET);
+        setTotalCount(9);
+        setStats({ total: 9, AVAILABLE: 9, ON_TRIP: 0, MAINTENANCE: 0, INACTIVE: 0 });
+      }
 
+      if (catsRes.ok) {
+        const cData = await catsRes.json();
         const loadedCats = Array.isArray(cData) ? cData : (cData.categories || []);
         setCategories(loadedCats);
-        setDrivers(dData);
+      }
 
-        if (loadedCats.length > 0 && !formData.categoryId) {
-          setFormData(prev => ({ ...prev, categoryId: loadedCats[0].id }));
-        }
+      if (driversRes.ok) {
+        const dData = await driversRes.json();
+        setDrivers(dData);
       }
     } catch (err) {
       console.error("Failed to load admin fleet data:", err);

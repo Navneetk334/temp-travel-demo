@@ -46,11 +46,17 @@ export default function Homepage() {
   const DEFAULT_FEATURED = [
     { id: "1", name: "Maruti Suzuki Swift Dzire", category: "Compact Sedan", seats: "4 Passengers", rate: "₹12/km", img: "/images/fleet-suv.png" },
     { id: "2", name: "Honda City / Hyundai Verna", category: "Executive Sedan", seats: "4 Passengers", rate: "₹18/km", img: "/images/hero-cover.png" },
-    { id: "3", name: "Mercedes-Benz E-Class", category: "Luxury Sedan", seats: "4 Passengers", rate: "₹65/km", img: "/images/hero-cover.png" }
+    { id: "3", name: "Toyota Innova Crysta", category: "Premium MPV", seats: "7 Passengers", rate: "₹22/km", img: "/images/fleet-suv.png" },
+    { id: "4", name: "Toyota Fortuner 4x4", category: "Luxury SUV", seats: "7 Passengers", rate: "₹45/km", img: "/images/fleet-suv.png" },
+    { id: "5", name: "Mahindra XUV700 AX7", category: "Premium SUV", seats: "7 Passengers", rate: "₹26/km", img: "/images/fleet-suv.png" },
+    { id: "6", name: "Hyundai Creta / Alcazar", category: "Mid SUV", seats: "6 Passengers", rate: "₹20/km", img: "/images/fleet-suv.png" },
+    { id: "7", name: "Mercedes-Benz E-Class Luxury", category: "Luxury Sedan", seats: "4 Passengers", rate: "₹75/km", img: "/images/hero-cover.png" },
+    { id: "8", name: "BMW 5 Series Executive", category: "Luxury Sedan", seats: "4 Passengers", rate: "₹80/km", img: "/images/hero-cover.png" },
+    { id: "9", name: "Force Motors Traveller 17S", category: "Executive Coach", seats: "17 Passengers", rate: "₹32/km", img: "/images/fleet-suv.png" }
   ];
 
-  const [featuredVehicles, setFeaturedVehicles] = useState<any[]>([]);
-  const [vehiclesLoading, setVehiclesLoading] = useState<boolean>(true);
+  const [featuredVehicles, setFeaturedVehicles] = useState<any[]>(DEFAULT_FEATURED);
+  const [vehiclesLoading, setVehiclesLoading] = useState<boolean>(false);
 
   const [googleData, setGoogleData] = useState<{
     rating: number;
@@ -89,7 +95,7 @@ export default function Homepage() {
     ]
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetch("/api/google-reviews")
       .then((res) => {
         if (res.ok) return res.json();
@@ -105,7 +111,7 @@ export default function Homepage() {
       });
 
     // Fetch featured homepage fleet vehicles selected in Admin Panel
-    fetch("/api/fleet?limit=30")
+    fetch("/api/fleet?limit=100")
       .then((res) => {
         if (res.ok) return res.json();
         throw new Error("Failed to fetch fleet");
@@ -113,26 +119,14 @@ export default function Homepage() {
       .then((data) => {
         const vehicles = Array.isArray(data) ? data : (data.vehicles || []);
         if (vehicles.length > 0) {
-          let selected = vehicles.filter((v: any) => v.isFeatured);
-          if (selected.length < 3) {
-            const unselected = vehicles.filter((v: any) => !selected.some((s: any) => s.id === v.id));
-            selected = [...selected, ...unselected].slice(0, 3);
-          } else {
-            selected = selected.slice(0, 3);
-          }
-
-          if (selected.length > 0) {
-            setFeaturedVehicles(selected.map((v: any) => ({
-              id: v.id,
-              name: `${v.make} ${v.model}`,
-              category: v.subCategory || v.category?.name || "Executive Fleet",
-              seats: `${v.capacity} Passengers`,
-              rate: v.perKmRate ? `₹${Number(v.perKmRate)}/km` : v.baseDailyRate ? `₹${Number(v.baseDailyRate)}/day` : "On Request",
-              img: v.imageUrl || "/images/fleet-suv.png"
-            })));
-          } else {
-            setFeaturedVehicles(DEFAULT_FEATURED);
-          }
+          setFeaturedVehicles(vehicles.map((v: any) => ({
+            id: v.id,
+            name: `${v.make} ${v.model}`,
+            category: v.subCategory || v.category?.name || "Executive Fleet",
+            seats: `${v.capacity} Passengers`,
+            rate: v.perKmRate ? `₹${Number(v.perKmRate)}/km` : v.baseDailyRate ? `₹${Number(v.baseDailyRate)}/day` : "On Request",
+            img: v.imageUrl || "/images/hero-car.png"
+          })));
         } else {
           setFeaturedVehicles(DEFAULT_FEATURED);
         }
@@ -140,9 +134,6 @@ export default function Homepage() {
       .catch((err) => {
         console.error("Featured vehicles load error:", err);
         setFeaturedVehicles(DEFAULT_FEATURED);
-      })
-      .finally(() => {
-        setVehiclesLoading(false);
       });
   }, []);
 
