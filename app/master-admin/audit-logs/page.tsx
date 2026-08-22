@@ -17,48 +17,7 @@ export default function MasterAuditLogsPage() {
   const [search, setSearch] = useState("");
   const [severityFilter, setSeverityFilter] = useState("ALL");
 
-  const [auditLogs, setAuditLogs] = useState([
-    {
-      id: "LOG-9941",
-      timestamp: "2026-08-21 14:45:12",
-      user: "Master Super Admin",
-      role: "SUPER_ADMIN",
-      action: "RECONCILED_DRIVER_CASH",
-      details: "Reconciled ₹49,000 driver cash collection against duty roster MH 02 CZ 4421.",
-      ipAddress: "103.21.124.89",
-      severity: "INFO"
-    },
-    {
-      id: "LOG-9940",
-      timestamp: "2026-08-21 13:30:05",
-      user: "Navneet Kumar",
-      role: "OPERATIONS_DISPATCH",
-      action: "ASSIGNED_DRIVER_DUTY",
-      details: "Assigned Chauffeur Rajesh Kumar to Airport Transfer Booking #BK-8841.",
-      ipAddress: "103.21.124.90",
-      severity: "INFO"
-    },
-    {
-      id: "LOG-9939",
-      timestamp: "2026-08-21 12:15:30",
-      user: "Master Super Admin",
-      role: "SUPER_ADMIN",
-      action: "UPDATED_VEHICLE_TARIFF",
-      details: "Updated per-km rate for Sedan Category from ₹12/km to ₹14/km.",
-      ipAddress: "103.21.124.89",
-      severity: "IMPORTANT"
-    },
-    {
-      id: "LOG-9938",
-      timestamp: "2026-08-21 11:00:00",
-      user: "System Automated Webhook",
-      role: "RAZORPAY_WEBHOOK",
-      action: "VERIFIED_PAYMENT_HMAC",
-      details: "Razorpay payment ID pay_Qx8812 verified with HMAC SHA-256 signature.",
-      ipAddress: "52.66.12.18",
-      severity: "INFO"
-    }
-  ]);
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
 
   const filteredLogs = auditLogs.filter((log) => {
     const matchesSearch =

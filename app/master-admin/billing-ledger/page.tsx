@@ -23,47 +23,7 @@ export default function MasterBillingLedgerPage() {
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null);
 
-  const [invoices, setInvoices] = useState([
-    {
-      id: "INV-2026-001",
-      customerName: "Acme Corp Logistics",
-      gstin: "27AABCU9603R1ZM",
-      tripType: "Corporate Employee Transit",
-      baseAmount: 45000,
-      cgst: 2700,
-      sgst: 2700,
-      totalAmount: 50400,
-      sacCode: "996412",
-      status: "PAID",
-      date: "2026-08-20"
-    },
-    {
-      id: "INV-2026-002",
-      customerName: "Dr. Aris Thorne",
-      gstin: "URP (Unregistered)",
-      tripType: "Outstation Car Rental - Pune",
-      baseAmount: 8500,
-      cgst: 255,
-      sgst: 255,
-      totalAmount: 9010,
-      sacCode: "996412",
-      status: "PAID",
-      date: "2026-08-19"
-    },
-    {
-      id: "INV-2026-003",
-      customerName: "Tata Consultancy Services",
-      gstin: "27AAACT2727Q1ZW",
-      tripType: "Monthly Airport Executive Shuttle",
-      baseAmount: 120000,
-      cgst: 7200,
-      sgst: 7200,
-      totalAmount: 134400,
-      sacCode: "996412",
-      status: "PENDING",
-      date: "2026-08-18"
-    }
-  ]);
+  const [invoices, setInvoices] = useState<any[]>([]);
 
   const [invoiceForm, setInvoiceForm] = useState({
     customerName: "",

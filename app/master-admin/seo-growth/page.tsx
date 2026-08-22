@@ -33,10 +33,7 @@ export default function MasterSEOGrowthPage() {
     { city: "Nashik Hub", slug: "nashik", keyword: "Intercity Cab Service Nashik", impressions: "5.2K", rank: "#1", status: "INDEXED", metaTitle: "Intercity Cab Service Nashik | TEMP TRAVEL" },
   ]);
 
-  const gbpReviews = [
-    { id: "rev-1", author: "Abhinandan Kumar", rating: 5, time: "2 days ago", text: "Excellent outstation taxi service from Mumbai to Pune. Chauffeur was highly experienced." },
-    { id: "rev-2", author: "Kartik Arora", rating: 5, time: "1 week ago", text: "Best corporate cab partner for our tech employees in BKC." }
-  ];
+  const gbpReviews: any[] = [];
 
   const handleReplySubmit = (e: React.FormEvent) => {
     e.preventDefault();

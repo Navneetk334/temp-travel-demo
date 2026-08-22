@@ -72,52 +72,16 @@ export default function AdminPaymentsPage() {
   const [receiptRecord, setReceiptRecord] = useState<CashRecord | null>(null);
 
   useEffect(() => {
-    // Initial production mock cash records
-    const initialRecords: CashRecord[] = [
-      {
-        id: "rec_101",
-        receiptNumber: "TT-REC-2026-801",
-        bookingNumber: "TT-DEL-9842",
-        customerName: "Amit Sharma",
-        driverName: "Ramesh Singh",
-        driverPhone: "+91 98765 43210",
-        amount: 3500,
-        paymentMode: "CASH",
-        status: "HANDED_OVER_TO_OFFICE",
-        collectedAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-        receivedByStaff: "Duty Manager",
-        remarks: "Local 8hr/80km rental package cash settlement."
-      },
-      {
-        id: "rec_102",
-        receiptNumber: "TT-REC-2026-802",
-        bookingNumber: "TT-MUM-4837",
-        customerName: "Vikram Malhotra",
-        driverName: "Suresh Kumar",
-        driverPhone: "+91 98123 45678",
-        amount: 8400,
-        paymentMode: "CASH",
-        status: "PENDING_HANDOVER",
-        collectedAt: new Date(Date.now() - 3600000 * 5).toISOString(),
-        receivedByStaff: "Pending Verification",
-        remarks: "Outstation One-Way cash collected by chauffeur."
-      },
-      {
-        id: "rec_103",
-        receiptNumber: "TT-REC-2026-803",
-        bookingNumber: "TT-BLR-1928",
-        customerName: "Priya Nair",
-        driverName: "Mahesh Yadav",
-        driverPhone: "+91 97654 32109",
-        amount: 14500,
-        paymentMode: "RAZORPAY_ONLINE",
-        status: "HANDED_OVER_TO_OFFICE",
-        collectedAt: new Date(Date.now() - 3600000 * 12).toISOString(),
-        receivedByStaff: "System Auto-Gateway",
-        remarks: "Razorpay Online Advance Collection."
+    const saved = localStorage.getItem("user_uploaded_payments");
+    if (saved) {
+      try {
+        setRecords(JSON.parse(saved));
+      } catch (e) {
+        setRecords([]);
       }
-    ];
-    setRecords(initialRecords);
+    } else {
+      setRecords([]);
+    }
     setLoading(false);
   }, []);
 
