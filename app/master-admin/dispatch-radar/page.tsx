@@ -229,38 +229,38 @@ export default function MasterDispatchRadarPage() {
       />
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-amber-500/20 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-amber-500/20 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-black tracking-tight text-slate-50">
+            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-50">
               Live Dispatch Radar & GPS Telematics Map
             </h1>
-            <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
               LIVE TELEMATICS STREAM
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-400 mt-0.5">
             Real-time Google Maps style GPS tracking, Day/Night mode toggles, and live ETAs.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setShowAssignModal(true)}
-            className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-lg shadow-amber-500/20 cursor-pointer"
+            className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md shadow-amber-500/20 cursor-pointer"
           >
-            <UserCheck className="w-4 h-4" />
+            <UserCheck className="w-3.5 h-3.5" />
             <span>Assign Duty Roster</span>
           </button>
         </div>
       </div>
 
       {/* Real Interactive Google Maps Style Map Window */}
-      <div className="bg-slate-900/90 backdrop-blur-2xl border border-amber-500/30 rounded-3xl p-6 shadow-2xl relative overflow-hidden space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
+      <div className="bg-slate-900/90 backdrop-blur-2xl border border-amber-500/30 rounded-2xl p-4 sm:p-5 shadow-xl relative overflow-hidden space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-3">
           <div className="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wider">
-            <Radio className="w-4 h-4 animate-pulse" />
+            <Radio className="w-3.5 h-3.5 animate-pulse" />
             <span>Interactive Google Maps Telematics View (HQ: Temp Travel Car Rentals Pvt Ltd)</span>
           </div>
 
@@ -293,7 +293,7 @@ export default function MasterDispatchRadarPage() {
         </div>
 
         {/* Real Leaflet Map Render Container */}
-        <div className="relative h-96 w-full rounded-2xl overflow-hidden border border-amber-500/30 shadow-2xl bg-slate-950">
+        <div className="relative h-80 sm:h-[350px] w-full rounded-xl overflow-hidden border border-amber-500/30 shadow-xl bg-slate-950">
           <div ref={mapRef} className="w-full h-full z-10" />
 
           {!mapLoaded && (

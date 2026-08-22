@@ -234,23 +234,23 @@ export default function MasterAdminLayout({
   return (
     <div className="min-h-screen bg-slate-950 flex font-sans selection:bg-amber-500 selection:text-slate-950">
       {/* 1. Master Desktop Sidebar Panel (Fixed Left) */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-slate-900/95 backdrop-blur-2xl border-r border-amber-500/20 z-40 shrink-0 shadow-2xl">
+      <aside className="hidden lg:flex lg:flex-col lg:w-56 lg:fixed lg:inset-y-0 bg-slate-900/95 backdrop-blur-2xl border-r border-amber-500/20 z-40 shrink-0 shadow-2xl">
         {/* Brand Header */}
-        <div className="h-20 px-4 border-b border-amber-500/20 flex flex-col justify-center items-center text-center relative bg-gradient-to-b from-amber-500/10 via-transparent to-transparent">
+        <div className="h-14 px-3 border-b border-amber-500/20 flex flex-col justify-center items-center text-center relative bg-gradient-to-b from-amber-500/10 via-transparent to-transparent">
           <Link href="/master-admin" className="inline-flex items-center justify-center group" title="Master Admin Home">
             <img
               src="/images/logo.png"
               alt="TEMP TRAVEL"
-              className="h-[44px] w-auto object-contain mx-auto group-hover:scale-105 transition-transform drop-shadow-[0_4px_12px_rgba(245,158,11,0.3)]"
+              className="h-[36px] w-auto object-contain mx-auto group-hover:scale-105 transition-transform drop-shadow-[0_4px_12px_rgba(245,158,11,0.3)]"
             />
           </Link>
-          <span className="text-[8px] font-black uppercase tracking-[0.25em] text-amber-400 mt-1">
+          <span className="text-[7px] font-black uppercase tracking-[0.2em] text-amber-400 mt-0.5">
             Master Control Center
           </span>
         </div>
 
         {/* Navigation Links */}
-        <nav className="flex-1 px-3.5 py-5 space-y-1.5 overflow-y-auto">
+        <nav className="flex-1 px-2.5 py-3 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -258,27 +258,27 @@ export default function MasterAdminLayout({
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all duration-200 group ${
+                className={`flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-bold tracking-wide transition-all duration-200 group ${
                   isActive
-                    ? "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-lg shadow-amber-500/20 font-black"
+                    ? "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md shadow-amber-500/20 font-black"
                     : "text-slate-300 hover:text-white hover:bg-white/5"
                 }`}
               >
-                <div className="flex items-center gap-2.5">
-                  <Icon className={`w-4 h-4 ${isActive ? "text-slate-950" : "text-amber-400 group-hover:scale-110"} transition-transform`} />
+                <div className="flex items-center gap-2">
+                  <Icon className={`w-3.5 h-3.5 ${isActive ? "text-slate-950" : "text-amber-400 group-hover:scale-110"} transition-transform`} />
                   <span>{item.name}</span>
                 </div>
-                {isActive && <ChevronRight className="w-3.5 h-3.5 text-slate-950" />}
+                {isActive && <ChevronRight className="w-3 h-3 text-slate-950" />}
               </Link>
             );
           })}
         </nav>
 
         {/* System Telemetry */}
-        <div className="p-3.5 border-t border-amber-500/20 bg-slate-950/60 space-y-2.5">
-          <div className="flex items-center justify-between text-[10px] font-bold text-slate-400">
+        <div className="p-2.5 border-t border-amber-500/20 bg-slate-950/60 space-y-2">
+          <div className="flex items-center justify-between text-[9px] font-bold text-slate-400">
             <div className="flex items-center gap-1.5 text-emerald-400">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span>SYSTEM ONLINE</span>
             </div>
             <span className="font-mono text-slate-500">v2.5 HQ</span>
@@ -287,54 +287,54 @@ export default function MasterAdminLayout({
       </aside>
 
       {/* 2. Main Content & Right Fixed Notification Wrapper */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-64 xl:pr-80 overflow-x-hidden min-h-screen">
+      <div className="flex-1 flex flex-col min-w-0 lg:pl-56 xl:pr-64 overflow-x-hidden min-h-screen">
         {/* Header Toolbar */}
-        <header className="h-20 bg-slate-900/80 backdrop-blur-xl border-b border-amber-500/20 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-30 shadow-xl">
+        <header className="h-14 bg-slate-900/80 backdrop-blur-xl border-b border-amber-500/20 flex items-center justify-between px-4 sm:px-5 lg:px-6 sticky top-0 z-30 shadow-lg">
           <button
             onClick={() => setMobileOpen(true)}
-            className="lg:hidden p-2 text-slate-400 hover:text-amber-400 rounded-lg hover:bg-white/5"
+            className="lg:hidden p-1.5 text-slate-400 hover:text-amber-400 rounded-lg hover:bg-white/5"
           >
-            <Menu className="w-6 h-6" />
+            <Menu className="w-5 h-5" />
           </button>
 
           {/* Active Breadcrumb / Badge */}
-          <div className="hidden sm:flex items-center gap-3">
-            <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-amber-400 bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-full">
-              <Sparkles className="w-3.5 h-3.5" />
+          <div className="hidden sm:flex items-center gap-2.5">
+            <span className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 rounded-full">
+              <Sparkles className="w-3 h-3" />
               <span>TEMP TRAVEL MASTER HQ</span>
             </span>
-            <span className="text-slate-500 text-xs">&bull;</span>
-            <span className="text-slate-400 text-xs font-bold">
-              Real-Time Operational Telemetry & Document Compliance
+            <span className="text-slate-600 text-xs">&bull;</span>
+            <span className="text-slate-400 text-xs font-semibold">
+              Real-Time Operational Telemetry & Compliance
             </span>
           </div>
 
-          {/* Controls: Telemetry indicator (No bell icon) */}
-          <div className="flex items-center gap-4 ml-auto">
-            <div className="flex items-center gap-2 bg-slate-950 border border-amber-500/20 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300">
-              <Activity className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-              <span>Vault & Expiries Synced</span>
+          {/* Controls: Telemetry indicator */}
+          <div className="flex items-center gap-3 ml-auto">
+            <div className="flex items-center gap-1.5 bg-slate-950 border border-amber-500/20 px-2.5 py-1 rounded-lg text-xs font-bold text-slate-300">
+              <Activity className="w-3 h-3 text-emerald-400 animate-pulse" />
+              <span>Telemetry Synced</span>
             </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+        <main className="flex-1 p-3.5 sm:p-5 lg:p-6 overflow-y-auto">
           {children}
         </main>
       </div>
 
       {/* 3. FIXED RIGHT-SIDE MASTER NOTIFICATION SIDEBAR PANEL */}
-      <aside className="hidden xl:flex xl:flex-col xl:w-80 xl:fixed xl:right-0 xl:inset-y-0 bg-slate-900/95 backdrop-blur-2xl border-l border-amber-500/20 z-40 shrink-0 shadow-2xl">
+      <aside className="hidden xl:flex xl:flex-col xl:w-64 xl:fixed xl:right-0 xl:inset-y-0 bg-slate-900/95 backdrop-blur-2xl border-l border-amber-500/20 z-40 shrink-0 shadow-2xl">
         {/* Right Panel Header */}
-        <div className="h-20 px-5 border-b border-amber-500/20 flex items-center justify-between bg-gradient-to-b from-amber-500/10 via-transparent to-transparent">
-          <div className="flex items-center gap-2">
-            <ShieldAlert className="w-5 h-5 text-amber-400" />
-            <h3 className="font-black text-slate-100 text-sm tracking-wide uppercase">
+        <div className="h-14 px-4 border-b border-amber-500/20 flex items-center justify-between bg-gradient-to-b from-amber-500/10 via-transparent to-transparent">
+          <div className="flex items-center gap-1.5">
+            <ShieldAlert className="w-4 h-4 text-amber-400" />
+            <h3 className="font-extrabold text-slate-100 text-xs tracking-wide uppercase">
               Master Alerts & Expiries
             </h3>
           </div>
-          <span className="text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full font-mono">
+          <span className="text-[9px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full font-mono">
             {expiryAlerts.length + birthdayAlerts.length} ALERTS
           </span>
         </div>

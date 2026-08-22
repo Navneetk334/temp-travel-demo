@@ -225,24 +225,24 @@ export default function MasterOfficeStaffPage() {
   const computedAge = calculateAge(formData.dob);
 
   return (
-    <div className="p-6 md:p-8 space-y-8 bg-slate-950 text-slate-100 min-h-screen">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/5 pb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-white/10 pb-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-50 tracking-tight flex items-center gap-2.5">
-            <Users className="w-7 h-7 text-amber-400" />
+          <h1 className="text-xl sm:text-2xl font-black text-slate-50 tracking-tight flex items-center gap-2">
+            <Users className="w-6 h-6 text-amber-400" />
             <span>Master Office Staff Directory</span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-400 mt-0.5">
             Manage corporate office staff records, DOB age calculation, KYC uploads, and Vault document segregation.
           </p>
         </div>
 
         <button
           onClick={openAddModal}
-          className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-lg shadow-amber-500/20 cursor-pointer"
+          className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md shadow-amber-500/20 cursor-pointer"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5" />
           <span>Add Office Staff</span>
         </button>
       </div>

@@ -117,17 +117,17 @@ export default function MasterDocumentVaultPage() {
     : currentFolderList[0];
 
   return (
-    <div className="p-6 md:p-8 space-y-8 bg-slate-950 text-slate-100 min-h-screen">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-amber-500/20 pb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-amber-500/20 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <FileCheck className="w-7 h-7 text-amber-400" />
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-50 tracking-tight">
+            <FileCheck className="w-6 h-6 text-amber-400" />
+            <h1 className="text-xl sm:text-2xl font-black text-slate-50 tracking-tight">
               Master Document Vault & Auto-Archive
             </h1>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-400 mt-0.5">
             Automatically organized document repository for Vehicles, Drivers, and Office Staff.
           </p>
         </div>

@@ -168,26 +168,26 @@ export default function MasterAdminDashboard() {
   return (
     <div className="space-y-8">
       {/* Header Title Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-amber-500/20 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-amber-500/20 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-black tracking-tight text-slate-50">
+            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-50">
               Master Executive Dashboard
             </h1>
-            <span className="bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest">
+            <span className="bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
               HQ Live
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-400 mt-0.5">
             Real-time operational telemetry, omnichannel lead sync, and financial revenue radar.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button
             onClick={handleSyncSystems}
             disabled={loading}
-            className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer"
+            className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-300 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-amber-400" : ""}`} />
             <span>{loading ? "Syncing..." : "Sync Systems"}</span>
@@ -195,48 +195,48 @@ export default function MasterAdminDashboard() {
 
           <button
             onClick={() => setShowDispatchModal(true)}
-            className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase transition-all shadow-lg shadow-amber-500/20 cursor-pointer"
+            className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-3.5 py-1.5 rounded-xl text-xs font-black tracking-wider uppercase transition-all shadow-md shadow-amber-500/20 cursor-pointer"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5" />
             <span>Quick Dispatch</span>
           </button>
         </div>
       </div>
 
       {/* 4 Primary Master KPI Telemetry Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-amber-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden group hover:border-amber-500/60 transition-all">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-amber-500/20 transition-all" />
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-3 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
-              <IndianRupee className="w-6 h-6" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-slate-900/80 backdrop-blur-xl border border-amber-500/30 rounded-2xl p-4 sm:p-5 shadow-xl relative overflow-hidden group hover:border-amber-500/60 transition-all">
+          <div className="absolute top-0 right-0 w-28 h-28 bg-amber-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-amber-500/20 transition-all" />
+          <div className="flex justify-between items-start mb-3">
+            <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              <IndianRupee className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-black uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+            <span className="text-[9px] font-black uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
               <TrendingUp className="w-3 h-3" /> +18.4%
             </span>
           </div>
           <div className="text-slate-400 text-xs font-bold uppercase tracking-wider">Gross System Revenue</div>
-          <div className="text-3xl font-black text-slate-50 mt-1 font-mono">
+          <div className="text-2xl font-black text-slate-50 mt-1 font-mono">
             ₹{stats.totalRevenue.toLocaleString("en-IN")}
           </div>
-          <div className="text-[11px] text-slate-400 mt-2 flex items-center gap-1">
+          <div className="text-[10px] text-slate-400 mt-1.5 flex items-center gap-1">
             <span>Synced across Razorpay & Driver Cash</span>
           </div>
         </div>
 
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-amber-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden group hover:border-amber-500/60 transition-all">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-blue-500/20 transition-all" />
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
-              <Radio className="w-6 h-6 animate-pulse" />
+        <div className="bg-slate-900/80 backdrop-blur-xl border border-amber-500/30 rounded-2xl p-4 sm:p-5 shadow-xl relative overflow-hidden group hover:border-amber-500/60 transition-all">
+          <div className="absolute top-0 right-0 w-28 h-28 bg-blue-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-blue-500/20 transition-all" />
+          <div className="flex justify-between items-start mb-3">
+            <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+              <Radio className="w-5 h-5 animate-pulse" />
             </div>
-            <span className="text-[10px] font-black uppercase text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full">
+            <span className="text-[9px] font-black uppercase text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full">
               LIVE TELEMATICS
             </span>
           </div>
           <div className="text-slate-400 text-xs font-bold uppercase tracking-wider">Active In-Transit Rides</div>
-          <div className="text-3xl font-black text-slate-50 mt-1 font-mono">
-            {stats.activeRides} <span className="text-sm font-normal text-slate-400">Rides</span>
+          <div className="text-2xl font-black text-slate-50 mt-1 font-mono">
+            {stats.activeRides} <span className="text-xs font-normal text-slate-400">Rides</span>
           </div>
           <div className="text-[11px] text-slate-400 mt-2 flex items-center gap-1">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
