@@ -23,24 +23,31 @@ export async function GET(req: NextRequest) {
       console.error("Prisma query error:", e);
     }
 
-    let vehiclesList = dbVehicles.map(v => ({
-      id: v.id,
-      make: v.make,
-      model: v.model,
-      registrationNumber: v.registrationNumber,
-      capacity: v.capacity || 4,
-      categoryName: v.category?.name || "Sedan",
-      subCategory: v.subCategory || v.category?.name || "Executive Fleet",
-      perKmRate: v.perKmRate || 15,
-      baseDailyRate: v.baseDailyRate || 3000,
-      driverAllowance: v.driverAllowance || 500,
-      nightAllowance: v.nightAllowance || 300,
-      fuelType: v.fuelType || "Diesel",
-      transmission: v.transmission || "MANUAL",
-      status: v.status || "AVAILABLE",
-      imageUrl: v.imageUrl || "/images/hero-car.png",
-      driver: v.driver
-    }));
+    let vehiclesList = dbVehicles.map(v => {
+      const catName = v.category?.name || "Sedan";
+      const clsName = v.subCategory || "Executive";
+      return {
+        id: v.id,
+        make: v.make,
+        model: v.model,
+        registrationNumber: v.registrationNumber,
+        capacity: v.capacity || 4,
+        categoryName: catName,
+        vehicleClass: clsName,
+        subCategory: clsName,
+        perKmRate: v.perKmRate || 15,
+        perHourRate: v.extraHrRate || 150,
+        baseDailyRate: v.baseDailyRate || 3000,
+        driverAllowance: 500,
+        nightAllowance: 300,
+        fuelType: v.fuelType || "Diesel",
+        transmission: v.transmission || "MANUAL",
+        status: v.status || "AVAILABLE",
+        isFeatured: v.isFeatured ?? false,
+        imageUrl: v.imageUrl || "/images/hero-car.png",
+        driver: v.driver
+      };
+    });
 
     // Apply search filter if provided
     if (search) {
@@ -87,18 +94,21 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { model, make, registrationNumber, capacity, categoryName, perKmRate, baseDailyRate, driverAllowance, nightAllowance, fuelType, transmission, imageUrl } = body;
+    const { model, make, registrationNumber, capacity, categoryName, vehicleClass, subCategory, perKmRate, baseDailyRate, fuelType, transmission, imageUrl } = body;
 
-    // Find category ID or default
-    const sedanCat = await prisma.vehicleCategory.findFirst({ where: { slug: "sedan" } });
+    const targetCategorySlug = (categoryName || "Sedan").toLowerCase().includes("suv") ? "suv" : "sedan";
+    const targetCategory = await prisma.vehicleCategory.findFirst({ where: { slug: targetCategorySlug } });
+
+    const cls = vehicleClass || subCategory || "Executive";
 
     const created = await prisma.fleetVehicle.create({
       data: {
         model: model || "Commercial Vehicle",
         make: make || "Commercial Brand",
-        registrationNumber: registrationNumber || `MH ${Math.floor(10 + Math.random() * 90)} AB ${Math.floor(1000 + Math.random() * 9000)}`,
+        registrationNumber: registrationNumber ? registrationNumber.trim().toUpperCase() : `MH ${Math.floor(10 + Math.random() * 90)} AB ${Math.floor(1000 + Math.random() * 9000)}`,
         capacity: Number(capacity) || 4,
-        categoryId: sedanCat?.id || "default-cat",
+        subCategory: cls,
+        categoryId: targetCategory?.id || "default-cat",
         status: "AVAILABLE",
         fuelType: fuelType || "Diesel",
         transmission: transmission || "MANUAL",
@@ -108,7 +118,15 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ success: true, vehicle: created });
+    return NextResponse.json({
+      success: true,
+      vehicle: {
+        ...created,
+        categoryName: categoryName || "Sedan",
+        vehicleClass: cls,
+        subCategory: cls
+      }
+    });
   } catch (error) {
     console.error("POST /api/fleet error:", error);
     return NextResponse.json({ error: "Failed to create vehicle" }, { status: 500 });

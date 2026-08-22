@@ -443,7 +443,7 @@ export default function MasterFleetRosterPage() {
                         )}
                       </button>
                       <span className="text-[10px] font-mono text-amber-400 font-bold uppercase tracking-wider bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
-                        {v.categoryName || "Sedan"} &bull; {v.vehicleClass || "Executive"}
+                        {v.categoryName || "Sedan"} &bull; {v.vehicleClass || v.subCategory || "Executive"}
                       </span>
                     </div>
                     <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">

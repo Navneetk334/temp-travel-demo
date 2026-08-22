@@ -33,6 +33,8 @@ interface Vehicle {
   model: string;
   make: string;
   registrationNumber: string;
+  categoryName?: string | null;
+  vehicleClass?: string | null;
   subCategory?: string | null;
   capacity: number;
   fuelType?: string | null;
@@ -775,12 +777,10 @@ export default function AdminFleetPage() {
                         </td>
                         <td className="p-4">
                           <div className="font-bold text-slate-200 flex items-center gap-1.5">
-                            <span>{v.category?.name || "Standard"}</span>
-                            {v.subCategory && (
-                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                                {v.subCategory}
-                              </span>
-                            )}
+                            <span>{v.categoryName || v.category?.name || "Sedan"}</span>
+                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                              {v.vehicleClass || v.subCategory || "Executive"}
+                            </span>
                           </div>
                           <div className="text-slate-400 mt-0.5">{v.capacity} Passenger Seats</div>
                         </td>
