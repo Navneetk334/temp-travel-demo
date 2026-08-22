@@ -18,8 +18,18 @@ import {
   Edit2,
   Trash2,
   CheckSquare,
-  Square
+  Square,
+  Upload,
+  CreditCard,
+  Landmark,
+  Shield
 } from "lucide-react";
+
+// Category to Class Mapping Hierarchy
+const CLASS_OPTIONS: Record<string, string[]> = {
+  Sedan: ["Compact", "Executive", "Premium Executive", "Luxury"],
+  SUV: ["Subcompact/Urban", "Mid-Premium", "Premium", "Luxury"]
+};
 
 export default function MasterDriversPage() {
   const [search, setSearch] = useState("");
@@ -36,92 +46,91 @@ export default function MasterDriversPage() {
       id: "DRV-101",
       name: "Rajesh Kumar",
       phone: "9820112233",
+      aadhaarNumber: "9988 7766 5544",
+      aadhaarDocName: "aadhaar_rajesh.pdf",
+      panNumber: "ABCDE1234F",
+      panDocName: "pan_rajesh.pdf",
+      photoName: "rajesh_photo.jpg",
+      bankName: "HDFC Bank",
+      accountHolderName: "Rajesh Kumar",
+      accountNumber: "50100234567812",
+      ifscCode: "HDFC0000123",
+      vehicleCategory: "Sedan",
+      vehicleClass: "Executive",
+      vehicleModel: "Maruti Suzuki Dzire",
       licenseNumber: "MH-0220190045123",
       licenseExpiry: "2029-08-15",
-      vehicleCategory: "Pickup & Drop / Airport Transfer",
-      vehicleClass: "Sedan",
-      vehicleModel: "Maruti Suzuki Dzire",
-      assignedVehicle: "MH 02 CZ 4421 (Swift Dzire)",
       policeVerification: "VERIFIED",
-      status: "ON_DUTY",
-      experienceYears: 8,
-      address: "Andheri West, Mumbai",
-      emergencyContact: "9820119900 (Wife)"
+      status: "ON_DUTY"
     },
     {
       id: "DRV-102",
       name: "Suresh Patil",
       phone: "9833445566",
+      aadhaarNumber: "8877 6655 4433",
+      aadhaarDocName: "aadhaar_suresh.pdf",
+      panNumber: "XYZPS9876K",
+      panDocName: "pan_suresh.pdf",
+      photoName: "suresh_photo.jpg",
+      bankName: "ICICI Bank",
+      accountHolderName: "Suresh Patil",
+      accountNumber: "001102987654",
+      ifscCode: "ICIC0000456",
+      vehicleCategory: "SUV",
+      vehicleClass: "Premium",
+      vehicleModel: "Toyota Innova Crysta",
       licenseNumber: "MH-0420180098765",
       licenseExpiry: "2028-12-01",
-      vehicleCategory: "Outstation Trip",
-      vehicleClass: "SUV",
-      vehicleModel: "Toyota Innova Crysta",
-      assignedVehicle: "MH 04 ER 8890 (Innova Crysta)",
       policeVerification: "VERIFIED",
-      status: "ON_DUTY",
-      experienceYears: 12,
-      address: "Thane West, Mumbai",
-      emergencyContact: "9833441122 (Brother)"
-    },
-    {
-      id: "DRV-103",
-      name: "Vikram Singh",
-      phone: "9899112244",
-      licenseNumber: "MH-0120200033445",
-      licenseExpiry: "2030-05-10",
-      vehicleCategory: "Corporate Transit",
-      vehicleClass: "Sedan",
-      vehicleModel: "Honda City",
-      assignedVehicle: "MH 01 AB 1234 (Honda City)",
-      policeVerification: "VERIFIED",
-      status: "STANDBY",
-      experienceYears: 6,
-      address: "Powai, Mumbai",
-      emergencyContact: "9899110099 (Father)"
-    },
-    {
-      id: "DRV-104",
-      name: "Mahesh Yadav",
-      phone: "9766554433",
-      licenseNumber: "MH-0220170077889",
-      licenseExpiry: "2027-02-18",
-      vehicleCategory: "VIP Delegation",
-      vehicleClass: "Luxury SUV",
-      vehicleModel: "Toyota Fortuner 4x4",
-      assignedVehicle: "MH 02 FG 9900 (Fortuner 4x4)",
-      policeVerification: "VERIFIED",
-      status: "ON_DUTY",
-      experienceYears: 10,
-      address: "Bandra East, Mumbai",
-      emergencyContact: "9766550011 (Wife)"
+      status: "ON_DUTY"
     }
   ]);
 
+  // Complete Form State with Personal, Banking & Vehicle Assignment
   const [formData, setFormData] = useState({
+    // Section A: Personal & KYC
+    photoName: "",
     name: "",
     phone: "",
-    licenseNumber: "",
-    address: "",
-    vehicleCategory: "Pickup & Drop / Airport Transfer",
-    vehicleClass: "Sedan",
-    vehicleModel: "Maruti Suzuki Dzire",
-    experienceYears: "5",
-    emergencyContact: ""
+    aadhaarNumber: "",
+    aadhaarDocName: "",
+    panNumber: "",
+    panDocName: "",
+    // Section B: Banking Details
+    bankName: "",
+    accountHolderName: "",
+    accountNumber: "",
+    confirmAccountNumber: "",
+    ifscCode: "",
+    // Section C: Vehicle Assignment
+    vehicleCategory: "Sedan",
+    vehicleClass: "Executive",
+    vehicleModel: "Maruti Suzuki Dzire"
   });
+
+  const handleCategoryChange = (cat: string) => {
+    const defaultClass = CLASS_OPTIONS[cat]?.[0] || "Executive";
+    setFormData(prev => ({ ...prev, vehicleCategory: cat, vehicleClass: defaultClass }));
+  };
 
   const openAddModal = () => {
     setEditingDriver(null);
     setFormData({
+      photoName: "",
       name: "",
       phone: "",
-      licenseNumber: "",
-      address: "",
-      vehicleCategory: "Pickup & Drop / Airport Transfer",
-      vehicleClass: "Sedan",
-      vehicleModel: "Maruti Suzuki Dzire",
-      experienceYears: "5",
-      emergencyContact: ""
+      aadhaarNumber: "",
+      aadhaarDocName: "",
+      panNumber: "",
+      panDocName: "",
+      bankName: "HDFC Bank",
+      accountHolderName: "",
+      accountNumber: "",
+      confirmAccountNumber: "",
+      ifscCode: "HDFC0000123",
+      vehicleCategory: "Sedan",
+      vehicleClass: "Executive",
+      vehicleModel: "Maruti Suzuki Dzire"
     });
     setShowAddModal(true);
   };
@@ -129,21 +138,33 @@ export default function MasterDriversPage() {
   const openEditModal = (drv: any) => {
     setEditingDriver(drv);
     setFormData({
+      photoName: drv.photoName || "",
       name: drv.name || "",
       phone: drv.phone || "",
-      licenseNumber: drv.licenseNumber || "",
-      address: drv.address || "",
-      vehicleCategory: drv.vehicleCategory || "Pickup & Drop / Airport Transfer",
-      vehicleClass: drv.vehicleClass || "Sedan",
-      vehicleModel: drv.vehicleModel || "Maruti Suzuki Dzire",
-      experienceYears: String(drv.experienceYears || 5),
-      emergencyContact: drv.emergencyContact || ""
+      aadhaarNumber: drv.aadhaarNumber || "",
+      aadhaarDocName: drv.aadhaarDocName || "",
+      panNumber: drv.panNumber || "",
+      panDocName: drv.panDocName || "",
+      bankName: drv.bankName || "HDFC Bank",
+      accountHolderName: drv.accountHolderName || drv.name || "",
+      accountNumber: drv.accountNumber || "",
+      confirmAccountNumber: drv.accountNumber || "",
+      ifscCode: drv.ifscCode || "HDFC0000123",
+      vehicleCategory: drv.vehicleCategory || "Sedan",
+      vehicleClass: drv.vehicleClass || CLASS_OPTIONS[drv.vehicleCategory || "Sedan"]?.[0] || "Executive",
+      vehicleModel: drv.vehicleModel || "Maruti Suzuki Dzire"
     });
     setShowAddModal(true);
   };
 
   const handleDriverFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (formData.accountNumber !== formData.confirmAccountNumber) {
+      alert("Bank Account Number and Confirm Account Number do not match!");
+      return;
+    }
+
     if (editingDriver) {
       setDrivers(drivers.map(d => {
         if (d.id === editingDriver.id) {
@@ -151,13 +172,18 @@ export default function MasterDriversPage() {
             ...d,
             name: formData.name,
             phone: formData.phone,
-            licenseNumber: formData.licenseNumber,
-            address: formData.address,
+            aadhaarNumber: formData.aadhaarNumber,
+            aadhaarDocName: formData.aadhaarDocName,
+            panNumber: formData.panNumber,
+            panDocName: formData.panDocName,
+            photoName: formData.photoName,
+            bankName: formData.bankName,
+            accountHolderName: formData.accountHolderName,
+            accountNumber: formData.accountNumber,
+            ifscCode: formData.ifscCode,
             vehicleCategory: formData.vehicleCategory,
             vehicleClass: formData.vehicleClass,
-            vehicleModel: formData.vehicleModel,
-            experienceYears: Number(formData.experienceYears) || 5,
-            emergencyContact: formData.emergencyContact
+            vehicleModel: formData.vehicleModel
           };
         }
         return d;
@@ -167,17 +193,22 @@ export default function MasterDriversPage() {
         id: `DRV-${Date.now()}`,
         name: formData.name || "Commercial Driver",
         phone: formData.phone || "9820001122",
-        licenseNumber: formData.licenseNumber || "MH-022023001122",
-        licenseExpiry: "2030-12-31",
+        aadhaarNumber: formData.aadhaarNumber || "9900 8877 6655",
+        aadhaarDocName: formData.aadhaarDocName,
+        panNumber: formData.panNumber || "ABCDE1234F",
+        panDocName: formData.panDocName,
+        photoName: formData.photoName,
+        bankName: formData.bankName || "HDFC Bank",
+        accountHolderName: formData.accountHolderName || formData.name,
+        accountNumber: formData.accountNumber || "501009876543",
+        ifscCode: formData.ifscCode || "HDFC0000123",
         vehicleCategory: formData.vehicleCategory,
         vehicleClass: formData.vehicleClass,
         vehicleModel: formData.vehicleModel,
-        assignedVehicle: `${formData.vehicleModel} (Assigned)`,
+        licenseNumber: "MH-022023001122",
+        licenseExpiry: "2030-12-31",
         policeVerification: "VERIFIED",
-        status: "STANDBY",
-        experienceYears: Number(formData.experienceYears) || 5,
-        address: formData.address || "Mumbai HQ",
-        emergencyContact: formData.emergencyContact || "Next of Kin"
+        status: "STANDBY"
       };
       setDrivers([created, ...drivers]);
     }
@@ -204,7 +235,8 @@ export default function MasterDriversPage() {
     const matchesSearch =
       drv.name.toLowerCase().includes(search.toLowerCase()) ||
       drv.phone.includes(search) ||
-      drv.licenseNumber.toLowerCase().includes(search.toLowerCase());
+      drv.aadhaarNumber.includes(search) ||
+      drv.panNumber.toLowerCase().includes(search.toLowerCase());
     const matchesDuty = filterDuty === "ALL" || drv.status === filterDuty;
     return matchesSearch && matchesDuty;
   });
@@ -236,7 +268,7 @@ export default function MasterDriversPage() {
             <span>Master Chauffeur Roster & Vehicle Mapping</span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Manage drivers, license verifications, vehicle category mappings, and dispatch availability.
+            Manage drivers, KYC uploads (Aadhaar & PAN), banking settlement accounts, and category/class vehicle mappings.
           </p>
         </div>
 
@@ -282,7 +314,7 @@ export default function MasterDriversPage() {
           <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search driver by name, phone, or license..."
+            placeholder="Search driver by name, phone, Aadhaar, or PAN..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full bg-slate-950 border border-white/10 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
@@ -367,16 +399,20 @@ export default function MasterDriversPage() {
 
                 <div className="space-y-1.5 bg-slate-950 p-3 rounded-xl border border-white/5 text-xs font-mono">
                   <div className="flex justify-between">
-                    <span className="text-slate-400 font-sans">License #:</span>
-                    <span className="text-amber-400 font-bold truncate max-w-[120px]">{drv.licenseNumber}</span>
+                    <span className="text-slate-400 font-sans">Aadhaar:</span>
+                    <span className="text-amber-400 font-bold">{drv.aadhaarNumber}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400 font-sans">Assigned Model:</span>
-                    <span className="text-slate-200 font-bold truncate max-w-[120px]">{drv.vehicleModel}</span>
+                    <span className="text-slate-400 font-sans">PAN:</span>
+                    <span className="text-slate-200 font-bold">{drv.panNumber}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400 font-sans">Class / Duty:</span>
-                    <span className="text-slate-200">{drv.vehicleClass}</span>
+                    <span className="text-slate-400 font-sans">Bank Settlement:</span>
+                    <span className="text-emerald-400 font-bold">{drv.bankName} ({drv.accountNumber.slice(-4)})</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400 font-sans">Assigned Vehicle:</span>
+                    <span className="text-slate-200">{drv.vehicleCategory} &bull; {drv.vehicleClass}</span>
                   </div>
                 </div>
 
@@ -384,7 +420,7 @@ export default function MasterDriversPage() {
                   <span className="flex items-center gap-1 text-emerald-400">
                     <BadgeCheck className="w-3.5 h-3.5" /> Police Verified
                   </span>
-                  <span className="text-slate-500 font-mono">Lic Exp: {drv.licenseExpiry}</span>
+                  <span className="text-slate-500 font-mono">Model: {drv.vehicleModel}</span>
                 </div>
               </div>
 
@@ -424,10 +460,10 @@ export default function MasterDriversPage() {
         })}
       </div>
 
-      {/* Add / Edit Driver Modal */}
+      {/* Add / Edit Driver Modal with 3 Structured Sections */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-xl shadow-2xl space-y-6 relative text-slate-100 max-h-[90vh] overflow-y-auto">
+          <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-2xl shadow-2xl space-y-6 relative text-slate-100 max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setShowAddModal(false)}
               className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
@@ -437,18 +473,30 @@ export default function MasterDriversPage() {
 
             <div className="space-y-1 border-b border-white/10 pb-3">
               <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">
-                {editingDriver ? "Edit Chauffeur Profile" : "Master Chauffeur Roster"}
+                {editingDriver ? "Edit Chauffeur Credentials" : "Master Chauffeur Onboarding"}
               </span>
               <h3 className="text-2xl font-black text-slate-50">
                 {editingDriver ? `Edit ${editingDriver.name}` : "Register New Driver"}
               </h3>
             </div>
 
-            <form onSubmit={handleDriverFormSubmit} className="space-y-5 text-xs">
+            <form onSubmit={handleDriverFormSubmit} className="space-y-6 text-xs">
+              {/* SECTION A: Personal & KYC Documents */}
               <div className="space-y-3">
-                <h4 className="text-amber-400 font-extrabold uppercase text-[11px] tracking-wider flex items-center gap-1.5">
-                  <UserCheck className="w-4 h-4" /> Personal & Driving License Details
+                <h4 className="text-amber-400 font-extrabold uppercase text-[11px] tracking-wider flex items-center gap-1.5 border-b border-white/5 pb-1">
+                  <UserCheck className="w-4 h-4" /> Section A: Personal Details & KYC Documents
                 </h4>
+
+                <div className="space-y-1">
+                  <label className="text-slate-300 font-bold block">Driver Photo Upload from Device</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setFormData({ ...formData, photoName: e.target.files?.[0]?.name || "" })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
+                  />
+                  {formData.photoName && <span className="text-[11px] font-mono text-amber-400">Photo: {formData.photoName}</span>}
+                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
@@ -478,57 +526,167 @@ export default function MasterDriversPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Driving License Number *</label>
+                    <label className="text-slate-300 font-bold">Aadhaar Card Number *</label>
                     <input
                       type="text"
                       required
-                      placeholder="e.g. MH-0220190045123"
-                      value={formData.licenseNumber}
-                      onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
+                      placeholder="e.g. 9988 7766 5544"
+                      value={formData.aadhaarNumber}
+                      onChange={(e) => setFormData({ ...formData, aadhaarNumber: e.target.value })}
                       className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Years of Experience</label>
+                    <label className="text-slate-300 font-bold">Upload Aadhaar Card from Device</label>
                     <input
-                      type="number"
-                      value={formData.experienceYears}
-                      onChange={(e) => setFormData({ ...formData, experienceYears: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
+                      type="file"
+                      accept=".pdf,image/*"
+                      onChange={(e) => setFormData({ ...formData, aadhaarDocName: e.target.files?.[0]?.name || "" })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">PAN Card Number *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. ABCDE1234F"
+                      value={formData.panNumber}
+                      onChange={(e) => setFormData({ ...formData, panNumber: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-mono uppercase"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Upload PAN Card from Device</label>
+                    <input
+                      type="file"
+                      accept=".pdf,image/*"
+                      onChange={(e) => setFormData({ ...formData, panDocName: e.target.files?.[0]?.name || "" })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-3 pt-2 border-t border-white/10">
-                <h4 className="text-amber-400 font-extrabold uppercase text-[11px] tracking-wider flex items-center gap-1.5">
-                  <Car className="w-4 h-4" /> Vehicle Category & Class Mapping
+              {/* SECTION B: Banking Details */}
+              <div className="space-y-3 pt-3 border-t border-white/10">
+                <h4 className="text-amber-400 font-extrabold uppercase text-[11px] tracking-wider flex items-center gap-1.5 border-b border-white/5 pb-1">
+                  <Landmark className="w-4 h-4" /> Section B: Banking Settlement Details
                 </h4>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Bank Name *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. HDFC Bank / ICICI Bank / SBI"
+                      value={formData.bankName}
+                      onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Account Holder Name *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Name as per bank records"
+                      value={formData.accountHolderName}
+                      onChange={(e) => setFormData({ ...formData, accountHolderName: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Account Number *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Bank account number"
+                      value={formData.accountNumber}
+                      onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Confirm Account Number *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Repeat account number"
+                      value={formData.confirmAccountNumber}
+                      onChange={(e) => setFormData({ ...formData, confirmAccountNumber: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">IFSC Code *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. HDFC0000123"
+                      value={formData.ifscCode}
+                      onChange={(e) => setFormData({ ...formData, ifscCode: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono uppercase"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION C: Vehicle Assignment */}
+              <div className="space-y-3 pt-3 border-t border-white/10">
+                <h4 className="text-amber-400 font-extrabold uppercase text-[11px] tracking-wider flex items-center gap-1.5 border-b border-white/5 pb-1">
+                  <Car className="w-4 h-4" /> Section C: Vehicle Assignment Mapping
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Vehicle Category *</label>
+                    <select
+                      value={formData.vehicleCategory}
+                      onChange={(e) => handleCategoryChange(e.target.value)}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400"
+                    >
+                      <option value="Sedan">Sedan</option>
+                      <option value="SUV">SUV</option>
+                    </select>
+                  </div>
+
                   <div className="space-y-1">
                     <label className="text-slate-300 font-bold">Vehicle Class *</label>
                     <select
                       value={formData.vehicleClass}
                       onChange={(e) => setFormData({ ...formData, vehicleClass: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
                     >
-                      <option value="Sedan">Sedan</option>
-                      <option value="SUV">SUV</option>
-                      <option value="Luxury SUV">Luxury SUV</option>
+                      {(CLASS_OPTIONS[formData.vehicleCategory] || []).map((cls) => (
+                        <option key={cls} value={cls}>
+                          {cls}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Assigned Model Name *</label>
+                    <label className="text-slate-300 font-bold">Vehicle Model Name *</label>
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Innova Crysta / Dzire"
+                      placeholder="e.g. Swift Dzire / Innova Crysta"
                       value={formData.vehicleModel}
                       onChange={(e) => setFormData({ ...formData, vehicleModel: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
                     />
                   </div>
                 </div>
@@ -546,7 +704,7 @@ export default function MasterDriversPage() {
                   type="submit"
                   className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer"
                 >
-                  {editingDriver ? "Update Driver Profile" : "Save Driver Record"}
+                  {editingDriver ? "Update Driver Record" : "Save Driver Record"}
                 </button>
               </div>
             </form>
@@ -581,20 +739,20 @@ export default function MasterDriversPage() {
                 <span className="text-slate-100 font-bold">+91-{selectedDriver.phone}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400 font-sans">License #:</span>
-                <span className="text-amber-400 font-bold">{selectedDriver.licenseNumber}</span>
+                <span className="text-slate-400 font-sans">Aadhaar:</span>
+                <span className="text-amber-400 font-bold">{selectedDriver.aadhaarNumber}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400 font-sans">Verification:</span>
-                <span className="text-emerald-400 font-bold">{selectedDriver.policeVerification}</span>
+                <span className="text-slate-400 font-sans">PAN Card:</span>
+                <span className="text-amber-400 font-bold">{selectedDriver.panNumber}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400 font-sans">Assigned Vehicle:</span>
-                <span className="text-slate-100">{selectedDriver.assignedVehicle}</span>
+                <span className="text-slate-400 font-sans">Bank Settlement:</span>
+                <span className="text-emerald-400 font-bold">{selectedDriver.bankName} (IFSC: {selectedDriver.ifscCode})</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400 font-sans">Emergency Contact:</span>
-                <span className="text-slate-300">{selectedDriver.emergencyContact}</span>
+                <span className="text-slate-400 font-sans">Vehicle Mapping:</span>
+                <span className="text-slate-100">{selectedDriver.vehicleCategory} &bull; {selectedDriver.vehicleClass} ({selectedDriver.vehicleModel})</span>
               </div>
             </div>
 

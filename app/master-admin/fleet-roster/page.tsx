@@ -17,8 +17,17 @@ import {
   Trash2,
   CheckSquare,
   Square,
-  Sparkles
+  Sparkles,
+  Upload,
+  Calendar,
+  Shield
 } from "lucide-react";
+
+// Category to Class Mapping Hierarchy
+const CLASS_OPTIONS: Record<string, string[]> = {
+  Sedan: ["Compact", "Executive", "Premium Executive", "Luxury"],
+  SUV: ["Subcompact/Urban", "Mid-Premium", "Premium", "Luxury"]
+};
 
 export default function MasterFleetRosterPage() {
   const [vehicles, setVehicles] = useState<any[]>([]);
@@ -31,23 +40,35 @@ export default function MasterFleetRosterPage() {
   // Multi-select state
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
+  // Complete Vehicle Form State
   const [formData, setFormData] = useState({
     make: "",
+    categoryName: "Sedan",
+    vehicleClass: "Executive",
     model: "",
     registrationNumber: "",
-    categoryName: "Sedan",
     transmission: "Manual",
     fuelType: "Diesel",
     capacity: "4",
     perKmRate: "14",
+    perHourRate: "150",
     baseDailyRate: "3500",
     driverAllowance: "500",
     nightAllowance: "300",
+    insuranceProvider: "HDFC ERGO General Insurance",
+    insuranceNumber: "POL-8829102",
     insuranceExpiry: "2027-06-30",
     fitnessExpiry: "2027-12-31",
     permitExpiry: "2028-03-15",
-    imageName: ""
+    imageName: "",
+    imageUrl: ""
   });
+
+  // Automatically adjust default Vehicle Class when Category changes
+  const handleCategoryChange = (cat: string) => {
+    const defaultClass = CLASS_OPTIONS[cat]?.[0] || "Executive";
+    setFormData(prev => ({ ...prev, categoryName: cat, vehicleClass: defaultClass }));
+  };
 
   // Load User Uploaded Fleet Vehicles
   useEffect(() => {
@@ -89,20 +110,25 @@ export default function MasterFleetRosterPage() {
     setEditingVehicle(null);
     setFormData({
       make: "",
+      categoryName: "Sedan",
+      vehicleClass: "Executive",
       model: "",
       registrationNumber: "",
-      categoryName: "Sedan",
       transmission: "Manual",
       fuelType: "Diesel",
       capacity: "4",
       perKmRate: "14",
+      perHourRate: "150",
       baseDailyRate: "3500",
       driverAllowance: "500",
       nightAllowance: "300",
+      insuranceProvider: "HDFC ERGO General Insurance",
+      insuranceNumber: "POL-8829102",
       insuranceExpiry: "2027-06-30",
       fitnessExpiry: "2027-12-31",
       permitExpiry: "2028-03-15",
-      imageName: ""
+      imageName: "",
+      imageUrl: ""
     });
     setShowModal(true);
   };
@@ -111,20 +137,25 @@ export default function MasterFleetRosterPage() {
     setEditingVehicle(v);
     setFormData({
       make: v.make || "",
+      categoryName: v.categoryName || "Sedan",
+      vehicleClass: v.vehicleClass || CLASS_OPTIONS[v.categoryName || "Sedan"]?.[0] || "Executive",
       model: v.model || "",
       registrationNumber: v.registrationNumber || "",
-      categoryName: v.categoryName || "Sedan",
       transmission: v.transmission || "Manual",
       fuelType: v.fuelType || "Diesel",
       capacity: String(v.capacity || 4),
       perKmRate: String(v.perKmRate || 14),
+      perHourRate: String(v.perHourRate || 150),
       baseDailyRate: String(v.baseDailyRate || 3500),
       driverAllowance: String(v.driverAllowance || 500),
       nightAllowance: String(v.nightAllowance || 300),
+      insuranceProvider: v.insuranceProvider || "HDFC ERGO General Insurance",
+      insuranceNumber: v.insuranceNumber || "POL-8829102",
       insuranceExpiry: v.insuranceExpiry || "2027-06-30",
       fitnessExpiry: v.fitnessExpiry || "2027-12-31",
       permitExpiry: v.permitExpiry || "2028-03-15",
-      imageName: ""
+      imageName: v.imageName || "",
+      imageUrl: v.imageUrl || ""
     });
     setShowModal(true);
   };
@@ -139,16 +170,25 @@ export default function MasterFleetRosterPage() {
           return {
             ...v,
             make: formData.make,
+            categoryName: formData.categoryName,
+            vehicleClass: formData.vehicleClass,
             model: formData.model,
             registrationNumber: formData.registrationNumber,
-            categoryName: formData.categoryName,
+            transmission: formData.transmission,
+            fuelType: formData.fuelType,
             capacity: parseInt(formData.capacity) || 4,
             perKmRate: parseFloat(formData.perKmRate) || 15,
+            perHourRate: parseFloat(formData.perHourRate) || 150,
             baseDailyRate: parseFloat(formData.baseDailyRate) || 3000,
             driverAllowance: parseFloat(formData.driverAllowance) || 500,
             nightAllowance: parseFloat(formData.nightAllowance) || 300,
-            fuelType: formData.fuelType,
-            insuranceExpiry: formData.insuranceExpiry
+            insuranceProvider: formData.insuranceProvider,
+            insuranceNumber: formData.insuranceNumber,
+            insuranceExpiry: formData.insuranceExpiry,
+            fitnessExpiry: formData.fitnessExpiry,
+            permitExpiry: formData.permitExpiry,
+            imageName: formData.imageName,
+            imageUrl: formData.imageUrl
           };
         }
         return v;
@@ -170,18 +210,27 @@ export default function MasterFleetRosterPage() {
       const created = {
         id: `v-${Date.now()}`,
         make: formData.make || "Commercial Make",
+        categoryName: formData.categoryName,
+        vehicleClass: formData.vehicleClass,
         model: formData.model || "Commercial Vehicle",
         registrationNumber: formData.registrationNumber || `MH 04 XX ${Math.floor(1000 + Math.random() * 9000)}`,
+        transmission: formData.transmission,
+        fuelType: formData.fuelType,
         capacity: parseInt(formData.capacity) || 4,
-        categoryName: formData.categoryName,
         perKmRate: parseFloat(formData.perKmRate) || 15,
+        perHourRate: parseFloat(formData.perHourRate) || 150,
         baseDailyRate: parseFloat(formData.baseDailyRate) || 3000,
         driverAllowance: parseFloat(formData.driverAllowance) || 500,
         nightAllowance: parseFloat(formData.nightAllowance) || 300,
-        fuelType: formData.fuelType,
+        insuranceProvider: formData.insuranceProvider,
+        insuranceNumber: formData.insuranceNumber,
+        insuranceExpiry: formData.insuranceExpiry,
+        fitnessExpiry: formData.fitnessExpiry,
+        permitExpiry: formData.permitExpiry,
         isAvailable: true,
         permitStatus: "VALID",
-        insuranceExpiry: formData.insuranceExpiry
+        imageName: formData.imageName,
+        imageUrl: formData.imageUrl
       };
 
       const updated = [created, ...vehicles];
@@ -264,7 +313,7 @@ export default function MasterFleetRosterPage() {
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Complete vehicle fleet specs, commercial tariffs, driver allowances, and permit expiry tracking.
+            Complete vehicle fleet specs, category & class hierarchy, commercial tariffs, and permit/insurance tracking.
           </p>
         </div>
 
@@ -359,7 +408,7 @@ export default function MasterFleetRosterPage() {
           <div className="space-y-1">
             <h3 className="text-xl font-bold text-slate-100">No Uploaded Vehicles Found</h3>
             <p className="text-xs text-slate-400 max-w-md mx-auto">
-              You haven't uploaded any fleet vehicles yet. Click "Add Vehicle" above to upload your 9 fleet vehicles.
+              You haven't uploaded any fleet vehicles yet. Click "Add Vehicle" above to upload your fleet vehicles.
             </p>
           </div>
           <button
@@ -394,7 +443,7 @@ export default function MasterFleetRosterPage() {
                         )}
                       </button>
                       <span className="text-[10px] font-mono text-amber-400 font-bold uppercase tracking-wider bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
-                        {v.categoryName || "Commercial"}
+                        {v.categoryName || "Sedan"} &bull; {v.vehicleClass || "Executive"}
                       </span>
                     </div>
                     <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
@@ -416,24 +465,24 @@ export default function MasterFleetRosterPage() {
                       <span className="font-bold text-slate-200">{v.capacity} Passengers</span>
                     </div>
                     <div>
-                      <span className="text-slate-500 text-[10px] block font-sans">Fuel Type</span>
-                      <span className="font-bold text-slate-200">{v.fuelType || "Diesel"}</span>
+                      <span className="text-slate-500 text-[10px] block font-sans">Fuel & Gearbox</span>
+                      <span className="font-bold text-slate-200">{v.fuelType || "Diesel"} ({v.transmission || "Manual"})</span>
                     </div>
                     <div>
                       <span className="text-slate-500 text-[10px] block font-sans">Per Km Rate</span>
                       <span className="font-bold text-amber-400">₹{v.perKmRate} / Km</span>
                     </div>
                     <div>
-                      <span className="text-slate-500 text-[10px] block font-sans">Base Daily Rate</span>
+                      <span className="text-slate-500 text-[10px] block font-sans">Per Hour Rate</span>
+                      <span className="font-bold text-amber-400">₹{v.perHourRate || 150} / Hr</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 text-[10px] block font-sans">Base Daily Slab</span>
                       <span className="font-bold text-amber-400">₹{v.baseDailyRate} / Day</span>
                     </div>
                     <div>
                       <span className="text-slate-500 text-[10px] block font-sans">Driver Day Allowance</span>
                       <span className="font-bold text-slate-300">₹{v.driverAllowance}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-500 text-[10px] block font-sans">Night Halt Allowance</span>
-                      <span className="font-bold text-slate-300">₹{v.nightAllowance}</span>
                     </div>
                   </div>
                 </div>
@@ -441,7 +490,7 @@ export default function MasterFleetRosterPage() {
                 {/* Footer Action Icons (Edit Icon & Delete Icon) */}
                 <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[11px]">
                   <span className="font-mono text-slate-400">
-                    Permit: <strong className="text-emerald-400">{v.permitStatus || "VALID"}</strong>
+                    Permit Exp: <strong className="text-emerald-400">{v.permitExpiry || "2028-03-15"}</strong>
                   </span>
 
                   <div className="flex items-center gap-2">
@@ -467,10 +516,10 @@ export default function MasterFleetRosterPage() {
         </div>
       )}
 
-      {/* Add / Edit Commercial Vehicle Modal */}
+      {/* Complete Master Commercial Vehicle Entry & Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-2xl shadow-2xl space-y-4 relative text-slate-100 max-h-[90vh] overflow-y-auto">
+          <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-3xl shadow-2xl space-y-6 relative text-slate-100 max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setShowModal(false)}
               className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
@@ -480,146 +529,290 @@ export default function MasterFleetRosterPage() {
 
             <div className="space-y-1 border-b border-white/10 pb-3">
               <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">
-                {editingVehicle ? "Edit Vehicle Specs" : "Commercial Fleet Entry"}
+                {editingVehicle ? "Edit Commercial Vehicle Specs" : "Master Commercial Fleet Entry"}
               </span>
               <h3 className="text-2xl font-black text-slate-50">
                 {editingVehicle ? `Edit ${editingVehicle.make} ${editingVehicle.model}` : "Add Commercial Vehicle"}
               </h3>
             </div>
 
-            <form onSubmit={handleFormSubmit} className="space-y-4 text-xs">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">Vehicle Brand / Make *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Toyota / Maruti Suzuki"
-                    value={formData.make}
-                    onChange={(e) => setFormData({ ...formData, make: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
-                  />
+            <form onSubmit={handleFormSubmit} className="space-y-5 text-xs">
+              {/* Section 1: Vehicle Make, Category & Class Hierarchy */}
+              <div className="space-y-3">
+                <h4 className="text-amber-400 font-extrabold uppercase text-[11px] tracking-wider flex items-center gap-1.5">
+                  <Car className="w-4 h-4" /> Vehicle Category, Class & Brand Identification
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Vehicle Brand / Make *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Toyota / Maruti Suzuki / Hyundai"
+                      value={formData.make}
+                      onChange={(e) => setFormData({ ...formData, make: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Vehicle Category *</label>
+                    <select
+                      value={formData.categoryName}
+                      onChange={(e) => handleCategoryChange(e.target.value)}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400"
+                    >
+                      <option value="Sedan">Sedan</option>
+                      <option value="SUV">SUV</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Vehicle Class *</label>
+                    <select
+                      value={formData.vehicleClass}
+                      onChange={(e) => setFormData({ ...formData, vehicleClass: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
+                    >
+                      {(CLASS_OPTIONS[formData.categoryName] || []).map((cls) => (
+                        <option key={cls} value={cls}>
+                          {cls}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">Model Name *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Innova Crysta / Dzire"
-                    value={formData.model}
-                    onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
-                  />
-                </div>
-              </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Model Name *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Swift Dzire / Innova Crysta / Fortuner"
+                      value={formData.model}
+                      onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
+                    />
+                  </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">Registration Number *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. MH 04 ER 8890"
-                    value={formData.registrationNumber}
-                    onChange={(e) => setFormData({ ...formData, registrationNumber: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">Vehicle Category *</label>
-                  <select
-                    value={formData.categoryName}
-                    onChange={(e) => setFormData({ ...formData, categoryName: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
-                  >
-                    <option value="Sedan">Sedan</option>
-                    <option value="SUV">SUV</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">Fuel Type</label>
-                  <select
-                    value={formData.fuelType}
-                    onChange={(e) => setFormData({ ...formData, fuelType: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
-                  >
-                    <option value="Diesel">Diesel</option>
-                    <option value="Petrol">Petrol</option>
-                    <option value="CNG">CNG</option>
-                    <option value="Electric">Electric (EV)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">Seating Capacity</label>
-                  <input
-                    type="number"
-                    value={formData.capacity}
-                    onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">Per Km Rate (₹) *</label>
-                  <input
-                    type="number"
-                    required
-                    value={formData.perKmRate}
-                    onChange={(e) => setFormData({ ...formData, perKmRate: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">Base Daily Rate (₹)</label>
-                  <input
-                    type="number"
-                    value={formData.baseDailyRate}
-                    onChange={(e) => setFormData({ ...formData, baseDailyRate: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400"
-                  />
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Registration Number *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. MH 04 ER 8890"
+                      value={formData.registrationNumber}
+                      onChange={(e) => setFormData({ ...formData, registrationNumber: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-mono font-extrabold text-emerald-400 uppercase"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">Driver Allowance (₹/Day)</label>
-                  <input
-                    type="number"
-                    value={formData.driverAllowance}
-                    onChange={(e) => setFormData({ ...formData, driverAllowance: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
-                  />
-                </div>
+              {/* Section 2: Specs & Seating Capacity */}
+              <div className="space-y-3 pt-3 border-t border-white/10">
+                <h4 className="text-amber-400 font-extrabold uppercase text-[11px] tracking-wider flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4" /> Technical Specs & Seating Capacity
+                </h4>
 
-                <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">Night Halt Allowance (₹)</label>
-                  <input
-                    type="number"
-                    value={formData.nightAllowance}
-                    onChange={(e) => setFormData({ ...formData, nightAllowance: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Transmission *</label>
+                    <select
+                      value={formData.transmission}
+                      onChange={(e) => setFormData({ ...formData, transmission: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
+                    >
+                      <option value="Manual">Manual</option>
+                      <option value="Automatic">Automatic</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Fuel Type *</label>
+                    <select
+                      value={formData.fuelType}
+                      onChange={(e) => setFormData({ ...formData, fuelType: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
+                    >
+                      <option value="Diesel">Diesel</option>
+                      <option value="Petrol">Petrol</option>
+                      <option value="CNG">CNG</option>
+                      <option value="Electric (EV)">Electric (EV)</option>
+                      <option value="Hybrid">Hybrid</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Seating Capacity *</label>
+                    <input
+                      type="number"
+                      required
+                      value={formData.capacity}
+                      onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-bold"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-slate-300 font-bold">Vehicle Image Upload from Device</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setFormData({ ...formData, imageName: e.target.files?.[0]?.name || "" })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950"
-                />
+              {/* Section 3: Commercial Tariffs & Allowances */}
+              <div className="space-y-3 pt-3 border-t border-white/10">
+                <h4 className="text-amber-400 font-extrabold uppercase text-[11px] tracking-wider flex items-center gap-1.5">
+                  <IndianRupee className="w-4 h-4" /> Commercial Rates & Daily Allowances
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Per Km Rate (₹) *</label>
+                    <input
+                      type="number"
+                      required
+                      value={formData.perKmRate}
+                      onChange={(e) => setFormData({ ...formData, perKmRate: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Per Hour Rate (₹) *</label>
+                    <input
+                      type="number"
+                      required
+                      value={formData.perHourRate}
+                      onChange={(e) => setFormData({ ...formData, perHourRate: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Base Daily Slab (₹) *</label>
+                    <input
+                      type="number"
+                      required
+                      value={formData.baseDailyRate}
+                      onChange={(e) => setFormData({ ...formData, baseDailyRate: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Driver Day Allowance (₹/Day)</label>
+                    <input
+                      type="number"
+                      value={formData.driverAllowance}
+                      onChange={(e) => setFormData({ ...formData, driverAllowance: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Night Halt Allowance (₹/Night)</label>
+                    <input
+                      type="number"
+                      value={formData.nightAllowance}
+                      onChange={(e) => setFormData({ ...formData, nightAllowance: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div className="pt-3 border-t border-white/10 flex justify-end gap-3">
+              {/* Section 4: Insurance, Permit & Compliance Dates */}
+              <div className="space-y-3 pt-3 border-t border-white/10">
+                <h4 className="text-amber-400 font-extrabold uppercase text-[11px] tracking-wider flex items-center gap-1.5">
+                  <Shield className="w-4 h-4" /> Insurance, Commercial Permit & Compliance
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Insurance Provider Name</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. HDFC ERGO / ICICI Lombard / Bajaj Allianz"
+                      value={formData.insuranceProvider}
+                      onChange={(e) => setFormData({ ...formData, insuranceProvider: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Insurance Policy Number</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. POL-8829102"
+                      value={formData.insuranceNumber}
+                      onChange={(e) => setFormData({ ...formData, insuranceNumber: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Insurance Expiry Date</label>
+                    <input
+                      type="date"
+                      value={formData.insuranceExpiry}
+                      onChange={(e) => setFormData({ ...formData, insuranceExpiry: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Fitness Expiry Date</label>
+                    <input
+                      type="date"
+                      value={formData.fitnessExpiry}
+                      onChange={(e) => setFormData({ ...formData, fitnessExpiry: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Commercial Permit Expiry</label>
+                    <input
+                      type="date"
+                      value={formData.permitExpiry}
+                      onChange={(e) => setFormData({ ...formData, permitExpiry: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 5: Device Image Upload */}
+              <div className="space-y-1 pt-3 border-t border-white/10">
+                <label className="text-slate-300 font-bold block">Vehicle Image Upload from Device</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setFormData({
+                          ...formData,
+                          imageName: file.name,
+                          imageUrl: URL.createObjectURL(file)
+                        });
+                      }
+                    }}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
+                  />
+                </div>
+                {formData.imageName && (
+                  <div className="text-[11px] font-mono text-amber-400 mt-1">
+                    Selected Image: {formData.imageName}
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-4 border-t border-white/10 flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
