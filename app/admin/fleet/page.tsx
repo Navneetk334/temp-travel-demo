@@ -719,14 +719,13 @@ export default function AdminFleetPage() {
                     <th className="p-4">Category & Capacity</th>
                     <th className="p-4">Fuel & Gearbox</th>
                     <th className="p-4">Assigned Driver</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4 text-right">Actions</th>
+                    <th className="p-4 text-right">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {vehicles.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="text-center py-16 text-slate-500 italic">
+                      <td colSpan={7} className="text-center py-16 text-slate-500 italic">
                         No fleet vehicles matching selected criteria found.
                       </td>
                     </tr>
@@ -802,23 +801,10 @@ export default function AdminFleetPage() {
                             <span className="text-slate-500 italic text-[11px]">Unassigned</span>
                           )}
                         </td>
-                        <td className="p-4">
+                        <td className="p-4 text-right">
                           <span className={`text-[9px] font-extrabold py-0.5 px-2 rounded-full border uppercase ${getStatusBadge(v.status)}`}>
                             {v.status}
                           </span>
-                        </td>
-                        <td className="p-4 text-right space-x-2">
-                          <button
-                            onClick={() => handleToggleFeatured(v)}
-                            className={`p-1.5 border rounded-lg transition-colors ${
-                              v.isFeatured 
-                                ? "bg-amber-500/20 text-amber-400 border-amber-400/40 shadow-sm" 
-                                : "bg-slate-900 border-white/5 text-slate-500 hover:text-amber-400"
-                            }`}
-                            title={v.isFeatured ? "Featured on Homepage (Click to Unfeature)" : "Click to Feature on Homepage Showcase"}
-                          >
-                            <Star className={`w-4 h-4 ${v.isFeatured ? "fill-amber-400" : ""}`} />
-                          </button>
                         </td>
                       </tr>
                     ))
