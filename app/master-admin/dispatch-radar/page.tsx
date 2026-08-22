@@ -20,6 +20,8 @@ import {
   Plus,
   Compass,
   Activity,
+  Sun,
+  Moon,
   Layers,
   Maximize2
 } from "lucide-react";
@@ -33,10 +35,12 @@ declare global {
 export default function MasterDispatchRadarPage() {
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletInstanceRef = useRef<any>(null);
+  const tileLayerRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
 
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("ALL");
+  const [mapMode, setMapMode] = useState<"DAY" | "NIGHT">("DAY"); // Google Maps Day / Night mode
   const [selectedDriver, setSelectedDriver] = useState<any | null>(null);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [assignSuccess, setAssignSuccess] = useState(false);
@@ -137,7 +141,17 @@ export default function MasterDispatchRadarPage() {
     }
   }, []);
 
-  // Initialize Real Leaflet Interactive Dark Satellite Map
+  // Map Tile URLs for Day (Google Maps Standard) vs Night (Google Maps Night Mode)
+  const getTileUrl = (mode: "DAY" | "NIGHT") => {
+    if (mode === "DAY") {
+      // CartoDB Voyager (Clean Google Maps Day look with yellow highways, green parks, blue water)
+      return "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+    }
+    // CartoDB Dark (Google Maps Night Mode look)
+    return "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+  };
+
+  // Initialize Real Leaflet Map with Google Maps Day/Night Toggle
   const initLeafletMap = () => {
     if (!window.L || !mapRef.current) return;
 
@@ -147,7 +161,6 @@ export default function MasterDispatchRadarPage() {
     }
 
     try {
-      // Center map on Mumbai Metropolitan Area [19.0760, 72.8777]
       const map = window.L.map(mapRef.current, {
         center: [19.0760, 72.8777],
         zoom: 12,
@@ -155,26 +168,38 @@ export default function MasterDispatchRadarPage() {
         attributionControl: false
       });
 
-      // Add CartoDB Dark Matter Map Tiles
-      window.L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      const tileLayer = window.L.tileLayer(getTileUrl(mapMode), {
         maxZoom: 19,
         subdomains: "abcd"
       }).addTo(map);
 
+      tileLayerRef.current = tileLayer;
       leafletInstanceRef.current = map;
       setMapLoaded(true);
 
-      // Render GPS Vehicle Markers on Real Map
       renderMapMarkers(map, drivers);
     } catch (e) {
       console.error("Leaflet map initialization error:", e);
     }
   };
 
+  // Switch Tile Layer between Day and Night dynamically
+  useEffect(() => {
+    if (leafletInstanceRef.current && window.L) {
+      if (tileLayerRef.current) {
+        leafletInstanceRef.current.removeLayer(tileLayerRef.current);
+      }
+      const newTileLayer = window.L.tileLayer(getTileUrl(mapMode), {
+        maxZoom: 19,
+        subdomains: "abcd"
+      }).addTo(leafletInstanceRef.current);
+      tileLayerRef.current = newTileLayer;
+    }
+  }, [mapMode]);
+
   const renderMapMarkers = (map: any, driverList: any[]) => {
     if (!window.L || !map) return;
 
-    // Clear previous markers
     markersRef.current.forEach(m => map.removeLayer(m));
     markersRef.current = [];
 
@@ -182,21 +207,20 @@ export default function MasterDispatchRadarPage() {
       const lat = drv.lat || 19.0760 + (Math.random() - 0.5) * 0.1;
       const lng = drv.lng || 72.8777 + (Math.random() - 0.5) * 0.1;
 
-      // Custom HTML Glowing Vehicle Pin Icon
       const customIcon = window.L.divIcon({
         className: "custom-leaflet-marker",
         html: `
           <div class="relative group cursor-pointer">
-            <div class="w-8 h-8 rounded-full bg-slate-900 border-2 border-amber-400 shadow-2xl flex items-center justify-center text-amber-400 font-bold hover:scale-125 transition-transform">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+            <div class="w-9 h-9 rounded-full bg-slate-900 border-2 border-amber-400 shadow-2xl flex items-center justify-center text-amber-400 font-bold hover:scale-125 transition-transform">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
             </div>
             <div class="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-slate-950/95 border border-amber-500/40 text-amber-400 text-[10px] font-mono font-bold px-2 py-0.5 rounded shadow-2xl whitespace-nowrap z-50">
               ${drv.driverName} (${drv.regNumber})
             </div>
           </div>
         `,
-        iconSize: [32, 32],
-        iconAnchor: [16, 16]
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
       });
 
       const marker = window.L.marker([lat, lng], { icon: customIcon }).addTo(map);
@@ -210,10 +234,6 @@ export default function MasterDispatchRadarPage() {
       renderMapMarkers(leafletInstanceRef.current, drivers);
     }
   }, [drivers]);
-
-  const toggleDriverStatus = (id: string, newStatus: string) => {
-    setDrivers(prev => prev.map(d => d.id === id ? { ...d, status: newStatus } : d));
-  };
 
   const handleAssignSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -290,7 +310,7 @@ export default function MasterDispatchRadarPage() {
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Real-time interactive GPS map, live chauffeur coordinates, on-route tracking, and ETAs.
+            Real-time Google Maps style GPS tracking, Day/Night mode toggles, and live ETAs.
           </p>
         </div>
 
@@ -305,29 +325,52 @@ export default function MasterDispatchRadarPage() {
         </div>
       </div>
 
-      {/* Real Interactive Leaflet Dark Map Visualizer */}
+      {/* Real Interactive Google Maps Style Map Window */}
       <div className="bg-slate-900/90 backdrop-blur-2xl border border-amber-500/30 rounded-3xl p-6 shadow-2xl relative overflow-hidden space-y-4">
-        <div className="flex justify-between items-center border-b border-white/10 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
           <div className="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wider">
             <Radio className="w-4 h-4 animate-pulse" />
-            <span>Real OpenStreetMap & CartoDB Dark GPS Telematics Map</span>
+            <span>Interactive Google Maps Telematics View (Mumbai HQ)</span>
           </div>
-          <div className="flex items-center gap-4 text-xs font-mono text-slate-400">
-            <span>Active GPS Vehicles: <strong className="text-amber-400">{drivers.length}</strong></span>
-            <span className="bg-slate-950 px-3 py-1 rounded-full border border-white/10 text-slate-300 font-bold">
-              Center: Mumbai Hub (19.0760° N, 72.8777° E)
-            </span>
+
+          {/* Google Maps Day / Night Mode Toggle Switch */}
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-slate-400 font-mono">Map Style Mode:</span>
+            <div className="flex bg-slate-950 p-1 rounded-xl border border-white/10">
+              <button
+                onClick={() => setMapMode("DAY")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  mapMode === "DAY"
+                    ? "bg-amber-500 text-slate-950 font-black shadow-md"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                <Sun className="w-3.5 h-3.5" />
+                <span>☀️ Day Mode</span>
+              </button>
+              <button
+                onClick={() => setMapMode("NIGHT")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  mapMode === "NIGHT"
+                    ? "bg-amber-500 text-slate-950 font-black shadow-md"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                <Moon className="w-3.5 h-3.5" />
+                <span>🌙 Night Mode</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Real Leaflet Map Render Window */}
+        {/* Real Leaflet Map Render Container */}
         <div className="relative h-96 w-full rounded-2xl overflow-hidden border border-amber-500/30 shadow-2xl bg-slate-950">
           <div ref={mapRef} className="w-full h-full z-10" />
 
           {!mapLoaded && (
             <div className="absolute inset-0 z-20 bg-slate-950 flex flex-col items-center justify-center space-y-3">
               <RefreshCw className="w-8 h-8 text-amber-400 animate-spin" />
-              <div className="text-xs font-mono text-amber-400 font-bold">Loading Satellite & Vector Map Tiles...</div>
+              <div className="text-xs font-mono text-amber-400 font-bold">Loading Google Maps Vector Tiles...</div>
             </div>
           )}
         </div>
