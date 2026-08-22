@@ -217,17 +217,17 @@ export default function Homepage() {
               className="w-full h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent absolute top-1/2 -translate-y-1/2 shadow-[0_0_25px_rgba(245,158,11,0.8)]"
             />
 
-            {/* Glowing Brand Logo (Centered in the area above the golden line) */}
+            {/* Glowing Brand Logo (Centered in the preloader area, slightly moved down) */}
             <motion.div
               initial={{ opacity: 0, scale: 0.85 }}
               animate={beamDone ? { opacity: 1, scale: 1 } : {}}
               transition={{ duration: 0.6 }}
-              className="absolute inset-x-0 top-0 h-[50vh] flex items-center justify-center z-10 pointer-events-none"
+              className="absolute inset-x-0 top-0 h-[55vh] flex items-center justify-center z-10 pointer-events-none translate-y-6 sm:translate-y-10"
             >
               <img
                 src="/images/logo.png"
                 alt="TEMP TRAVEL"
-                className="h-20 sm:h-28 md:h-36 w-auto object-contain drop-shadow-[0_10px_30px_rgba(245,158,11,0.3)]"
+                className="h-20 sm:h-28 md:h-36 w-auto object-contain drop-shadow-[0_10px_30px_rgba(245,158,11,0.35)]"
               />
             </motion.div>
           </motion.div>
