@@ -743,23 +743,35 @@ export default function AdminFleetPage() {
                           {(currentPage - 1) * pageSize + idx + 1}
                         </td>
                         <td className="p-4">
-                          <div className="font-bold text-slate-100 text-sm flex items-center gap-2">
-                            <span>{v.make} {v.model}</span>
-                            <span className="font-mono text-emerald-400 text-xs px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 font-extrabold">
-                              {v.registrationNumber}
-                            </span>
-                            {v.isFeatured && (
-                              <span className="text-[9px] font-extrabold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center gap-1">
-                                <Sparkles className="w-3 h-3 fill-amber-400" />
-                                <span>HOMEPAGE FEATURED</span>
-                              </span>
-                            )}
-                          </div>
-                          {v.perKmRate && (
-                            <div className="text-[10px] text-slate-400 font-mono mt-0.5">
-                              Tariff: ₹{Number(v.perKmRate)}/km &bull; Daily: ₹{Number(v.baseDailyRate || 0)}
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={v.imageUrl || "/images/hero-car.png"}
+                              alt={v.model}
+                              className="w-12 h-9 object-cover rounded-lg border border-white/10 shrink-0 bg-slate-950"
+                              onError={(e) => {
+                                (e.target as HTMLElement).setAttribute("src", "/images/hero-car.png");
+                              }}
+                            />
+                            <div>
+                              <div className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                                <span>{v.make} {v.model}</span>
+                                <span className="font-mono text-emerald-400 text-xs px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 font-extrabold">
+                                  {v.registrationNumber}
+                                </span>
+                                {v.isFeatured && (
+                                  <span className="text-[9px] font-extrabold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center gap-1">
+                                    <Sparkles className="w-3 h-3 fill-amber-400" />
+                                    <span>HOMEPAGE FEATURED</span>
+                                  </span>
+                                )}
+                              </div>
+                              {v.perKmRate && (
+                                <div className="text-[10px] text-slate-400 font-mono mt-0.5">
+                                  Tariff: ₹{Number(v.perKmRate)}/km &bull; Daily: ₹{Number(v.baseDailyRate || 0)}
+                                </div>
+                              )}
                             </div>
-                          )}
+                          </div>
                         </td>
                         <td className="p-4">
                           <div className="font-bold text-slate-200 flex items-center gap-1.5">

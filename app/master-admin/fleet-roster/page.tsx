@@ -451,6 +451,24 @@ export default function MasterFleetRosterPage() {
                     </span>
                   </div>
 
+                  {/* Vehicle Image Thumbnail Banner */}
+                  <div className="relative h-40 bg-slate-950 rounded-xl overflow-hidden border border-white/5 group">
+                    <img
+                      src={v.imageUrl || "/images/hero-car.png"}
+                      alt={`${v.make} ${v.model}`}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        (e.target as HTMLElement).setAttribute("src", "/images/hero-car.png");
+                      }}
+                    />
+                    {v.isFeatured && (
+                      <div className="absolute top-2 right-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 px-2.5 py-0.5 rounded-full text-[9px] font-black flex items-center gap-1 shadow-lg tracking-wider">
+                        <Sparkles className="w-3 h-3 fill-slate-950" />
+                        <span>HOMEPAGE FEATURED</span>
+                      </div>
+                    )}
+                  </div>
+
                   <div>
                     <h3 className="font-extrabold text-slate-100 text-lg leading-tight">
                       {v.make} {v.model}
@@ -821,19 +839,25 @@ export default function MasterFleetRosterPage() {
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
-                        setFormData({
-                          ...formData,
-                          imageName: file.name,
-                          imageUrl: URL.createObjectURL(file)
-                        });
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                          const dataUrl = event.target?.result as string;
+                          setFormData(prev => ({
+                            ...prev,
+                            imageName: file.name,
+                            imageUrl: dataUrl
+                          }));
+                        };
+                        reader.readAsDataURL(file);
                       }
                     }}
                     className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                   />
                 </div>
-                {formData.imageName && (
-                  <div className="text-[11px] font-mono text-amber-400 mt-1">
-                    Selected Image: {formData.imageName}
+                {formData.imageUrl && (
+                  <div className="mt-2 flex items-center gap-3 bg-slate-950 p-2 rounded-xl border border-white/5">
+                    <img src={formData.imageUrl} alt="Uploaded Preview" className="w-16 h-10 object-cover rounded-lg border border-amber-400/40" />
+                    <span className="text-[11px] font-mono text-amber-400">Selected Image: {formData.imageName || "Device Upload"}</span>
                   </div>
                 )}
               </div>
