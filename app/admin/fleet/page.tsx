@@ -328,26 +328,16 @@ export default function AdminFleetPage() {
       if (vehiclesRes.ok) {
         const vData = await vehiclesRes.json();
         const rawList = Array.isArray(vData) ? vData : (vData.vehicles || []);
-        
-        const finalVehicles = rawList.length > 0 ? rawList : DEFAULT_MASTER_FLEET;
-        setVehicles(finalVehicles);
-        setTotalCount(vData.pagination?.totalCount || finalVehicles.length);
+        setVehicles(rawList);
+        setTotalCount(vData.pagination?.totalCount || rawList.length);
         setTotalPages(vData.pagination?.totalPages || 1);
         if (vData.stats) {
           setStats(vData.stats);
-        } else {
-          setStats({
-            total: finalVehicles.length,
-            AVAILABLE: finalVehicles.length,
-            ON_TRIP: 0,
-            MAINTENANCE: 0,
-            INACTIVE: 0,
-          });
         }
       } else {
-        setVehicles(DEFAULT_MASTER_FLEET);
-        setTotalCount(9);
-        setStats({ total: 9, AVAILABLE: 9, ON_TRIP: 0, MAINTENANCE: 0, INACTIVE: 0 });
+        setVehicles([]);
+        setTotalCount(0);
+        setStats({ total: 0, AVAILABLE: 0, ON_TRIP: 0, MAINTENANCE: 0, INACTIVE: 0 });
       }
 
       if (catsRes.ok) {

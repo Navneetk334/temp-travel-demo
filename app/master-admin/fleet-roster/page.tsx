@@ -13,162 +13,16 @@ import {
   FileText,
   Clock,
   X,
-  Edit2
+  Edit2,
+  Upload
 } from "lucide-react";
 
-// Full List of 9 Uploaded Fleet Vehicles
-const defaultFleetList = [
-  {
-    id: "v-1",
-    make: "Maruti Suzuki",
-    model: "Swift Dzire",
-    registrationNumber: "MH 02 CZ 4421",
-    capacity: 4,
-    categoryName: "Sedan",
-    perKmRate: 12,
-    baseDailyRate: 2200,
-    driverAllowance: 400,
-    nightAllowance: 250,
-    fuelType: "CNG / Petrol",
-    isAvailable: true,
-    permitStatus: "VALID",
-    insuranceExpiry: "2027-03-15"
-  },
-  {
-    id: "v-2",
-    make: "Honda",
-    model: "City / Verna",
-    registrationNumber: "MH 01 AB 1234",
-    capacity: 4,
-    categoryName: "Sedan",
-    perKmRate: 18,
-    baseDailyRate: 3500,
-    driverAllowance: 500,
-    nightAllowance: 300,
-    fuelType: "Petrol",
-    isAvailable: true,
-    permitStatus: "VALID",
-    insuranceExpiry: "2026-11-20"
-  },
-  {
-    id: "v-3",
-    make: "Toyota",
-    model: "Innova Crysta",
-    registrationNumber: "MH 04 ER 8890",
-    capacity: 7,
-    categoryName: "SUV",
-    perKmRate: 22,
-    baseDailyRate: 4800,
-    driverAllowance: 600,
-    nightAllowance: 400,
-    fuelType: "Diesel",
-    isAvailable: true,
-    permitStatus: "VALID",
-    insuranceExpiry: "2027-01-10"
-  },
-  {
-    id: "v-4",
-    make: "Toyota",
-    model: "Fortuner 4x4",
-    registrationNumber: "MH 02 FG 9900",
-    capacity: 7,
-    categoryName: "SUV",
-    perKmRate: 45,
-    baseDailyRate: 9500,
-    driverAllowance: 1000,
-    nightAllowance: 600,
-    fuelType: "Diesel",
-    isAvailable: true,
-    permitStatus: "VALID",
-    insuranceExpiry: "2026-12-05"
-  },
-  {
-    id: "v-5",
-    make: "Mahindra",
-    model: "XUV700 AX7",
-    registrationNumber: "MH 03 EY 7711",
-    capacity: 7,
-    categoryName: "SUV",
-    perKmRate: 26,
-    baseDailyRate: 5200,
-    driverAllowance: 650,
-    nightAllowance: 450,
-    fuelType: "Diesel",
-    isAvailable: true,
-    permitStatus: "VALID",
-    insuranceExpiry: "2027-08-14"
-  },
-  {
-    id: "v-6",
-    make: "Hyundai",
-    model: "Creta / Alcazar",
-    registrationNumber: "MH 02 DF 5544",
-    capacity: 6,
-    categoryName: "SUV",
-    perKmRate: 20,
-    baseDailyRate: 4200,
-    driverAllowance: 550,
-    nightAllowance: 350,
-    fuelType: "Petrol / Diesel",
-    isAvailable: true,
-    permitStatus: "VALID",
-    insuranceExpiry: "2027-04-18"
-  },
-  {
-    id: "v-7",
-    make: "Mercedes-Benz",
-    model: "E-Class Luxury",
-    registrationNumber: "MH 01 CC 9000",
-    capacity: 4,
-    categoryName: "Sedan",
-    perKmRate: 75,
-    baseDailyRate: 16000,
-    driverAllowance: 1500,
-    nightAllowance: 1000,
-    fuelType: "Diesel",
-    isAvailable: true,
-    permitStatus: "VALID",
-    insuranceExpiry: "2027-10-30"
-  },
-  {
-    id: "v-8",
-    make: "BMW",
-    model: "5 Series Executive",
-    registrationNumber: "MH 01 DD 8000",
-    capacity: 4,
-    categoryName: "Sedan",
-    perKmRate: 80,
-    baseDailyRate: 17500,
-    driverAllowance: 1500,
-    nightAllowance: 1000,
-    fuelType: "Petrol",
-    isAvailable: true,
-    permitStatus: "VALID",
-    insuranceExpiry: "2027-11-25"
-  },
-  {
-    id: "v-9",
-    make: "Force Motors",
-    model: "Traveller Executive 17S",
-    registrationNumber: "MH 04 TT 1717",
-    capacity: 17,
-    categoryName: "SUV",
-    perKmRate: 32,
-    baseDailyRate: 7500,
-    driverAllowance: 800,
-    nightAllowance: 500,
-    fuelType: "Diesel",
-    isAvailable: true,
-    permitStatus: "VALID",
-    insuranceExpiry: "2027-09-12"
-  }
-];
-
 export default function MasterFleetRosterPage() {
-  const [vehicles, setVehicles] = useState<any[]>(defaultFleetList);
+  const [vehicles, setVehicles] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const [newVehicle, setNewVehicle] = useState({
     make: "",
@@ -188,31 +42,50 @@ export default function MasterFleetRosterPage() {
     imageName: ""
   });
 
+  // Load User Uploaded Fleet Vehicles
   useEffect(() => {
-    // Fetch live items from API and merge with uploaded 9 vehicles for instant sub-50ms speed
-    fetch("/api/fleet")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data) {
-          const apiList = Array.isArray(data) ? data : data.vehicles || [];
-          if (apiList.length > 0) {
-            // Merge unique vehicles
-            const existingRegs = new Set(defaultFleetList.map((v) => v.registrationNumber));
-            const fresh = apiList.filter((v: any) => !existingRegs.has(v.registrationNumber));
-            setVehicles([...defaultFleetList, ...fresh]);
-          }
+    const loadFleet = async () => {
+      setLoading(true);
+      let localList: any[] = [];
+      const saved = localStorage.getItem("user_uploaded_fleet");
+      if (saved) {
+        try {
+          localList = JSON.parse(saved);
+        } catch (e) {
+          console.error(e);
         }
-      })
-      .catch((err) => console.error(err));
+      }
+
+      try {
+        const res = await fetch("/api/fleet");
+        if (res.ok) {
+          const data = await res.json();
+          const apiList = data.vehicles || [];
+          // Combine API & Local persistent vehicles by reg number
+          const regMap = new Map();
+          localList.forEach(v => regMap.set(v.registrationNumber, v));
+          apiList.forEach((v: any) => regMap.set(v.registrationNumber, v));
+          setVehicles(Array.from(regMap.values()));
+        } else {
+          setVehicles(localList);
+        }
+      } catch (e) {
+        setVehicles(localList);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadFleet();
   }, []);
 
-  const handleAddSubmit = (e: React.FormEvent) => {
+  const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const created = {
       id: `v-${Date.now()}`,
       make: newVehicle.make || "Commercial Make",
       model: newVehicle.model || "Commercial Vehicle",
-      registrationNumber: newVehicle.registrationNumber || "MH 04 XX 9900",
+      registrationNumber: newVehicle.registrationNumber || `MH 04 XX ${Math.floor(1000 + Math.random() * 9000)}`,
       capacity: parseInt(newVehicle.capacity) || 4,
       categoryName: newVehicle.categoryName,
       perKmRate: parseFloat(newVehicle.perKmRate) || 15,
@@ -225,7 +98,21 @@ export default function MasterFleetRosterPage() {
       insuranceExpiry: newVehicle.insuranceExpiry
     };
 
-    setVehicles([created, ...vehicles]);
+    const updated = [created, ...vehicles];
+    setVehicles(updated);
+    localStorage.setItem("user_uploaded_fleet", JSON.stringify(updated));
+
+    // Save to Database
+    try {
+      await fetch("/api/fleet", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(created)
+      });
+    } catch (err) {
+      console.error("Save vehicle error:", err);
+    }
+
     setShowModal(false);
     setNewVehicle({
       make: "",
@@ -265,7 +152,7 @@ export default function MasterFleetRosterPage() {
               Commercial Fleet Vehicles & Tariff Roster
             </h1>
             <span className="bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest">
-              {vehicles.length} Vehicles Managed
+              {vehicles.length} Uploaded Vehicles
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
@@ -315,65 +202,83 @@ export default function MasterFleetRosterPage() {
       </div>
 
       {/* Fleet Vehicles Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredVehicles.map((v) => (
-          <div
-            key={v.id}
-            className="bg-slate-900/80 backdrop-blur-xl border border-white/10 hover:border-amber-500/40 rounded-2xl p-6 shadow-xl space-y-4 transition-all flex flex-col justify-between"
-          >
-            <div className="space-y-3">
-              <div className="flex justify-between items-start">
-                <span className="text-[10px] font-mono text-amber-400 font-bold uppercase tracking-wider bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
-                  {v.categoryName || "Commercial"}
-                </span>
-                <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
-                  {v.isAvailable ? "READY FOR DUTY" : "ON ASSIGNMENT"}
-                </span>
-              </div>
-
-              <div>
-                <h3 className="font-extrabold text-slate-100 text-lg leading-tight">
-                  {v.make} {v.model}
-                </h3>
-                <div className="text-xs font-mono text-amber-400 font-bold mt-0.5">{v.registrationNumber}</div>
-              </div>
-
-              {/* Specs & Tariffs Grid */}
-              <div className="grid grid-cols-2 gap-2 bg-slate-950 p-3 rounded-xl border border-white/5 text-xs font-mono">
-                <div>
-                  <span className="text-slate-500 text-[10px] block font-sans">Seating Capacity</span>
-                  <span className="font-bold text-slate-200">{v.capacity} Passengers</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 text-[10px] block font-sans">Fuel Type</span>
-                  <span className="font-bold text-slate-200">{v.fuelType || "Diesel"}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 text-[10px] block font-sans">Per Km Rate</span>
-                  <span className="font-bold text-amber-400">₹{v.perKmRate} / Km</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 text-[10px] block font-sans">Base Daily Rate</span>
-                  <span className="font-bold text-amber-400">₹{v.baseDailyRate} / Day</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 text-[10px] block font-sans">Driver Day Allowance</span>
-                  <span className="font-bold text-slate-300">₹{v.driverAllowance}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 text-[10px] block font-sans">Night Halt Allowance</span>
-                  <span className="font-bold text-slate-300">₹{v.nightAllowance}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[11px] font-mono text-slate-400">
-              <span>Permit: <strong className="text-emerald-400">{v.permitStatus || "VALID"}</strong></span>
-              <span>Insurance: <strong className="text-slate-200">{v.insuranceExpiry}</strong></span>
-            </div>
+      {filteredVehicles.length === 0 ? (
+        <div className="bg-slate-900/60 border border-white/10 rounded-3xl p-12 text-center space-y-4">
+          <Car className="w-12 h-12 text-amber-400 mx-auto opacity-80" />
+          <div className="space-y-1">
+            <h3 className="text-xl font-bold text-slate-100">No Uploaded Vehicles Found</h3>
+            <p className="text-xs text-slate-400 max-w-md mx-auto">
+              You haven't uploaded any fleet vehicles yet. Click "Add Vehicle" above to upload your 9 fleet vehicles.
+            </p>
           </div>
-        ))}
-      </div>
+          <button
+            onClick={() => setShowModal(true)}
+            className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer"
+          >
+            + Upload Vehicle Now
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredVehicles.map((v) => (
+            <div
+              key={v.id}
+              className="bg-slate-900/80 backdrop-blur-xl border border-white/10 hover:border-amber-500/40 rounded-2xl p-6 shadow-xl space-y-4 transition-all flex flex-col justify-between"
+            >
+              <div className="space-y-3">
+                <div className="flex justify-between items-start">
+                  <span className="text-[10px] font-mono text-amber-400 font-bold uppercase tracking-wider bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
+                    {v.categoryName || "Commercial"}
+                  </span>
+                  <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
+                    {v.isAvailable ? "READY FOR DUTY" : "ON ASSIGNMENT"}
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="font-extrabold text-slate-100 text-lg leading-tight">
+                    {v.make} {v.model}
+                  </h3>
+                  <div className="text-xs font-mono text-amber-400 font-bold mt-0.5">{v.registrationNumber}</div>
+                </div>
+
+                {/* Specs & Tariffs Grid */}
+                <div className="grid grid-cols-2 gap-2 bg-slate-950 p-3 rounded-xl border border-white/5 text-xs font-mono">
+                  <div>
+                    <span className="text-slate-500 text-[10px] block font-sans">Seating Capacity</span>
+                    <span className="font-bold text-slate-200">{v.capacity} Passengers</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 text-[10px] block font-sans">Fuel Type</span>
+                    <span className="font-bold text-slate-200">{v.fuelType || "Diesel"}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 text-[10px] block font-sans">Per Km Rate</span>
+                    <span className="font-bold text-amber-400">₹{v.perKmRate} / Km</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 text-[10px] block font-sans">Base Daily Rate</span>
+                    <span className="font-bold text-amber-400">₹{v.baseDailyRate} / Day</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 text-[10px] block font-sans">Driver Day Allowance</span>
+                    <span className="font-bold text-slate-300">₹{v.driverAllowance}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 text-[10px] block font-sans">Night Halt Allowance</span>
+                    <span className="font-bold text-slate-300">₹{v.nightAllowance}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[11px] font-mono text-slate-400">
+                <span>Permit: <strong className="text-emerald-400">{v.permitStatus || "VALID"}</strong></span>
+                <span>Insurance: <strong className="text-slate-200">{v.insuranceExpiry || "2027-12-31"}</strong></span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Add Commercial Vehicle Modal */}
       {showModal && (
