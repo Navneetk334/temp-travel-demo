@@ -11,9 +11,14 @@ interface EditBlogPostPageProps {
 export default async function EditBlogPostPage({ params }: EditBlogPostPageProps) {
   const { id } = await params;
 
-  const post = await prisma.blogPost.findUnique({
-    where: { id },
-  });
+  let post: any = null;
+  try {
+    post = await prisma.blogPost.findUnique({
+      where: { id },
+    });
+  } catch (e) {
+    console.error("EditBlogPostPage DB error:", e);
+  }
 
   if (!post) {
     notFound();
