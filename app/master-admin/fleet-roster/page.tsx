@@ -319,6 +319,18 @@ export default function MasterFleetRosterPage() {
 
         <div className="flex items-center gap-3">
           <button
+            onClick={() => {
+              if (confirm("Are you sure you want to clear all stored vehicle roster data? You will be able to upload your fresh vehicles clean.")) {
+                localStorage.removeItem("user_uploaded_fleet");
+                setVehicles([]);
+                fetch("/api/fleet/clear", { method: "POST" }).catch(e => console.error(e));
+              }
+            }}
+            className="px-3.5 py-2 bg-slate-900 border border-white/10 hover:border-rose-400 text-slate-400 hover:text-rose-400 rounded-xl text-xs font-bold transition-all cursor-pointer"
+          >
+            Clear Stored Roster
+          </button>
+          <button
             onClick={openAddModal}
             className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-lg shadow-amber-500/20 cursor-pointer"
           >
