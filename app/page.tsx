@@ -119,7 +119,7 @@ export default function Homepage() {
       .then((data) => {
         const vehicles = Array.isArray(data) ? data : (data.vehicles || []);
         if (vehicles.length > 0) {
-          setFeaturedVehicles(vehicles.map((v: any) => ({
+          setFeaturedVehicles(vehicles.slice(0, 3).map((v: any) => ({
             id: v.id,
             name: `${v.make} ${v.model}`,
             category: v.subCategory || v.category?.name || "Executive Fleet",
@@ -128,7 +128,7 @@ export default function Homepage() {
             img: v.imageUrl || "/images/hero-car.png"
           })));
         } else {
-          setFeaturedVehicles(DEFAULT_FEATURED);
+          setFeaturedVehicles(DEFAULT_FEATURED.slice(0, 3));
         }
       })
       .catch((err) => {
@@ -479,6 +479,17 @@ export default function Homepage() {
                 </div>
               ))
             )}
+          </div>
+
+          {/* View All Fleet Link Button */}
+          <div className="text-center pt-4">
+            <Link
+              href="/fleet"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-8 py-3.5 rounded-2xl text-xs font-black uppercase tracking-wider transition-all shadow-xl shadow-amber-500/20 cursor-pointer"
+            >
+              <span>Explore Full Fleet Roster ({featuredVehicles.length > 0 ? "All Vehicles" : ""})</span>
+              <ChevronRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </section>
