@@ -66,21 +66,45 @@ export default function MasterAdminDashboard() {
   const handleSyncSystems = async () => {
     setLoading(true);
     try {
-      const [leadsRes, fleetRes] = await Promise.all([
+      // 1. Check local CRM leads
+      let totalLocalCount = 0;
+      try {
+        const localCRM = localStorage.getItem("user_uploaded_crm_leads");
+        if (localCRM) {
+          const parsed = JSON.parse(localCRM);
+          if (Array.isArray(parsed)) totalLocalCount = parsed.length;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+
+      const [rentalRes, corpRes, fleetRes] = await Promise.allSettled([
         fetch("/api/rental/lead"),
+        fetch("/api/corporate/lead"),
         fetch("/api/fleet")
       ]);
-      if (leadsRes.ok) {
-        const leadsData = await leadsRes.json();
-        if (Array.isArray(leadsData)) {
-          setStats((prev) => ({
-            ...prev,
-            totalLeads: leadsData.length > 0 ? leadsData.length + 12 : prev.totalLeads,
-          }));
-        }
+
+      let apiLeadsCount = 0;
+      if (rentalRes.status === "fulfilled" && rentalRes.value.ok) {
+        const data = await rentalRes.value.json();
+        const items = Array.isArray(data) ? data : (data.leads || []);
+        apiLeadsCount += items.length;
       }
-      if (fleetRes.ok) {
-        const fleetData = await fleetRes.json();
+      if (corpRes.status === "fulfilled" && corpRes.value.ok) {
+        const data = await corpRes.value.json();
+        const items = Array.isArray(data) ? data : (data.leads || []);
+        apiLeadsCount += items.length;
+      }
+
+      const calculatedTotalLeads = Math.max(totalLocalCount, apiLeadsCount, totalLocalCount + apiLeadsCount);
+
+      setStats(prev => ({
+        ...prev,
+        totalLeads: calculatedTotalLeads
+      }));
+
+      if (fleetRes.status === "fulfilled" && fleetRes.value.ok) {
+        const fleetData = await fleetRes.value.json();
         const list = Array.isArray(fleetData) ? fleetData : (fleetData.vehicles || []);
         if (list.length > 0) {
           setStats((prev) => ({ ...prev, fleetCount: list.length }));

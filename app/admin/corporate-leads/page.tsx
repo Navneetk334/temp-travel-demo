@@ -93,23 +93,57 @@ export default function AdminCorporateLeadsPage() {
         limit: pageSize.toString(),
       });
 
+      let fetchedLeads: Lead[] = [];
       const res = await fetch(`/api/corporate/lead?${queryParams.toString()}`);
       if (res.ok) {
         const data = await res.json();
-        // Support array response or paginated object response
         if (Array.isArray(data)) {
-          setLeads(data);
-          setTotalCount(data.length);
-          setTotalPages(1);
-        } else {
-          setLeads(data.leads || []);
-          setTotalCount(data.pagination?.totalCount || 0);
-          setTotalPages(data.pagination?.totalPages || 1);
-          if (data.stats) {
-            setStats(data.stats);
-          }
+          fetchedLeads = data;
+        } else if (data.leads) {
+          fetchedLeads = data.leads;
+          if (data.stats) setStats(data.stats);
         }
       }
+
+      // Check local CRM leads for Pickup & Drop
+      try {
+        const local = localStorage.getItem("user_uploaded_crm_leads");
+        if (local) {
+          const parsed = JSON.parse(local);
+          if (Array.isArray(parsed)) {
+            const matching = parsed.filter((l: any) => 
+              (l.tripType || "").toLowerCase().includes("pickup") || 
+              (l.tripType || "").toLowerCase().includes("airport") ||
+              (l.notes || "").toLowerCase().includes("pickup")
+            ).map((l: any) => ({
+              id: l.id || `lead_${Date.now()}`,
+              companyName: l.companyName || "Individual",
+              contactName: l.customerName || "Customer",
+              email: l.email || "",
+              phone: l.phone || "",
+              employeeCount: 1,
+              pickupLocations: l.pickupLocation || "",
+              serviceType: l.tripType || "Pickup & Drop",
+              requirements: l.notes || "",
+              notes: l.notes || "",
+              status: (l.status || "NEW") as LeadStatus,
+              createdAt: l.createdAt || new Date().toISOString()
+            }));
+
+            // Merge deduplicated
+            const map = new Map<string, Lead>();
+            fetchedLeads.forEach(f => map.set(f.id, f));
+            matching.forEach(m => map.set(m.id, m));
+            fetchedLeads = Array.from(map.values());
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+
+      setLeads(fetchedLeads);
+      setTotalCount(fetchedLeads.length);
+      setTotalPages(Math.ceil(fetchedLeads.length / pageSize) || 1);
     } catch (err) {
       console.error("Failed to load corporate leads:", err);
     } finally {

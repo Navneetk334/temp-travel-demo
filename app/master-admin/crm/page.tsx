@@ -29,16 +29,101 @@ export default function MasterOmnichannelCRMPage() {
   const [selectedLead, setSelectedLead] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Normalize incoming lead from any API or local format into consistent structure
+  const normalizeLead = (raw: any, defaultType: string = "Rental Inquiry") => {
+    return {
+      id: raw.id || `lead_${Math.random().toString(36).substring(2, 9)}`,
+      bookingRef: raw.bookingRef || raw.bookingNumber || `TT-${(raw.id || Date.now().toString()).slice(-6).toUpperCase()}`,
+      customerName: raw.customerName || raw.contactName || raw.name || "Customer Lead",
+      companyName: raw.companyName || "",
+      phone: raw.phone || "",
+      email: raw.email || "",
+      tripType: raw.tripType || raw.serviceType || (raw.tourPackageId ? "Tour Package Booking" : (raw.subject ? `Contact Inquiry (${raw.subject})` : defaultType)),
+      pickupLocation: raw.pickupLocation || raw.pickupLocations || raw.pickup || "-",
+      dropLocation: raw.dropLocation || raw.drop || "-",
+      status: (raw.status || "NEW").toUpperCase(),
+      createdAt: raw.createdAt || raw.date || new Date().toISOString(),
+      notes: raw.notes || raw.requirements || raw.message || raw.details || ""
+    };
+  };
+
   const fetchLeads = async () => {
     setLoading(true);
+    let combinedLeads: any[] = [];
+
+    // 1. Instant Local Storage Hydration
     try {
-      const res = await fetch("/api/rental/lead");
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data)) setLeads(data);
+      const localLeads = localStorage.getItem("user_uploaded_crm_leads");
+      if (localLeads) {
+        const parsed = JSON.parse(localLeads);
+        if (Array.isArray(parsed)) {
+          combinedLeads = parsed.map(l => normalizeLead(l));
+        }
       }
+    } catch (e) {
+      console.error("Error reading local CRM leads:", e);
+    }
+
+    // Update state immediately so UI renders with zero lag
+    if (combinedLeads.length > 0) {
+      setLeads([...combinedLeads]);
+    }
+
+    // 2. Concurrently fetch all live CRM sources from backend
+    try {
+      const [rentalRes, corpRes, toursRes, contactRes] = await Promise.allSettled([
+        fetch("/api/rental/lead"),
+        fetch("/api/corporate/lead"),
+        fetch("/api/bookings"),
+        fetch("/api/contact")
+      ]);
+
+      const fetchedList: any[] = [];
+
+      if (rentalRes.status === "fulfilled" && rentalRes.value.ok) {
+        const data = await rentalRes.value.json();
+        const items = Array.isArray(data) ? data : (data.leads || []);
+        items.forEach((item: any) => fetchedList.push(normalizeLead(item, "Rental Inquiry")));
+      }
+
+      if (corpRes.status === "fulfilled" && corpRes.value.ok) {
+        const data = await corpRes.value.json();
+        const items = Array.isArray(data) ? data : (data.leads || []);
+        items.forEach((item: any) => fetchedList.push(normalizeLead(item, "Corporate Inquiry")));
+      }
+
+      if (toursRes.status === "fulfilled" && toursRes.value.ok) {
+        const data = await toursRes.value.json();
+        const items = Array.isArray(data) ? data : (data.bookings || []);
+        items.forEach((item: any) => fetchedList.push(normalizeLead(item, "Tour Package Booking")));
+      }
+
+      if (contactRes.status === "fulfilled" && contactRes.value.ok) {
+        const data = await contactRes.value.json();
+        const items = Array.isArray(data) ? data : (data.leads || []);
+        items.forEach((item: any) => fetchedList.push(normalizeLead(item, "Contact Inquiry")));
+      }
+
+      // Merge and deduplicate by bookingRef / id / phone+email
+      const map = new Map<string, any>();
+      // First add remote fetched items
+      fetchedList.forEach(item => {
+        const key = item.id || item.bookingRef || `${item.phone}_${item.tripType}`;
+        map.set(key, item);
+      });
+      // Then overlay local submissions (ensures latest local status & newest submissions win)
+      combinedLeads.forEach(item => {
+        const key = item.id || item.bookingRef || `${item.phone}_${item.tripType}`;
+        map.set(key, item);
+      });
+
+      const merged = Array.from(map.values()).sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+
+      setLeads(merged);
     } catch (err) {
-      console.error(err);
+      console.error("Error fetching live leads:", err);
     } finally {
       setLoading(false);
     }
@@ -49,7 +134,16 @@ export default function MasterOmnichannelCRMPage() {
   }, []);
 
   const updateLeadStatus = async (id: string, newStatus: string) => {
-    setLeads(prev => prev.map(l => l.id === id ? { ...l, status: newStatus } : l));
+    const updated = leads.map(l => l.id === id ? { ...l, status: newStatus } : l);
+    setLeads(updated);
+
+    // Save to local storage
+    try {
+      localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(updated));
+    } catch (e) {
+      console.error("Error saving updated lead status:", e);
+    }
+
     try {
       await fetch(`/api/rental/lead`, {
         method: "PUT",
@@ -62,9 +156,19 @@ export default function MasterOmnichannelCRMPage() {
   };
 
   const exportCSV = () => {
-    const headers = ["Customer Name", "Phone", "Email", "Trip Type", "Pickup", "Status"];
-    const rows = displayLeads.map(l => [l.customerName, l.phone, l.email, l.tripType, l.pickupLocation, l.status]);
-    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+    const headers = ["Booking Ref", "Customer Name", "Phone", "Email", "Trip Type", "Pickup", "Drop", "Status", "Date"];
+    const rows = displayLeads.map(l => [
+      l.bookingRef,
+      l.customerName,
+      l.phone,
+      l.email,
+      l.tripType,
+      l.pickupLocation,
+      l.dropLocation,
+      l.status,
+      l.createdAt
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.map(x => `"${(x || "").toString().replace(/"/g, '""')}"`).join(","))].join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -81,29 +185,60 @@ export default function MasterOmnichannelCRMPage() {
     const type = (l.tripType || "").toLowerCase();
     const notes = (l.notes || "").toLowerCase();
 
-    if (activeLeadTab === "pickup") return type.includes("pickup") || type.includes("airport") || notes.includes("airport");
-    if (activeLeadTab === "local") return type.includes("local") || notes.includes("local");
-    if (activeLeadTab === "outstation") return type.includes("outstation") || notes.includes("outstation");
-    if (activeLeadTab === "corporate") return type.includes("corporate") || notes.includes("corporate");
+    if (activeLeadTab === "pickup") return type.includes("pickup") || type.includes("airport") || notes.includes("pickup") || notes.includes("airport");
+    if (activeLeadTab === "local") return type.includes("local") || notes.includes("local") || type.includes("hourly");
+    if (activeLeadTab === "outstation") return type.includes("outstation") || notes.includes("outstation") || type.includes("round trip") || type.includes("one way");
+    if (activeLeadTab === "corporate") return type.includes("corporate") || type.includes("working") || notes.includes("corporate") || Boolean(l.companyName && l.companyName !== "Individual");
     if (activeLeadTab === "tour") return type.includes("tour") || notes.includes("tour");
-    if (activeLeadTab === "contact") return type.includes("contact") || type.includes("inquiry");
+    if (activeLeadTab === "contact") return type.includes("contact") || type.includes("inquiry") || notes.includes("subject");
     return true;
   }).filter((l) => {
     const matchesSearch =
       l.customerName?.toLowerCase().includes(search.toLowerCase()) ||
       l.phone?.includes(search) ||
-      l.email?.toLowerCase().includes(search.toLowerCase());
+      l.email?.toLowerCase().includes(search.toLowerCase()) ||
+      l.bookingRef?.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === "ALL" || l.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const leadCategories = [
-    { key: "pickup", label: "Pickup & Drop Leads", icon: Clock, count: allLeads.filter(l => (l.tripType || "").toLowerCase().includes("pickup") || (l.tripType || "").toLowerCase().includes("airport")).length },
-    { key: "local", label: "Local Rentals Leads", icon: Clock, count: allLeads.filter(l => (l.tripType || "").toLowerCase().includes("local")).length },
-    { key: "outstation", label: "Outstation Leads", icon: MapPin, count: allLeads.filter(l => (l.tripType || "").toLowerCase().includes("outstation")).length },
-    { key: "corporate", label: "Corporate Inquiry Leads", icon: Building2, count: allLeads.filter(l => (l.tripType || "").toLowerCase().includes("corporate")).length },
-    { key: "tour", label: "Tour Package Leads", icon: Compass, count: allLeads.filter(l => (l.tripType || "").toLowerCase().includes("tour")).length },
-    { key: "contact", label: "Contact Leads", icon: Mail, count: allLeads.filter(l => (l.tripType || "").toLowerCase().includes("contact") || (l.tripType || "").toLowerCase().includes("inquiry")).length },
+    {
+      key: "pickup" as const,
+      label: "Pickup & Drop Leads",
+      icon: Clock,
+      count: allLeads.filter(l => (l.tripType || "").toLowerCase().includes("pickup") || (l.tripType || "").toLowerCase().includes("airport") || (l.notes || "").toLowerCase().includes("pickup")).length
+    },
+    {
+      key: "local" as const,
+      label: "Local Rentals Leads",
+      icon: Clock,
+      count: allLeads.filter(l => (l.tripType || "").toLowerCase().includes("local") || (l.notes || "").toLowerCase().includes("local") || (l.tripType || "").toLowerCase().includes("hourly")).length
+    },
+    {
+      key: "outstation" as const,
+      label: "Outstation Leads",
+      icon: MapPin,
+      count: allLeads.filter(l => (l.tripType || "").toLowerCase().includes("outstation") || (l.notes || "").toLowerCase().includes("outstation") || (l.tripType || "").toLowerCase().includes("round trip") || (l.tripType || "").toLowerCase().includes("one way")).length
+    },
+    {
+      key: "corporate" as const,
+      label: "Corporate Inquiry Leads",
+      icon: Building2,
+      count: allLeads.filter(l => (l.tripType || "").toLowerCase().includes("corporate") || (l.tripType || "").toLowerCase().includes("working") || (l.notes || "").toLowerCase().includes("corporate") || Boolean(l.companyName && l.companyName !== "Individual")).length
+    },
+    {
+      key: "tour" as const,
+      label: "Tour Package Leads",
+      icon: Compass,
+      count: allLeads.filter(l => (l.tripType || "").toLowerCase().includes("tour") || (l.notes || "").toLowerCase().includes("tour")).length
+    },
+    {
+      key: "contact" as const,
+      label: "Contact Leads",
+      icon: Mail,
+      count: allLeads.filter(l => (l.tripType || "").toLowerCase().includes("contact") || (l.tripType || "").toLowerCase().includes("inquiry") || (l.notes || "").toLowerCase().includes("subject")).length
+    },
   ];
 
   return (
@@ -125,6 +260,15 @@ export default function MasterOmnichannelCRMPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={fetchLeads}
+            disabled={loading}
+            className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-300 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
+            title="Sync live leads across all channels"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-amber-400 ${loading ? "animate-spin" : ""}`} />
+            <span>{loading ? "Syncing..." : "Refresh Pipeline"}</span>
+          </button>
           <button
             onClick={exportCSV}
             className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer"
