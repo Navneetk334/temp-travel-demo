@@ -20,7 +20,7 @@ import {
   Compass,
   Truck
 } from "lucide-react";
-import LeadDispatchModal from "@/components/admin/lead-dispatch-modal";
+import LeadDispatchModal, { extractLeadVehicleRequirements } from "@/components/admin/lead-dispatch-modal";
 
 export type LeadStatus = "NEW" | "CONTACTED" | "QUALIFIED" | "NEGOTIATION" | "WON" | "LOST" | "ARCHIVED";
 
@@ -697,6 +697,27 @@ export default function AdminRentalLeadsPage() {
                   <span className="text-slate-400">Category & Type:</span>
                   <span className="font-bold text-slate-100">{activeLead.vehicleCategory?.name} - {activeLead.tripType}</span>
                 </div>
+
+                {(() => {
+                  const req = extractLeadVehicleRequirements(activeLead);
+                  if (req.isVehiclePreSelected) {
+                    return (
+                      <div className="bg-amber-500/10 p-3 rounded-lg border border-amber-500/20 space-y-1.5">
+                        <div className="text-[10px] text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                          <Car className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Customer Selected Vehicle</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2 text-xs">
+                          {req.category && <span className="px-2 py-0.5 rounded bg-slate-900 border border-white/10 text-slate-200">Category: <strong>{req.category}</strong></span>}
+                          {req.vehicleClass && <span className="px-2 py-0.5 rounded bg-slate-900 border border-white/10 text-slate-200">Class: <strong>{req.vehicleClass}</strong></span>}
+                          {req.model && <span className="px-2 py-0.5 rounded bg-slate-900 border border-emerald-500/30 text-emerald-300">Model: <strong>{req.model}</strong></span>}
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+
                 <div className="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-lg border border-white/5">
                   <span className="text-slate-400">Pickup Date & Time:</span>
                   <span className="font-mono font-bold text-slate-200">{new Date(activeLead.pickupDateTime).toLocaleString("en-IN")}</span>

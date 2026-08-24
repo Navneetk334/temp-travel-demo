@@ -30,6 +30,11 @@ import {
   ShieldCheck,
   FileText
 } from "lucide-react";
+import LocationInput from "@/components/shared/location-input";
+import { extractLeadVehicleRequirements } from "@/components/admin/lead-dispatch-modal";
+
+const SEDAN_CLASSES = ["Compact", "Executive", "Premium Executive", "Luxury"];
+const SUV_CLASSES = ["Subcompact/Urban", "Mid-Premium", "Premium", "Luxury"];
 
 export default function MasterOmnichannelCRMPage() {
   const [activeLeadTab, setActiveLeadTab] = useState<"pickup" | "local" | "outstation" | "corporate" | "tour" | "contact">("pickup");
@@ -44,6 +49,8 @@ export default function MasterOmnichannelCRMPage() {
   const [dispatchedSuccess, setDispatchedSuccess] = useState<any | null>(null);
   const [availableVehicles, setAvailableVehicles] = useState<any[]>([]);
   const [availableDrivers, setAvailableDrivers] = useState<any[]>([]);
+  const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
+  const [classFilter, setClassFilter] = useState<string>("ALL");
 
   // Dispatch Form State
   const [dispatchForm, setDispatchForm] = useState({
@@ -265,8 +272,31 @@ export default function MasterOmnichannelCRMPage() {
   // Open Dispatch Modal with Pre-filled Lead Information
   const openDispatchModal = (lead: any) => {
     setDispatchModalLead(lead);
+
+    const req = extractLeadVehicleRequirements(lead);
+    let initialCat = "ALL";
+    let initialClass = "ALL";
+    let preMatchedVehicle = null;
+
+    if (req.isVehiclePreSelected) {
+      if (req.category) initialCat = req.category;
+      if (req.vehicleClass) initialClass = req.vehicleClass;
+
+      preMatchedVehicle = availableVehicles.find((v) => {
+        const catMatches = !req.category || (v.categoryName || "").toUpperCase() === req.category.toUpperCase();
+        const classMatches = !req.vehicleClass || (v.vehicleClass || "").toLowerCase() === req.vehicleClass.toLowerCase();
+        const modelMatches = !req.model || `${v.make} ${v.model}`.toLowerCase().includes(req.model.toLowerCase());
+        return catMatches && (classMatches || modelMatches);
+      });
+    }
+
+    setCategoryFilter(initialCat);
+    setClassFilter(initialClass);
+
+    const chosenVehId = preMatchedVehicle?.id || availableVehicles[0]?.id || "";
+
     setDispatchForm({
-      vehicleId: availableVehicles[0]?.id || "",
+      vehicleId: chosenVehId,
       driverId: availableDrivers[0]?.id || "",
       fare: "2800",
       advance: "500",
@@ -278,12 +308,29 @@ export default function MasterOmnichannelCRMPage() {
     });
   };
 
+  // Compute filtered vehicles based on category and class selections
+  const filteredVehicles = availableVehicles.filter((v) => {
+    const matchesCat =
+      categoryFilter === "ALL" ||
+      (v.categoryName || "").toUpperCase() === categoryFilter.toUpperCase();
+
+    const matchesClass =
+      classFilter === "ALL" ||
+      (v.vehicleClass || "").toLowerCase() === classFilter.toLowerCase();
+
+    return matchesCat && matchesClass;
+  });
+
+  const availableClassOptions = categoryFilter === "Sedan" 
+    ? SEDAN_CLASSES 
+    : (categoryFilter === "SUV" ? SUV_CLASSES : Array.from(new Set([...SEDAN_CLASSES, ...SUV_CLASSES])));
+
   // Execute Ride Dispatch & Generate Official Booking
   const handleConfirmDispatch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!dispatchModalLead) return;
 
-    const assignedVeh = availableVehicles.find(v => v.id === dispatchForm.vehicleId) || availableVehicles[0];
+    const assignedVeh = availableVehicles.find(v => v.id === dispatchForm.vehicleId) || filteredVehicles[0] || availableVehicles[0];
     const assignedDrv = availableDrivers.find(d => d.id === dispatchForm.driverId) || availableDrivers[0];
     const finalBookingRef = dispatchModalLead.bookingRef || `TT-${Date.now().toString().slice(-6)}`;
 
@@ -752,62 +799,154 @@ export default function MasterOmnichannelCRMPage() {
 
             <form onSubmit={handleConfirmDispatch} className="space-y-5">
               {/* Customer Lead Summary */}
-              <div className="bg-slate-950 p-4 rounded-2xl border border-white/10 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                <div>
-                  <span className="text-[10px] text-slate-400 block uppercase font-bold">Customer</span>
-                  <span className="font-bold text-slate-100 text-sm">{dispatchModalLead.customerName}</span>
-                  <div className="text-slate-400 font-mono text-[11px]">{dispatchModalLead.phone}</div>
+              <div className="bg-slate-950 p-4 rounded-2xl border border-white/10 space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                  <div>
+                    <span className="text-[10px] text-slate-400 block uppercase font-bold">Customer</span>
+                    <span className="font-bold text-slate-100 text-sm">{dispatchModalLead.customerName}</span>
+                    <div className="text-slate-400 font-mono text-[11px]">{dispatchModalLead.phone}</div>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-400 block uppercase font-bold">Trip Type</span>
+                    <span className="font-bold text-amber-400">{dispatchModalLead.tripType}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-400 block uppercase font-bold">Lead Ingested</span>
+                    <span className="text-slate-300 font-mono">{dispatchModalLead.createdAt?.slice(0, 10)}</span>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-[10px] text-slate-400 block uppercase font-bold">Trip Type</span>
-                  <span className="font-bold text-amber-400">{dispatchModalLead.tripType}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-slate-400 block uppercase font-bold">Lead Ingested</span>
-                  <span className="text-slate-300 font-mono">{dispatchModalLead.createdAt?.slice(0, 10)}</span>
-                </div>
+
+                {/* Show Vehicle Requirement Badge ONLY if specified in lead (Local Rental / Outstation) */}
+                {(() => {
+                  const req = extractLeadVehicleRequirements(dispatchModalLead);
+                  if (req.isVehiclePreSelected) {
+                    return (
+                      <div className="pt-2 border-t border-white/5 flex flex-wrap items-center gap-2 text-xs">
+                        <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider flex items-center gap-1">
+                          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Customer Selected Vehicle:</span>
+                        </span>
+                        {req.category && (
+                          <span className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-300 font-bold text-[11px]">
+                            Category: {req.category}
+                          </span>
+                        )}
+                        {req.vehicleClass && (
+                          <span className="px-2 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 font-bold text-[11px]">
+                            Class: {req.vehicleClass}
+                          </span>
+                        )}
+                        {req.model && (
+                          <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-bold text-[11px]">
+                            Model: {req.model}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
               </div>
 
-              {/* Assignment Controls: Vehicle & Driver */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                    <Car className="w-4 h-4 text-amber-400" />
-                    <span>Select Fleet Vehicle *</span>
-                  </label>
-                  <select
-                    value={dispatchForm.vehicleId}
-                    onChange={(e) => setDispatchForm({ ...dispatchForm, vehicleId: e.target.value })}
-                    required
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-mono cursor-pointer"
-                  >
-                    <option value="" disabled>- Select Active Fleet Vehicle -</option>
-                    {availableVehicles.map((veh) => (
-                      <option key={veh.id} value={veh.id} className="bg-slate-900">
-                        {veh.make} {veh.model} ({veh.registrationNumber}) - {veh.categoryName} {veh.vehicleClass}
-                      </option>
-                    ))}
-                  </select>
+              {/* Assignment Controls: Vehicle Filter (Category & Class) & Chauffeur */}
+              <div className="space-y-3 bg-slate-950/60 p-4 rounded-2xl border border-white/5">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                  <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <Filter className="w-4 h-4 text-amber-400" />
+                    <span>Filter Fleet for Dispatch</span>
+                  </span>
+                  <span className="text-[11px] text-slate-400">
+                    Available: <strong className="text-amber-400">{filteredVehicles.length}</strong> vehicle(s)
+                  </span>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                    <UserCheck className="w-4 h-4 text-amber-400" />
-                    <span>Select Chauffeur / Driver *</span>
-                  </label>
-                  <select
-                    value={dispatchForm.driverId}
-                    onChange={(e) => setDispatchForm({ ...dispatchForm, driverId: e.target.value })}
-                    required
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-mono cursor-pointer"
-                  >
-                    <option value="" disabled>- Select Assigned Chauffeur -</option>
-                    {availableDrivers.map((drv) => (
-                      <option key={drv.id} value={drv.id} className="bg-slate-900">
-                        {drv.name} (+91 {drv.phone})
-                      </option>
-                    ))}
-                  </select>
+                {/* Category & Class Selection Buttons */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      Vehicle Category
+                    </label>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {["ALL", "Sedan", "SUV"].map((cat) => (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => {
+                            setCategoryFilter(cat);
+                            setClassFilter("ALL");
+                          }}
+                          className={`py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer border ${
+                            categoryFilter.toUpperCase() === cat.toUpperCase()
+                              ? "bg-amber-500 text-slate-950 border-amber-400 font-black shadow-md shadow-amber-500/10"
+                              : "bg-slate-900 text-slate-400 border-white/10 hover:text-slate-200"
+                          }`}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      Vehicle Class
+                    </label>
+                    <select
+                      value={classFilter}
+                      onChange={(e) => setClassFilter(e.target.value)}
+                      className="w-full bg-slate-900 border border-white/10 rounded-lg p-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400 cursor-pointer"
+                    >
+                      <option value="ALL">All Vehicle Classes</option>
+                      {availableClassOptions.map((cls) => (
+                        <option key={cls} value={cls}>
+                          {cls}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Vehicle & Chauffeur Dropdowns */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-white/5">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                      <Car className="w-4 h-4 text-amber-400" />
+                      <span>Select Fleet Vehicle *</span>
+                    </label>
+                    <select
+                      value={dispatchForm.vehicleId}
+                      onChange={(e) => setDispatchForm({ ...dispatchForm, vehicleId: e.target.value })}
+                      required
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-mono cursor-pointer"
+                    >
+                      <option value="" disabled>- Select Fleet Vehicle -</option>
+                      {filteredVehicles.map((veh) => (
+                        <option key={veh.id} value={veh.id} className="bg-slate-900">
+                          {veh.make} {veh.model} ({veh.registrationNumber}) • {veh.categoryName || "Sedan"} - {veh.vehicleClass || "Executive"}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                      <UserCheck className="w-4 h-4 text-amber-400" />
+                      <span>Select Chauffeur / Driver *</span>
+                    </label>
+                    <select
+                      value={dispatchForm.driverId}
+                      onChange={(e) => setDispatchForm({ ...dispatchForm, driverId: e.target.value })}
+                      required
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-mono cursor-pointer"
+                    >
+                      <option value="" disabled>- Select Assigned Chauffeur -</option>
+                      {availableDrivers.map((drv) => (
+                        <option key={drv.id} value={drv.id} className="bg-slate-900">
+                          {drv.name} (+91 {drv.phone})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
 
@@ -856,26 +995,30 @@ export default function MasterOmnichannelCRMPage() {
                 </div>
               </div>
 
-              {/* Route & Schedule Confirmation */}
+              {/* Route & Schedule Confirmation with Live Location Search */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300">Pickup Location *</label>
-                  <input
-                    type="text"
-                    required
+                  <label className="text-xs font-bold text-slate-300 flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Pickup Location *</span>
+                  </label>
+                  <LocationInput
                     value={dispatchForm.pickupLocation}
-                    onChange={(e) => setDispatchForm({ ...dispatchForm, pickupLocation: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
+                    onChange={(val) => setDispatchForm(prev => ({ ...prev, pickupLocation: val }))}
+                    placeholder="Search pickup location, airport, landmark..."
+                    required
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300">Drop Location / Destination</label>
-                  <input
-                    type="text"
+                  <label className="text-xs font-bold text-slate-300 flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Drop Location / Destination</span>
+                  </label>
+                  <LocationInput
                     value={dispatchForm.dropLocation}
-                    onChange={(e) => setDispatchForm({ ...dispatchForm, dropLocation: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
+                    onChange={(val) => setDispatchForm(prev => ({ ...prev, dropLocation: val }))}
+                    placeholder="Search drop location or transit hub..."
                   />
                 </div>
               </div>
@@ -1018,7 +1161,26 @@ export default function MasterOmnichannelCRMPage() {
               <div>Phone: <strong className="text-slate-200">{selectedLead.phone}</strong></div>
               <div>Email: <strong className="text-slate-200">{selectedLead.email}</strong></div>
               <div>Trip Type: <strong className="text-amber-400">{selectedLead.tripType}</strong></div>
+              {(() => {
+                const req = extractLeadVehicleRequirements(selectedLead);
+                if (req.isVehiclePreSelected) {
+                  return (
+                    <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 space-y-1 my-1">
+                      <div className="text-[10px] font-bold uppercase text-amber-400">Customer Selected Fleet:</div>
+                      <div className="flex flex-wrap gap-2">
+                        {req.category && <span className="text-slate-200">Category: <strong>{req.category}</strong></span>}
+                        {req.vehicleClass && <span className="text-slate-200">• Class: <strong>{req.vehicleClass}</strong></span>}
+                        {req.model && <span className="text-slate-200">• Model: <strong className="text-emerald-400">{req.model}</strong></span>}
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
               <div>Pickup Address: <strong className="text-slate-200">{selectedLead.pickupLocation}</strong></div>
+              {selectedLead.dropLocation && (
+                <div>Drop Address: <strong className="text-slate-200">{selectedLead.dropLocation}</strong></div>
+              )}
               <div>Notes: <p className="text-slate-400 font-sans mt-1">{selectedLead.notes || "No special instructions recorded."}</p></div>
             </div>
 
