@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Car, Users, ArrowRight, ShieldCheck, Star, Sparkles, Fuel, Gauge, CheckCircle2 } from "lucide-react";
+import VehicleBookingModal from "@/components/shared/vehicle-booking-modal";
 
 interface FleetVehicle {
   id: string;
@@ -33,6 +34,7 @@ function FleetContent() {
   const [selectedCategory, setSelectedCategory] = useState(initialCategory.toUpperCase());
   const [vehicles, setVehicles] = useState<FleetVehicle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedBookingVehicle, setSelectedBookingVehicle] = useState<FleetVehicle | null>(null);
 
   useEffect(() => {
     // 1. Instant local hydration from user uploaded fleet in Master Admin / Admin Panel
@@ -229,18 +231,26 @@ function FleetContent() {
                 </div>
 
                 <div className="pt-6 border-t border-white/10 flex items-center justify-between mt-6">
-                  <Link
-                    href="/#booking-widget"
+                  <button
+                    type="button"
+                    onClick={() => setSelectedBookingVehicle(v)}
                     className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black py-3 rounded-xl text-center text-xs uppercase tracking-wider transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <span>Book This Vehicle</span>
                     <ArrowRight className="w-4 h-4" />
-                  </Link>
+                  </button>
                 </div>
               </div>
             ))}
           </div>
         )}
+
+        {/* Vehicle Booking Modal with Prefilled Vehicle Details */}
+        <VehicleBookingModal
+          isOpen={!!selectedBookingVehicle}
+          onClose={() => setSelectedBookingVehicle(null)}
+          vehicle={selectedBookingVehicle}
+        />
       </div>
     </div>
   );
