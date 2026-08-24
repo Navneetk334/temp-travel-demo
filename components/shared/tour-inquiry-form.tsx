@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { ArrowRight, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import LocationInput from "@/components/shared/location-input";
 
 interface TourInquiryFormProps {
   tourId: string;
@@ -12,6 +13,7 @@ export default function TourInquiryForm({ tourId }: TourInquiryFormProps) {
     name: "",
     email: "",
     phone: "",
+    pickupLocation: "",
     travelDate: "",
     numPassengers: 1,
     details: "",
@@ -64,6 +66,7 @@ export default function TourInquiryForm({ tourId }: TourInquiryFormProps) {
         name: "",
         email: "",
         phone: "",
+        pickupLocation: "",
         travelDate: "",
         numPassengers: 1,
         details: "",
@@ -141,6 +144,16 @@ export default function TourInquiryForm({ tourId }: TourInquiryFormProps) {
             onChange={handleChange}
             placeholder="+919999999999"
             className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3.5 text-xs text-slate-100 focus:outline-none focus:border-primary transition-all"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Starting / Pickup Location *</label>
+          <LocationInput
+            required
+            placeholder="Search starting city or airport..."
+            value={formData.pickupLocation}
+            onChange={(val) => setFormData({ ...formData, pickupLocation: val })}
           />
         </div>
 
