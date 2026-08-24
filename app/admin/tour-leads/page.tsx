@@ -8,11 +8,13 @@ import {
   Trash2, 
   FileText, 
   AlertCircle, 
-  MessageSquare,
-  Archive,
-  ChevronLeft,
-  ChevronRight
+  MessageSquare, 
+  Archive, 
+  ChevronLeft, 
+  ChevronRight,
+  Truck
 } from "lucide-react";
+import LeadDispatchModal from "@/components/admin/lead-dispatch-modal";
 
 export type BookingStatus = "PENDING" | "CONFIRMED" | "DRIVER_ASSIGNED" | "VEHICLE_ASSIGNED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
 
@@ -42,6 +44,7 @@ export default function AdminTourLeadsPage() {
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [dispatchLead, setDispatchLead] = useState<any | null>(null);
 
   const [activeLead, setActiveLead] = useState<BookingLead | null>(null);
   const [newNoteInput, setNewNoteInput] = useState("");
@@ -433,6 +436,14 @@ export default function AdminTourLeadsPage() {
                           </td>
                           <td className="p-4 text-right space-x-1" onClick={(e) => e.stopPropagation()}>
                             <button
+                              onClick={() => setDispatchLead({ ...lead, customerName: lead.contactName, tripType: "Tour Package Booking" })}
+                              title="Dispatch Fleet & Chauffeur"
+                              className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-2.5 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all shadow-sm cursor-pointer"
+                            >
+                              <Truck className="w-3.5 h-3.5" />
+                              <span>Dispatch</span>
+                            </button>
+                            <button
                               onClick={() => handleDelete(lead.id)}
                               title="Delete Lead"
                               className="inline-flex p-1.5 bg-slate-900 border border-white/5 rounded-lg text-slate-400 hover:text-red-400 transition-colors"
@@ -462,9 +473,18 @@ export default function AdminTourLeadsPage() {
                   <h3 className="text-xl font-extrabold text-slate-50 mt-0.5">{activeLead.contactName}</h3>
                   <p className="text-[11px] text-slate-400 mt-0.5">Created: {new Date(activeLead.createdAt).toLocaleString("en-IN")}</p>
                 </div>
-                <span className={`text-[10px] font-extrabold py-1 px-3 rounded-full border uppercase ${getStatusBadge(activeLead.status)}`}>
-                  {activeLead.status}
-                </span>
+                <div className="flex flex-col items-end gap-2">
+                  <span className={`text-[10px] font-extrabold py-1 px-3 rounded-full border uppercase ${getStatusBadge(activeLead.status)}`}>
+                    {activeLead.status}
+                  </span>
+                  <button
+                    onClick={() => setDispatchLead({ ...activeLead, customerName: activeLead.contactName, tripType: "Tour Package Booking" })}
+                    className="flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 cursor-pointer"
+                  >
+                    <Truck className="w-3.5 h-3.5" />
+                    <span>Dispatch Ride</span>
+                  </button>
+                </div>
               </div>
 
               {/* Status Update Pipeline Selector */}
@@ -527,6 +547,18 @@ export default function AdminTourLeadsPage() {
         </div>
 
       </div>
+
+      {/* Global Lead Dispatch Modal */}
+      {dispatchLead && (
+        <LeadDispatchModal
+          isOpen={Boolean(dispatchLead)}
+          onClose={() => setDispatchLead(null)}
+          lead={dispatchLead}
+          onSuccess={() => {
+            loadLeads(false);
+          }}
+        />
+      )}
     </div>
   );
 }

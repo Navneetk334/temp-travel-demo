@@ -11,8 +11,10 @@ import {
   MessageSquare,
   Archive,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Truck
 } from "lucide-react";
+import LeadDispatchModal from "@/components/admin/lead-dispatch-modal";
 
 export type LeadStatus = "NEW" | "CONTACTED" | "QUALIFIED" | "NEGOTIATION" | "WON" | "LOST" | "ARCHIVED";
 
@@ -61,6 +63,7 @@ export default function AdminLocalRentalLeadsPage() {
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [dispatchLead, setDispatchLead] = useState<any | null>(null);
   const [stats, setStats] = useState<Stats>({
     total: 0,
     NEW: 0,
@@ -542,6 +545,14 @@ export default function AdminLocalRentalLeadsPage() {
                           </td>
                           <td className="p-4 text-right space-x-1" onClick={(e) => e.stopPropagation()}>
                             <button
+                              onClick={() => setDispatchLead(lead)}
+                              title="Dispatch Fleet & Chauffeur"
+                              className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-2.5 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all shadow-sm cursor-pointer"
+                            >
+                              <Truck className="w-3.5 h-3.5" />
+                              <span>Dispatch</span>
+                            </button>
+                            <button
                               onClick={() => handleStatusChange(lead.id, "ARCHIVED")}
                               title="Archive Lead"
                               className="inline-flex p-1.5 bg-slate-900 border border-white/5 rounded-lg text-slate-400 hover:text-accent transition-colors"
@@ -570,12 +581,12 @@ export default function AdminLocalRentalLeadsPage() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1">
-                    <span>Per page:</span>
+                  <div className="flex items-center gap-2">
+                    <span>Rows per page:</span>
                     <select
                       value={pageSize}
-                      onChange={(e) => { setPageSize(parseInt(e.target.value)); setCurrentPage(1); }}
-                      className="bg-slate-950 border border-white/10 rounded px-2 py-1 text-slate-200"
+                      onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
+                      className="bg-slate-950 border border-white/10 rounded px-2 py-1 text-slate-200 focus:outline-none"
                     >
                       <option value="5">5</option>
                       <option value="10">10</option>
@@ -619,9 +630,18 @@ export default function AdminLocalRentalLeadsPage() {
                   <h3 className="text-xl font-extrabold text-slate-50 mt-0.5">{activeLead.customerName}</h3>
                   <p className="text-[11px] text-slate-400 mt-0.5">Created: {new Date(activeLead.createdAt).toLocaleString("en-IN")}</p>
                 </div>
-                <span className={`text-[10px] font-extrabold py-1 px-3 rounded-full border uppercase ${getStatusBadge(activeLead.status)}`}>
-                  {activeLead.status}
-                </span>
+                <div className="flex flex-col items-end gap-2">
+                  <span className={`text-[10px] font-extrabold py-1 px-3 rounded-full border uppercase ${getStatusBadge(activeLead.status)}`}>
+                    {activeLead.status}
+                  </span>
+                  <button
+                    onClick={() => setDispatchLead(activeLead)}
+                    className="flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 cursor-pointer"
+                  >
+                    <Truck className="w-3.5 h-3.5" />
+                    <span>Dispatch Ride</span>
+                  </button>
+                </div>
               </div>
 
               {/* Status Update Pipeline Selector */}
@@ -724,6 +744,18 @@ export default function AdminLocalRentalLeadsPage() {
         </div>
 
       </div>
+
+      {/* Global Lead Dispatch Modal */}
+      {dispatchLead && (
+        <LeadDispatchModal
+          isOpen={Boolean(dispatchLead)}
+          onClose={() => setDispatchLead(null)}
+          lead={dispatchLead}
+          onSuccess={() => {
+            loadLeads(false);
+          }}
+        />
+      )}
     </div>
   );
 }

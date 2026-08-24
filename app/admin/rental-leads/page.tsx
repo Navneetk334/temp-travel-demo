@@ -17,8 +17,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Navigation,
-  Compass
+  Compass,
+  Truck
 } from "lucide-react";
+import LeadDispatchModal from "@/components/admin/lead-dispatch-modal";
 
 export type LeadStatus = "NEW" | "CONTACTED" | "QUALIFIED" | "NEGOTIATION" | "WON" | "LOST" | "ARCHIVED";
 
@@ -64,6 +66,7 @@ export default function AdminRentalLeadsPage() {
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [dispatchLead, setDispatchLead] = useState<any | null>(null);
   const [stats, setStats] = useState<Stats>({
     total: 0,
     NEW: 0,
@@ -556,6 +559,14 @@ export default function AdminRentalLeadsPage() {
                           </td>
                           <td className="p-4 text-right space-x-1" onClick={(e) => e.stopPropagation()}>
                             <button
+                              onClick={() => setDispatchLead(lead)}
+                              title="Dispatch Fleet & Chauffeur"
+                              className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-2.5 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all shadow-sm cursor-pointer"
+                            >
+                              <Truck className="w-3.5 h-3.5" />
+                              <span>Dispatch</span>
+                            </button>
+                            <button
                               onClick={() => handleStatusChange(lead.id, "ARCHIVED")}
                               title="Archive Inquiry"
                               className="inline-flex p-1.5 bg-slate-900 border border-white/5 rounded-lg text-slate-400 hover:text-accent transition-colors"
@@ -584,12 +595,12 @@ export default function AdminRentalLeadsPage() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1">
-                    <span>Per page:</span>
+                  <div className="flex items-center gap-2">
+                    <span>Rows per page:</span>
                     <select
                       value={pageSize}
-                      onChange={(e) => { setPageSize(parseInt(e.target.value)); setCurrentPage(1); }}
-                      className="bg-slate-950 border border-white/10 rounded px-2 py-1 text-slate-200"
+                      onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
+                      className="bg-slate-950 border border-white/10 rounded px-2 py-1 text-slate-200 focus:outline-none"
                     >
                       <option value="5">5</option>
                       <option value="10">10</option>
@@ -633,9 +644,18 @@ export default function AdminRentalLeadsPage() {
                   <h3 className="text-xl font-extrabold text-slate-50 mt-0.5">{activeLead.customerName}</h3>
                   <p className="text-[11px] text-slate-400 mt-0.5">Created: {new Date(activeLead.createdAt).toLocaleString("en-IN")}</p>
                 </div>
-                <span className={`text-[10px] font-extrabold py-1 px-3 rounded-full border uppercase ${getStatusBadge(activeLead.status)}`}>
-                  {activeLead.status}
-                </span>
+                <div className="flex flex-col items-end gap-2">
+                  <span className={`text-[10px] font-extrabold py-1 px-3 rounded-full border uppercase ${getStatusBadge(activeLead.status)}`}>
+                    {activeLead.status}
+                  </span>
+                  <button
+                    onClick={() => setDispatchLead(activeLead)}
+                    className="flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 cursor-pointer"
+                  >
+                    <Truck className="w-3.5 h-3.5" />
+                    <span>Dispatch Ride</span>
+                  </button>
+                </div>
               </div>
 
               {/* Status Update Pipeline Selector */}
@@ -659,46 +679,38 @@ export default function AdminRentalLeadsPage() {
                 </div>
               </div>
 
-              {/* Rental Details Specs */}
+              {/* Details Specs */}
               <div className="space-y-3 border-t border-white/5 pt-4 text-xs text-slate-300">
                 <div className="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-lg border border-white/5">
-                  <span className="text-slate-400">Rental Type:</span>
-                  <span className="font-bold text-accent uppercase tracking-wider">{activeLead.tripType}</span>
-                </div>
-                <div className="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-lg border border-white/5">
-                  <span className="text-slate-400">Vehicle Category:</span>
-                  <span className="font-bold text-slate-100">{activeLead.vehicleCategory?.name || "Standard"}</span>
+                  <span className="text-slate-400">Customer Name:</span>
+                  <span className="font-bold text-slate-100">{activeLead.customerName}</span>
                 </div>
                 <div className="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-lg border border-white/5">
                   <span className="text-slate-400">Email:</span>
-                  <span className="font-mono font-bold text-slate-100">{activeLead.email}</span>
+                  <span className="font-mono font-bold text-accent">{activeLead.email}</span>
                 </div>
                 <div className="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-lg border border-white/5">
                   <span className="text-slate-400">Phone:</span>
                   <span className="font-mono font-bold text-slate-100">{activeLead.phone}</span>
                 </div>
+                <div className="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-lg border border-white/5">
+                  <span className="text-slate-400">Category & Type:</span>
+                  <span className="font-bold text-slate-100">{activeLead.vehicleCategory?.name} - {activeLead.tripType}</span>
+                </div>
+                <div className="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-lg border border-white/5">
+                  <span className="text-slate-400">Pickup Date & Time:</span>
+                  <span className="font-mono font-bold text-slate-200">{new Date(activeLead.pickupDateTime).toLocaleString("en-IN")}</span>
+                </div>
 
                 <div className="bg-slate-950/40 p-3 rounded-lg border border-white/5 space-y-1">
-                  <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Pickup Location</div>
-                  <div className="text-slate-200 font-medium">{activeLead.pickupLocation}</div>
+                  <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Pickup Address</div>
+                  <div className="text-slate-200 leading-relaxed">{activeLead.pickupLocation}</div>
                 </div>
 
                 {activeLead.dropLocation && (
                   <div className="bg-slate-950/40 p-3 rounded-lg border border-white/5 space-y-1">
-                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Drop Location</div>
-                    <div className="text-slate-200 font-medium">{activeLead.dropLocation}</div>
-                  </div>
-                )}
-
-                <div className="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-lg border border-white/5">
-                  <span className="text-slate-400">Pickup Date / Time:</span>
-                  <span className="font-mono font-bold text-slate-100">{new Date(activeLead.pickupDateTime).toLocaleString("en-IN")}</span>
-                </div>
-
-                {activeLead.returnDateTime && (
-                  <div className="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-lg border border-white/5">
-                    <span className="text-slate-400">Return Date / Time:</span>
-                    <span className="font-mono font-bold text-slate-100">{new Date(activeLead.returnDateTime).toLocaleString("en-IN")}</span>
+                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Destination Drop Address</div>
+                    <div className="text-slate-200 leading-relaxed">{activeLead.dropLocation}</div>
                   </div>
                 )}
               </div>
@@ -746,6 +758,18 @@ export default function AdminRentalLeadsPage() {
         </div>
 
       </div>
+
+      {/* Global Lead Dispatch Modal */}
+      {dispatchLead && (
+        <LeadDispatchModal
+          isOpen={Boolean(dispatchLead)}
+          onClose={() => setDispatchLead(null)}
+          lead={dispatchLead}
+          onSuccess={() => {
+            loadLeads(false);
+          }}
+        />
+      )}
     </div>
   );
 }
