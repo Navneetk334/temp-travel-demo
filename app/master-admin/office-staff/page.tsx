@@ -20,7 +20,8 @@ import {
   Upload,
   Landmark,
   Cake,
-  Calendar
+  Calendar,
+  RefreshCw
 } from "lucide-react";
 
 // Age calculation helper
@@ -43,6 +44,7 @@ export default function MasterOfficeStaffPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingStaff, setEditingStaff] = useState<any | null>(null);
   const [selectedStaff, setSelectedStaff] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Multi-selection state
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -71,16 +73,22 @@ export default function MasterOfficeStaffPage() {
 
   // Load from local storage
   useEffect(() => {
+    let hasLocal = false;
     const saved = localStorage.getItem("user_uploaded_office_staff");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           setStaffList(parsed);
+          setLoading(false);
+          hasLocal = true;
         }
       } catch (e) {
         console.error(e);
       }
+    }
+    if (!hasLocal) {
+      setLoading(false);
     }
   }, []);
 
@@ -296,8 +304,33 @@ export default function MasterOfficeStaffPage() {
       </div>
 
       {/* Office Staff Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredStaff.map((stf) => {
+      {loading && staffList.length === 0 ? (
+        <div className="bg-slate-900/60 border border-white/10 rounded-3xl p-16 text-center space-y-4">
+          <RefreshCw className="w-10 h-10 text-amber-400 mx-auto animate-spin" />
+          <div className="space-y-1">
+            <h3 className="text-base font-bold text-slate-100">Loading Office Staff Directory...</h3>
+            <p className="text-xs text-slate-400">Verifying corporate staff profiles, KYC and employment contracts.</p>
+          </div>
+        </div>
+      ) : filteredStaff.length === 0 ? (
+        <div className="bg-slate-900/60 border border-white/10 rounded-3xl p-12 text-center space-y-4">
+          <Users className="w-12 h-12 text-amber-400 mx-auto opacity-80" />
+          <div className="space-y-1">
+            <h3 className="text-xl font-bold text-slate-100">No Office Staff Found</h3>
+            <p className="text-xs text-slate-400 max-w-md mx-auto">
+              Your staff directory is clean and empty. Click "Add Office Staff" above to register corporate employees and upload KYC records.
+            </p>
+          </div>
+          <button
+            onClick={openAddModal}
+            className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer"
+          >
+            + Add Office Staff Now
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredStaff.map((stf) => {
           const isSelected = selectedIds.includes(stf.id);
           const age = calculateAge(stf.dob);
           return (
@@ -391,6 +424,7 @@ export default function MasterOfficeStaffPage() {
           );
         })}
       </div>
+      )}
 
       {/* Add / Edit Staff Modal */}
       {showAddModal && (

@@ -17,7 +17,8 @@ import {
   Square,
   Landmark,
   Cake,
-  Calendar
+  Calendar,
+  RefreshCw
 } from "lucide-react";
 
 // Category to Class Mapping Hierarchy
@@ -29,12 +30,12 @@ const CLASS_OPTIONS: Record<string, string[]> = {
 // Age calculation helper
 function calculateAge(dobString: string): number | null {
   if (!dobString) return null;
-  const dob = new Date(dobString);
-  if (isNaN(dob.getTime())) return null;
-  const today = new Date();
-  let age = today.getFullYear() - dob.getFullYear();
-  const monthDiff = today.getMonth() - dob.getMonth();
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+  const birth = new Date(dobString);
+  if (isNaN(birth.getTime())) return null;
+  const now = new Date();
+  let age = now.getFullYear() - birth.getFullYear();
+  const m = now.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) {
     age--;
   }
   return age >= 0 ? age : null;
@@ -46,6 +47,7 @@ export default function MasterDriversPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingDriver, setEditingDriver] = useState<any | null>(null);
   const [selectedDriver, setSelectedDriver] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Multi-selection state
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -78,17 +80,41 @@ export default function MasterDriversPage() {
 
   // Load local storage
   useEffect(() => {
+    let hasLocal = false;
     const saved = localStorage.getItem("user_uploaded_drivers");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           setDrivers(parsed);
+          setLoading(false);
+          hasLocal = true;
         }
       } catch (e) {
         console.error(e);
       }
     }
+    if (!hasLocal) {
+      setLoading(true);
+    }
+
+    const loadDrivers = async () => {
+      try {
+        const res = await fetch("/api/admin/drivers");
+        if (res.ok) {
+          const apiList = await res.json();
+          if (Array.isArray(apiList) && apiList.length > 0) {
+            setDrivers(prev => (prev.length > 0 ? prev : apiList));
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch drivers from API:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDrivers();
   }, []);
 
   const handleCategoryChange = (cat: string) => {
@@ -288,8 +314,33 @@ export default function MasterDriversPage() {
       </div>
 
       {/* Driver Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredDrivers.map((drv) => {
+      {loading && drivers.length === 0 ? (
+        <div className="bg-slate-900/60 border border-white/10 rounded-3xl p-16 text-center space-y-4">
+          <RefreshCw className="w-10 h-10 text-amber-400 mx-auto animate-spin" />
+          <div className="space-y-1">
+            <h3 className="text-base font-bold text-slate-100">Loading Master Chauffeur Roster...</h3>
+            <p className="text-xs text-slate-400">Verifying driver KYC, license validity and document vault records.</p>
+          </div>
+        </div>
+      ) : filteredDrivers.length === 0 ? (
+        <div className="bg-slate-900/60 border border-white/10 rounded-3xl p-12 text-center space-y-4">
+          <UserCheck className="w-12 h-12 text-amber-400 mx-auto opacity-80" />
+          <div className="space-y-1">
+            <h3 className="text-xl font-bold text-slate-100">No Registered Drivers Found</h3>
+            <p className="text-xs text-slate-400 max-w-md mx-auto">
+              Your driver roster is clean and empty. Click "Register New Driver" above to onboard chauffeurs and upload KYC documents.
+            </p>
+          </div>
+          <button
+            onClick={openAddModal}
+            className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer"
+          >
+            + Register Driver Now
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredDrivers.map((drv) => {
           const isSelected = selectedIds.includes(drv.id);
           const age = calculateAge(drv.dob);
           return (
@@ -381,6 +432,7 @@ export default function MasterDriversPage() {
           );
         })}
       </div>
+      )}
 
       {/* Add / Edit Driver Modal */}
       {showAddModal && (
