@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   CreditCard,
   IndianRupee,
@@ -24,6 +24,42 @@ export default function MasterBillingLedgerPage() {
   const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null);
 
   const [invoices, setInvoices] = useState<any[]>([]);
+  const [razorpayTotal, setRazorpayTotal] = useState(0);
+  const [cashTotal, setCashTotal] = useState(0);
+
+  useEffect(() => {
+    // 1. Load saved invoices
+    const savedInvoices = localStorage.getItem("user_uploaded_invoices");
+    if (savedInvoices) {
+      try {
+        const parsed = JSON.parse(savedInvoices);
+        if (Array.isArray(parsed)) setInvoices(parsed);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // 2. Load payments for Razorpay & Driver Cash settlements
+    const savedPayments = localStorage.getItem("user_uploaded_payments");
+    if (savedPayments) {
+      try {
+        const payments = JSON.parse(savedPayments);
+        if (Array.isArray(payments)) {
+          const razorpay = payments
+            .filter((p: any) => p.paymentMode !== "CASH")
+            .reduce((sum: number, p: any) => sum + (Number(p.amount) || 0), 0);
+          const cash = payments
+            .filter((p: any) => p.paymentMode === "CASH")
+            .reduce((sum: number, p: any) => sum + (Number(p.amount) || 0), 0);
+
+          setRazorpayTotal(razorpay);
+          setCashTotal(cash);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, []);
 
   const [invoiceForm, setInvoiceForm] = useState({
     customerName: "",
@@ -50,7 +86,9 @@ export default function MasterBillingLedgerPage() {
       status: "PAID",
       date: new Date().toISOString().slice(0, 10)
     };
-    setInvoices([created, ...invoices]);
+    const updated = [created, ...invoices];
+    setInvoices(updated);
+    localStorage.setItem("user_uploaded_invoices", JSON.stringify(updated));
     setShowInvoiceModal(false);
     setInvoiceForm({ customerName: "", gstin: "", tripType: "Corporate Employee Transit", baseAmount: "" });
   };
@@ -60,70 +98,74 @@ export default function MasterBillingLedgerPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-amber-500/20 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-amber-500/20 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-black tracking-tight text-slate-50">
+            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-50">
               Master Billing & Tax Ledger
             </h1>
-            <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest">
+            <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
               GST Tax Compliant (SAC 9964)
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-400 mt-0.5">
             Automated GST tax invoicing, Razorpay order settlements, and driver cash collection reconciliation.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setShowInvoiceModal(true)}
-            className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase transition-all shadow-lg shadow-amber-500/20"
+            className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-3.5 py-1.5 rounded-xl text-xs font-black tracking-wider uppercase transition-all shadow-md shadow-amber-500/20 cursor-pointer"
           >
-            <FileText className="w-4 h-4" />
+            <FileText className="w-3.5 h-3.5" />
             <span>Generate New GST Invoice</span>
           </button>
         </div>
       </div>
 
       {/* Financial Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-amber-500/30 rounded-2xl p-6 shadow-xl">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-slate-900/80 backdrop-blur-xl border border-amber-500/30 rounded-2xl p-4 sm:p-5 shadow-xl">
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs text-slate-400 font-bold uppercase">Total Invoiced Billing</span>
-            <IndianRupee className="w-5 h-5 text-amber-400" />
+            <IndianRupee className="w-4 h-4 text-amber-400" />
           </div>
-          <div className="text-3xl font-black text-slate-50 font-mono">
-            ₹{invoices.reduce((acc, i) => acc + i.totalAmount, 0).toLocaleString("en-IN")}
+          <div className="text-2xl font-black text-slate-50 font-mono">
+            ₹{invoices.reduce((acc, i) => acc + (Number(i.totalAmount) || 0), 0).toLocaleString("en-IN")}
           </div>
-          <div className="text-[11px] text-slate-400 mt-1">CGST (6%) + SGST (6%) / IGST (12%) Applied</div>
+          <div className="text-[10px] text-slate-400 mt-1">CGST (6%) + SGST (6%) / IGST (12%) Applied</div>
         </div>
 
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-emerald-500/30 rounded-2xl p-6 shadow-xl">
+        <div className="bg-slate-900/80 backdrop-blur-xl border border-emerald-500/30 rounded-2xl p-4 sm:p-5 shadow-xl">
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs text-slate-400 font-bold uppercase">Razorpay Bank Settlements</span>
-            <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           </div>
-          <div className="text-3xl font-black text-slate-50 font-mono">₹1,44,810</div>
-          <div className="text-[11px] text-emerald-400 mt-1">Verified Gateway HMAC Signatures</div>
+          <div className="text-2xl font-black text-emerald-400 font-mono">
+            ₹{razorpayTotal.toLocaleString("en-IN")}
+          </div>
+          <div className="text-[10px] text-emerald-500 mt-1">Verified Gateway HMAC Signatures</div>
         </div>
 
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-blue-500/30 rounded-2xl p-6 shadow-xl">
+        <div className="bg-slate-900/80 backdrop-blur-xl border border-blue-500/30 rounded-2xl p-4 sm:p-5 shadow-xl">
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs text-slate-400 font-bold uppercase">Driver Cash Collections</span>
-            <CreditCard className="w-5 h-5 text-blue-400" />
+            <CreditCard className="w-4 h-4 text-blue-400" />
           </div>
-          <div className="text-3xl font-black text-slate-50 font-mono">₹49,000</div>
-          <div className="text-[11px] text-blue-400 mt-1">Reconciled against Duty Logs</div>
+          <div className="text-2xl font-black text-blue-400 font-mono">
+            ₹{cashTotal.toLocaleString("en-IN")}
+          </div>
+          <div className="text-[10px] text-blue-400 mt-1">Reconciled against Duty Logs</div>
         </div>
       </div>
 
       {/* Invoices & Gateway Ledger Table */}
-      <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl space-y-4">
-        <div className="flex justify-between items-center pb-4 border-b border-white/10">
-          <h3 className="text-base font-bold text-slate-100">Tax Invoices & Transaction History</h3>
+      <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-2xl space-y-4">
+        <div className="flex justify-between items-center pb-3 border-b border-white/10">
+          <h3 className="text-sm font-bold text-slate-100">Tax Invoices & Transaction History</h3>
           <span className="text-xs font-mono text-slate-400">SAC Code: 996412 (Passenger Transport)</span>
         </div>
 
@@ -131,46 +173,54 @@ export default function MasterBillingLedgerPage() {
           <table className="w-full text-left text-xs text-slate-300">
             <thead className="bg-slate-950 text-slate-400 font-extrabold uppercase text-[10px] tracking-wider border-b border-white/10">
               <tr>
-                <th className="py-3 px-4">Invoice # & Date</th>
-                <th className="py-3 px-4">Customer & GSTIN</th>
-                <th className="py-3 px-4">Base Fare</th>
-                <th className="py-3 px-4">GST (12%)</th>
-                <th className="py-3 px-4">Total Amount</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">PDF Invoice</th>
+                <th className="py-2.5 px-3">Invoice # & Date</th>
+                <th className="py-2.5 px-3">Customer & GSTIN</th>
+                <th className="py-2.5 px-3">Base Fare</th>
+                <th className="py-2.5 px-3">GST (12%)</th>
+                <th className="py-2.5 px-3">Total Amount</th>
+                <th className="py-2.5 px-3">Status</th>
+                <th className="py-2.5 px-3 text-right">PDF Invoice</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {invoices.map((inv) => (
-                <tr key={inv.id} className="hover:bg-white/5 transition-colors">
-                  <td className="py-4 px-4 font-mono font-bold text-amber-400">
-                    <div>{inv.id}</div>
-                    <div className="text-[10px] text-slate-500 font-normal">{inv.date}</div>
-                  </td>
-                  <td className="py-4 px-4">
-                    <div className="font-bold text-slate-100">{inv.customerName}</div>
-                    <div className="text-[10px] font-mono text-slate-400">GSTIN: {inv.gstin}</div>
-                  </td>
-                  <td className="py-4 px-4 font-mono text-slate-200">₹{inv.baseAmount.toLocaleString("en-IN")}</td>
-                  <td className="py-4 px-4 font-mono text-slate-400">₹{(inv.cgst + inv.sgst).toLocaleString("en-IN")}</td>
-                  <td className="py-4 px-4 font-mono font-bold text-emerald-400">₹{inv.totalAmount.toLocaleString("en-IN")}</td>
-                  <td className="py-4 px-4">
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                      inv.status === "PAID" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                    }`}>
-                      {inv.status}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4 text-right">
-                    <button
-                      onClick={() => handlePrintPDF(inv)}
-                      className="inline-flex items-center gap-1 bg-slate-950 text-slate-300 hover:text-white border border-white/10 hover:border-amber-400/40 px-3 py-1 rounded-lg text-[11px] font-bold transition-all"
-                    >
-                      <Download className="w-3 h-3 text-amber-400" /> PDF Receipt
-                    </button>
+              {invoices.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-slate-500 text-xs">
+                    No tax invoices generated yet. Click &quot;Generate New GST Invoice&quot; above to create a bill.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                invoices.map((inv) => (
+                  <tr key={inv.id} className="hover:bg-white/5 transition-colors">
+                    <td className="py-3 px-3 font-mono font-bold text-amber-400">
+                      <div>{inv.id}</div>
+                      <div className="text-[10px] text-slate-500 font-normal">{inv.date}</div>
+                    </td>
+                    <td className="py-3 px-3">
+                      <div className="font-bold text-slate-100">{inv.customerName}</div>
+                      <div className="text-[10px] font-mono text-slate-400">GSTIN: {inv.gstin}</div>
+                    </td>
+                    <td className="py-3 px-3 font-mono text-slate-200">₹{inv.baseAmount.toLocaleString("en-IN")}</td>
+                    <td className="py-3 px-3 font-mono text-slate-400">₹{(inv.cgst + inv.sgst).toLocaleString("en-IN")}</td>
+                    <td className="py-3 px-3 font-mono font-bold text-emerald-400">₹{inv.totalAmount.toLocaleString("en-IN")}</td>
+                    <td className="py-3 px-3">
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                        inv.status === "PAID" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                      }`}>
+                        {inv.status}
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-right">
+                      <button
+                        onClick={() => handlePrintPDF(inv)}
+                        className="inline-flex items-center gap-1 bg-slate-950 text-slate-300 hover:text-white border border-white/10 hover:border-amber-400/40 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer"
+                      >
+                        <Download className="w-3 h-3 text-amber-400" /> PDF Receipt
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
