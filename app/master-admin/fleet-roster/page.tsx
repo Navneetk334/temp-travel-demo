@@ -20,7 +20,8 @@ import {
   Sparkles,
   Upload,
   Calendar,
-  Shield
+  Shield,
+  RefreshCw
 } from "lucide-react";
 
 // Category to Class Mapping Hierarchy
@@ -84,32 +85,42 @@ export default function MasterFleetRosterPage() {
 
   // Load User Uploaded Fleet Vehicles
   useEffect(() => {
-    const loadFleet = async () => {
-      setLoading(true);
-      let localList: any[] = [];
-      const saved = localStorage.getItem("user_uploaded_fleet");
-      if (saved) {
-        try {
-          localList = JSON.parse(saved);
-        } catch (e) {
-          console.error(e);
+    // 1. Immediate local hydration for instant render without flash
+    let hasLocalData = false;
+    const saved = localStorage.getItem("user_uploaded_fleet");
+    let localList: any[] = [];
+    if (saved) {
+      try {
+        localList = JSON.parse(saved);
+        if (Array.isArray(localList) && localList.length > 0) {
+          setVehicles(localList);
+          setLoading(false);
+          hasLocalData = true;
         }
+      } catch (e) {
+        console.error(e);
       }
+    }
 
+    if (!hasLocalData) {
+      setLoading(true);
+    }
+
+    const loadFleet = async () => {
       try {
         const res = await fetch("/api/fleet");
         if (res.ok) {
           const data = await res.json();
           const apiList = data.vehicles || [];
-          const regMap = new Map();
-          localList.forEach(v => regMap.set(v.registrationNumber, v));
-          apiList.forEach((v: any) => regMap.set(v.registrationNumber, v));
-          setVehicles(Array.from(regMap.values()));
-        } else {
-          setVehicles(localList);
+          if (apiList.length > 0) {
+            const regMap = new Map();
+            localList.forEach(v => regMap.set(v.registrationNumber, v));
+            apiList.forEach((v: any) => regMap.set(v.registrationNumber, v));
+            setVehicles(Array.from(regMap.values()));
+          }
         }
       } catch (e) {
-        setVehicles(localList);
+        console.error("Failed to fetch fleet from API:", e);
       } finally {
         setLoading(false);
       }
@@ -401,7 +412,15 @@ export default function MasterFleetRosterPage() {
       </div>
 
       {/* Fleet Vehicles Grid */}
-      {filteredVehicles.length === 0 ? (
+      {loading && vehicles.length === 0 ? (
+        <div className="bg-slate-900/60 border border-white/10 rounded-3xl p-16 text-center space-y-4">
+          <RefreshCw className="w-10 h-10 text-amber-400 mx-auto animate-spin" />
+          <div className="space-y-1">
+            <h3 className="text-base font-bold text-slate-100">Loading Master Fleet Roster...</h3>
+            <p className="text-xs text-slate-400">Verifying commercial fleet compliance and document vault records.</p>
+          </div>
+        </div>
+      ) : filteredVehicles.length === 0 ? (
         <div className="bg-slate-900/60 border border-white/10 rounded-3xl p-12 text-center space-y-4">
           <Car className="w-12 h-12 text-amber-400 mx-auto opacity-80" />
           <div className="space-y-1">
