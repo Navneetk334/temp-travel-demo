@@ -26,9 +26,27 @@ export default function MasterBlogCMSPage() {
   const [selectedArticle, setSelectedArticle] = useState<any | null>(null);
 
   const [articles, setArticles] = useState<any[]>([]);
+  const [categories, setCategories] = useState<string[]>([
+    "Outstation Trips",
+    "Corporate Travel",
+    "Airport Transfers",
+    "Local City Guides"
+  ]);
 
   // Local storage hydration and initialization
   useEffect(() => {
+    const savedCategories = localStorage.getItem("user_uploaded_blog_categories");
+    if (savedCategories) {
+      try {
+        const parsedCats = JSON.parse(savedCategories);
+        if (Array.isArray(parsedCats) && parsedCats.length > 0) {
+          setCategories(parsedCats.map((c: any) => c.name));
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     const saved = localStorage.getItem("user_uploaded_blogs");
     if (saved) {
       try {
@@ -201,6 +219,13 @@ export default function MasterBlogCMSPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Link
+            href="/master-admin/blog/categories"
+            className="flex items-center gap-1.5 bg-slate-900 border border-white/10 hover:border-amber-400/40 text-slate-300 px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
+          >
+            <Tag className="w-3.5 h-3.5 text-amber-400" />
+            <span>Blog Categories</span>
+          </Link>
           <button
             onClick={openAddModal}
             className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-3.5 py-1.5 rounded-xl text-xs font-black tracking-wider uppercase transition-all shadow-md shadow-amber-500/20 cursor-pointer"
@@ -376,10 +401,11 @@ export default function MasterBlogCMSPage() {
                     onChange={(e) => setNewArticle({ ...newArticle, category: e.target.value })}
                     className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
                   >
-                    <option value="Outstation Trips">Outstation Trips</option>
-                    <option value="Corporate Travel">Corporate Travel</option>
-                    <option value="Airport Transfers">Airport Transfers</option>
-                    <option value="Local City Guides">Local City Guides</option>
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
