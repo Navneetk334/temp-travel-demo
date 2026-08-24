@@ -205,10 +205,9 @@ export default function MasterAdminLayout({
 
   const [blogCmsOpen, setBlogCmsOpen] = useState(pathname.startsWith("/master-admin/blog"));
 
+  // Auto-collapse Blog CMS when navigating to any non-blog section
   useEffect(() => {
-    if (pathname.startsWith("/master-admin/blog")) {
-      setBlogCmsOpen(true);
-    }
+    setBlogCmsOpen(pathname.startsWith("/master-admin/blog"));
   }, [pathname]);
 
   const handleLogout = async () => {
@@ -338,8 +337,8 @@ export default function MasterAdminLayout({
           })}
         </nav>
 
-        {/* System Telemetry */}
-        <div className="p-2.5 border-t border-amber-500/20 bg-slate-950/60 space-y-2">
+        {/* System Telemetry & Logout */}
+        <div className="p-2.5 border-t border-amber-500/20 bg-slate-950/80 space-y-2">
           <div className="flex items-center justify-between text-[9px] font-bold text-slate-400">
             <div className="flex items-center gap-1.5 text-emerald-400">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -347,6 +346,15 @@ export default function MasterAdminLayout({
             </div>
             <span className="font-mono text-slate-500">v2.5 HQ</span>
           </div>
+
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white border border-rose-500/20 hover:border-rose-500 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm"
+            title="Sign Out of Master Admin"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Sign Out</span>
+          </button>
         </div>
       </aside>
 
@@ -373,12 +381,21 @@ export default function MasterAdminLayout({
             </span>
           </div>
 
-          {/* Controls: Telemetry indicator */}
-          <div className="flex items-center gap-3 ml-auto">
-            <div className="flex items-center gap-1.5 bg-slate-950 border border-amber-500/20 px-2.5 py-1 rounded-lg text-xs font-bold text-slate-300">
+          {/* Controls: Telemetry indicator & Logout */}
+          <div className="flex items-center gap-2.5 ml-auto">
+            <div className="hidden md:flex items-center gap-1.5 bg-slate-950 border border-amber-500/20 px-2.5 py-1 rounded-lg text-xs font-bold text-slate-300">
               <Activity className="w-3 h-3 text-emerald-400 animate-pulse" />
               <span>Telemetry Synced</span>
             </div>
+
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 bg-slate-950 hover:bg-rose-500 text-slate-300 hover:text-white border border-white/10 hover:border-rose-500 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm"
+              title="Sign Out of Master Control Center"
+            >
+              <LogOut className="w-3.5 h-3.5 text-rose-400 hover:text-white" />
+              <span className="hidden sm:inline">Sign Out</span>
+            </button>
           </div>
         </header>
 
@@ -594,6 +611,17 @@ export default function MasterAdminLayout({
                   );
                 })}
               </nav>
+
+              {/* Mobile Drawer Logout */}
+              <div className="pt-3 border-t border-white/10 mt-auto">
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white border border-rose-500/30 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
