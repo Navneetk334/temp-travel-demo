@@ -143,26 +143,41 @@ export default function BookingDispatchPage() {
         limit: pageSize.toString(),
       });
 
+      let combinedBookings: Booking[] = [];
       const res = await fetch(`/api/bookings?${queryParams.toString()}`);
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {
-          setBookings(data);
-          setTotalCount(data.length);
-          setTotalPages(1);
-        } else {
-          setBookings(data.bookings || []);
-          setTotalCount(data.pagination?.totalCount || 0);
-          setTotalPages(data.pagination?.totalPages || 1);
-          if (data.stats) {
-            setStats(data.stats);
-          }
+          combinedBookings = data;
+        } else if (data.bookings) {
+          combinedBookings = data.bookings;
+          if (data.stats) setStats(data.stats);
         }
       }
 
+      // Merge local dispatched bookings
+      try {
+        const stored = localStorage.getItem("user_uploaded_dispatched_bookings");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            const map = new Map<string, Booking>();
+            combinedBookings.forEach(b => map.set(b.id || b.bookingNumber, b));
+            parsed.forEach((p: any) => map.set(p.id || p.bookingNumber, p));
+            combinedBookings = Array.from(map.values());
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+
+      setBookings(combinedBookings);
+      setTotalCount(combinedBookings.length);
+      setTotalPages(Math.ceil(combinedBookings.length / pageSize) || 1);
+
       // Fetch vehicles to use for dispatch assignments
       let localVehicles: any[] = [];
-      const savedFleet = localStorage.getItem("user_uploaded_fleet");
+      const savedFleet = localStorage.getItem("user_uploaded_fleet_vehicles") || localStorage.getItem("user_uploaded_fleet");
       if (savedFleet) {
         try {
           const parsed = JSON.parse(savedFleet);
@@ -192,9 +207,28 @@ export default function BookingDispatchPage() {
   }, [search, statusFilter, paymentFilter, sortBy, sortOrder, currentPage, pageSize]);
 
   const handleStatusChange = async (id: string, newStatus: BookingStatus) => {
+    // 1. Update local storage dispatched bookings
     try {
-      const target = bookings.find((b) => b.id === id);
-      const res = await fetch(`/api/bookings/${id}`, {
+      const stored = localStorage.getItem("user_uploaded_dispatched_bookings");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          const updatedLocal = parsed.map((b: any) => (b.id === id || b.bookingNumber === id) ? { ...b, status: newStatus } : b);
+          localStorage.setItem("user_uploaded_dispatched_bookings", JSON.stringify(updatedLocal));
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    setBookings(prev => prev.map(b => (b.id === id || b.bookingNumber === id) ? { ...b, status: newStatus } : b));
+    if (activeBooking && (activeBooking.id === id || activeBooking.bookingNumber === id)) {
+      setActiveBooking(prev => prev ? { ...prev, status: newStatus } : null);
+    }
+
+    try {
+      const target = bookings.find((b) => b.id === id || b.bookingNumber === id);
+      await fetch(`/api/bookings/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -202,29 +236,51 @@ export default function BookingDispatchPage() {
           notes: target?.notes || "",
         }),
       });
-
-      if (res.ok) {
-        const updated = await res.json();
-        setBookings(bookings.map((b) => (b.id === id ? updated : b)));
-        if (activeBooking && activeBooking.id === id) {
-          setActiveBooking(updated);
-        }
-        loadData();
-      }
     } catch (err) {
-      console.error("Failed to update booking status:", err);
+      console.error("Failed to update booking status on backend:", err);
     }
   };
 
   const handleAssignVehicle = async () => {
     if (!activeBooking) return;
+    const selectedVeh = vehicles.find(v => v.id === selectedVehicleId);
+    
+    // Update local storage
+    try {
+      const stored = localStorage.getItem("user_uploaded_dispatched_bookings");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          const updatedLocal = parsed.map((b: any) => {
+            if (b.id === activeBooking.id || b.bookingNumber === activeBooking.bookingNumber) {
+              return {
+                ...b,
+                status: "VEHICLE_ASSIGNED" as BookingStatus,
+                vehicle: selectedVeh ? {
+                  id: selectedVeh.id,
+                  model: `${selectedVeh.make || ""} ${selectedVeh.model || ""}`.trim(),
+                  registrationNumber: selectedVeh.registrationNumber,
+                  driver: selectedVeh.driver ? { name: selectedVeh.driver.name, phone: selectedVeh.driver.phone } : null
+                } : b.vehicle
+              };
+            }
+            return b;
+          });
+          localStorage.setItem("user_uploaded_dispatched_bookings", JSON.stringify(updatedLocal));
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
     try {
       const res = await fetch(`/api/bookings/${activeBooking.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           vehicleId: selectedVehicleId || null,
-          status: selectedVehicleId ? "VEHICLE_ASSIGNED" : activeBooking.status,
+          status: "VEHICLE_ASSIGNED",
+          notes: activeBooking.notes || "",
         }),
       });
 
@@ -232,11 +288,12 @@ export default function BookingDispatchPage() {
         const updated = await res.json();
         setBookings(bookings.map((b) => (b.id === activeBooking.id ? updated : b)));
         setActiveBooking(updated);
-        setAssignModalOpen(false);
-        loadData();
       }
     } catch (err) {
       console.error("Failed to assign vehicle:", err);
+    } finally {
+      setAssignModalOpen(false);
+      loadData();
     }
   };
 
