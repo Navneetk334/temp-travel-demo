@@ -161,10 +161,24 @@ export default function BookingDispatchPage() {
       }
 
       // Fetch vehicles to use for dispatch assignments
+      let localVehicles: any[] = [];
+      const savedFleet = localStorage.getItem("user_uploaded_fleet");
+      if (savedFleet) {
+        try {
+          const parsed = JSON.parse(savedFleet);
+          if (Array.isArray(parsed)) localVehicles = parsed;
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
       const vehiclesRes = await fetch("/api/fleet");
       if (vehiclesRes.ok) {
         const fleetData = await vehiclesRes.json();
-        setVehicles(fleetData);
+        const apiList = Array.isArray(fleetData) ? fleetData : (fleetData.vehicles || []);
+        setVehicles(localVehicles.length > 0 ? localVehicles : apiList);
+      } else if (localVehicles.length > 0) {
+        setVehicles(localVehicles);
       }
     } catch (err) {
       console.error("Failed to load bookings dispatch:", err);

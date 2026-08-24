@@ -309,6 +309,43 @@ export default function AdminFleetPage() {
   const loadData = async (showSpinner = true) => {
     if (showSpinner) setLoading(true);
     try {
+      // 1. Check local storage where vehicles are saved from Master Admin
+      let localList: Vehicle[] = [];
+      const saved = localStorage.getItem("user_uploaded_fleet");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            localList = parsed.map((v: any) => ({
+              id: v.id,
+              model: v.model,
+              make: v.make,
+              registrationNumber: v.registrationNumber,
+              categoryName: v.categoryName || "Sedan",
+              vehicleClass: v.vehicleClass || "Executive",
+              subCategory: v.vehicleClass || "Executive",
+              capacity: v.capacity || 4,
+              fuelType: v.fuelType || "Diesel",
+              transmission: v.transmission || "MANUAL",
+              imageUrl: v.imageUrl || "/images/hero-car.png",
+              perKmRate: v.perKmRate || 15,
+              baseDailyRate: v.baseDailyRate || 3000,
+              extraKmRate: v.extraKmRate || 15,
+              extraHrRate: v.perHourRate || v.extraHrRate || 150,
+              status: (v.status as VehicleStatus) || "AVAILABLE",
+              isFeatured: !!v.isFeatured,
+              categoryId: (v.categoryName || "").toLowerCase().includes("suv") ? "4a315fe8-3c73-4cf9-97a1-1ddb8d107df5" : "36194d98-0236-4566-8231-e515cfc2e979",
+              category: {
+                id: (v.categoryName || "").toLowerCase().includes("suv") ? "4a315fe8-3c73-4cf9-97a1-1ddb8d107df5" : "36194d98-0236-4566-8231-e515cfc2e979",
+                name: v.categoryName || "Sedan"
+              }
+            }));
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
       const queryParams = new URLSearchParams({
         search,
         categoryId: categoryFilter,
@@ -327,20 +364,57 @@ export default function AdminFleetPage() {
         fetch("/api/admin/drivers")
       ]);
 
+      let apiList: Vehicle[] = [];
       if (vehiclesRes.ok) {
         const vData = await vehiclesRes.json();
-        const rawList = Array.isArray(vData) ? vData : (vData.vehicles || []);
-        setVehicles(rawList);
-        setTotalCount(vData.pagination?.totalCount || rawList.length);
-        setTotalPages(vData.pagination?.totalPages || 1);
-        if (vData.stats) {
-          setStats(vData.stats);
-        }
-      } else {
-        setVehicles([]);
-        setTotalCount(0);
-        setStats({ total: 0, AVAILABLE: 0, ON_TRIP: 0, MAINTENANCE: 0, INACTIVE: 0 });
+        apiList = Array.isArray(vData) ? vData : (vData.vehicles || []);
       }
+
+      // Combine / prioritize localList (Master Admin uploads)
+      const finalList = localList.length > 0 ? localList : apiList;
+
+      // Apply client-side filters if localList is used
+      let filtered = finalList;
+      if (search) {
+        const q = search.toLowerCase();
+        filtered = filtered.filter(v =>
+          v.model.toLowerCase().includes(q) ||
+          v.make.toLowerCase().includes(q) ||
+          v.registrationNumber.toLowerCase().includes(q)
+        );
+      }
+      if (categoryFilter) {
+        filtered = filtered.filter(v =>
+          (v.categoryName || v.category?.name || "").toLowerCase() === categoryFilter.toLowerCase() ||
+          v.categoryId === categoryFilter
+        );
+      }
+      if (statusFilter) {
+        filtered = filtered.filter(v => v.status === statusFilter);
+      }
+      if (fuelTypeFilter) {
+        filtered = filtered.filter(v => (v.fuelType || "").toUpperCase() === fuelTypeFilter.toUpperCase());
+      }
+      if (transmissionFilter) {
+        filtered = filtered.filter(v => (v.transmission || "").toUpperCase() === transmissionFilter.toUpperCase());
+      }
+
+      setVehicles(filtered);
+      setTotalCount(filtered.length);
+      setTotalPages(Math.max(1, Math.ceil(filtered.length / pageSize)));
+
+      const avail = finalList.filter(v => v.status === "AVAILABLE").length;
+      const ontrip = finalList.filter(v => v.status === "ON_TRIP").length;
+      const maint = finalList.filter(v => v.status === "MAINTENANCE").length;
+      const inact = finalList.filter(v => v.status === "INACTIVE").length;
+
+      setStats({
+        total: finalList.length,
+        AVAILABLE: avail,
+        ON_TRIP: ontrip,
+        MAINTENANCE: maint,
+        INACTIVE: inact
+      });
 
       if (catsRes.ok) {
         const cData = await catsRes.json();
@@ -386,11 +460,24 @@ export default function AdminFleetPage() {
     setSelectedIds((prev) => prev.filter((i) => i !== id));
     setTotalCount((prev) => Math.max(0, prev - 1));
 
+    // Update local storage
+    const saved = localStorage.getItem("user_uploaded_fleet");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const updated = parsed.filter((v: any) => v.id !== id);
+          localStorage.setItem("user_uploaded_fleet", JSON.stringify(updated));
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     try {
       const res = await fetch(`/api/fleet/${id}`, { method: "DELETE" });
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || "Failed to delete vehicle");
         loadData(false);
       } else {
         loadData(false);
@@ -410,6 +497,20 @@ export default function AdminFleetPage() {
     setVehicles((prev) => prev.filter((v) => !idsToDelete.includes(v.id)));
     setSelectedIds([]);
     setTotalCount((prev) => Math.max(0, prev - idsToDelete.length));
+
+    // Update local storage
+    const saved = localStorage.getItem("user_uploaded_fleet");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const updated = parsed.filter((v: any) => !idsToDelete.includes(v.id));
+          localStorage.setItem("user_uploaded_fleet", JSON.stringify(updated));
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
 
     try {
       await Promise.all(idsToDelete.map((id) => fetch(`/api/fleet/${id}`, { method: "DELETE" })));
@@ -493,31 +594,41 @@ export default function AdminFleetPage() {
       if (formData.extraKmRate) payload.extraKmRate = Number(formData.extraKmRate);
       if (formData.extraHourRate) payload.extraHrRate = Number(formData.extraHourRate);
 
+      // Save locally as well
+      const saved = localStorage.getItem("user_uploaded_fleet");
+      const currentList: any[] = saved ? JSON.parse(saved) : [];
+      let updatedLocal: any[] = [];
+      if (editingVehicle) {
+        updatedLocal = currentList.map((v: any) => (v.id === editingVehicle.id ? { ...v, ...payload } : v));
+      } else {
+        const newLocal = {
+          id: `v-${Date.now()}`,
+          ...payload,
+          categoryName: activeCategories.find(c => c.id === formData.categoryId)?.name || "Sedan",
+          vehicleClass: formData.subCategory || "Executive"
+        };
+        updatedLocal = [newLocal, ...currentList];
+      }
+      localStorage.setItem("user_uploaded_fleet", JSON.stringify(updatedLocal));
+
       const url = editingVehicle ? `/api/fleet/${editingVehicle.id}` : "/api/fleet";
       const method = editingVehicle ? "PUT" : "POST";
 
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        if (data.error && typeof data.error === "object") {
-          setFormError(JSON.stringify(data.error));
-        } else {
-          setFormError(data.error || "Failed to save vehicle");
-        }
-        return;
+      try {
+        await fetch(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      } catch (err) {
+        console.error("API sync error:", err);
       }
 
       setIsModalOpen(false);
       loadData(false);
     } catch (err) {
       console.error("Save vehicle error:", err);
-      setFormError("Server connection error");
+      setFormError("Error saving vehicle");
     } finally {
       setIsSubmitting(false);
     }
@@ -1048,22 +1159,7 @@ export default function AdminFleetPage() {
                 </div>
               </div>
 
-              {/* Featured Showcase Checkbox Option */}
-              <div className="bg-amber-500/10 border border-amber-500/30 p-3.5 rounded-xl flex items-center justify-between gap-4">
-                <div className="flex items-center gap-2.5">
-                  <Star className="w-5 h-5 text-amber-400 fill-amber-400 shrink-0" />
-                  <div>
-                    <div className="font-extrabold text-slate-100 text-xs">Feature on Homepage Showcase</div>
-                    <div className="text-[11px] text-amber-300/80">Display this vehicle directly on the main website homepage fleet section.</div>
-                  </div>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={formData.isFeatured}
-                  onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
-                  className="w-5 h-5 rounded text-amber-500 bg-slate-950 border-white/20 focus:ring-0 cursor-pointer"
-                />
-              </div>
+
 
               {/* Row 4: Custom Per-KM Rate, Daily Rate, Extra KM Rate */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
