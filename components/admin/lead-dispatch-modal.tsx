@@ -46,7 +46,7 @@ export default function LeadDispatchModal({
   useEffect(() => {
     if (!isOpen) return;
 
-    // 1. Load Vehicles
+    // 1. Initial Load from Local Storage (instant, no flash)
     let vList: any[] = [];
     try {
       const storedVehicles = localStorage.getItem("user_uploaded_fleet_vehicles") || localStorage.getItem("user_uploaded_fleet");
@@ -67,7 +67,7 @@ export default function LeadDispatchModal({
     }
     setAvailableVehicles(vList);
 
-    // 2. Load Drivers
+    // 2. Initial Load Drivers from Local Storage
     let dList: any[] = [];
     try {
       const storedDrivers = localStorage.getItem("user_uploaded_drivers");
@@ -86,6 +86,51 @@ export default function LeadDispatchModal({
       ];
     }
     setAvailableDrivers(dList);
+
+    // 3. Live Sync from API (Fleet & Drivers)
+    const syncLiveSources = async () => {
+      try {
+        const [fleetRes, drvRes] = await Promise.allSettled([
+          fetch("/api/fleet"),
+          fetch("/api/admin/drivers")
+        ]);
+
+        if (fleetRes.status === "fulfilled" && fleetRes.value.ok) {
+          const fleetData = await fleetRes.value.json();
+          const apiVehicles = Array.isArray(fleetData) ? fleetData : (fleetData.vehicles || []);
+          if (apiVehicles.length > 0) {
+            const vMap = new Map();
+            vList.forEach(v => vMap.set(v.id || v.registrationNumber, v));
+            apiVehicles.forEach((v: any) => {
+              if (!vMap.has(v.id || v.registrationNumber)) {
+                vMap.set(v.id || v.registrationNumber, v);
+              }
+            });
+            const mergedV = Array.from(vMap.values());
+            setAvailableVehicles(mergedV);
+          }
+        }
+
+        if (drvRes.status === "fulfilled" && drvRes.value.ok) {
+          const apiDrivers = await drvRes.value.json();
+          if (Array.isArray(apiDrivers) && apiDrivers.length > 0) {
+            const dMap = new Map();
+            dList.forEach(d => dMap.set(d.id || d.phone, d));
+            apiDrivers.forEach((d: any) => {
+              if (!dMap.has(d.id || d.phone)) {
+                dMap.set(d.id || d.phone, d);
+              }
+            });
+            const mergedD = Array.from(dMap.values());
+            setAvailableDrivers(mergedD);
+          }
+        }
+      } catch (err) {
+        console.error("Live dispatch sync error:", err);
+      }
+    };
+
+    syncLiveSources();
 
     // Reset Form with lead info
     if (lead) {

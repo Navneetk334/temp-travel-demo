@@ -188,13 +188,20 @@ export default function BookingDispatchPage() {
       }
 
       const vehiclesRes = await fetch("/api/fleet");
+      let apiList: any[] = [];
       if (vehiclesRes.ok) {
         const fleetData = await vehiclesRes.json();
-        const apiList = Array.isArray(fleetData) ? fleetData : (fleetData.vehicles || []);
-        setVehicles(localVehicles.length > 0 ? localVehicles : apiList);
-      } else if (localVehicles.length > 0) {
-        setVehicles(localVehicles);
+        apiList = Array.isArray(fleetData) ? fleetData : (fleetData.vehicles || []);
       }
+
+      const vMap = new Map();
+      localVehicles.forEach(v => vMap.set(v.id || v.registrationNumber, v));
+      apiList.forEach(v => {
+        if (!vMap.has(v.id || v.registrationNumber)) {
+          vMap.set(v.id || v.registrationNumber, v);
+        }
+      });
+      setVehicles(Array.from(vMap.values()));
     } catch (err) {
       console.error("Failed to load bookings dispatch:", err);
     } finally {

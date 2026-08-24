@@ -96,7 +96,7 @@ export default function MasterAdminLayout({
       const bdayList: any[] = [];
 
       // 1. Scan Vehicles
-      const savedFleet = localStorage.getItem("user_uploaded_fleet");
+      const savedFleet = localStorage.getItem("user_uploaded_fleet_vehicles") || localStorage.getItem("user_uploaded_fleet");
       if (savedFleet) {
         try {
           const fleet = JSON.parse(savedFleet);

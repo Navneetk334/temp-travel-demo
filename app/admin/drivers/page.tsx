@@ -85,11 +85,42 @@ export default function AdminDriversPage() {
   const loadDrivers = async (showSpinner = true) => {
     if (showSpinner) setLoading(true);
     try {
-      const res = await fetch(`/api/admin/drivers?search=${encodeURIComponent(search)}`);
-      if (res.ok) {
-        const data = await res.json();
-        setDrivers(data);
+      let localList: any[] = [];
+      const stored = localStorage.getItem("user_uploaded_drivers");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) localList = parsed;
+        } catch (e) {
+          console.error(e);
+        }
       }
+
+      const res = await fetch(`/api/admin/drivers?search=${encodeURIComponent(search)}`);
+      let apiList: Driver[] = [];
+      if (res.ok) {
+        apiList = await res.json();
+      }
+
+      const map = new Map<string, any>();
+      localList.forEach((d: any) => {
+        map.set(d.id || d.phone, {
+          id: d.id,
+          name: d.name,
+          email: d.email || `${(d.name || "driver").toLowerCase().replace(/\s+/g, '')}@temptravel.in`,
+          phone: d.phone,
+          isActive: d.status !== "INACTIVE" && d.isActive !== false,
+          photoUrl: d.photoUrl,
+          aadhaarNumber: d.aadhaarNumber,
+          panNumber: d.panNumber,
+          dob: d.dob,
+          licenseNumber: d.licenseNumber,
+          createdAt: d.createdAt || new Date().toISOString()
+        });
+      });
+      apiList.forEach((d: any) => map.set(d.id || d.phone, d));
+
+      setDrivers(Array.from(map.values()));
     } catch (err) {
       console.error("Failed to load drivers:", err);
     } finally {
@@ -157,6 +188,27 @@ export default function AdminDriversPage() {
     setFormError("");
     setIsSubmitting(true);
 
+    // Update local storage
+    try {
+      const stored = localStorage.getItem("user_uploaded_drivers");
+      const currentList: any[] = stored ? JSON.parse(stored) : [];
+      let updatedLocal: any[] = [];
+      if (editingDriver) {
+        updatedLocal = currentList.map((d: any) => (d.id === editingDriver.id || d.phone === editingDriver.phone) ? { ...d, ...formData } : d);
+      } else {
+        const newDrv = {
+          id: `DRV-${Date.now()}`,
+          ...formData,
+          createdAt: new Date().toISOString(),
+          status: "STANDBY"
+        };
+        updatedLocal = [newDrv, ...currentList];
+      }
+      localStorage.setItem("user_uploaded_drivers", JSON.stringify(updatedLocal));
+    } catch (e) {
+      console.error("Local driver sync error:", e);
+    }
+
     try {
       const url = editingDriver ? `/api/admin/drivers/${editingDriver.id}` : "/api/admin/drivers";
       const method = editingDriver ? "PUT" : "POST";
@@ -189,6 +241,20 @@ export default function AdminDriversPage() {
     setDrivers((prev) => prev.filter((d) => d.id !== id));
     setSelectedIds((prev) => prev.filter((i) => i !== id));
 
+    // Update local storage
+    try {
+      const stored = localStorage.getItem("user_uploaded_drivers");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          const updated = parsed.filter((d: any) => d.id !== id);
+          localStorage.setItem("user_uploaded_drivers", JSON.stringify(updated));
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
     try {
       const res = await fetch(`/api/admin/drivers/${id}`, { method: "DELETE" });
       if (!res.ok) {
@@ -212,6 +278,20 @@ export default function AdminDriversPage() {
     // Optimistic bulk remove
     setDrivers((prev) => prev.filter((d) => !idsToDelete.includes(d.id)));
     setSelectedIds([]);
+
+    // Update local storage
+    try {
+      const stored = localStorage.getItem("user_uploaded_drivers");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          const updated = parsed.filter((d: any) => !idsToDelete.includes(d.id));
+          localStorage.setItem("user_uploaded_drivers", JSON.stringify(updated));
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
 
     try {
       await Promise.all(idsToDelete.map((id) => fetch(`/api/admin/drivers/${id}`, { method: "DELETE" })));

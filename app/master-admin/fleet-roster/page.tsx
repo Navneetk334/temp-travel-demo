@@ -281,6 +281,7 @@ export default function MasterFleetRosterPage() {
 
     setVehicles(updatedList);
     localStorage.setItem("user_uploaded_fleet", JSON.stringify(updatedList));
+    localStorage.setItem("user_uploaded_fleet_vehicles", JSON.stringify(updatedList));
 
     try {
       if (editingVehicle) {
@@ -310,6 +311,7 @@ export default function MasterFleetRosterPage() {
       setVehicles(updated);
       setSelectedIds(selectedIds.filter(id => id !== v.id));
       localStorage.setItem("user_uploaded_fleet", JSON.stringify(updated));
+      localStorage.setItem("user_uploaded_fleet_vehicles", JSON.stringify(updated));
       fetch(`/api/fleet/${v.id}`, { method: "DELETE" }).catch(e => console.error(e));
     }
   };

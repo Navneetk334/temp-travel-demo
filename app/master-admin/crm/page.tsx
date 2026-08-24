@@ -100,6 +100,49 @@ export default function MasterOmnichannelCRMPage() {
       ];
     }
     setAvailableDrivers(dList);
+
+    // 3. Live Sync from API (Fleet & Drivers)
+    const syncLiveSources = async () => {
+      try {
+        const [fleetRes, drvRes] = await Promise.allSettled([
+          fetch("/api/fleet"),
+          fetch("/api/admin/drivers")
+        ]);
+
+        if (fleetRes.status === "fulfilled" && fleetRes.value.ok) {
+          const fleetData = await fleetRes.value.json();
+          const apiVehicles = Array.isArray(fleetData) ? fleetData : (fleetData.vehicles || []);
+          if (apiVehicles.length > 0) {
+            const vMap = new Map();
+            vList.forEach(v => vMap.set(v.id || v.registrationNumber, v));
+            apiVehicles.forEach((v: any) => {
+              if (!vMap.has(v.id || v.registrationNumber)) {
+                vMap.set(v.id || v.registrationNumber, v);
+              }
+            });
+            setAvailableVehicles(Array.from(vMap.values()));
+          }
+        }
+
+        if (drvRes.status === "fulfilled" && drvRes.value.ok) {
+          const apiDrivers = await drvRes.value.json();
+          if (Array.isArray(apiDrivers) && apiDrivers.length > 0) {
+            const dMap = new Map();
+            dList.forEach(d => dMap.set(d.id || d.phone, d));
+            apiDrivers.forEach((d: any) => {
+              if (!dMap.has(d.id || d.phone)) {
+                dMap.set(d.id || d.phone, d);
+              }
+            });
+            setAvailableDrivers(Array.from(dMap.values()));
+          }
+        }
+      } catch (err) {
+        console.error("Live CRM dispatch sync error:", err);
+      }
+    };
+
+    syncLiveSources();
   }, []);
 
   // Normalize incoming lead from any API or local format into consistent structure

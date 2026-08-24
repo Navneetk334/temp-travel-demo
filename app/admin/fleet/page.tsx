@@ -422,10 +422,35 @@ export default function AdminFleetPage() {
         setCategories(loadedCats);
       }
 
+      // Drivers - merge local storage drivers (from Master Admin) and API drivers
+      let allDrivers: Driver[] = [];
+      const storedDrivers = localStorage.getItem("user_uploaded_drivers");
+      if (storedDrivers) {
+        try {
+          const parsed = JSON.parse(storedDrivers);
+          if (Array.isArray(parsed)) {
+            allDrivers = parsed.map((d: any) => ({
+              id: d.id,
+              name: d.name,
+              phone: d.phone,
+              email: d.email || `${(d.name || "driver").toLowerCase().replace(/\s+/g, '')}@temptravel.in`
+            }));
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
       if (driversRes.ok) {
         const dData = await driversRes.json();
-        setDrivers(dData);
+        if (Array.isArray(dData)) {
+          const drvMap = new Map();
+          allDrivers.forEach(d => drvMap.set(d.id || d.phone, d));
+          dData.forEach((d: any) => drvMap.set(d.id || d.phone, d));
+          allDrivers = Array.from(drvMap.values());
+        }
       }
+      setDrivers(allDrivers);
     } catch (err) {
       console.error("Failed to load admin fleet data:", err);
     } finally {
@@ -468,6 +493,7 @@ export default function AdminFleetPage() {
         if (Array.isArray(parsed)) {
           const updated = parsed.filter((v: any) => v.id !== id);
           localStorage.setItem("user_uploaded_fleet", JSON.stringify(updated));
+          localStorage.setItem("user_uploaded_fleet_vehicles", JSON.stringify(updated));
         }
       } catch (e) {
         console.error(e);
@@ -506,6 +532,7 @@ export default function AdminFleetPage() {
         if (Array.isArray(parsed)) {
           const updated = parsed.filter((v: any) => !idsToDelete.includes(v.id));
           localStorage.setItem("user_uploaded_fleet", JSON.stringify(updated));
+          localStorage.setItem("user_uploaded_fleet_vehicles", JSON.stringify(updated));
         }
       } catch (e) {
         console.error(e);
@@ -610,6 +637,7 @@ export default function AdminFleetPage() {
         updatedLocal = [newLocal, ...currentList];
       }
       localStorage.setItem("user_uploaded_fleet", JSON.stringify(updatedLocal));
+      localStorage.setItem("user_uploaded_fleet_vehicles", JSON.stringify(updatedLocal));
 
       const url = editingVehicle ? `/api/fleet/${editingVehicle.id}` : "/api/fleet";
       const method = editingVehicle ? "PUT" : "POST";

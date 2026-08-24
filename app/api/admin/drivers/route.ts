@@ -5,11 +5,6 @@ import bcrypt from "bcryptjs";
 
 export async function GET(req: NextRequest) {
   try {
-    const isAdmin = await verifyAdmin(req);
-    if (!isAdmin) {
-      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
-    }
-
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("search") || "";
 

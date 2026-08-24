@@ -34,7 +34,7 @@ export default function MasterDocumentVaultPage() {
 
   useEffect(() => {
     // 1. Auto-organize Vehicles from Local Storage
-    const savedFleet = localStorage.getItem("user_uploaded_fleet");
+    const savedFleet = localStorage.getItem("user_uploaded_fleet_vehicles") || localStorage.getItem("user_uploaded_fleet");
     if (savedFleet) {
       try {
         const fleet = JSON.parse(savedFleet);

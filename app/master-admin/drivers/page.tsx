@@ -176,7 +176,7 @@ export default function MasterDriversPage() {
     setShowAddModal(true);
   };
 
-  const handleDriverFormSubmit = (e: React.FormEvent) => {
+  const handleDriverFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (formData.accountNumber !== formData.confirmAccountNumber) {
@@ -243,6 +243,44 @@ export default function MasterDriversPage() {
 
     setDrivers(updated);
     localStorage.setItem("user_uploaded_drivers", JSON.stringify(updated));
+
+    // Sync to backend DB
+    try {
+      if (editingDriver) {
+        await fetch(`/api/admin/drivers/${editingDriver.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: formData.name,
+            phone: formData.phone,
+            email: `${formData.name.toLowerCase().replace(/\s+/g, '')}@temptravel.in`,
+            dob: formData.dob,
+            photoUrl: formData.photoUrl,
+            aadhaarNumber: formData.aadhaarNumber,
+            panNumber: formData.panNumber,
+            licenseNumber: formData.licenseNumber
+          })
+        });
+      } else {
+        await fetch("/api/admin/drivers", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: formData.name,
+            phone: formData.phone,
+            email: `${formData.name.toLowerCase().replace(/\s+/g, '')}${Date.now().toString().slice(-4)}@temptravel.in`,
+            dob: formData.dob,
+            photoUrl: formData.photoUrl,
+            aadhaarNumber: formData.aadhaarNumber,
+            panNumber: formData.panNumber,
+            licenseNumber: formData.licenseNumber
+          })
+        });
+      }
+    } catch (err) {
+      console.error("Save driver API error:", err);
+    }
+
     setShowAddModal(false);
   };
 
@@ -253,6 +291,7 @@ export default function MasterDriversPage() {
       setDrivers(updated);
       setSelectedIds(selectedIds.filter(id => id !== drv.id));
       localStorage.setItem("user_uploaded_drivers", JSON.stringify(updated));
+      fetch(`/api/admin/drivers/${drv.id}`, { method: "DELETE" }).catch(e => console.error(e));
     }
   };
 

@@ -35,12 +35,14 @@ function FleetContent() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Instant local hydration from user uploaded fleet in Master Admin
-    const saved = localStorage.getItem("user_uploaded_fleet");
+    // 1. Instant local hydration from user uploaded fleet in Master Admin / Admin Panel
+    let localList: FleetVehicle[] = [];
+    const saved = localStorage.getItem("user_uploaded_fleet_vehicles") || localStorage.getItem("user_uploaded_fleet");
     if (saved) {
       try {
-        const localList = JSON.parse(saved);
-        if (Array.isArray(localList)) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          localList = parsed;
           setVehicles(localList);
           setLoading(false);
         }
@@ -56,7 +58,14 @@ function FleetContent() {
         if (data) {
           const apiList = Array.isArray(data) ? data : (data.vehicles || []);
           if (apiList.length > 0) {
-            setVehicles((prev) => (prev.length > 0 ? prev : apiList));
+            const vMap = new Map();
+            localList.forEach(v => vMap.set(v.id || v.registrationNumber, v));
+            apiList.forEach((v: any) => {
+              if (!vMap.has(v.id || v.registrationNumber)) {
+                vMap.set(v.id || v.registrationNumber, v);
+              }
+            });
+            setVehicles(Array.from(vMap.values()));
           }
         }
       })
