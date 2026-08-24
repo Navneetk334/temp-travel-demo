@@ -885,8 +885,8 @@ export default function BookingWidget() {
           dropLocation: localData.dropLocation.trim() || null,
           pickupDateTime: new Date(`${localData.pickupDate}T${localData.pickupTime}`).toISOString(),
           returnDateTime: null,
-          vehicleCategoryId: localData.vehicleCategoryId,
-          tripType: `Local Hourly Rental (${localData.duration}) - ${localSubTab === "working" ? `Corporate (${localData.company.trim()})` : "Individual"}${localData.vehicleClass ? ` - Class: ${localData.vehicleClass}` : ""}${localData.vehicleModel ? `, Model: ${localData.vehicleModel}` : ""}`
+          vehicleCategoryId: localData.vehicleCategoryId || (categories[0]?.id || ""),
+          tripType: `Local Hourly Rental (${localData.duration}) - ${localSubTab === "working" ? `Corporate (${localData.company.trim()})` : "Individual"}${localData.vehicleCategory ? ` - ${localData.vehicleCategory}` : ""}${localData.vehicleClass ? ` (${localData.vehicleClass})` : ""}${localData.vehicleModel ? `, Model: ${localData.vehicleModel}` : ""}`
         };
       } else if (activeTab === "outstation") {
         url = "/api/rental/lead";
@@ -964,11 +964,24 @@ export default function BookingWidget() {
       const data = await response.json();
 
       if (!response.ok) {
-        if (data.error && typeof data.error === "object") {
-          const fieldErrors = Object.values(data.error).flat().join(", ");
-          throw new Error(fieldErrors || "Submission failed. Please check inputs.");
+        if (typeof data.error === "string") {
+          throw new Error(data.error);
         }
-        throw new Error(data.error || "Submission failed.");
+        if (data.error && typeof data.error === "object") {
+          const flat = data.error.fieldErrors || data.error;
+          const messages: string[] = [];
+          Object.entries(flat).forEach(([key, val]) => {
+            if (Array.isArray(val)) {
+              messages.push(...val.map(String));
+            } else if (typeof val === "string") {
+              messages.push(val);
+            } else if (val && typeof val === "object") {
+              messages.push(Object.values(val).flat().map(String).join(", "));
+            }
+          });
+          throw new Error(messages.filter(Boolean).join(", ") || "Submission failed. Please check inputs.");
+        }
+        throw new Error("Submission failed. Please check your entries.");
       }
 
       setSuccess(true);

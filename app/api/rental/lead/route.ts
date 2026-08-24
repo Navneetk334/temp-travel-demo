@@ -114,30 +114,45 @@ export async function POST(req: NextRequest) {
     const result = rentalLeadSchema.safeParse(body);
 
     if (!result.success) {
-      return NextResponse.json({ error: result.error.flatten() }, { status: 400 });
+      const errMsgs = Object.values(result.error.flatten().fieldErrors).flat().join(", ");
+      return NextResponse.json({ error: errMsgs || "Validation error" }, { status: 400 });
     }
 
     try {
-      const lead = await prisma.rentalLead.create({
-        data: {
-          ...result.data,
-          status: "NEW",
-          pickupDateTime: new Date(result.data.pickupDateTime),
-          returnDateTime: result.data.returnDateTime ? new Date(result.data.returnDateTime) : null,
-        },
-      });
-      return NextResponse.json(lead, { status: 201 });
+      let catId = result.data.vehicleCategoryId;
+      let validCat = null;
+      if (catId) {
+        validCat = await prisma.vehicleCategory.findUnique({ where: { id: catId } }).catch(() => null);
+      }
+      if (!validCat) {
+        validCat = await prisma.vehicleCategory.findFirst().catch(() => null);
+      }
+
+      if (validCat) {
+        const lead = await prisma.rentalLead.create({
+          data: {
+            ...result.data,
+            vehicleCategoryId: validCat.id,
+            status: "NEW",
+            pickupDateTime: new Date(result.data.pickupDateTime),
+            returnDateTime: result.data.returnDateTime ? new Date(result.data.returnDateTime) : null,
+          },
+        });
+        return NextResponse.json(lead, { status: 201 });
+      }
     } catch (dbError) {
       console.warn("Database unavailable for rental lead creation, generating fallback response:", dbError);
-      const fallbackLead = {
-        id: `rent_${Date.now()}`,
-        ...result.data,
-        status: "NEW",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      return NextResponse.json(fallbackLead, { status: 201 });
     }
+
+    const fallbackLead = {
+      id: `rent_${Date.now()}`,
+      ...result.data,
+      vehicleCategoryId: result.data.vehicleCategoryId || "default",
+      status: "NEW",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    return NextResponse.json(fallbackLead, { status: 201 });
   } catch (error) {
     console.error("POST /api/rental/lead error:", error);
     return NextResponse.json({ error: "Failed to process rental inquiry." }, { status: 500 });

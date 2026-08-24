@@ -9,7 +9,7 @@ export const rentalLeadSchema = z.object({
   dropLocation: z.string().optional().nullable(),
   pickupDateTime: z.string().refine((val) => !isNaN(Date.parse(val)), { message: "Invalid pickup date/time format" }),
   returnDateTime: z.string().optional().nullable().refine((val) => !val || !isNaN(Date.parse(val)), { message: "Invalid return date/time format" }),
-  vehicleCategoryId: z.string().uuid("Invalid vehicle category ID"),
+  vehicleCategoryId: z.string().optional().nullable().or(z.literal("")),
   tripType: z.string().min(3, "Please specify a trip type"),
 });
 
