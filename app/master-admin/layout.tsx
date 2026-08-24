@@ -236,17 +236,14 @@ export default function MasterAdminLayout({
       {/* 1. Master Desktop Sidebar Panel (Fixed Left) */}
       <aside className="hidden lg:flex lg:flex-col lg:w-56 lg:fixed lg:inset-y-0 bg-slate-900/95 backdrop-blur-2xl border-r border-amber-500/20 z-40 shrink-0 shadow-2xl">
         {/* Brand Header */}
-        <div className="h-14 px-3 border-b border-amber-500/20 flex flex-col justify-center items-center text-center relative bg-gradient-to-b from-amber-500/10 via-transparent to-transparent">
-          <Link href="/master-admin" className="inline-flex items-center justify-center group" title="Master Admin Home">
+        <div className="h-14 px-3 border-b border-amber-500/20 flex items-center justify-center relative bg-gradient-to-b from-amber-500/10 via-transparent to-transparent">
+          <Link href="/master-admin" className="w-full h-full flex items-center justify-center group" title="Master Admin Home">
             <img
               src="/images/logo.png"
               alt="TEMP TRAVEL"
-              className="h-[36px] w-auto object-contain mx-auto group-hover:scale-105 transition-transform drop-shadow-[0_4px_12px_rgba(245,158,11,0.3)]"
+              className="max-h-10 w-auto max-w-[190px] object-contain mx-auto group-hover:scale-105 transition-transform drop-shadow-[0_4px_12px_rgba(245,158,11,0.3)]"
             />
           </Link>
-          <span className="text-[7px] font-black uppercase tracking-[0.2em] text-amber-400 mt-0.5">
-            Master Control Center
-          </span>
         </div>
 
         {/* Navigation Links */}
@@ -287,7 +284,7 @@ export default function MasterAdminLayout({
       </aside>
 
       {/* 2. Main Content & Right Fixed Notification Wrapper */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-56 xl:pr-64 overflow-x-hidden min-h-screen">
+      <div className="flex-1 flex flex-col min-w-0 lg:pl-56 xl:pr-72 overflow-x-hidden min-h-screen">
         {/* Header Toolbar */}
         <header className="h-14 bg-slate-900/80 backdrop-blur-xl border-b border-amber-500/20 flex items-center justify-between px-4 sm:px-5 lg:px-6 sticky top-0 z-30 shadow-lg">
           <button
@@ -325,17 +322,17 @@ export default function MasterAdminLayout({
       </div>
 
       {/* 3. FIXED RIGHT-SIDE MASTER NOTIFICATION SIDEBAR PANEL */}
-      <aside className="hidden xl:flex xl:flex-col xl:w-64 xl:fixed xl:right-0 xl:inset-y-0 bg-slate-900/95 backdrop-blur-2xl border-l border-amber-500/20 z-40 shrink-0 shadow-2xl">
+      <aside className="hidden xl:flex xl:flex-col xl:w-72 xl:fixed xl:right-0 xl:inset-y-0 bg-slate-900/95 backdrop-blur-2xl border-l border-amber-500/20 z-40 shrink-0 shadow-2xl">
         {/* Right Panel Header */}
-        <div className="h-14 px-4 border-b border-amber-500/20 flex items-center justify-between bg-gradient-to-b from-amber-500/10 via-transparent to-transparent">
-          <div className="flex items-center gap-1.5">
-            <ShieldAlert className="w-4 h-4 text-amber-400" />
-            <h3 className="font-extrabold text-slate-100 text-xs tracking-wide uppercase">
-              Master Alerts & Expiries
+        <div className="h-14 px-4 border-b border-amber-500/20 flex items-center justify-between gap-2 bg-gradient-to-b from-amber-500/10 via-transparent to-transparent">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
+            <h3 className="font-black text-slate-100 text-xs tracking-wider uppercase truncate">
+              Notifications
             </h3>
           </div>
-          <span className="text-[9px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full font-mono">
-            {expiryAlerts.length + birthdayAlerts.length} ALERTS
+          <span className="text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2.5 py-0.5 rounded-full font-mono whitespace-nowrap shrink-0">
+            {expiryAlerts.length + birthdayAlerts.length} Alerts
           </span>
         </div>
 
