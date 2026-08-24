@@ -61,12 +61,12 @@ function isBirthdayThisMonth(dobString: string): { isToday: boolean; isComingUp:
   const today = new Date();
   const age = calculateAge(dobString);
   const isToday = dob.getDate() === today.getDate() && dob.getMonth() === today.getMonth();
-  
+
   // Is coming up in next 7 days
   const dobThisYear = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
   const diff = (dobThisYear.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
   const isComingUp = diff >= 0 && diff <= 7;
-  
+
   return { isToday, isComingUp, age };
 }
 
@@ -255,11 +255,10 @@ export default function MasterAdminLayout({
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-bold tracking-wide transition-all duration-200 group ${
-                  isActive
-                    ? "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md shadow-amber-500/20 font-black"
-                    : "text-slate-300 hover:text-white hover:bg-white/5"
-                }`}
+                className={`flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-bold tracking-wide transition-all duration-200 group ${isActive
+                  ? "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md shadow-amber-500/20 font-black"
+                  : "text-slate-300 hover:text-white hover:bg-white/5"
+                  }`}
               >
                 <div className="flex items-center gap-2">
                   <Icon className={`w-3.5 h-3.5 ${isActive ? "text-slate-950" : "text-amber-400 group-hover:scale-110"} transition-transform`} />
@@ -358,28 +357,26 @@ export default function MasterAdminLayout({
                   return (
                     <div
                       key={idx}
-                      className={`p-3 rounded-xl border transition-all text-xs space-y-1 ${
-                        isUrgent
-                          ? "bg-rose-500/10 border-rose-500/40 text-rose-200"
-                          : "bg-amber-500/10 border-amber-500/30 text-amber-200"
-                      }`}
+                      className={`p-3 rounded-xl border transition-all text-xs space-y-1 ${isUrgent
+                        ? "bg-rose-500/10 border-rose-500/40 text-rose-200"
+                        : "bg-amber-500/10 border-amber-500/30 text-amber-200"
+                        }`}
                     >
                       <div className="flex justify-between items-start font-bold">
                         <span className="leading-tight text-slate-100">{exp.title}</span>
                         <span
-                          className={`text-[9px] font-black font-mono px-2 py-0.5 rounded-full uppercase shrink-0 ${
-                            exp.daysLeft < 0
-                              ? "bg-rose-500 text-white"
-                              : exp.daysLeft <= 7
+                          className={`text-[9px] font-black font-mono px-2 py-0.5 rounded-full uppercase shrink-0 ${exp.daysLeft < 0
+                            ? "bg-rose-500 text-white"
+                            : exp.daysLeft <= 7
                               ? "bg-rose-500/20 text-rose-300 border border-rose-500/40"
                               : "bg-amber-500/20 text-amber-300 border border-amber-500/40"
-                          }`}
+                            }`}
                         >
                           {exp.daysLeft < 0
                             ? "EXPIRED"
                             : exp.daysLeft === 0
-                            ? "EXPIRES TODAY"
-                            : `${exp.daysLeft} DAYS LEFT`}
+                              ? "EXPIRES TODAY"
+                              : `${exp.daysLeft} DAYS LEFT`}
                         </span>
                       </div>
                       <div className="text-[10px] font-mono text-slate-400">{exp.subtitle}</div>
@@ -466,11 +463,10 @@ export default function MasterAdminLayout({
                       key={item.name}
                       href={item.href}
                       onClick={() => setMobileOpen(false)}
-                      className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-bold transition-all ${
-                        isActive
-                          ? "bg-amber-500 text-slate-950 font-black"
-                          : "text-slate-300 hover:bg-white/5"
-                      }`}
+                      className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-bold transition-all ${isActive
+                        ? "bg-amber-500 text-slate-950 font-black"
+                        : "text-slate-300 hover:bg-white/5"
+                        }`}
                     >
                       <Icon className="w-4.5 h-4.5" />
                       <span>{item.name}</span>
