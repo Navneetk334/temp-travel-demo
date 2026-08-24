@@ -72,14 +72,9 @@ export default function MasterDispatchRadarPage() {
     }
   }, []);
 
-  // Map Tile URLs for Day (Google Maps Standard) vs Night (Google Maps Night Mode)
-  const getTileUrl = (mode: "DAY" | "NIGHT") => {
-    if (mode === "DAY") {
-      // CartoDB Voyager (Clean Google Maps Day look with yellow highways, green parks, blue water)
-      return "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
-    }
-    // CartoDB Dark (Google Maps Night Mode look)
-    return "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+  // Real Google Maps Tile URL (mt0, mt1, mt2, mt3)
+  const getGoogleMapsTileUrl = () => {
+    return "https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}";
   };
 
   // Initialize Real Leaflet Map with Google Maps Day/Night Toggle
@@ -99,9 +94,9 @@ export default function MasterDispatchRadarPage() {
         attributionControl: false
       });
 
-      const tileLayer = window.L.tileLayer(getTileUrl(mapMode), {
-        maxZoom: 19,
-        subdomains: "abcd"
+      const tileLayer = window.L.tileLayer(getGoogleMapsTileUrl(), {
+        maxZoom: 20,
+        subdomains: ["mt0", "mt1", "mt2", "mt3"]
       }).addTo(map);
 
       tileLayerRef.current = tileLayer;
@@ -113,20 +108,6 @@ export default function MasterDispatchRadarPage() {
       console.error("Leaflet map initialization error:", e);
     }
   };
-
-  // Switch Tile Layer between Day and Night dynamically
-  useEffect(() => {
-    if (leafletInstanceRef.current && window.L) {
-      if (tileLayerRef.current) {
-        leafletInstanceRef.current.removeLayer(tileLayerRef.current);
-      }
-      const newTileLayer = window.L.tileLayer(getTileUrl(mapMode), {
-        maxZoom: 19,
-        subdomains: "abcd"
-      }).addTo(leafletInstanceRef.current);
-      tileLayerRef.current = newTileLayer;
-    }
-  }, [mapMode]);
 
   const renderMapMarkers = (map: any, driverList: any[]) => {
     if (!window.L || !map) return;
@@ -293,7 +274,7 @@ export default function MasterDispatchRadarPage() {
         </div>
 
         {/* Real Leaflet Map Render Container */}
-        <div className="relative h-80 sm:h-[350px] w-full rounded-xl overflow-hidden border border-amber-500/30 shadow-xl bg-slate-950">
+        <div className={`relative h-80 sm:h-[350px] w-full rounded-xl overflow-hidden border border-amber-500/30 shadow-xl bg-slate-950 ${mapMode === "NIGHT" ? "google-maps-night-mode" : "google-maps-day-mode"}`}>
           <div ref={mapRef} className="w-full h-full z-10" />
 
           {!mapLoaded && (
@@ -303,6 +284,15 @@ export default function MasterDispatchRadarPage() {
             </div>
           )}
         </div>
+
+        <style jsx global>{`
+          .google-maps-night-mode .leaflet-tile-pane {
+            filter: invert(100%) hue-rotate(180deg) brightness(92%) contrast(90%) saturate(110%) !important;
+          }
+          .google-maps-day-mode .leaflet-tile-pane {
+            filter: none !important;
+          }
+        `}</style>
       </div>
 
       {/* Search & Filter Toolbar */}
