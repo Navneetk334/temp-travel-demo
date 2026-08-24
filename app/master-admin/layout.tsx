@@ -250,7 +250,7 @@ export default function MasterAdminLayout({
   return (
     <div className="min-h-screen bg-slate-950 flex font-sans selection:bg-amber-500 selection:text-slate-950">
       {/* 1. Master Desktop Sidebar Panel (Fixed Left) */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-56 lg:fixed lg:inset-y-0 bg-slate-900/95 backdrop-blur-2xl border-r border-amber-500/20 z-40 shrink-0 shadow-2xl">
+      <aside className="hidden lg:flex lg:flex-col lg:w-56 lg:fixed lg:inset-y-0 bg-slate-900/95 backdrop-blur-2xl border-r border-amber-500/20 z-20 shrink-0 shadow-2xl">
         {/* Brand Header */}
         <div className="h-14 px-3 border-b border-amber-500/20 flex items-center justify-center relative bg-gradient-to-b from-amber-500/10 via-transparent to-transparent">
           <Link href="/master-admin" className="w-full h-full flex items-center justify-center group" title="Master Admin Home">
@@ -356,9 +356,9 @@ export default function MasterAdminLayout({
       </aside>
 
       {/* 2. Main Content & Right Fixed Notification Wrapper */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-56 xl:pr-72 overflow-x-hidden min-h-screen">
+      <div className="flex-1 flex flex-col min-w-0 lg:pl-56 xl:pr-72 overflow-x-hidden min-h-screen relative z-30">
         {/* Header Toolbar */}
-        <header className="h-14 bg-slate-900/80 backdrop-blur-xl border-b border-amber-500/20 flex items-center justify-between px-4 sm:px-5 lg:px-6 sticky top-0 z-30 shadow-lg">
+        <header className="h-14 bg-slate-900/80 backdrop-blur-xl border-b border-amber-500/20 flex items-center justify-between px-4 sm:px-5 lg:px-6 sticky top-0 z-10 shadow-lg">
           <button
             onClick={() => setMobileOpen(true)}
             className="lg:hidden p-1.5 text-slate-400 hover:text-amber-400 rounded-lg hover:bg-white/5"
@@ -397,13 +397,13 @@ export default function MasterAdminLayout({
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-3.5 sm:p-5 lg:p-6 overflow-y-auto">
+        <main className="flex-1 p-3.5 sm:p-5 lg:p-6 overflow-y-auto relative z-30">
           {children}
         </main>
       </div>
 
       {/* 3. FIXED RIGHT-SIDE MASTER NOTIFICATION SIDEBAR PANEL */}
-      <aside className="hidden xl:flex xl:flex-col xl:w-72 xl:fixed xl:right-0 xl:inset-y-0 bg-slate-900/95 backdrop-blur-2xl border-l border-amber-500/20 z-40 shrink-0 shadow-2xl">
+      <aside className="hidden xl:flex xl:flex-col xl:w-72 xl:fixed xl:right-0 xl:inset-y-0 bg-slate-900/95 backdrop-blur-2xl border-l border-amber-500/20 z-20 shrink-0 shadow-2xl">
         {/* Right Panel Header */}
         <div className="h-14 px-4 border-b border-amber-500/20 flex items-center justify-between gap-2 bg-gradient-to-b from-amber-500/10 via-transparent to-transparent">
           <div className="flex items-center gap-1.5 min-w-0">

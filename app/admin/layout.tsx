@@ -102,7 +102,7 @@ export default function AdminLayout({
   return (
     <div className="min-h-screen bg-slate-950 flex">
       {/* 1. Sidebar Panel for Desktop (Fixed) */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-slate-900 border-r border-white/5 z-30 shrink-0">
+      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-slate-900 border-r border-white/5 z-20 shrink-0">
         {/* Brand identity */}
         <div className="h-20 px-4 border-b border-white/5 flex items-center justify-center text-center">
           <Link href="/admin" className="inline-flex items-center justify-center" title="Admin Home">
@@ -123,40 +123,47 @@ export default function AdminLayout({
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all ${isActive
-                    ? "bg-primary text-primary-foreground border-l-2 border-accent"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
-                  }`}
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                  isActive
+                    ? "bg-accent text-slate-950 font-bold shadow-md shadow-accent/20"
+                    : "text-slate-400 hover:text-slate-100 hover:bg-white/5"
+                }`}
               >
-                <Icon className={`w-4.5 h-4.5 ${isActive ? "text-accent" : "text-slate-400"}`} />
-                <span>{item.name}</span>
+                <div className="flex items-center gap-3">
+                  <Icon className={`w-4 h-4 ${isActive ? "text-slate-950" : "text-accent"}`} />
+                  <span>{item.name}</span>
+                </div>
               </Link>
             );
           })}
         </nav>
 
-        {/* Profile Avatar Card */}
-        <div className="p-4 border-t border-white/5 flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-accent font-bold uppercase">
+        {/* User profile & logout */}
+        <div className="p-4 border-t border-white/5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-accent/20 border border-accent/40 flex items-center justify-center text-accent font-bold text-xs">
               {adminSession.name.charAt(0)}
             </div>
-            <div>
+            <div className="text-xs">
               <div className="font-bold text-slate-200">{adminSession.name}</div>
-              <div className="text-[9px] text-slate-500 font-semibold uppercase mt-0.5">{adminSession.role}</div>
+              <div className="text-slate-500 font-mono text-[10px]">{adminSession.role}</div>
             </div>
           </div>
-          <button onClick={handleLogout} className="text-slate-400 hover:text-slate-200" title="Sign Out">
+          <button
+            onClick={handleLogout}
+            title="Sign Out"
+            className="p-1.5 text-slate-400 hover:text-red-400 rounded-lg hover:bg-white/5 transition-colors"
+          >
             <LogOut className="w-4 h-4" />
           </button>
         </div>
       </aside>
 
       {/* 2. Main content area (Padded for fixed sidebar) */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-64 overflow-x-hidden min-h-screen">
+      <div className="flex-1 flex flex-col min-w-0 lg:pl-64 overflow-x-hidden min-h-screen relative z-30">
 
         {/* Header toolbar */}
-        <header className="h-20 bg-slate-900 border-b border-white/5 flex items-center justify-between px-4 sm:px-6 lg:px-8">
+        <header className="h-20 bg-slate-900 border-b border-white/5 flex items-center justify-between px-4 sm:px-6 lg:px-8 relative z-10">
           <button
             onClick={() => setMobileOpen(true)}
             className="lg:hidden p-2 text-slate-400 hover:text-slate-200"
@@ -186,14 +193,14 @@ export default function AdminLayout({
         </header>
 
         {/* Main Content Body */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto relative z-30">
           {children}
         </main>
       </div>
 
       {/* Mobile Drawer Slide-out */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-50 flex lg:hidden bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[9999] flex lg:hidden bg-black/60 backdrop-blur-sm">
           <div className="bg-slate-900 w-64 p-6 relative flex flex-col justify-between h-full border-r border-white/10">
             <button
               onClick={() => setMobileOpen(false)}

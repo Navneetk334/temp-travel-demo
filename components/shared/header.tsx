@@ -28,7 +28,7 @@ export default function Header() {
   ];
 
   return (
-    <header className="fixed top-4 inset-x-0 z-50 px-4 flex justify-center pointer-events-none">
+    <header className="fixed top-4 inset-x-0 z-30 px-4 flex justify-center pointer-events-none">
       <div className="pointer-events-auto bg-slate-950/80 backdrop-blur-xl border border-white/15 rounded-full px-7 py-3 sm:py-3.5 shadow-2xl shadow-slate-950/90 flex items-center gap-6 sm:gap-8 max-w-fit mx-auto transition-all duration-300 hover:border-amber-400/40">
 
         {/* Left Navigation Links */}
