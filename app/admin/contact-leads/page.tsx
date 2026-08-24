@@ -80,24 +80,54 @@ export default function AdminContactLeadsPage() {
         limit: pageSize.toString(),
       });
 
+      let fetchedLeads: ContactLead[] = [];
       const res = await fetch(`/api/contact?${queryParams.toString()}`);
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {
-          setLeads(data);
-          setTotalCount(data.length);
-          setTotalPages(1);
-        } else {
-          setLeads(data.leads || []);
-          setTotalCount(data.pagination?.totalCount || 0);
-          setTotalPages(data.pagination?.totalPages || 1);
-          if (data.stats) {
-            setStats(data.stats);
-          }
+          fetchedLeads = data;
+        } else if (data.leads) {
+          fetchedLeads = data.leads;
+          if (data.stats) setStats(data.stats);
         }
       }
+
+      // Merge local CRM storage leads for Contact Inquiries
+      try {
+        const local = localStorage.getItem("user_uploaded_crm_leads");
+        if (local) {
+          const parsed = JSON.parse(local);
+          if (Array.isArray(parsed)) {
+            const matching = parsed.filter((l: any) => 
+              (l.tripType || "").toLowerCase().includes("contact") ||
+              (l.tripType || "").toLowerCase().includes("inquiry") ||
+              (l.notes || "").toLowerCase().includes("subject")
+            ).map((l: any) => ({
+              id: l.id || `contact_${Date.now()}`,
+              name: l.customerName || "Web Inquirer",
+              email: l.email || "",
+              phone: l.phone || null,
+              subject: l.tripType || "General Inquiry",
+              message: l.notes || "Customer contacted via website.",
+              status: (l.status || "NEW") as ContactStatus,
+              createdAt: l.createdAt || new Date().toISOString()
+            }));
+
+            const map = new Map<string, ContactLead>();
+            fetchedLeads.forEach(f => map.set(f.id, f));
+            matching.forEach(m => map.set(m.id, m));
+            fetchedLeads = Array.from(map.values());
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+
+      setLeads(fetchedLeads);
+      setTotalCount(fetchedLeads.length);
+      setTotalPages(Math.ceil(fetchedLeads.length / pageSize) || 1);
     } catch (err) {
-      console.error("Failed to load contact messages:", err);
+      console.error("Failed to load contact leads:", err);
     } finally {
       if (showSpinner) setLoading(false);
     }

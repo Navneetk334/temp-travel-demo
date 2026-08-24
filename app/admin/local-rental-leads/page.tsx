@@ -89,22 +89,58 @@ export default function AdminLocalRentalLeadsPage() {
         limit: pageSize.toString(),
       });
 
+      let fetchedLeads: Lead[] = [];
       const res = await fetch(`/api/rental/lead?${queryParams.toString()}`);
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {
-          setLeads(data);
-          setTotalCount(data.length);
-          setTotalPages(1);
-        } else {
-          setLeads(data.leads || []);
-          setTotalCount(data.pagination?.totalCount || 0);
-          setTotalPages(data.pagination?.totalPages || 1);
-          if (data.stats) {
-            setStats(data.stats);
-          }
+          fetchedLeads = data;
+        } else if (data.leads) {
+          fetchedLeads = data.leads;
+          if (data.stats) setStats(data.stats);
         }
       }
+
+      // Merge local CRM storage leads for Local Hourly Rentals
+      try {
+        const local = localStorage.getItem("user_uploaded_crm_leads");
+        if (local) {
+          const parsed = JSON.parse(local);
+          if (Array.isArray(parsed)) {
+            const matching = parsed.filter((l: any) => 
+              (l.tripType || "").toLowerCase().includes("local") || 
+              (l.tripType || "").toLowerCase().includes("hourly") ||
+              (l.notes || "").toLowerCase().includes("local")
+            ).map((l: any) => ({
+              id: l.id || `lead_${Date.now()}`,
+              customerName: l.customerName || "Customer",
+              email: l.email || "",
+              phone: l.phone || "",
+              pickupLocation: l.pickupLocation || "",
+              dropLocation: l.dropLocation || null,
+              pickupDateTime: l.createdAt || new Date().toISOString(),
+              returnDateTime: null,
+              tripType: l.tripType || "Local Hourly Rental",
+              notes: l.notes || "",
+              status: (l.status || "NEW") as LeadStatus,
+              vehicleCategoryId: "default",
+              vehicleCategory: { id: "cat-1", name: "Selected Vehicle Class", slug: "selected-vehicle-class" },
+              createdAt: l.createdAt || new Date().toISOString()
+            }));
+
+            const map = new Map<string, Lead>();
+            fetchedLeads.forEach(f => map.set(f.id, f));
+            matching.forEach(m => map.set(m.id, m));
+            fetchedLeads = Array.from(map.values());
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+
+      setLeads(fetchedLeads);
+      setTotalCount(fetchedLeads.length);
+      setTotalPages(Math.ceil(fetchedLeads.length / pageSize) || 1);
     } catch (err) {
       console.error("Failed to load local rental leads:", err);
     } finally {

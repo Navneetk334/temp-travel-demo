@@ -50,14 +50,60 @@ export default function AdminTourLeadsPage() {
   const loadLeads = async (showSpinner = true) => {
     if (showSpinner) setLoading(true);
     try {
+      let bookingsList: BookingLead[] = [];
       const res = await fetch(`/api/bookings?bookingType=TOUR_PACKAGE`);
       if (res.ok) {
         const data = await res.json();
-        const bookingsList: BookingLead[] = Array.isArray(data) ? data : data.bookings || [];
-        setLeads(bookingsList);
-        setTotalCount(bookingsList.length);
-        setTotalPages(Math.ceil(bookingsList.length / pageSize) || 1);
+        bookingsList = Array.isArray(data) ? data : data.bookings || [];
       }
+
+      // Merge local CRM storage leads for Tour Packages
+      try {
+        const local = localStorage.getItem("user_uploaded_crm_leads");
+        if (local) {
+          const parsed = JSON.parse(local);
+          if (Array.isArray(parsed)) {
+            const matching = parsed.filter((l: any) => 
+              (l.tripType || "").toLowerCase().includes("tour") ||
+              (l.notes || "").toLowerCase().includes("tour")
+            ).map((l: any) => ({
+              id: l.id || `book_${Date.now()}`,
+              bookingNumber: l.bookingRef || `BKG-${Date.now().toString().slice(-6)}`,
+              name: l.customerName || "Tour Passenger",
+              contactName: l.customerName || "Tour Passenger",
+              bookingType: "TOUR_PACKAGE",
+              email: l.email || "",
+              phone: l.phone || "",
+              travelDate: l.createdAt || new Date().toISOString(),
+              numPassengers: 2,
+              pickupLocation: l.pickupLocation || "IGI Airport Terminal 3",
+              dropLocation: l.dropLocation || "Tour Destination",
+              totalAmount: 15000,
+              taxAmount: 750,
+              netAmount: 15750,
+              notes: l.notes || "",
+              status: (l.status || "PENDING") as BookingStatus,
+              tourPackage: {
+                id: "tour-pkg-1",
+                title: l.tripType || "Exclusive Tour Package",
+                duration: "3 Days / 2 Nights"
+              },
+              createdAt: l.createdAt || new Date().toISOString()
+            }));
+
+            const map = new Map<string, BookingLead>();
+            bookingsList.forEach(f => map.set(f.id, f));
+            matching.forEach(m => map.set(m.id, m));
+            bookingsList = Array.from(map.values());
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+
+      setLeads(bookingsList);
+      setTotalCount(bookingsList.length);
+      setTotalPages(Math.ceil(bookingsList.length / pageSize) || 1);
     } catch (err) {
       console.error("Failed to load tour leads:", err);
     } finally {
