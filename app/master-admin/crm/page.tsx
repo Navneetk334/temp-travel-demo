@@ -241,6 +241,74 @@ export default function MasterOmnichannelCRMPage() {
     },
   ];
 
+  const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
+
+  const handleSelectAll = () => {
+    if (selectedLeadIds.length === displayLeads.length && displayLeads.length > 0) {
+      setSelectedLeadIds([]);
+    } else {
+      setSelectedLeadIds(displayLeads.map(l => l.id));
+    }
+  };
+
+  const handleToggleSelect = (id: string) => {
+    setSelectedLeadIds(prev =>
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkStatusChange = (newStatus: string) => {
+    if (selectedLeadIds.length === 0) return;
+    const updated = leads.map(l => selectedLeadIds.includes(l.id) ? { ...l, status: newStatus } : l);
+    setLeads(updated);
+    try {
+      localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(updated));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedLeadIds.length === 0) return;
+    if (confirm(`Are you sure you want to delete ${selectedLeadIds.length} selected lead(s)?`)) {
+      const updated = leads.filter(l => !selectedLeadIds.includes(l.id));
+      setLeads(updated);
+      setSelectedLeadIds([]);
+      try {
+        localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(updated));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
+  const exportSelectedCSV = () => {
+    const targetLeads = selectedLeadIds.length > 0
+      ? leads.filter(l => selectedLeadIds.includes(l.id))
+      : displayLeads;
+
+    const headers = ["Booking Ref", "Customer Name", "Phone", "Email", "Trip Type", "Pickup", "Drop", "Status", "Date"];
+    const rows = targetLeads.map(l => [
+      l.bookingRef,
+      l.customerName,
+      l.phone,
+      l.email,
+      l.tripType,
+      l.pickupLocation,
+      l.dropLocation,
+      l.status,
+      l.createdAt
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.map(x => `"${(x || "").toString().replace(/"/g, '""')}"`).join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Omnichannel_Selected_Leads_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -288,9 +356,9 @@ export default function MasterOmnichannelCRMPage() {
             <button
               key={cat.key}
               onClick={() => setActiveLeadTab(cat.key as any)}
-              className={`p-4 rounded-2xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
+              className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
                 isActive
-                  ? "bg-amber-500 text-slate-950 border-amber-400 font-black shadow-lg shadow-amber-500/20"
+                  ? "bg-amber-500 text-slate-950 border-amber-400 shadow-xl shadow-amber-500/20 font-black scale-[1.02]"
                   : "bg-slate-900/80 text-slate-300 border-white/10 hover:border-amber-500/40"
               }`}
             >
@@ -308,6 +376,7 @@ export default function MasterOmnichannelCRMPage() {
 
       {/* Leads Table & Pipeline List */}
       <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl space-y-4">
+        {/* Search and Filters */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-4 border-b border-white/10">
           <div className="relative w-full sm:w-80">
             <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -320,10 +389,10 @@ export default function MasterOmnichannelCRMPage() {
             />
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Filter className="w-4 h-4 text-slate-400" />
             <span className="text-xs text-slate-400 font-bold uppercase">Status:</span>
-            {["ALL", "NEW", "CONTACTED", "QUALIFIED", "CONVERTED"].map((st) => (
+            {["ALL", "NEW", "CONTACTED", "QUALIFIED", "CONVERTED", "LOST"].map((st) => (
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
@@ -339,11 +408,77 @@ export default function MasterOmnichannelCRMPage() {
           </div>
         </div>
 
+        {/* Multi-Select Bulk Actions Toolbar */}
+        {selectedLeadIds.length > 0 && (
+          <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl animate-in fade-in slide-in-from-top-2">
+            <div className="flex items-center gap-2">
+              <span className="bg-amber-500 text-slate-950 text-xs font-black px-2.5 py-0.5 rounded-md font-mono">
+                {selectedLeadIds.length} Selected
+              </span>
+              <span className="text-xs text-slate-300 font-medium">Bulk Lead Operations</span>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] text-slate-400 font-bold">Mark As:</span>
+                <select
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      handleBulkStatusChange(e.target.value);
+                      e.target.value = "";
+                    }
+                  }}
+                  className="bg-slate-950 border border-amber-500/30 text-amber-400 text-xs font-bold rounded-lg px-2.5 py-1 focus:outline-none cursor-pointer"
+                  defaultValue=""
+                >
+                  <option value="" disabled>Select Status...</option>
+                  <option value="NEW">NEW</option>
+                  <option value="CONTACTED">CONTACTED</option>
+                  <option value="QUALIFIED">QUALIFIED</option>
+                  <option value="CONVERTED">CONVERTED</option>
+                  <option value="LOST">LOST</option>
+                </select>
+              </div>
+
+              <button
+                onClick={exportSelectedCSV}
+                className="flex items-center gap-1 bg-slate-950 hover:bg-slate-800 border border-white/10 text-slate-300 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer"
+              >
+                <Download className="w-3 h-3 text-amber-400" />
+                <span>Export Selected</span>
+              </button>
+
+              <button
+                onClick={handleBulkDelete}
+                className="flex items-center gap-1 bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white border border-rose-500/30 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer"
+              >
+                <span>Delete Selected</span>
+              </button>
+
+              <button
+                onClick={() => setSelectedLeadIds([])}
+                className="text-xs text-slate-400 hover:text-white font-bold underline px-2 py-1 cursor-pointer"
+              >
+                Deselect All
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Lead Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs text-slate-300">
             <thead className="bg-slate-950 text-slate-400 font-extrabold uppercase text-[10px] tracking-wider border-b border-white/10">
               <tr>
+                <th className="py-3 px-3 w-10 text-center">
+                  <input
+                    type="checkbox"
+                    checked={displayLeads.length > 0 && selectedLeadIds.length === displayLeads.length}
+                    onChange={handleSelectAll}
+                    className="w-4 h-4 rounded border-white/20 bg-slate-900 text-amber-500 focus:ring-amber-400 cursor-pointer accent-amber-500"
+                    title="Select All Leads"
+                  />
+                </th>
                 <th className="py-3 px-4">Customer Info</th>
                 <th className="py-3 px-4">Trip / Requirement</th>
                 <th className="py-3 px-4">Locations & Date</th>
@@ -353,54 +488,83 @@ export default function MasterOmnichannelCRMPage() {
             </thead>
             <tbody className="divide-y divide-white/5">
               {displayLeads.length > 0 ? (
-                displayLeads.map((lead, idx) => (
-                  <tr key={lead.id || idx} className="hover:bg-white/5 transition-colors">
-                    <td className="py-4 px-4 font-semibold text-slate-100">
-                      <div>{lead.customerName || "Customer Lead"}</div>
-                      <div className="text-[11px] text-slate-400 font-mono">{lead.phone}</div>
-                      <div className="text-[10px] text-slate-500">{lead.email}</div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                        {lead.tripType || "Rental Lead"}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="text-slate-200">{lead.pickupLocation || lead.pickup}</div>
-                      <div className="text-[11px] text-slate-400 font-mono">{lead.pickupDateTime || "Flexible Date"}</div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <select
-                        value={lead.status || "NEW"}
-                        onChange={(e) => updateLeadStatus(lead.id, e.target.value)}
-                        className="bg-slate-950 border border-white/10 rounded-lg px-2.5 py-1 text-[11px] font-bold text-amber-400 focus:outline-none focus:border-amber-400 cursor-pointer"
-                      >
-                        <option value="NEW">NEW</option>
-                        <option value="CONTACTED">CONTACTED</option>
-                        <option value="QUALIFIED">QUALIFIED</option>
-                        <option value="CONVERTED">CONVERTED</option>
-                        <option value="LOST">LOST</option>
-                      </select>
-                    </td>
-                    <td className="py-4 px-4 text-right space-x-2">
-                      <button
-                        onClick={() => setSelectedLead(lead)}
-                        className="inline-flex items-center gap-1 bg-slate-950 text-slate-300 hover:text-white border border-white/10 px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer"
-                      >
-                        <Eye className="w-3 h-3 text-amber-400" /> Inspect
-                      </button>
-                      <a
-                        href={`tel:${lead.phone}`}
-                        className="inline-flex items-center gap-1 bg-amber-500/10 text-amber-400 border border-amber-500/30 px-3 py-1 rounded-lg hover:bg-amber-500 hover:text-slate-950 text-[11px] font-bold transition-all"
-                      >
-                        <PhoneCall className="w-3 h-3" /> Call
-                      </a>
-                    </td>
-                  </tr>
-                ))
+                displayLeads.map((lead, idx) => {
+                  const isSelected = selectedLeadIds.includes(lead.id);
+                  return (
+                    <tr
+                      key={lead.id || idx}
+                      className={`transition-colors ${
+                        isSelected ? "bg-amber-500/10" : "hover:bg-white/5"
+                      }`}
+                    >
+                      <td className="py-4 px-3 text-center">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => handleToggleSelect(lead.id)}
+                          className="w-4 h-4 rounded border-white/20 bg-slate-900 text-amber-500 focus:ring-amber-400 cursor-pointer accent-amber-500"
+                        />
+                      </td>
+                      <td className="py-4 px-4 font-semibold text-slate-100">
+                        <div className="flex items-center gap-2">
+                          <span>{lead.customerName || "Customer Lead"}</span>
+                          {lead.companyName && (
+                            <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-normal">
+                              {lead.companyName}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[11px] text-slate-400 font-mono mt-0.5">{lead.phone}</div>
+                        <div className="text-[10px] text-slate-500">{lead.email}</div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20 whitespace-nowrap">
+                          {lead.tripType || "Rental Lead"}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4 max-w-xs">
+                        <div className="text-slate-200 truncate" title={lead.pickupLocation}>
+                          {lead.pickupLocation || lead.pickup}
+                        </div>
+                        <div className="text-[11px] text-slate-400 font-mono">{lead.createdAt?.slice(0, 10) || "Recent"}</div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <select
+                          value={lead.status || "NEW"}
+                          onChange={(e) => updateLeadStatus(lead.id, e.target.value)}
+                          className="bg-slate-950 border border-white/10 rounded-lg px-2.5 py-1 text-[11px] font-bold text-amber-400 focus:outline-none focus:border-amber-400 cursor-pointer"
+                        >
+                          <option value="NEW">NEW</option>
+                          <option value="CONTACTED">CONTACTED</option>
+                          <option value="QUALIFIED">QUALIFIED</option>
+                          <option value="CONVERTED">CONVERTED</option>
+                          <option value="LOST">LOST</option>
+                        </select>
+                      </td>
+                      <td className="py-4 px-4 text-right">
+                        <div className="flex items-center justify-end gap-2 whitespace-nowrap">
+                          <button
+                            onClick={() => setSelectedLead(lead)}
+                            className="inline-flex items-center gap-1 bg-slate-950 hover:bg-slate-800 text-slate-300 hover:text-white border border-white/10 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer shadow-sm"
+                          >
+                            <Eye className="w-3.5 h-3.5 text-amber-400" />
+                            <span>Inspect</span>
+                          </button>
+                          <a
+                            href={`tel:${lead.phone}`}
+                            className="inline-flex items-center gap-1 bg-amber-500/10 hover:bg-amber-500 text-amber-400 hover:text-slate-950 border border-amber-500/30 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all shadow-sm"
+                          >
+                            <PhoneCall className="w-3.5 h-3.5" />
+                            <span>Call</span>
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-slate-400 text-xs">
+                  <td colSpan={6} className="py-8 text-center text-slate-400 text-xs">
                     No lead records found for this category tab.
                   </td>
                 </tr>

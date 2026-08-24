@@ -200,6 +200,39 @@ export default function MasterBlogCMSPage() {
     (a.seoKeywords && a.seoKeywords.toLowerCase().includes(search.toLowerCase()))
   );
 
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const handleSelectAll = () => {
+    if (selectedIds.length === filteredArticles.length && filteredArticles.length > 0) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredArticles.map(a => a.id));
+    }
+  };
+
+  const handleToggleSelect = (id: string) => {
+    setSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedIds.length === 0) return;
+    if (confirm(`Are you sure you want to delete ${selectedIds.length} selected blog article(s)?`)) {
+      const updated = articles.filter(a => !selectedIds.includes(a.id));
+      setArticles(updated);
+      setSelectedIds([]);
+      localStorage.setItem("user_uploaded_blogs", JSON.stringify(updated));
+    }
+  };
+
+  const handleBulkStatusChange = (status: "PUBLISHED" | "DRAFT") => {
+    if (selectedIds.length === 0) return;
+    const updated = articles.map(a => selectedIds.includes(a.id) ? { ...a, status } : a);
+    setArticles(updated);
+    localStorage.setItem("user_uploaded_blogs", JSON.stringify(updated));
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -247,114 +280,177 @@ export default function MasterBlogCMSPage() {
           <div className="text-[11px] text-emerald-400 mt-1">100% Schema.org BlogPosting Indexed</div>
         </div>
 
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-blue-500/30 rounded-2xl p-6 shadow-xl">
+        <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-xs text-slate-400 font-bold uppercase">Organic Blog Traffic</span>
-            <Globe className="w-5 h-5 text-blue-400" />
+            <span className="text-xs text-slate-400 font-bold uppercase">Organic Search Focus</span>
+            <Globe className="w-5 h-5 text-amber-400" />
           </div>
-          <div className="text-3xl font-black text-slate-50 font-mono">7,410 Reads</div>
-          <div className="text-[11px] text-blue-400 mt-1">Driving Qualified Leads to Booking Widget</div>
+          <div className="text-3xl font-black text-slate-50 font-mono">India-Wide</div>
+          <div className="text-[11px] text-slate-400 mt-1">Delhi, Mumbai, Goa, Bangalore, Pune</div>
         </div>
 
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-6 shadow-xl">
+        <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-xs text-slate-400 font-bold uppercase">Google Organic Ranking</span>
-            <Sparkles className="w-5 h-5 text-purple-400" />
+            <span className="text-xs text-slate-400 font-bold uppercase">Active Categories</span>
+            <Tag className="w-5 h-5 text-amber-400" />
           </div>
-          <div className="text-3xl font-black text-slate-50 font-mono">Top 3 Rank</div>
-          <div className="text-[11px] text-purple-400 mt-1">Outstation & Airport Cab Search</div>
+          <div className="text-3xl font-black text-slate-50 font-mono">{categories.length} Topics</div>
+          <div className="text-[11px] text-slate-400 mt-1">High-Intent Commercial Keyword Clusters</div>
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-2xl border border-white/10">
-        <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Search article title, keyword or category..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-slate-950 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
-          />
+      {/* Articles Management Table */}
+      <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl space-y-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-4 border-b border-white/10">
+          <div className="relative w-full sm:w-80">
+            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search articles by title, keywords or category..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-slate-950 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
+            />
+          </div>
         </div>
-      </div>
 
-      {/* Articles Table */}
-      <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl space-y-4">
-        <div className="flex justify-between items-center pb-4 border-b border-white/10">
-          <h3 className="text-base font-bold text-slate-100">Live Blog Publications & SEO Index</h3>
-          <span className="text-xs font-mono text-slate-400">Total: {filteredArticles.length} Posts</span>
-        </div>
+        {/* Multi-Select Bulk Actions Bar */}
+        {selectedIds.length > 0 && (
+          <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl animate-in fade-in slide-in-from-top-2">
+            <div className="flex items-center gap-2">
+              <span className="bg-amber-500 text-slate-950 text-xs font-black px-2.5 py-0.5 rounded-md font-mono">
+                {selectedIds.length} Selected
+              </span>
+              <span className="text-xs text-slate-300 font-medium">Bulk Blog Operations</span>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={() => handleBulkStatusChange("PUBLISHED")}
+                className="bg-slate-950 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer"
+              >
+                Publish All
+              </button>
+              <button
+                onClick={() => handleBulkStatusChange("DRAFT")}
+                className="bg-slate-950 hover:bg-white/10 text-slate-300 border border-white/10 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer"
+              >
+                Set to Draft
+              </button>
+              <button
+                onClick={handleBulkDelete}
+                className="bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white border border-rose-500/30 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer"
+              >
+                Delete Selected
+              </button>
+              <button
+                onClick={() => setSelectedIds([])}
+                className="text-xs text-slate-400 hover:text-white font-bold underline px-2 py-1 cursor-pointer"
+              >
+                Deselect All
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs text-slate-300">
             <thead className="bg-slate-950 text-slate-400 font-extrabold uppercase text-[10px] tracking-wider border-b border-white/10">
               <tr>
-                <th className="py-3 px-4">Article Title & Slug</th>
+                <th className="py-3 px-3 w-10 text-center">
+                  <input
+                    type="checkbox"
+                    checked={filteredArticles.length > 0 && selectedIds.length === filteredArticles.length}
+                    onChange={handleSelectAll}
+                    className="w-4 h-4 rounded border-white/20 bg-slate-900 text-amber-500 focus:ring-amber-400 cursor-pointer accent-amber-500"
+                    title="Select All Blogs"
+                  />
+                </th>
+                <th className="py-3 px-4">Article Title & Path</th>
                 <th className="py-3 px-4">Category & Keywords</th>
                 <th className="py-3 px-4">Published Date</th>
                 <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th className="py-3 px-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {filteredArticles.map((art) => (
-                <tr key={art.id} className="hover:bg-white/5 transition-colors">
-                  <td className="py-4 px-4">
-                    <div className="font-bold text-slate-100">{art.title}</div>
-                    <div className="text-[10px] font-mono text-amber-400">/blog/{art.slug}</div>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20 mb-1">
-                      {art.category}
-                    </span>
-                    <div className="text-[10px] text-slate-400 font-mono">Keywords: {art.seoKeywords}</div>
-                  </td>
-                  <td className="py-4 px-4 font-mono text-slate-400">{art.date}</td>
-                  <td className="py-4 px-4">
-                    <button
-                      onClick={() => toggleStatus(art.id)}
-                      className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase border cursor-pointer ${
-                        art.status === "PUBLISHED"
-                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                          : "bg-slate-950 text-slate-400 border-white/10"
-                      }`}
-                    >
-                      {art.status}
-                    </button>
-                  </td>
-                  <td className="py-3 px-3 text-right space-x-1.5 whitespace-nowrap">
-                    <button
-                      onClick={() => openEditModal(art)}
-                      className="inline-flex items-center gap-1 bg-slate-950 text-slate-300 hover:text-white border border-white/10 hover:border-amber-400/40 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer"
-                    >
-                      <Edit2 className="w-3 h-3 text-amber-400" /> Edit
-                    </button>
-                    <button
-                      onClick={() => setSelectedArticle(art)}
-                      className="inline-flex items-center gap-1 bg-slate-950 text-slate-300 hover:text-white border border-white/10 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer"
-                    >
-                      <Eye className="w-3 h-3 text-amber-400" /> Read
-                    </button>
-                    <a
-                      href={`/blog/${art.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded-lg hover:bg-amber-500 hover:text-slate-950 text-[10px] font-bold transition-all"
-                    >
-                      Live <ExternalLink className="w-3 h-3" />
-                    </a>
-                    <button
-                      onClick={() => handleDeleteArticle(art.id)}
-                      className="inline-flex items-center p-1 bg-slate-950 text-slate-400 hover:text-rose-400 border border-white/10 hover:border-rose-400/40 rounded-lg text-[10px] font-bold transition-all cursor-pointer"
-                      title="Delete Article"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {filteredArticles.map((art) => {
+                const isSelected = selectedIds.includes(art.id);
+                return (
+                  <tr
+                    key={art.id}
+                    className={`transition-colors ${
+                      isSelected ? "bg-amber-500/10" : "hover:bg-white/5"
+                    }`}
+                  >
+                    <td className="py-4 px-3 text-center">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => handleToggleSelect(art.id)}
+                        className="w-4 h-4 rounded border-white/20 bg-slate-900 text-amber-500 focus:ring-amber-400 cursor-pointer accent-amber-500"
+                      />
+                    </td>
+                    <td className="py-4 px-4">
+                      <div className="font-bold text-slate-100">{art.title}</div>
+                      <div className="text-[10px] font-mono text-amber-400">/blog/{art.slug}</div>
+                    </td>
+                    <td className="py-4 px-4">
+                      <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20 mb-1">
+                        {art.category}
+                      </span>
+                      <div className="text-[10px] text-slate-400 font-mono">Keywords: {art.seoKeywords}</div>
+                    </td>
+                    <td className="py-4 px-4 font-mono text-slate-400">{art.date}</td>
+                    <td className="py-4 px-4">
+                      <button
+                        onClick={() => toggleStatus(art.id)}
+                        className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase border cursor-pointer ${
+                          art.status === "PUBLISHED"
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                            : "bg-slate-950 text-slate-400 border-white/10"
+                        }`}
+                      >
+                        {art.status}
+                      </button>
+                    </td>
+                    <td className="py-3 px-3 text-right whitespace-nowrap">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => openEditModal(art)}
+                          className="inline-flex items-center gap-1 bg-slate-950 text-slate-300 hover:text-white border border-white/10 hover:border-amber-400/40 px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all cursor-pointer shadow-sm"
+                        >
+                          <Edit2 className="w-3 h-3 text-amber-400" />
+                          <span>Edit</span>
+                        </button>
+                        <button
+                          onClick={() => setSelectedArticle(art)}
+                          className="inline-flex items-center gap-1 bg-slate-950 text-slate-300 hover:text-white border border-white/10 px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all cursor-pointer shadow-sm"
+                        >
+                          <Eye className="w-3 h-3 text-amber-400" />
+                          <span>Read</span>
+                        </button>
+                        <a
+                          href={`/blog/${art.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2.5 py-1.5 rounded-lg hover:bg-amber-500 hover:text-slate-950 text-[10px] font-bold transition-all shadow-sm"
+                        >
+                          <span>Live</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                        <button
+                          onClick={() => handleDeleteArticle(art.id)}
+                          className="inline-flex items-center p-1.5 bg-slate-950 text-slate-400 hover:text-rose-400 border border-white/10 hover:border-rose-400/40 rounded-lg text-[10px] font-bold transition-all cursor-pointer shadow-sm"
+                          title="Delete Article"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
