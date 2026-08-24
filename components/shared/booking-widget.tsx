@@ -972,8 +972,32 @@ export default function BookingWidget() {
       }
 
       setSuccess(true);
-      if (data.bookingNumber) {
-        setBookingRef(data.bookingNumber);
+      const generatedRef = data.bookingNumber || `TT-${Date.now().toString().slice(-6)}`;
+      setBookingRef(generatedRef);
+
+      // Persist lead to local CRM storage
+      try {
+        const leadRecord = {
+          id: data.id || `lead_${Date.now()}`,
+          bookingRef: generatedRef,
+          customerName: payload.contactName || payload.customerName || payload.name || "Customer",
+          companyName: payload.companyName || "",
+          email: payload.email || "",
+          phone: payload.phone || "",
+          tripType: payload.serviceType || payload.tripType || payload.details || "Rental Inquiry",
+          pickupLocation: payload.pickupLocations || payload.pickupLocation || "",
+          dropLocation: payload.dropLocation || "",
+          status: "NEW",
+          date: new Date().toISOString().slice(0, 10),
+          createdAt: new Date().toISOString()
+        };
+
+        const existingLeads = localStorage.getItem("user_uploaded_crm_leads");
+        const list = existingLeads ? JSON.parse(existingLeads) : [];
+        list.unshift(leadRecord);
+        localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(list));
+      } catch (e) {
+        console.error("Failed to save local CRM lead:", e);
       }
 
       // Reset forms
