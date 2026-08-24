@@ -19,6 +19,8 @@ import {
   Trash2
 } from "lucide-react";
 
+import { DEFAULT_BLOG_POSTS, DEFAULT_BLOG_CATEGORIES } from "@/lib/default-blogs";
+
 export default function MasterBlogCMSPage() {
   const [search, setSearch] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
@@ -45,6 +47,8 @@ export default function MasterBlogCMSPage() {
       } catch (e) {
         console.error(e);
       }
+    } else {
+      localStorage.setItem("user_uploaded_blog_categories", JSON.stringify(DEFAULT_BLOG_CATEGORIES));
     }
 
     const saved = localStorage.getItem("user_uploaded_blogs");
@@ -60,48 +64,8 @@ export default function MasterBlogCMSPage() {
       }
     }
 
-    const defaultBlogs = [
-      {
-        id: "art-1",
-        title: "Top 10 Outstation Cab Travel Routes from Mumbai to Pune & Mahabaleshwar",
-        slug: "top-10-outstation-cab-routes-mumbai-pune",
-        category: "Outstation Trips",
-        seoKeywords: "Mumbai Pune Cab, Outstation Taxi, Innova Crysta",
-        author: "TEMP TRAVEL Editorial Team",
-        date: "2026-08-20",
-        status: "PUBLISHED",
-        views: 1420,
-        coverImage: "/images/hero-car.png",
-        content: "Exploring the lush green Western Ghats between Mumbai and Pune requires a reliable, comfortable chauffeur-driven car rental. In this comprehensive guide, we cover the top routes, toll plaza advice, and why booking an Innova Crysta with TEMP TRAVEL CAR RENTALS PVT LTD ensures a stress-free trip."
-      },
-      {
-        id: "art-2",
-        title: "Corporate Employee Transit Solutions: Maximizing Productivity in BKC & Powai",
-        slug: "corporate-employee-transit-solutions-mumbai",
-        category: "Corporate Travel",
-        seoKeywords: "Corporate Cabs BKC, Employee Transit Roster, Executive Shuttle",
-        author: "Navneet Kumar (Operations HQ)",
-        date: "2026-08-18",
-        status: "PUBLISHED",
-        views: 2890,
-        coverImage: "/images/hero-car.png",
-        content: "Corporate logistics in Mumbai's business hubs require punctual, ISO 9001-certified chauffeur services. TEMP TRAVEL delivers automated roster management and real-time GPS telematics for multinational firms."
-      },
-      {
-        id: "art-3",
-        title: "Complete Guide to Airport Transfer Rentals at Chhatrapati Shivaji Maharaj Intl T2",
-        slug: "airport-transfer-rental-guide-mumbai-t2",
-        category: "Airport Transfers",
-        seoKeywords: "Mumbai Airport T2 Cab, Pickup Drop Cabs, Sahar Hub Shuttle",
-        author: "TEMP TRAVEL Editorial Team",
-        date: "2026-08-15",
-        status: "PUBLISHED",
-        views: 3100,
-        coverImage: "/images/hero-car.png",
-        content: "Avoid airport pickup hassles with TEMP TRAVEL's 24/7 dedicated airport transfer shuttle. Learn about pickup points, transparent billing, and flight tracking integration."
-      }
-    ];
-    setArticles(defaultBlogs);
+    localStorage.setItem("user_uploaded_blogs", JSON.stringify(DEFAULT_BLOG_POSTS));
+    setArticles(DEFAULT_BLOG_POSTS);
   }, []);
 
   const [newArticle, setNewArticle] = useState({

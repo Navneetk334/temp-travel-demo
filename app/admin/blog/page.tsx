@@ -20,6 +20,8 @@ import {
   Tag
 } from "lucide-react";
 
+import { DEFAULT_BLOG_POSTS, DEFAULT_BLOG_CATEGORIES } from "@/lib/default-blogs";
+
 export type BlogStatusFilter = "ALL" | "PUBLISHED" | "DRAFT" | "SCHEDULED";
 
 interface Post {
@@ -98,30 +100,73 @@ export default function AdminBlogPage() {
         fetch("/api/blog/categories")
       ]);
 
-      if (postsRes.ok && catsRes.ok) {
-        const postsData = await postsRes.json();
-        const catsData = await catsRes.json();
+        let finalPosts: any[] = [];
+        if (postsRes.ok && catsRes.ok) {
+          const postsData = await postsRes.json();
+          const catsData = await catsRes.json();
 
-        if (Array.isArray(postsData)) {
-          setPosts(postsData);
-          setTotalCount(postsData.length);
-          setTotalPages(1);
-        } else {
-          setPosts(postsData.posts || []);
-          setTotalCount(postsData.pagination?.totalCount || 0);
-          setTotalPages(postsData.pagination?.totalPages || 1);
-          if (postsData.stats) {
-            setStats(postsData.stats);
+          if (Array.isArray(postsData) && postsData.length > 0) {
+            finalPosts = postsData;
+          } else if (postsData.posts && postsData.posts.length > 0) {
+            finalPosts = postsData.posts;
+          }
+          if (Array.isArray(catsData) && catsData.length > 0) {
+            setCategories(catsData);
           }
         }
-        setCategories(catsData);
+
+        // Check localStorage user_uploaded_blogs
+        let localBlogs: any[] = [];
+        try {
+          const saved = localStorage.getItem("user_uploaded_blogs");
+          if (saved) {
+            localBlogs = JSON.parse(saved);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+
+        if (localBlogs.length === 0) {
+          localBlogs = DEFAULT_BLOG_POSTS;
+          try {
+            localStorage.setItem("user_uploaded_blogs", JSON.stringify(DEFAULT_BLOG_POSTS));
+          } catch (e) {}
+        }
+
+        if (finalPosts.length === 0) {
+          finalPosts = localBlogs.map((b: any) => ({
+            id: b.id,
+            title: b.title,
+            slug: b.slug,
+            summary: b.summary || b.content?.slice(0, 150) || "",
+            published: b.status === "PUBLISHED" || b.published !== false,
+            publishedAt: b.date || b.createdAt,
+            tags: Array.isArray(b.tags) ? b.tags : (b.seoKeywords ? b.seoKeywords.split(",").map((s: string) => s.trim()) : []),
+            author: { name: typeof b.author === "object" ? b.author?.name : (b.author || "TEMP TRAVEL Editorial Team") },
+            category: {
+              id: "cat-1",
+              name: typeof b.category === "object" ? b.category?.name : (b.category || "General"),
+              slug: typeof b.category === "object" ? b.category?.slug : (b.category?.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "general")
+            },
+            createdAt: b.date || b.createdAt || new Date().toISOString()
+          }));
+        }
+
+        setPosts(finalPosts);
+        setTotalCount(finalPosts.length);
+        setTotalPages(Math.ceil(finalPosts.length / pageSize) || 1);
+        setStats({
+          total: finalPosts.length,
+          PUBLISHED: finalPosts.filter((p) => p.published).length,
+          DRAFT: finalPosts.filter((p) => !p.published).length,
+          SCHEDULED: 0
+        });
+      } catch (err) {
+        console.error("Failed to load admin blog posts:", err);
+      } finally {
+        if (showSpinner) setLoading(false);
       }
-    } catch (err) {
-      console.error("Failed to load admin blog posts:", err);
-    } finally {
-      if (showSpinner) setLoading(false);
     }
-  }
 
   useEffect(() => {
     loadPosts();
