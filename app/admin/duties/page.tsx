@@ -72,6 +72,7 @@ export default function AdminDutiesPage() {
   const [printerPingStatus, setPrinterPingStatus] = useState<"IDLE" | "CHECKING" | "ONLINE" | "LAN_LOCAL">("IDLE");
   const [scanDpi, setScanDpi] = useState("300");
   const [scanColorMode, setScanColorMode] = useState("COLOR");
+  const [scanCloudGuidance, setScanCloudGuidance] = useState("");
 
   // Real Camera Document Scanner
   const [isCameraActive, setIsCameraActive] = useState(false);
@@ -479,12 +480,12 @@ export default function AdminDutiesPage() {
         }, 500);
       } else {
         setIsScanningPrinter(false);
-        alert(data.message || `Physical scanner '${selectedScannerDevice}' could not be accessed. Please ensure the scanner is turned on and paper is on the glass bed.`);
+        setScanCloudGuidance(data.message || `Physical scanner '${selectedScannerDevice}' could not be accessed. Please ensure the scanner is turned on and paper is placed on the glass bed.`);
       }
     } catch (err: any) {
       console.error("Physical scan error:", err);
       setIsScanningPrinter(false);
-      alert(`Physical scanner error: ${err.message || "Failed to communicate with scanner"}`);
+      setScanCloudGuidance(`Physical scan connection: ${err.message || "Failed to communicate with scanner"}`);
     }
   };
 
@@ -1986,6 +1987,40 @@ export default function AdminDutiesPage() {
                       )}
                     </button>
                   </div>
+
+                  {scanCloudGuidance && (
+                    <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-amber-300 space-y-2">
+                      <div className="flex items-center gap-2 font-bold text-xs">
+                        <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                        <span>Hardware Scanner Communication Note</span>
+                      </div>
+                      <p className="text-[11px] leading-relaxed text-slate-300">{scanCloudGuidance}</p>
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setScannerTab("DOCUMENT_CAMERA");
+                            startCamera();
+                          }}
+                          className="bg-accent text-slate-950 px-3 py-1.5 rounded-lg font-black text-[10px] uppercase tracking-wider flex items-center gap-1 shadow-sm"
+                        >
+                          <Camera className="w-3.5 h-3.5" />
+                          <span>Scan via Live Doc Camera</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setScannerTab("FILE_UPLOAD");
+                            fileInputRef.current?.click();
+                          }}
+                          className="bg-white/10 hover:bg-white/20 text-slate-200 px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider flex items-center gap-1"
+                        >
+                          <UploadCloud className="w-3.5 h-3.5" />
+                          <span>Upload Scanned File / PDF</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
