@@ -32,8 +32,15 @@ function LoginForm() {
         throw new Error(data.error || "Login failed");
       }
 
-      router.push(callbackUrl);
-      router.refresh();
+      if (data.admin) {
+        localStorage.setItem("tt_admin_user", JSON.stringify(data.admin));
+      }
+      if (data.token) {
+        localStorage.setItem("tt_admin_token", data.token);
+      }
+
+      // Hard redirect to clear browser middleware cache on mobile
+      window.location.href = callbackUrl || "/admin";
     } catch (err: any) {
       setError(err.message || "Something went wrong");
     } finally {
