@@ -18,8 +18,8 @@ export async function POST(req: NextRequest) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    // Use gemini-2.5-flash for fast and accurate multimodal tasks
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    // Use gemini-3.6-flash for fast and accurate multimodal tasks
+    const model = genAI.getGenerativeModel({ model: "gemini-3.6-flash" });
 
     // Remove the data URL prefix if it exists
     const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, "");

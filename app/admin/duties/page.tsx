@@ -260,15 +260,43 @@ export default function AdminDutiesPage() {
 
     const reader = new FileReader();
     reader.onload = async () => {
-      const base64 = reader.result as string;
-      setFormData((prev) => ({
-        ...prev,
-        slipImageUrl: base64,
-        slipImageName: file.name,
-      }));
+      const img = new Image();
+      img.onload = () => {
+        // Compress the image via canvas
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        // Scale down if it's too large (max 1920x1080 bounding box equivalent)
+        const MAX_DIM = 1920;
+        if (width > MAX_DIM || height > MAX_DIM) {
+          if (width > height) {
+            height *= MAX_DIM / width;
+            width = MAX_DIM;
+          } else {
+            width *= MAX_DIM / height;
+            height = MAX_DIM;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6); // 60% quality
 
-      // Trigger OCR Scan
-      handlePerformOCRScan(base64, file.name);
+          setFormData((prev) => ({
+            ...prev,
+            slipImageUrl: compressedBase64,
+            slipImageName: file.name,
+          }));
+
+          // Trigger OCR Scan
+          handlePerformOCRScan(compressedBase64, file.name);
+        }
+      };
+      img.src = reader.result as string;
     };
     reader.readAsDataURL(file);
   };
@@ -392,7 +420,7 @@ export default function AdminDutiesPage() {
     const ctx = canvas.getContext("2d");
     if (ctx) {
       ctx.drawImage(video, 0, 0, w, h);
-      const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.6); // 60% quality to avoid 413 Payload Too Large
       stopCamera();
       setIsPrinterScannerModalOpen(false);
       setIsScanOptionsModalOpen(false);
