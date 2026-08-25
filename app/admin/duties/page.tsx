@@ -976,13 +976,13 @@ export default function AdminDutiesPage() {
                   </h3>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 items-start">
-                    <div className="lg:col-span-5">
+                    <div className="lg:col-span-4">
                       <label className="block text-slate-400 font-bold uppercase mb-1">Was Service Provided</label>
                       <div className="grid grid-cols-3 gap-1.5 pt-0.5">
                         {["EXCELLENT", "GOOD", "POOR"].map((opt) => (
                           <label
                             key={opt}
-                            className={`flex items-center justify-center text-center px-2 py-2.5 rounded-lg border text-[11px] font-bold cursor-pointer transition-all ${
+                            className={`flex items-center justify-center text-center px-2 py-2 rounded-lg border text-[11px] font-bold cursor-pointer transition-all ${
                               formData.serviceFeedback === opt
                                 ? "bg-accent text-slate-950 border-accent font-black shadow-sm"
                                 : "bg-slate-950 text-slate-400 border-white/10 hover:text-white"
@@ -1002,8 +1002,10 @@ export default function AdminDutiesPage() {
                       </div>
                     </div>
 
-                    <div className="lg:col-span-2">
-                      <label className="block text-slate-400 font-bold uppercase mb-1">Parking/Toll/Tax (₹)</label>
+                    <div className="lg:col-span-3">
+                      <label className="block text-slate-400 font-bold uppercase mb-1 whitespace-nowrap">
+                        Parking / Toll / Tax (₹)
+                      </label>
                       <input
                         type="number"
                         placeholder="e.g. 420"
@@ -1014,7 +1016,9 @@ export default function AdminDutiesPage() {
                     </div>
 
                     <div className="lg:col-span-3">
-                      <label className="block text-slate-400 font-bold uppercase mb-1">Place of Release</label>
+                      <label className="block text-slate-400 font-bold uppercase mb-1 whitespace-nowrap">
+                        Place of Release
+                      </label>
                       <input
                         type="text"
                         placeholder="e.g. Aerocity Terminal 3"
@@ -1025,7 +1029,9 @@ export default function AdminDutiesPage() {
                     </div>
 
                     <div className="lg:col-span-2">
-                      <label className="block text-slate-400 font-bold uppercase mb-1">Guest Mobile</label>
+                      <label className="block text-slate-400 font-bold uppercase mb-1 whitespace-nowrap">
+                        Guest Mobile
+                      </label>
                       <input
                         type="text"
                         placeholder="+91 98112 34567"
