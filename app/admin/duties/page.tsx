@@ -270,8 +270,8 @@ export default function AdminDutiesPage() {
     }
   };
 
-  // Add Leg to Car Usage Sheet
-  const handleAddUsageLeg = () => {
+  // Add Leg / Route Log to Car Usage Sheet
+  const handleAddRouteLog = () => {
     setFormData((prev) => ({
       ...prev,
       usageTracks: [
@@ -280,11 +280,12 @@ export default function AdminDutiesPage() {
           id: String(prev.usageTracks.length + 1),
           from: "",
           to: "",
-          details: `Leg ${prev.usageTracks.length + 1}`,
+          details: `Route Log ${prev.usageTracks.length + 1}`,
         },
       ],
     }));
   };
+  const handleAddUsageLeg = handleAddRouteLog;
 
   const handleRemoveUsageLeg = (index: number) => {
     setFormData((prev) => ({
@@ -974,16 +975,16 @@ export default function AdminDutiesPage() {
                     <span>3. Service Rating, Toll Settlement & Release</span>
                   </h3>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                    <div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 items-start">
+                    <div className="lg:col-span-5">
                       <label className="block text-slate-400 font-bold uppercase mb-1">Was Service Provided</label>
-                      <div className="flex items-center gap-2 pt-1">
+                      <div className="grid grid-cols-3 gap-1.5 pt-0.5">
                         {["EXCELLENT", "GOOD", "POOR"].map((opt) => (
                           <label
                             key={opt}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold cursor-pointer transition-all ${
+                            className={`flex items-center justify-center text-center px-2 py-2.5 rounded-lg border text-[11px] font-bold cursor-pointer transition-all ${
                               formData.serviceFeedback === opt
-                                ? "bg-accent text-slate-950 border-accent font-black"
+                                ? "bg-accent text-slate-950 border-accent font-black shadow-sm"
                                 : "bg-slate-950 text-slate-400 border-white/10 hover:text-white"
                             }`}
                           >
@@ -1001,8 +1002,8 @@ export default function AdminDutiesPage() {
                       </div>
                     </div>
 
-                    <div>
-                      <label className="block text-slate-400 font-bold uppercase mb-1">Parking / Toll / Tax (₹)</label>
+                    <div className="lg:col-span-2">
+                      <label className="block text-slate-400 font-bold uppercase mb-1">Parking/Toll/Tax (₹)</label>
                       <input
                         type="number"
                         placeholder="e.g. 420"
@@ -1012,7 +1013,7 @@ export default function AdminDutiesPage() {
                       />
                     </div>
 
-                    <div>
+                    <div className="lg:col-span-3">
                       <label className="block text-slate-400 font-bold uppercase mb-1">Place of Release</label>
                       <input
                         type="text"
@@ -1023,8 +1024,8 @@ export default function AdminDutiesPage() {
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-slate-400 font-bold uppercase mb-1">Guest Mobile Number</label>
+                    <div className="lg:col-span-2">
+                      <label className="block text-slate-400 font-bold uppercase mb-1">Guest Mobile</label>
                       <input
                         type="text"
                         placeholder="+91 98112 34567"
@@ -1045,45 +1046,51 @@ export default function AdminDutiesPage() {
                     </h3>
                     <button
                       type="button"
-                      onClick={handleAddUsageLeg}
-                      className="text-xs text-accent font-bold hover:underline flex items-center gap-1"
+                      onClick={handleAddRouteLog}
+                      className="text-xs text-accent font-bold hover:underline flex items-center gap-1.5"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      <span>Add Route Leg</span>
+                      <span>Add Route Log</span>
                     </button>
                   </div>
 
                   <div className="space-y-2">
                     {formData.usageTracks.map((leg, idx) => (
-                      <div key={leg.id || idx} className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-slate-950 p-2.5 rounded-xl border border-white/5">
-                        <span className="sm:col-span-1 text-center font-mono font-bold text-slate-500">#{idx + 1}</span>
-                        <div className="sm:col-span-5">
+                      <div key={leg.id || idx} className="flex flex-col sm:flex-row items-center gap-2.5 bg-slate-950 p-2.5 rounded-xl border border-white/5">
+                        <span className="shrink-0 w-8 text-center font-mono font-bold text-slate-500">#{idx + 1}</span>
+                        
+                        <div className="flex-1 w-full">
                           <input
                             type="text"
                             placeholder="FROM (e.g. Garage / Hotel Pullman)"
                             value={leg.from}
                             onChange={(e) => handleUpdateUsageLeg(idx, "from", e.target.value)}
-                            className="w-full bg-slate-900 border border-white/10 rounded-lg p-2 text-slate-100 text-xs focus:border-accent"
+                            className="w-full bg-slate-900 border border-white/10 rounded-lg p-2.5 text-slate-100 text-xs focus:border-accent"
                           />
                         </div>
-                        <div className="sm:col-span-5">
+
+                        <span className="shrink-0 px-2.5 py-1 bg-slate-900 border border-white/10 rounded-md text-xs font-bold text-amber-400 lowercase">
+                          to
+                        </span>
+
+                        <div className="flex-1 w-full">
                           <input
                             type="text"
                             placeholder="TO (e.g. Cyber City Gurugram / Airport)"
                             value={leg.to}
                             onChange={(e) => handleUpdateUsageLeg(idx, "to", e.target.value)}
-                            className="w-full bg-slate-900 border border-white/10 rounded-lg p-2 text-slate-100 text-xs focus:border-accent"
+                            className="w-full bg-slate-900 border border-white/10 rounded-lg p-2.5 text-slate-100 text-xs focus:border-accent"
                           />
                         </div>
-                        <div className="sm:col-span-1 text-right">
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveUsageLeg(idx)}
-                            className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveUsageLeg(idx)}
+                          className="shrink-0 p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                          title="Remove Route Log"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
                       </div>
                     ))}
                   </div>
