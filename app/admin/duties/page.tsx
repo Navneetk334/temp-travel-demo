@@ -37,7 +37,6 @@ import {
   Sliders,
   Laptop
 } from "lucide-react";
-import Tesseract from "tesseract.js";
 import Portal from "@/components/shared/portal";
 import { DutySlipRecord } from "@/app/api/duties/route";
 
@@ -274,42 +273,23 @@ export default function AdminDutiesPage() {
     reader.readAsDataURL(file);
   };
 
-  // Real Tesseract.js OCR Execution Engine
+  // Real AI OCR Execution Engine (Gemini Vision)
   const runRealTesseractOCR = async (imageSource: string, sourceName = "duty_slip_scan.jpg") => {
     try {
       setIsScanning(true);
-      setScanMessage("Running real Tesseract OCR optical text recognition...");
+      setScannerProgress(20);
+      setScanMessage("Sending image to Cloud Vision AI for handwriting analysis...");
 
-      let rawExtractedText = "";
-      try {
-        const ocrResult = await Tesseract.recognize(
-          imageSource,
-          "eng",
-          {
-            logger: (m) => {
-              if (m.status === "recognizing text") {
-                const prog = Math.round(m.progress * 100);
-                setScannerProgress(prog);
-                setScanMessage(`Analyzing characters & document structure (${prog}%)...`);
-              }
-            }
-          }
-        );
-        rawExtractedText = ocrResult.data.text || "";
-      } catch (tessErr) {
-        console.warn("Tesseract worker notification:", tessErr);
-      }
-
-      // Send extracted text to parser
+      setScannerProgress(50);
       const res = await fetch("/api/duties/ocr", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           imageBase64: imageSource,
-          rawText: rawExtractedText,
           fileName: sourceName,
         }),
       });
+      setScannerProgress(90);
 
       const result = await res.json();
       if (result.success && result.extractedData) {
@@ -353,11 +333,9 @@ export default function AdminDutiesPage() {
           slipImageUrl: imageSource,
           slipImageName: sourceName,
         }));
-        const finalRawText = rawExtractedText || result.rawText || "";
+        setScannerProgress(100);
         setScanMessage(
-          finalRawText && finalRawText.trim()
-            ? `✨ Text Recognized: "${finalRawText.trim().replace(/\s+/g, " ").substring(0, 100)}..."`
-            : "✨ Live capture processed and attached (no readable text found)."
+          "✨ Document Successfully Deciphered via Vision AI!"
         );
       }
     } catch (err: any) {
