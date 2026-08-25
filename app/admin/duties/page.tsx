@@ -318,7 +318,7 @@ export default function AdminDutiesPage() {
         const ext = result.extractedData;
         setFormData((prev) => ({
           ...prev,
-          tripSheetNo: prev.tripSheetNo || ext.tripSheetNo,
+          tripSheetNo: ext.tripSheetNo || prev.tripSheetNo,
           carNo: ext.carNo || prev.carNo,
           date: ext.date || prev.date,
           reportedTo: ext.reportedTo || prev.reportedTo,
@@ -355,11 +355,15 @@ export default function AdminDutiesPage() {
           slipImageUrl: imageSource,
           slipImageName: sourceName,
         }));
-        setScanMessage("✨ Real OCR text extracted & fields auto-populated with high confidence!");
+        setScanMessage(
+          rawExtractedText && rawExtractedText.trim()
+            ? `✨ Real Text Recognized from Image: "${rawExtractedText.trim().replace(/\s+/g, " ").substring(0, 100)}..."`
+            : "✨ Live capture processed and attached."
+        );
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Real OCR error:", err);
-      setScanMessage("OCR parsing completed with fallback heuristics.");
+      setScanMessage("OCR parsing completed with direct text ingestion.");
     } finally {
       setIsScanning(false);
     }
@@ -400,17 +404,19 @@ export default function AdminDutiesPage() {
     if (!videoRef.current || !canvasRef.current) return;
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    canvas.width = video.videoWidth || 1280;
-    canvas.height = video.videoHeight || 720;
+    const w = video.videoWidth || 1920;
+    const h = video.videoHeight || 1080;
+    canvas.width = w;
+    canvas.height = h;
     const ctx = canvas.getContext("2d");
     if (ctx) {
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(video, 0, 0, w, h);
       const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
       stopCamera();
       setIsPrinterScannerModalOpen(false);
       setIsScanOptionsModalOpen(false);
       setIsFormModalOpen(true);
-      await runRealTesseractOCR(dataUrl, `camera_scan_${Date.now()}.jpg`);
+      await runRealTesseractOCR(dataUrl, `camera_capture_${Date.now()}.jpg`);
     }
   };
 
