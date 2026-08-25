@@ -32,6 +32,8 @@ declare global {
   }
 }
 
+import Portal from "@/components/shared/portal";
+
 export default function MasterDispatchRadarPage() {
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletInstanceRef = useRef<any>(null);
@@ -389,160 +391,164 @@ export default function MasterDispatchRadarPage() {
 
       {/* Assign Duty Roster Modal */}
       {showAssignModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100 max-h-[90vh] overflow-y-auto">
-            <button
-              onClick={() => setShowAssignModal(false)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
+        <Portal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+            <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100 max-h-[90vh] overflow-y-auto">
+              <button
+                onClick={() => setShowAssignModal(false)}
+                className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
 
-            <div className="space-y-1 border-b border-white/10 pb-3">
-              <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">Master Duty Roster</span>
-              <h3 className="text-2xl font-black text-slate-50">Assign Chauffeur Duty</h3>
-            </div>
-
-            {assignSuccess ? (
-              <div className="p-8 text-center space-y-3">
-                <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto animate-bounce" />
-                <h4 className="text-lg font-bold text-slate-100">Duty Assigned & Dispatched!</h4>
-                <p className="text-xs text-slate-400">Driver app notified. GPS radar tracking active.</p>
+              <div className="space-y-1 border-b border-white/10 pb-3">
+                <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">Master Duty Roster</span>
+                <h3 className="text-2xl font-black text-slate-50">Assign Chauffeur Duty</h3>
               </div>
-            ) : (
-              <form onSubmit={handleAssignSubmit} className="space-y-4 text-xs">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Select Driver *</label>
-                    <select
-                      value={assignForm.driverName}
-                      onChange={(e) => setAssignForm({ ...assignForm, driverName: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
-                    >
-                      <option value="Rajesh Kumar">Rajesh Kumar (Swift Dzire)</option>
-                      <option value="Suresh Patil">Suresh Patil (Innova Crysta)</option>
-                      <option value="Vikram Singh">Vikram Singh (Honda City)</option>
-                      <option value="Mahesh Yadav">Mahesh Yadav (Fortuner)</option>
-                    </select>
+
+              {assignSuccess ? (
+                <div className="p-8 text-center space-y-3">
+                  <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto animate-bounce" />
+                  <h4 className="text-lg font-bold text-slate-100">Duty Assigned & Dispatched!</h4>
+                  <p className="text-xs text-slate-400">Driver app notified. GPS radar tracking active.</p>
+                </div>
+              ) : (
+                <form onSubmit={handleAssignSubmit} className="space-y-4 text-xs">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-slate-300 font-bold">Select Driver *</label>
+                      <select
+                        value={assignForm.driverName}
+                        onChange={(e) => setAssignForm({ ...assignForm, driverName: e.target.value })}
+                        className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
+                      >
+                        <option value="Rajesh Kumar">Rajesh Kumar (Swift Dzire)</option>
+                        <option value="Suresh Patil">Suresh Patil (Innova Crysta)</option>
+                        <option value="Vikram Singh">Vikram Singh (Honda City)</option>
+                        <option value="Mahesh Yadav">Mahesh Yadav (Fortuner)</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-slate-300 font-bold">Trip Type</label>
+                      <select
+                        value={assignForm.tripType}
+                        onChange={(e) => setAssignForm({ ...assignForm, tripType: e.target.value })}
+                        className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
+                      >
+                        <option value="Airport Transfer">Airport Transfer</option>
+                        <option value="Local Rental">Local Rental (8hr / 80km)</option>
+                        <option value="Outstation Trip">Outstation Trip</option>
+                        <option value="Corporate Transit">Corporate Transit</option>
+                      </select>
+                    </div>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Trip Type</label>
-                    <select
-                      value={assignForm.tripType}
-                      onChange={(e) => setAssignForm({ ...assignForm, tripType: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
-                    >
-                      <option value="Airport Transfer">Airport Transfer</option>
-                      <option value="Local Rental">Local Rental (8hr / 80km)</option>
-                      <option value="Outstation Trip">Outstation Trip</option>
-                      <option value="Corporate Transit">Corporate Transit</option>
-                    </select>
+                    <label className="text-slate-300 font-bold">Passenger Name *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Vikram Malhotra"
+                      value={assignForm.customerName}
+                      onChange={(e) => setAssignForm({ ...assignForm, customerName: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
+                    />
                   </div>
-                </div>
 
-                <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">Passenger Name *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Vikram Malhotra"
-                    value={assignForm.customerName}
-                    onChange={(e) => setAssignForm({ ...assignForm, customerName: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
-                  />
-                </div>
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Pickup Location *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Chhatrapati Shivaji Maharaj Intl Airport (T2)"
+                      value={assignForm.pickupLocation}
+                      onChange={(e) => setAssignForm({ ...assignForm, pickupLocation: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
+                    />
+                  </div>
 
-                <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">Pickup Location *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Chhatrapati Shivaji Maharaj Intl Airport (T2)"
-                    value={assignForm.pickupLocation}
-                    onChange={(e) => setAssignForm({ ...assignForm, pickupLocation: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
-                  />
-                </div>
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Destination Drop Location</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. BKC G-Block, Bandra East, Mumbai"
+                      value={assignForm.destination}
+                      onChange={(e) => setAssignForm({ ...assignForm, destination: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
+                    />
+                  </div>
 
-                <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">Destination Drop Location</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. BKC G-Block, Bandra East, Mumbai"
-                    value={assignForm.destination}
-                    onChange={(e) => setAssignForm({ ...assignForm, destination: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
-                  />
-                </div>
-
-                <div className="pt-3 border-t border-white/10 flex justify-end gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowAssignModal(false)}
-                    className="px-5 py-2.5 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs font-bold"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer"
-                  >
-                    Dispatch Duty Now
-                  </button>
-                </div>
-              </form>
-            )}
+                  <div className="pt-3 border-t border-white/10 flex justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowAssignModal(false)}
+                      className="px-5 py-2.5 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs font-bold"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer"
+                    >
+                      Dispatch Duty Now
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
-        </div>
+        </Portal>
       )}
 
       {/* Driver Telematics Drawer */}
       {selectedDriver && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 relative text-slate-100">
-            <button
-              onClick={() => setSelectedDriver(null)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">Live GPS Telematics Telemetry</span>
-              <h3 className="text-xl font-bold text-slate-50">{selectedDriver.driverName}</h3>
-              <div className="text-xs text-amber-400 font-mono font-bold">{selectedDriver.vehicleModel} &bull; {selectedDriver.regNumber}</div>
-            </div>
-
-            <div className="space-y-2 bg-slate-950 p-4 rounded-xl border border-white/10 text-xs font-mono">
-              <div className="flex justify-between">
-                <span className="text-slate-400">Current Speed:</span>
-                <strong className="text-emerald-400">{selectedDriver.speed}</strong>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Estimated ETA:</span>
-                <strong className="text-amber-400">{selectedDriver.eta}</strong>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Passenger Name:</span>
-                <strong className="text-slate-100">{selectedDriver.customerName}</strong>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Current Location:</span>
-                <strong className="text-slate-200 truncate max-w-[180px]">{selectedDriver.currentLocation}</strong>
-              </div>
-            </div>
-
-            <div className="pt-2 flex justify-end">
+        <Portal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+            <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 relative text-slate-100">
               <button
                 onClick={() => setSelectedDriver(null)}
-                className="px-4 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs cursor-pointer"
+                className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"
               >
-                Close Inspector
+                <X className="w-5 h-5" />
               </button>
+
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">Live GPS Telematics Telemetry</span>
+                <h3 className="text-xl font-bold text-slate-50">{selectedDriver.driverName}</h3>
+                <div className="text-xs text-amber-400 font-mono font-bold">{selectedDriver.vehicleModel} &bull; {selectedDriver.regNumber}</div>
+              </div>
+
+              <div className="space-y-2 bg-slate-950 p-4 rounded-xl border border-white/10 text-xs font-mono">
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Current Speed:</span>
+                  <strong className="text-emerald-400">{selectedDriver.speed}</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Estimated ETA:</span>
+                  <strong className="text-amber-400">{selectedDriver.eta}</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Passenger Name:</span>
+                  <strong className="text-slate-100">{selectedDriver.customerName}</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Current Location:</span>
+                  <strong className="text-slate-200 truncate max-w-[180px]">{selectedDriver.currentLocation}</strong>
+                </div>
+              </div>
+
+              <div className="pt-2 flex justify-end">
+                <button
+                  onClick={() => setSelectedDriver(null)}
+                  className="px-4 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs cursor-pointer"
+                >
+                  Close Inspector
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </Portal>
       )}
     </div>
   );

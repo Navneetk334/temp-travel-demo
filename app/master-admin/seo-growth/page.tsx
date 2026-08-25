@@ -17,6 +17,7 @@ import {
   X,
   MessageSquare
 } from "lucide-react";
+import Portal from "@/components/shared/portal";
 
 export default function MasterSEOGrowthPage() {
   const [selectedCity, setSelectedCity] = useState<any | null>(null);
@@ -200,62 +201,64 @@ export default function MasterSEOGrowthPage() {
 
       {/* GBP Review Reply Modal */}
       {selectedReview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
-            <button
-              onClick={() => setSelectedReview(null)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white"
-            >
-              <X className="w-5 h-5" />
-            </button>
+        <Portal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+            <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
+              <button
+                onClick={() => setSelectedReview(null)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
 
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">Google Business Profile Sync</span>
-              <h3 className="text-xl font-bold text-slate-50">Reply to Review from {selectedReview.author}</h3>
-            </div>
-
-            {replySuccess ? (
-              <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-xl text-center space-y-1 text-xs text-emerald-400 font-bold">
-                <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
-                <div>Official Reply Synced to Google Maps!</div>
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">Google Business Profile Sync</span>
+                <h3 className="text-xl font-bold text-slate-50">Reply to Review from {selectedReview.author}</h3>
               </div>
-            ) : (
-              <form onSubmit={handleReplySubmit} className="space-y-4 text-xs">
-                <div className="p-3 bg-slate-950 rounded-xl border border-white/5 italic text-slate-300">
-                  "{selectedReview.text}"
-                </div>
 
-                <div className="space-y-1">
-                  <label className="text-slate-400 font-bold">Official Response *</label>
-                  <textarea
-                    required
-                    rows={3}
-                    placeholder="Thank you for choosing TEMP TRAVEL! We are committed to providing premium chauffeur transit..."
-                    value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
-                  />
+              {replySuccess ? (
+                <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-xl text-center space-y-1 text-xs text-emerald-400 font-bold">
+                  <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
+                  <div>Official Reply Synced to Google Maps!</div>
                 </div>
+              ) : (
+                <form onSubmit={handleReplySubmit} className="space-y-4 text-xs">
+                  <div className="p-3 bg-slate-950 rounded-xl border border-white/5 italic text-slate-300">
+                    "{selectedReview.text}"
+                  </div>
 
-                <div className="pt-2 flex justify-end gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedReview(null)}
-                    className="px-4 py-2 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-5 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs uppercase"
-                  >
-                    Post to Google Business
-                  </button>
-                </div>
-              </form>
-            )}
+                  <div className="space-y-1">
+                    <label className="text-slate-400 font-bold">Official Response *</label>
+                    <textarea
+                      required
+                      rows={3}
+                      placeholder="Thank you for choosing TEMP TRAVEL! We are committed to providing premium chauffeur transit..."
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
+                    />
+                  </div>
+
+                  <div className="pt-2 flex justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedReview(null)}
+                      className="px-4 py-2 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-5 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs uppercase"
+                    >
+                      Post to Google Business
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
-        </div>
+        </Portal>
       )}
     </div>
   );

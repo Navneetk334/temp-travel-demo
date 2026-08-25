@@ -18,6 +18,7 @@ import {
   FileText,
   Key
 } from "lucide-react";
+import Portal from "@/components/shared/portal";
 
 export default function MasterSettingsVaultPage() {
   const [activeTab, setActiveTab] = useState<"global" | "users" | "vault">("global");
@@ -377,109 +378,113 @@ export default function MasterSettingsVaultPage() {
 
       {/* Add User Modal */}
       {showAddUserModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
-            <button onClick={() => setShowAddUserModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white">
-              <X className="w-5 h-5" />
-            </button>
-            <h3 className="text-xl font-bold text-slate-50">Create Admin Account</h3>
-            <form onSubmit={handleAddUserSubmit} className="space-y-4 text-xs">
-              <div className="space-y-1">
-                <label className="text-slate-400 font-bold">Full Name *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Navneet Kumar"
-                  value={newUser.name}
-                  onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-slate-400 font-bold">Email Address *</label>
-                <input
-                  type="email"
-                  required
-                  placeholder="user@temptravels.com"
-                  value={newUser.email}
-                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-slate-400 font-bold">Assigned Role</label>
-                <select
-                  value={newUser.role}
-                  onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100"
-                >
-                  <option value="SUPER_ADMIN">SUPER_ADMIN (Full HQ Access)</option>
-                  <option value="OPERATIONS_DISPATCH">OPERATIONS_DISPATCH</option>
-                  <option value="ACCOUNTANT">ACCOUNTANT</option>
-                  <option value="CASH_ADMIN">CASH_ADMIN (Local Cash Desk)</option>
-                </select>
-              </div>
-              <div className="pt-2 flex justify-end gap-3">
-                <button type="button" onClick={() => setShowAddUserModal(false)} className="px-4 py-2 bg-slate-950 text-slate-400 rounded-xl">Cancel</button>
-                <button type="submit" className="px-5 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl uppercase">Create Account</button>
-              </div>
-            </form>
+        <Portal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+            <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
+              <button onClick={() => setShowAddUserModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+              <h3 className="text-xl font-bold text-slate-50">Create Admin Account</h3>
+              <form onSubmit={handleAddUserSubmit} className="space-y-4 text-xs">
+                <div className="space-y-1">
+                  <label className="text-slate-400 font-bold">Full Name *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Navneet Kumar"
+                    value={newUser.name}
+                    onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-slate-400 font-bold">Email Address *</label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="user@temptravels.com"
+                    value={newUser.email}
+                    onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-slate-400 font-bold">Assigned Role</label>
+                  <select
+                    value={newUser.role}
+                    onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100"
+                  >
+                    <option value="SUPER_ADMIN">SUPER_ADMIN (Full HQ Access)</option>
+                    <option value="OPERATIONS_DISPATCH">OPERATIONS_DISPATCH</option>
+                    <option value="ACCOUNTANT">ACCOUNTANT</option>
+                    <option value="CASH_ADMIN">CASH_ADMIN (Local Cash Desk)</option>
+                  </select>
+                </div>
+                <div className="pt-2 flex justify-end gap-3">
+                  <button type="button" onClick={() => setShowAddUserModal(false)} className="px-4 py-2 bg-slate-950 text-slate-400 rounded-xl">Cancel</button>
+                  <button type="submit" className="px-5 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl uppercase">Create Account</button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </Portal>
       )}
 
       {/* Add Document Modal */}
       {showAddDocModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
-            <button onClick={() => setShowAddDocModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white">
-              <X className="w-5 h-5" />
-            </button>
-            <h3 className="text-xl font-bold text-slate-50">Upload Document to Vault</h3>
-            <form onSubmit={handleAddDocSubmit} className="space-y-4 text-xs">
-              <div className="space-y-1">
-                <label className="text-slate-400 font-bold">Document Title *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Commercial Permit - Ertiga"
-                  value={newDoc.title}
-                  onChange={(e) => setNewDoc({ ...newDoc, title: e.target.value })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+        <Portal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+            <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
+              <button onClick={() => setShowAddDocModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+              <h3 className="text-xl font-bold text-slate-50">Upload Document to Vault</h3>
+              <form onSubmit={handleAddDocSubmit} className="space-y-4 text-xs">
                 <div className="space-y-1">
-                  <label className="text-slate-400 font-bold">Category</label>
-                  <select
-                    value={newDoc.category}
-                    onChange={(e) => setNewDoc({ ...newDoc, category: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100"
-                  >
-                    <option value="VEHICLE">VEHICLE</option>
-                    <option value="DRIVER">DRIVER</option>
-                    <option value="EMPLOYEE">EMPLOYEE</option>
-                    <option value="COMPANY">COMPANY</option>
-                  </select>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-slate-400 font-bold">Reference / Policy #</label>
+                  <label className="text-slate-400 font-bold">Document Title *</label>
                   <input
                     type="text"
-                    placeholder="MH-02-2025"
-                    value={newDoc.refNumber}
-                    onChange={(e) => setNewDoc({ ...newDoc, refNumber: e.target.value })}
+                    required
+                    placeholder="e.g. Commercial Permit - Ertiga"
+                    value={newDoc.title}
+                    onChange={(e) => setNewDoc({ ...newDoc, title: e.target.value })}
                     className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100"
                   />
                 </div>
-              </div>
-              <div className="pt-2 flex justify-end gap-3">
-                <button type="button" onClick={() => setShowAddDocModal(false)} className="px-4 py-2 bg-slate-950 text-slate-400 rounded-xl">Cancel</button>
-                <button type="submit" className="px-5 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl uppercase">Save Document</button>
-              </div>
-            </form>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-slate-400 font-bold">Category</label>
+                    <select
+                      value={newDoc.category}
+                      onChange={(e) => setNewDoc({ ...newDoc, category: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100"
+                    >
+                      <option value="VEHICLE">VEHICLE</option>
+                      <option value="DRIVER">DRIVER</option>
+                      <option value="EMPLOYEE">EMPLOYEE</option>
+                      <option value="COMPANY">COMPANY</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-slate-400 font-bold">Reference / Policy #</label>
+                    <input
+                      type="text"
+                      placeholder="MH-02-2025"
+                      value={newDoc.refNumber}
+                      onChange={(e) => setNewDoc({ ...newDoc, refNumber: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100"
+                    />
+                  </div>
+                </div>
+                <div className="pt-2 flex justify-end gap-3">
+                  <button type="button" onClick={() => setShowAddDocModal(false)} className="px-4 py-2 bg-slate-950 text-slate-400 rounded-xl">Cancel</button>
+                  <button type="submit" className="px-5 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl uppercase">Save Document</button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </Portal>
       )}
     </div>
   );

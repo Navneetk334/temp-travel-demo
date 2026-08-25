@@ -18,6 +18,7 @@ import {
   User,
   Building
 } from "lucide-react";
+import Portal from "@/components/shared/portal";
 
 export type TestimonialStatus = "APPROVED" | "PENDING" | "REJECTED";
 
@@ -510,7 +511,8 @@ export default function AdminTestimonialsPage() {
 
       {/* Add / Edit Testimonial Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <Portal>
+          <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-white/10 rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-2xl">
             
             <div className="flex justify-between items-center border-b border-white/5 pb-4">
@@ -657,6 +659,7 @@ export default function AdminTestimonialsPage() {
             </form>
           </div>
         </div>
+        </Portal>
       )}
 
     </div>

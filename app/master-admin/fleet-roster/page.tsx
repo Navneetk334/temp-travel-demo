@@ -23,6 +23,7 @@ import {
   Shield,
   RefreshCw
 } from "lucide-react";
+import Portal from "@/components/shared/portal";
 
 // Category to Class Mapping Hierarchy
 const CLASS_OPTIONS: Record<string, string[]> = {
@@ -569,7 +570,8 @@ export default function MasterFleetRosterPage() {
 
       {/* Complete Rearranged Add / Edit Vehicle Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <Portal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
           <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-3xl shadow-2xl space-y-6 relative text-slate-100 max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setShowModal(false)}
@@ -945,6 +947,7 @@ export default function MasterFleetRosterPage() {
             </form>
           </div>
         </div>
+        </Portal>
       )}
     </div>
   );

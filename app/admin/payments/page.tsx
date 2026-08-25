@@ -21,6 +21,7 @@ import {
   Building2,
   Calendar
 } from "lucide-react";
+import Portal from "@/components/shared/portal";
 
 interface CashRecord {
   id: string;
@@ -466,179 +467,183 @@ export default function AdminPaymentsPage() {
 
       {/* MODAL 1: LOG DRIVER CASH COLLECTION */}
       {isLogModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 sm:p-8 max-w-lg w-full space-y-6 shadow-2xl relative">
-            <button
-              onClick={() => setIsLogModalOpen(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white p-1"
-            >
-              <X className="w-5 h-5" />
-            </button>
+        <Portal>
+          <div className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 sm:p-8 max-w-lg w-full space-y-6 shadow-2xl relative">
+              <button
+                onClick={() => setIsLogModalOpen(false)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-white p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
 
-            <div className="space-y-1">
-              <h3 className="text-xl font-bold text-slate-50 flex items-center gap-2">
-                <IndianRupee className="w-5 h-5 text-amber-400" />
-                <span>Log Cash Collected by Driver</span>
-              </h3>
-              <p className="text-xs text-slate-400">Record cash received from trip completion for office ledger audits.</p>
+              <div className="space-y-1">
+                <h3 className="text-xl font-bold text-slate-50 flex items-center gap-2">
+                  <IndianRupee className="w-5 h-5 text-amber-400" />
+                  <span>Log Cash Collected by Driver</span>
+                </h3>
+                <p className="text-xs text-slate-400">Record cash received from trip completion for office ledger audits.</p>
+              </div>
+
+              <form onSubmit={handleLogCashSubmit} className="space-y-4 text-xs">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-slate-400 font-bold uppercase mb-1">Booking Number *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. TT-DEL-9842"
+                      value={logForm.bookingNumber}
+                      onChange={(e) => setLogForm({ ...logForm, bookingNumber: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 focus:border-amber-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 font-bold uppercase mb-1">Customer Name</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Amit Sharma"
+                      value={logForm.customerName}
+                      onChange={(e) => setLogForm({ ...logForm, customerName: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 focus:border-amber-400"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-slate-400 font-bold uppercase mb-1">Driver Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={logForm.driverName}
+                      onChange={(e) => setLogForm({ ...logForm, driverName: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 focus:border-amber-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 font-bold uppercase mb-1">Cash Amount (₹) *</label>
+                    <input
+                      type="number"
+                      required
+                      placeholder="e.g. 3500"
+                      value={logForm.amount}
+                      onChange={(e) => setLogForm({ ...logForm, amount: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 font-bold text-amber-400 focus:border-amber-400"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-slate-400 font-bold uppercase mb-1">Handover Status</label>
+                  <select
+                    value={logForm.status}
+                    onChange={(e) => setLogForm({ ...logForm, status: e.target.value as any })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 focus:border-amber-400"
+                  >
+                    <option value="HANDED_OVER_TO_OFFICE">Handed Over to Office Drawer (Received)</option>
+                    <option value="PENDING_HANDOVER">Pending Handover (With Chauffeur)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-slate-400 font-bold uppercase mb-1">Staff Remarks</label>
+                  <textarea
+                    rows={2}
+                    value={logForm.remarks}
+                    onChange={(e) => setLogForm({ ...logForm, remarks: e.target.value })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 focus:border-amber-400"
+                  />
+                </div>
+
+                <div className="pt-4 flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsLogModalOpen(false)}
+                    className="px-4 py-2 bg-white/5 text-slate-300 rounded-lg font-bold hover:bg-white/10"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-amber-400 text-slate-950 font-extrabold rounded-lg hover:bg-amber-500 uppercase tracking-wider"
+                  >
+                    Save Cash Record
+                  </button>
+                </div>
+              </form>
             </div>
-
-            <form onSubmit={handleLogCashSubmit} className="space-y-4 text-xs">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-slate-400 font-bold uppercase mb-1">Booking Number *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. TT-DEL-9842"
-                    value={logForm.bookingNumber}
-                    onChange={(e) => setLogForm({ ...logForm, bookingNumber: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 focus:border-amber-400"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-400 font-bold uppercase mb-1">Customer Name</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Amit Sharma"
-                    value={logForm.customerName}
-                    onChange={(e) => setLogForm({ ...logForm, customerName: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 focus:border-amber-400"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-slate-400 font-bold uppercase mb-1">Driver Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={logForm.driverName}
-                    onChange={(e) => setLogForm({ ...logForm, driverName: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 focus:border-amber-400"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-400 font-bold uppercase mb-1">Cash Amount (₹) *</label>
-                  <input
-                    type="number"
-                    required
-                    placeholder="e.g. 3500"
-                    value={logForm.amount}
-                    onChange={(e) => setLogForm({ ...logForm, amount: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 font-bold text-amber-400 focus:border-amber-400"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-slate-400 font-bold uppercase mb-1">Handover Status</label>
-                <select
-                  value={logForm.status}
-                  onChange={(e) => setLogForm({ ...logForm, status: e.target.value as any })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 focus:border-amber-400"
-                >
-                  <option value="HANDED_OVER_TO_OFFICE">Handed Over to Office Drawer (Received)</option>
-                  <option value="PENDING_HANDOVER">Pending Handover (With Chauffeur)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-slate-400 font-bold uppercase mb-1">Staff Remarks</label>
-                <textarea
-                  rows={2}
-                  value={logForm.remarks}
-                  onChange={(e) => setLogForm({ ...logForm, remarks: e.target.value })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 focus:border-amber-400"
-                />
-              </div>
-
-              <div className="pt-4 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsLogModalOpen(false)}
-                  className="px-4 py-2 bg-white/5 text-slate-300 rounded-lg font-bold hover:bg-white/10"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2 bg-amber-400 text-slate-950 font-extrabold rounded-lg hover:bg-amber-500 uppercase tracking-wider"
-                >
-                  Save Cash Record
-                </button>
-              </div>
-            </form>
           </div>
-        </div>
+        </Portal>
       )}
 
       {/* MODAL 2: PRINTABLE CASH RECEIPT */}
       {receiptRecord && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-white/10 rounded-2xl p-8 max-w-xl w-full space-y-6 shadow-2xl relative">
-            <button
-              onClick={() => setReceiptRecord(null)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white p-1"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            {/* Printable Receipt Card */}
-            <div id="printable-receipt" className="bg-slate-950 p-6 rounded-xl border border-white/10 space-y-6 text-slate-100">
-              <div className="flex justify-between items-start border-b border-white/10 pb-4">
-                <div>
-                  <h2 className="text-lg font-black text-slate-50 uppercase tracking-tight">TEMP TRAVEL CAR RENTALS PVT LTD</h2>
-                  <p className="text-[10px] text-slate-400">Plot No. 183, Kh No. 16/2, Qutub Vihar PH-I, New Delhi - 110071</p>
-                  <p className="text-[10px] text-amber-400 font-bold mt-0.5">GSTIN: 07AACCT9842M1Z5 • Cash Collection Desk</p>
-                </div>
-                <div className="text-right">
-                  <span className="text-xs font-mono font-bold text-amber-400 block">{receiptRecord.receiptNumber}</span>
-                  <span className="text-[10px] text-slate-400 block">{new Date(receiptRecord.collectedAt).toLocaleDateString()}</span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 text-xs">
-                <div>
-                  <span className="text-[10px] text-slate-500 uppercase font-bold block">Booking Reference</span>
-                  <span className="font-extrabold text-slate-200">{receiptRecord.bookingNumber}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-slate-500 uppercase font-bold block">Customer Name</span>
-                  <span className="font-extrabold text-slate-200">{receiptRecord.customerName}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-slate-500 uppercase font-bold block">Assigned Chauffeur</span>
-                  <span className="font-extrabold text-slate-200">{receiptRecord.driverName}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-slate-500 uppercase font-bold block">Received By Staff</span>
-                  <span className="font-extrabold text-slate-200">{receiptRecord.receivedByStaff}</span>
-                </div>
-              </div>
-
-              <div className="bg-slate-900 p-4 rounded-lg border border-white/5 flex justify-between items-center">
-                <span className="text-xs font-extrabold uppercase text-slate-300">Total Cash Payment Received:</span>
-                <span className="text-2xl font-black text-amber-400">₹{receiptRecord.amount.toLocaleString()}</span>
-              </div>
-
-              <div className="text-[10px] text-slate-400 italic">
-                Note: {receiptRecord.remarks}
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 pt-2">
+        <Portal>
+          <div className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-white/10 rounded-2xl p-8 max-w-xl w-full space-y-6 shadow-2xl relative">
               <button
-                onClick={() => window.print()}
-                className="flex items-center gap-2 bg-amber-400 hover:bg-amber-500 text-slate-950 font-extrabold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider"
+                onClick={() => setReceiptRecord(null)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-white p-1"
               >
-                <Printer className="w-4 h-4" />
-                <span>Print Official Cash Receipt</span>
+                <X className="w-5 h-5" />
               </button>
+
+              {/* Printable Receipt Card */}
+              <div id="printable-receipt" className="bg-slate-950 p-6 rounded-xl border border-white/10 space-y-6 text-slate-100">
+                <div className="flex justify-between items-start border-b border-white/10 pb-4">
+                  <div>
+                    <h2 className="text-lg font-black text-slate-50 uppercase tracking-tight">TEMP TRAVEL CAR RENTALS PVT LTD</h2>
+                    <p className="text-[10px] text-slate-400">Plot No. 183, Kh No. 16/2, Qutub Vihar PH-I, New Delhi - 110071</p>
+                    <p className="text-[10px] text-amber-400 font-bold mt-0.5">GSTIN: 07AACCT9842M1Z5 • Cash Collection Desk</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs font-mono font-bold text-amber-400 block">{receiptRecord.receiptNumber}</span>
+                    <span className="text-[10px] text-slate-400 block">{new Date(receiptRecord.collectedAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-xs">
+                  <div>
+                    <span className="text-[10px] text-slate-500 uppercase font-bold block">Booking Reference</span>
+                    <span className="font-extrabold text-slate-200">{receiptRecord.bookingNumber}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-500 uppercase font-bold block">Customer Name</span>
+                    <span className="font-extrabold text-slate-200">{receiptRecord.customerName}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-500 uppercase font-bold block">Assigned Chauffeur</span>
+                    <span className="font-extrabold text-slate-200">{receiptRecord.driverName}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-500 uppercase font-bold block">Received By Staff</span>
+                    <span className="font-extrabold text-slate-200">{receiptRecord.receivedByStaff}</span>
+                  </div>
+                </div>
+
+                <div className="bg-slate-900 p-4 rounded-lg border border-white/5 flex justify-between items-center">
+                  <span className="text-xs font-extrabold uppercase text-slate-300">Total Cash Payment Received:</span>
+                  <span className="text-2xl font-black text-amber-400">₹{receiptRecord.amount.toLocaleString()}</span>
+                </div>
+
+                <div className="text-[10px] text-slate-400 italic">
+                  Note: {receiptRecord.remarks}
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  onClick={() => window.print()}
+                  className="flex items-center gap-2 bg-amber-400 hover:bg-amber-500 text-slate-950 font-extrabold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Print Official Cash Receipt</span>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </Portal>
       )}
 
     </div>

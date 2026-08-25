@@ -25,6 +25,7 @@ import {
   Check,
   Slash
 } from "lucide-react";
+import Portal from "@/components/shared/portal";
 
 export type TourStatus = "DRAFT" | "PUBLISHED" | "ACTIVE" | "ARCHIVED";
 
@@ -629,7 +630,8 @@ export default function AdminToursPage() {
 
       {/* Tour Package Builder Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <Portal>
+          <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-white/10 rounded-2xl max-w-4xl w-full p-6 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-thin">
             
             <div className="flex justify-between items-center border-b border-white/5 pb-4">
@@ -970,6 +972,7 @@ export default function AdminToursPage() {
             </form>
           </div>
         </div>
+        </Portal>
       )}
 
     </div>

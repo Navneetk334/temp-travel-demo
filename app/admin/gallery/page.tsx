@@ -24,6 +24,7 @@ import {
   ToggleLeft,
   ToggleRight
 } from "lucide-react";
+import Portal from "@/components/shared/portal";
 
 interface Media {
   id: string;
@@ -516,214 +517,218 @@ export default function AdminGalleryPage() {
 
       {/* ADD / EDIT MEDIA MODAL */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-white/10 rounded-2xl max-w-xl w-full p-6 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-thin">
-            
-            <div className="flex justify-between items-center border-b border-white/5 pb-4">
-              <div>
-                <h3 className="text-lg font-extrabold text-slate-50 flex items-center gap-2">
-                  <ImageIcon className="w-5 h-5 text-accent" />
-                  <span>{editingMedia ? "Edit Gallery Item" : "Add Gallery Journal Asset"}</span>
-                </h3>
-                <p className="text-xs text-slate-400 mt-0.5">Control image URL, category tag, location, description, and display order.</p>
-              </div>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {formError && (
-              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                <span>{formError}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleSaveMedia} className="space-y-4 text-xs">
+        <Portal>
+          <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-white/10 rounded-2xl max-w-xl w-full p-6 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-thin">
               
-              <ImageUploader
-                value={formData.imageUrl}
-                onChange={(url) => setFormData({ ...formData, imageUrl: url })}
-                label="Gallery Media Image *"
-                placeholder="Upload file from device or paste image URL"
-              />
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex justify-between items-center border-b border-white/5 pb-4">
                 <div>
-                  <label className="font-bold text-slate-300 block mb-1">Title / Caption Headline *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Executive Commute"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent font-semibold"
-                  />
+                  <h3 className="text-lg font-extrabold text-slate-50 flex items-center gap-2">
+                    <ImageIcon className="w-5 h-5 text-accent" />
+                    <span>{editingMedia ? "Edit Gallery Item" : "Add Gallery Journal Asset"}</span>
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-0.5">Control image URL, category tag, location, description, and display order.</p>
                 </div>
-
-                <div>
-                  <label className="font-bold text-slate-300 block mb-1">Category Tag *</label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent font-bold"
-                  >
-                    <option value="fleet" className="bg-slate-900">Fleet Vehicles</option>
-                    <option value="corporate" className="bg-slate-900">Corporate Mobility</option>
-                    <option value="airport transfer" className="bg-slate-900">Airport Transfer</option>
-                    <option value="outstation" className="bg-slate-900">Outstation</option>
-                    <option value="tours" className="bg-slate-900">Tours</option>
-                    <option value="destinations" className="bg-slate-900">Destinations</option>
-                    <option value="events" className="bg-slate-900">Events</option>
-                    <option value="lifestyle" className="bg-slate-900">Lifestyle</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <label className="font-bold text-slate-300 block mb-1">Location</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Delhi NCR or Jaipur"
-                    value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-bold text-slate-300 block mb-1">Year / Date</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. 2026"
-                    value={formData.year}
-                    onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-bold text-slate-300 block mb-1">Display Order</label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={formData.sortOrder}
-                    onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value, 10) || 0 })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-300 block mb-1">Short Description</label>
-                <textarea
-                  rows={2}
-                  placeholder="A visual snapshot of our executive corporate cab fleet in motion..."
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-white/5 pt-3">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.isFeatured}
-                    onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
-                    className="w-4 h-4 rounded text-accent focus:ring-accent bg-slate-950 border-white/10"
-                  />
-                  <span className="font-bold text-slate-200">Featured Item (Prioritize on Public Gallery)</span>
-                </label>
-
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.isActive}
-                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                    className="w-4 h-4 rounded text-accent focus:ring-accent bg-slate-950 border-white/10"
-                  />
-                  <span className="font-bold text-slate-200">Active (Visible on Public /gallery)</span>
-                </label>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
                 <button
-                  type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-5 py-2.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors"
+                  className="text-slate-400 hover:text-white p-1"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="px-6 py-2.5 rounded-lg text-xs font-extrabold bg-accent text-slate-950 hover:bg-yellow-500 transition-all uppercase tracking-wider shadow-lg disabled:opacity-50"
-                >
-                  {isSubmitting ? "Saving Asset..." : editingMedia ? "Update Gallery Item" : "Save Gallery Item"}
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
-            </form>
+              {formError && (
+                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{formError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleSaveMedia} className="space-y-4 text-xs">
+                
+                <ImageUploader
+                  value={formData.imageUrl}
+                  onChange={(url) => setFormData({ ...formData, imageUrl: url })}
+                  label="Gallery Media Image *"
+                  placeholder="Upload file from device or paste image URL"
+                />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="font-bold text-slate-300 block mb-1">Title / Caption Headline *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Executive Commute"
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent font-semibold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-slate-300 block mb-1">Category Tag *</label>
+                    <select
+                      value={formData.category}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent font-bold"
+                    >
+                      <option value="fleet" className="bg-slate-900">Fleet Vehicles</option>
+                      <option value="corporate" className="bg-slate-900">Corporate Mobility</option>
+                      <option value="airport transfer" className="bg-slate-900">Airport Transfer</option>
+                      <option value="outstation" className="bg-slate-900">Outstation</option>
+                      <option value="tours" className="bg-slate-900">Tours</option>
+                      <option value="destinations" className="bg-slate-900">Destinations</option>
+                      <option value="events" className="bg-slate-900">Events</option>
+                      <option value="lifestyle" className="bg-slate-900">Lifestyle</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="font-bold text-slate-300 block mb-1">Location</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Delhi NCR or Jaipur"
+                      value={formData.location}
+                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-slate-300 block mb-1">Year / Date</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 2026"
+                      value={formData.year}
+                      onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-slate-300 block mb-1">Display Order</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={formData.sortOrder}
+                      onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value, 10) || 0 })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-300 block mb-1">Short Description</label>
+                  <textarea
+                    rows={2}
+                    placeholder="A visual snapshot of our executive corporate cab fleet in motion..."
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-white/5 pt-3">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.isFeatured}
+                      onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
+                      className="w-4 h-4 rounded text-accent focus:ring-accent bg-slate-950 border-white/10"
+                    />
+                    <span className="font-bold text-slate-200">Featured Item (Prioritize on Public Gallery)</span>
+                  </label>
+
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.isActive}
+                      onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                      className="w-4 h-4 rounded text-accent focus:ring-accent bg-slate-950 border-white/10"
+                    />
+                    <span className="font-bold text-slate-200">Active (Visible on Public /gallery)</span>
+                  </label>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="px-5 py-2.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="px-6 py-2.5 rounded-lg text-xs font-extrabold bg-accent text-slate-950 hover:bg-yellow-500 transition-all uppercase tracking-wider shadow-lg disabled:opacity-50"
+                  >
+                    {isSubmitting ? "Saving Asset..." : editingMedia ? "Update Gallery Item" : "Save Gallery Item"}
+                  </button>
+                </div>
+
+              </form>
+            </div>
           </div>
-        </div>
+        </Portal>
       )}
 
       {/* LIGHTBOX ZOOM MODAL */}
       {lightboxImage && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="relative max-w-4xl w-full bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row">
-            <button
-              onClick={() => setLightboxImage(null)}
-              className="absolute top-4 right-4 p-2 bg-slate-950/80 text-white rounded-full hover:bg-slate-800 z-10"
-            >
-              <X className="w-5 h-5" />
-            </button>
+        <Portal>
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[99999] flex items-center justify-center p-4">
+            <div className="relative max-w-4xl w-full bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row">
+              <button
+                onClick={() => setLightboxImage(null)}
+                className="absolute top-4 right-4 p-2 bg-slate-950/80 text-white rounded-full hover:bg-slate-800 z-10"
+              >
+                <X className="w-5 h-5" />
+              </button>
 
-            <div className="md:w-2/3 h-80 md:h-[500px] bg-black flex items-center justify-center">
-              <img
-                src={lightboxImage.imageUrl}
-                alt={lightboxImage.title || "Gallery Zoom"}
-                className="max-w-full max-h-full object-contain"
-              />
-            </div>
-
-            <div className="md:w-1/3 p-6 space-y-4 flex flex-col justify-between bg-slate-900 border-l border-white/5">
-              <div className="space-y-3">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-accent/20 text-accent border border-accent/30 inline-block">
-                  {lightboxImage.category}
-                </span>
-                <h3 className="text-xl font-extrabold text-slate-50">{lightboxImage.title || "Untitled Asset"}</h3>
-                {lightboxImage.description && (
-                  <p className="text-xs text-slate-300 leading-relaxed">{lightboxImage.description}</p>
-                )}
-                
-                <div className="space-y-1.5 text-xs text-slate-400 font-mono border-t border-white/5 pt-3">
-                  {lightboxImage.location && (
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-3.5 h-3.5 text-accent" />
-                      <span>{lightboxImage.location}</span>
-                    </div>
-                  )}
-                  {lightboxImage.year && (
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-3.5 h-3.5 text-accent" />
-                      <span>{lightboxImage.year}</span>
-                    </div>
-                  )}
-                </div>
+              <div className="md:w-2/3 h-80 md:h-[500px] bg-black flex items-center justify-center">
+                <img
+                  src={lightboxImage.imageUrl}
+                  alt={lightboxImage.title || "Gallery Zoom"}
+                  className="max-w-full max-h-full object-contain"
+                />
               </div>
 
-              <div className="text-[10px] text-slate-500 font-mono border-t border-white/5 pt-3">
-                ID: {lightboxImage.id}
+              <div className="md:w-1/3 p-6 space-y-4 flex flex-col justify-between bg-slate-900 border-l border-white/5">
+                <div className="space-y-3">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-accent/20 text-accent border border-accent/30 inline-block">
+                    {lightboxImage.category}
+                  </span>
+                  <h3 className="text-xl font-extrabold text-slate-50">{lightboxImage.title || "Untitled Asset"}</h3>
+                  {lightboxImage.description && (
+                    <p className="text-xs text-slate-300 leading-relaxed">{lightboxImage.description}</p>
+                  )}
+                  
+                  <div className="space-y-1.5 text-xs text-slate-400 font-mono border-t border-white/5 pt-3">
+                    {lightboxImage.location && (
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-3.5 h-3.5 text-accent" />
+                        <span>{lightboxImage.location}</span>
+                      </div>
+                    )}
+                    {lightboxImage.year && (
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-3.5 h-3.5 text-accent" />
+                        <span>{lightboxImage.year}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="text-[10px] text-slate-500 font-mono border-t border-white/5 pt-3">
+                  ID: {lightboxImage.id}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </Portal>
       )}
 
     </div>

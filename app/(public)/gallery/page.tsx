@@ -12,6 +12,7 @@ import {
   ArrowRight,
   Car
 } from "lucide-react";
+import Portal from "@/components/shared/portal";
 
 interface GalleryItem {
   id: string;
@@ -478,107 +479,110 @@ export default function PublicGalleryPage() {
 
       {/* FULLSCREEN INTERACTIVE LIGHTBOX MODAL */}
       {lightboxItem && (
-        <div 
-          className="fixed inset-0 bg-black/95 backdrop-blur-xl z-50 flex items-center justify-center p-4 sm:p-6 cursor-default"
-          onClick={() => setLightboxIndex(null)}
-        >
+        <Portal>
           <div 
-            className="relative max-w-5xl w-full bg-slate-900 border border-white/10 rounded-3xl overflow-hidden shadow-2xl flex flex-col lg:flex-row max-h-[90vh]"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[99999] flex items-center justify-center p-4 sm:p-6 cursor-default"
+            onClick={() => setLightboxIndex(null)}
           >
-            {/* Close Button */}
-            <button
-              onClick={() => setLightboxIndex(null)}
-              className="absolute top-4 right-4 p-2.5 bg-slate-950/80 text-slate-200 hover:text-white rounded-full border border-white/10 z-30 transition-all"
+            <div 
+              className="relative max-w-5xl w-full bg-slate-900 border border-white/10 rounded-3xl overflow-hidden shadow-2xl flex flex-col lg:flex-row max-h-[90vh]"
+              onClick={(e) => e.stopPropagation()}
             >
-              <X className="w-5 h-5" />
-            </button>
+              {/* Close Button */}
+              <button
+                onClick={() => setLightboxIndex(null)}
+                className="absolute top-4 right-4 p-2.5 bg-slate-950/80 text-slate-200 hover:text-white rounded-full border border-white/10 z-30 transition-all"
+              >
+                <X className="w-5 h-5" />
+              </button>
 
-            {/* Prev / Next Overlay Buttons */}
-            <button
-              onClick={() => setLightboxIndex((prev) => (prev !== null ? (prev - 1 + items.length) % items.length : null))}
-              className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-slate-950/80 text-slate-200 hover:text-accent rounded-full border border-white/10 z-30 transition-all"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-            <button
-              onClick={() => setLightboxIndex((prev) => (prev !== null ? (prev + 1) % items.length : null))}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-slate-950/80 text-slate-200 hover:text-accent rounded-full border border-white/10 z-30 transition-all"
-            >
-              <ChevronRight className="w-6 h-6" />
-            </button>
+              {/* Prev / Next Overlay Buttons */}
+              <button
+                onClick={() => setLightboxIndex((prev) => (prev !== null ? (prev - 1 + items.length) % items.length : null))}
+                className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-slate-950/80 text-slate-200 hover:text-accent rounded-full border border-white/10 z-30 transition-all"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <button
+                onClick={() => setLightboxIndex((prev) => (prev !== null ? (prev + 1) % items.length : null))}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-slate-950/80 text-slate-200 hover:text-accent rounded-full border border-white/10 z-30 transition-all"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
 
-            {/* Lightbox Image Box */}
-            <div className="lg:w-2/3 h-[320px] sm:h-[480px] lg:h-auto bg-black flex items-center justify-center relative">
-              <img
-                src={lightboxItem.imageUrl}
-                alt={lightboxItem.altText || lightboxItem.title || "TEMP TRAVEL Lightbox"}
-                className="max-w-full max-h-full object-contain p-2"
-              />
-            </div>
+              {/* Lightbox Image Box */}
+              <div className="lg:w-2/3 h-[320px] sm:h-[480px] lg:h-auto bg-black flex items-center justify-center relative">
+                <img
+                  src={lightboxItem.imageUrl}
+                  alt={lightboxItem.altText || lightboxItem.title || "TEMP TRAVEL Lightbox"}
+                  className="max-w-full max-h-full object-contain p-2"
+                />
+              </div>
 
-            {/* Lightbox Info Panel */}
-            <div className="lg:w-1/3 p-6 sm:p-8 space-y-6 flex flex-col justify-between bg-slate-900 border-t lg:border-t-0 lg:border-l border-white/10 overflow-y-auto">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest bg-accent/10 text-accent border border-accent/20">
-                    {lightboxItem.category || "FLEET"}
-                  </span>
-                  {lightboxItem.isFeatured && (
-                    <span className="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-accent text-slate-950">
-                      FEATURED
+              {/* Lightbox Info Panel */}
+              <div className="lg:w-1/3 p-6 sm:p-8 flex flex-col justify-between space-y-6 bg-slate-900 border-t lg:border-t-0 lg:border-l border-white/5 overflow-y-auto">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-accent/20 text-accent border border-accent/30">
+                      {lightboxItem.category || "TEMP TRAVEL Fleet"}
                     </span>
-                  )}
-                </div>
-
-                <h2 className="text-2xl font-extrabold text-slate-50 leading-tight">
-                  {lightboxItem.title || "Untitled Journal Asset"}
-                </h2>
-
-                {lightboxItem.description && (
-                  <p className="text-xs text-slate-300 font-light leading-relaxed">
-                    {lightboxItem.description}
-                  </p>
-                )}
-
-                {lightboxItem.caption && (
-                  <div className="p-3 bg-slate-950/60 border border-white/5 rounded-xl text-xs text-slate-400 italic">
-                    &ldquo;{lightboxItem.caption}&rdquo;
+                    {lightboxItem.isFeatured && (
+                      <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1">
+                        <Sparkles className="w-3 h-3" />
+                        Featured
+                      </span>
+                    )}
                   </div>
-                )}
-              </div>
 
-              <div className="space-y-4 border-t border-white/5 pt-4">
-                <div className="space-y-2 text-xs text-slate-400 font-mono">
-                  {lightboxItem.location && (
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-3.5 h-3.5 text-accent" />
-                      <span>Location: {lightboxItem.location}</span>
-                    </div>
+                  <h3 className="text-xl sm:text-2xl font-black text-slate-50 leading-tight">
+                    {lightboxItem.title || "Chauffeur Drive Experience"}
+                  </h3>
+
+                  {lightboxItem.description && (
+                    <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                      {lightboxItem.description}
+                    </p>
                   )}
-                  {lightboxItem.year && (
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-3.5 h-3.5 text-accent" />
-                      <span>Year: {lightboxItem.year}</span>
+
+                  {lightboxItem.caption && (
+                    <div className="p-3 bg-slate-950/60 border border-white/5 rounded-xl text-xs text-slate-400 italic">
+                      &ldquo;{lightboxItem.caption}&rdquo;
                     </div>
                   )}
                 </div>
 
-                <div className="pt-2">
-                  <Link
-                    href="/contact"
-                    className="w-full inline-flex items-center justify-center gap-2 bg-accent hover:bg-yellow-500 text-slate-950 font-extrabold py-3 px-4 rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg"
-                  >
-                    <span>Inquire Mobility Service</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
+                <div className="space-y-4 border-t border-white/5 pt-4">
+                  <div className="space-y-2 text-xs text-slate-400 font-mono">
+                    {lightboxItem.location && (
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-3.5 h-3.5 text-accent" />
+                        <span>Location: {lightboxItem.location}</span>
+                      </div>
+                    )}
+                    {lightboxItem.year && (
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-3.5 h-3.5 text-accent" />
+                        <span>Year: {lightboxItem.year}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="pt-2">
+                    <Link
+                      href="/contact"
+                      className="w-full inline-flex items-center justify-center gap-2 bg-accent hover:bg-yellow-500 text-slate-950 font-extrabold py-3 px-4 rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg"
+                    >
+                      <span>Inquire Mobility Service</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </div>
                 </div>
+
               </div>
 
             </div>
-
           </div>
-        </div>
+        </Portal>
       )}
 
     </div>

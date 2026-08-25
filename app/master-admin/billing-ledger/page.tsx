@@ -17,6 +17,7 @@ import {
   X,
   Plus
 } from "lucide-react";
+import Portal from "@/components/shared/portal";
 
 export default function MasterBillingLedgerPage() {
   const [activeLedgerTab, setActiveLedgerTab] = useState<"invoices" | "razorpay" | "cash">("invoices");
@@ -228,151 +229,155 @@ export default function MasterBillingLedgerPage() {
 
       {/* Generate GST Invoice Modal */}
       {showInvoiceModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
-            <button
-              onClick={() => setShowInvoiceModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white"
-            >
-              <X className="w-5 h-5" />
-            </button>
+        <Portal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+            <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
+              <button
+                onClick={() => setShowInvoiceModal(false)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
 
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">GST Tax Invoice Generator</span>
-              <h3 className="text-xl font-bold text-slate-50">Create New Bill</h3>
-            </div>
-
-            <form onSubmit={handleCreateInvoiceSubmit} className="space-y-4 text-xs">
               <div className="space-y-1">
-                <label className="text-slate-400 font-bold">Customer / Company Name *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Acme Corp Logistics"
-                  value={invoiceForm.customerName}
-                  onChange={(e) => setInvoiceForm({ ...invoiceForm, customerName: e.target.value })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
-                />
+                <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">GST Tax Invoice Generator</span>
+                <h3 className="text-xl font-bold text-slate-50">Create New Bill</h3>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <form onSubmit={handleCreateInvoiceSubmit} className="space-y-4 text-xs">
                 <div className="space-y-1">
-                  <label className="text-slate-400 font-bold">GSTIN (Optional)</label>
+                  <label className="text-slate-400 font-bold">Customer / Company Name *</label>
                   <input
                     type="text"
-                    placeholder="27AAAAA0000A1Z5"
-                    value={invoiceForm.gstin}
-                    onChange={(e) => setInvoiceForm({ ...invoiceForm, gstin: e.target.value })}
+                    required
+                    placeholder="e.g. Acme Corp Logistics"
+                    value={invoiceForm.customerName}
+                    onChange={(e) => setInvoiceForm({ ...invoiceForm, customerName: e.target.value })}
                     className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-slate-400 font-bold">Base Fare Amount (₹) *</label>
-                  <input
-                    type="number"
-                    required
-                    placeholder="45000"
-                    value={invoiceForm.baseAmount}
-                    onChange={(e) => setInvoiceForm({ ...invoiceForm, baseAmount: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-slate-400 font-bold">GSTIN (Optional)</label>
+                    <input
+                      type="text"
+                      placeholder="27AAAAA0000A1Z5"
+                      value={invoiceForm.gstin}
+                      onChange={(e) => setInvoiceForm({ ...invoiceForm, gstin: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-400 font-bold">Base Fare Amount (₹) *</label>
+                    <input
+                      type="number"
+                      required
+                      placeholder="45000"
+                      value={invoiceForm.baseAmount}
+                      onChange={(e) => setInvoiceForm({ ...invoiceForm, baseAmount: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
+                    />
+                  </div>
                 </div>
+
+                <div className="p-3 bg-slate-950 rounded-xl border border-white/5 space-y-1 font-mono text-[11px]">
+                  <div className="flex justify-between text-slate-400">
+                    <span>SAC Code:</span>
+                    <span className="text-slate-200">996412</span>
+                  </div>
+                  <div className="flex justify-between text-slate-400">
+                    <span>CGST (6%):</span>
+                    <span className="text-amber-400">₹{((parseFloat(invoiceForm.baseAmount) || 0) * 0.06).toLocaleString("en-IN")}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-400">
+                    <span>SGST (6%):</span>
+                    <span className="text-amber-400">₹{((parseFloat(invoiceForm.baseAmount) || 0) * 0.06).toLocaleString("en-IN")}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-200 font-bold pt-1 border-t border-white/10">
+                    <span>Total Tax Inclusive Bill:</span>
+                    <span className="text-emerald-400">₹{((parseFloat(invoiceForm.baseAmount) || 0) * 1.12).toLocaleString("en-IN")}</span>
+                  </div>
+                </div>
+
+                <div className="pt-2 flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowInvoiceModal(false)}
+                    className="px-4 py-2 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs uppercase"
+                  >
+                    Generate Invoice
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </Portal>
+      )}
+
+      {/* PDF Receipt Viewer Modal */}
+      {selectedInvoice && (
+        <Portal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+            <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
+              <button
+                onClick={() => setSelectedInvoice(null)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="space-y-1 text-center border-b border-white/10 pb-4">
+                <img src="/images/logo.png" alt="TEMP TRAVEL" className="h-10 mx-auto object-contain mb-1" />
+                <h3 className="text-lg font-bold text-slate-50">TAX INVOICE - TEMP TRAVEL CAR RENTALS PVT LTD</h3>
+                <div className="text-[10px] text-slate-400 font-mono">Invoice Ref: {selectedInvoice.id} &bull; Date: {selectedInvoice.date}</div>
               </div>
 
-              <div className="p-3 bg-slate-950 rounded-xl border border-white/5 space-y-1 font-mono text-[11px]">
-                <div className="flex justify-between text-slate-400">
-                  <span>SAC Code:</span>
-                  <span className="text-slate-200">996412</span>
+              <div className="space-y-2 text-xs font-mono bg-slate-950 p-4 rounded-xl border border-white/5">
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Billed To:</span>
+                  <span className="text-slate-100 font-bold">{selectedInvoice.customerName}</span>
                 </div>
-                <div className="flex justify-between text-slate-400">
-                  <span>CGST (6%):</span>
-                  <span className="text-amber-400">₹{((parseFloat(invoiceForm.baseAmount) || 0) * 0.06).toLocaleString("en-IN")}</span>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">GSTIN:</span>
+                  <span className="text-slate-200">{selectedInvoice.gstin}</span>
                 </div>
-                <div className="flex justify-between text-slate-400">
-                  <span>SGST (6%):</span>
-                  <span className="text-amber-400">₹{((parseFloat(invoiceForm.baseAmount) || 0) * 0.06).toLocaleString("en-IN")}</span>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">SAC Code:</span>
+                  <span className="text-slate-200">{selectedInvoice.sacCode}</span>
                 </div>
-                <div className="flex justify-between text-slate-200 font-bold pt-1 border-t border-white/10">
-                  <span>Total Tax Inclusive Bill:</span>
-                  <span className="text-emerald-400">₹{((parseFloat(invoiceForm.baseAmount) || 0) * 1.12).toLocaleString("en-IN")}</span>
+                <div className="border-t border-white/10 pt-2 flex justify-between">
+                  <span className="text-slate-400">Base Fare:</span>
+                  <span className="text-slate-200">₹{selectedInvoice.baseAmount.toLocaleString("en-IN")}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">CGST (6%) + SGST (6%):</span>
+                  <span className="text-amber-400">₹{(selectedInvoice.cgst + selectedInvoice.sgst).toLocaleString("en-IN")}</span>
+                </div>
+                <div className="border-t border-white/10 pt-2 flex justify-between text-emerald-400 font-bold text-sm">
+                  <span>Total Amount Paid:</span>
+                  <span>₹{selectedInvoice.totalAmount.toLocaleString("en-IN")}</span>
                 </div>
               </div>
 
               <div className="pt-2 flex justify-end gap-3">
                 <button
-                  type="button"
-                  onClick={() => setShowInvoiceModal(false)}
-                  className="px-4 py-2 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs"
+                  onClick={() => setSelectedInvoice(null)}
+                  className="px-4 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs uppercase"
-                >
-                  Generate Invoice
+                  Close Receipt
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* PDF Receipt Viewer Modal */}
-      {selectedInvoice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
-            <button
-              onClick={() => setSelectedInvoice(null)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="space-y-1 text-center border-b border-white/10 pb-4">
-              <img src="/images/logo.png" alt="TEMP TRAVEL" className="h-10 mx-auto object-contain mb-1" />
-              <h3 className="text-lg font-bold text-slate-50">TAX INVOICE - TEMP TRAVEL CAR RENTALS PVT LTD</h3>
-              <div className="text-[10px] text-slate-400 font-mono">Invoice Ref: {selectedInvoice.id} &bull; Date: {selectedInvoice.date}</div>
-            </div>
-
-            <div className="space-y-2 text-xs font-mono bg-slate-950 p-4 rounded-xl border border-white/5">
-              <div className="flex justify-between">
-                <span className="text-slate-400">Billed To:</span>
-                <span className="text-slate-100 font-bold">{selectedInvoice.customerName}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">GSTIN:</span>
-                <span className="text-slate-200">{selectedInvoice.gstin}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">SAC Code:</span>
-                <span className="text-slate-200">{selectedInvoice.sacCode}</span>
-              </div>
-              <div className="border-t border-white/10 pt-2 flex justify-between">
-                <span className="text-slate-400">Base Fare:</span>
-                <span className="text-slate-200">₹{selectedInvoice.baseAmount.toLocaleString("en-IN")}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">CGST (6%) + SGST (6%):</span>
-                <span className="text-amber-400">₹{(selectedInvoice.cgst + selectedInvoice.sgst).toLocaleString("en-IN")}</span>
-              </div>
-              <div className="border-t border-white/10 pt-2 flex justify-between text-emerald-400 font-bold text-sm">
-                <span>Total Amount Paid:</span>
-                <span>₹{selectedInvoice.totalAmount.toLocaleString("en-IN")}</span>
-              </div>
-            </div>
-
-            <div className="pt-2 flex justify-end gap-3">
-              <button
-                onClick={() => setSelectedInvoice(null)}
-                className="px-4 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs"
-              >
-                Close Receipt
-              </button>
             </div>
           </div>
-        </div>
+        </Portal>
       )}
     </div>
   );

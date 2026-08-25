@@ -15,6 +15,7 @@ import {
   Sparkles,
   ArrowRight
 } from "lucide-react";
+import Portal from "@/components/shared/portal";
 
 interface BlogCategory {
   id: string;
@@ -326,82 +327,84 @@ export default function MasterBlogCategoriesPage() {
 
       {/* Add / Edit Category Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
-            <button
-              onClick={() => setShowModal(false)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
+        <Portal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+            <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
+              <button
+                onClick={() => setShowModal(false)}
+                className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
 
-            <div className="space-y-1 border-b border-white/10 pb-3">
-              <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">
-                {editingCategory ? "Update Category" : "New Taxonomy"}
-              </span>
-              <h3 className="text-xl font-black text-slate-50">
-                {editingCategory ? "Edit Blog Category" : "Add Blog Category"}
-              </h3>
+              <div className="space-y-1 border-b border-white/10 pb-3">
+                <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">
+                  {editingCategory ? "Update Category" : "New Taxonomy"}
+                </span>
+                <h3 className="text-xl font-black text-slate-50">
+                  {editingCategory ? "Edit Blog Category" : "Add Blog Category"}
+                </h3>
+              </div>
+
+              <form onSubmit={handleSaveCategory} className="space-y-4 text-xs">
+                <div className="space-y-1">
+                  <label className="text-slate-300 font-bold">Category Name *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Wedding Car Rentals"
+                    value={formData.name}
+                    onChange={(e) => {
+                      const name = e.target.value;
+                      const autoSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
+                      setFormData({ ...formData, name, slug: editingCategory ? formData.slug : autoSlug });
+                    }}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-slate-300 font-bold">URL Slug *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. wedding-car-rentals"
+                    value={formData.slug}
+                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-slate-300 font-bold">Description</label>
+                  <textarea
+                    rows={3}
+                    placeholder="Brief description of the articles and topics covered under this category..."
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-sans"
+                  />
+                </div>
+
+                <div className="pt-3 border-t border-white/10 flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowModal(false)}
+                    className="px-5 py-2 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs font-bold cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer"
+                  >
+                    {editingCategory ? "Save Changes" : "Create Category"}
+                  </button>
+                </div>
+              </form>
             </div>
-
-            <form onSubmit={handleSaveCategory} className="space-y-4 text-xs">
-              <div className="space-y-1">
-                <label className="text-slate-300 font-bold">Category Name *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Wedding Car Rentals"
-                  value={formData.name}
-                  onChange={(e) => {
-                    const name = e.target.value;
-                    const autoSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
-                    setFormData({ ...formData, name, slug: editingCategory ? formData.slug : autoSlug });
-                  }}
-                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-slate-300 font-bold">URL Slug *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. wedding-car-rentals"
-                  value={formData.slug}
-                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-slate-300 font-bold">Description</label>
-                <textarea
-                  rows={3}
-                  placeholder="Brief description of the articles and topics covered under this category..."
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-sans"
-                />
-              </div>
-
-              <div className="pt-3 border-t border-white/10 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-5 py-2 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs font-bold cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer"
-                >
-                  {editingCategory ? "Save Changes" : "Create Category"}
-                </button>
-              </div>
-            </form>
           </div>
-        </div>
+        </Portal>
       )}
     </div>
   );

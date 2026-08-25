@@ -30,6 +30,7 @@ import {
   ShieldCheck,
   FileText
 } from "lucide-react";
+import Portal from "@/components/shared/portal";
 import LocationInput from "@/components/shared/location-input";
 import { extractLeadVehicleRequirements } from "@/components/admin/lead-dispatch-modal";
 
@@ -771,7 +772,8 @@ export default function MasterOmnichannelCRMPage() {
 
       {/* Ride Dispatch & Fleet Assignment Modal */}
       {dispatchModalLead && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+        <Portal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
           <div className="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 sm:p-8 w-full max-w-2xl shadow-2xl space-y-6 relative text-slate-100 max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setDispatchModalLead(null)}
@@ -1053,159 +1055,164 @@ export default function MasterOmnichannelCRMPage() {
             </form>
           </div>
         </div>
+        </Portal>
       )}
 
       {/* Dispatched Success & Booking Reference Card */}
       {dispatchedSuccess && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-          <div className="bg-slate-900 border border-emerald-500/40 rounded-3xl p-6 sm:p-8 w-full max-w-xl shadow-2xl space-y-6 relative text-slate-100">
-            <button
-              onClick={() => setDispatchedSuccess(null)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="text-center space-y-2">
-              <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto">
-                <Check className="w-6 h-6" />
-              </div>
-              <h3 className="text-2xl font-black text-slate-50">Ride Dispatched Successfully!</h3>
-              <p className="text-xs text-slate-400">
-                The lead is now confirmed and logged as an active booking in the dispatch network.
-              </p>
-            </div>
-
-            {/* Official Booking PNR Ticket Banner */}
-            <div className="bg-slate-950 p-5 rounded-2xl border border-amber-500/30 space-y-3">
-              <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Official Booking PNR</span>
-                <span className="text-xl font-black font-mono text-amber-400">{dispatchedSuccess.bookingRef}</span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 text-xs">
-                <div>
-                  <span className="text-slate-400 block text-[10px] uppercase font-bold">Customer</span>
-                  <span className="font-bold text-slate-100">{dispatchedSuccess.lead?.customerName}</span>
-                  <div className="text-[11px] font-mono text-slate-400">{dispatchedSuccess.lead?.phone}</div>
-                </div>
-
-                <div>
-                  <span className="text-slate-400 block text-[10px] uppercase font-bold">Assigned Vehicle</span>
-                  <span className="font-bold text-amber-400 font-mono">{dispatchedSuccess.vehicle?.registrationNumber}</span>
-                  <div className="text-[11px] text-slate-300">{dispatchedSuccess.vehicle?.make} {dispatchedSuccess.vehicle?.model}</div>
-                </div>
-
-                <div>
-                  <span className="text-slate-400 block text-[10px] uppercase font-bold">Chauffeur</span>
-                  <span className="font-bold text-slate-100">{dispatchedSuccess.driver?.name}</span>
-                  <div className="text-[11px] font-mono text-slate-400">+91 {dispatchedSuccess.driver?.phone}</div>
-                </div>
-
-                <div>
-                  <span className="text-slate-400 block text-[10px] uppercase font-bold">Total Fare / Mode</span>
-                  <span className="font-black text-emerald-400 font-mono text-sm">₹{dispatchedSuccess.fare}</span>
-                  <div className="text-[10px] text-slate-400">{dispatchedSuccess.paymentMode}</div>
-                </div>
-              </div>
-            </div>
-
-            {/* 1-Click Action Buttons: WhatsApp Share & Print Slip */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              <a
-                href={`https://wa.me/91${(dispatchedSuccess.lead?.phone || "").replace(/\D/g, "").slice(-10)}?text=${encodeURIComponent(
-                  `*TEMP TRAVEL CAR RENTALS - RIDE CONFIRMATION*\n\nDear ${dispatchedSuccess.lead?.customerName},\nYour cab has been confirmed and dispatched.\n\n*Booking Number (PNR):* ${dispatchedSuccess.bookingRef}\n*Vehicle:* ${dispatchedSuccess.vehicle?.make} ${dispatchedSuccess.vehicle?.model} (${dispatchedSuccess.vehicle?.registrationNumber})\n*Driver / Chauffeur:* ${dispatchedSuccess.driver?.name} (📞 +91-${dispatchedSuccess.driver?.phone})\n*Pickup Location:* ${dispatchedSuccess.pickupLocation}\n*Agreed Fare:* ₹${dispatchedSuccess.fare}\n\nThank you for choosing Temp Travel! For assistance call +91-9999999999.`
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider shadow-lg transition-all"
+        <Portal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+            <div className="bg-slate-900 border border-emerald-500/40 rounded-3xl p-6 sm:p-8 w-full max-w-xl shadow-2xl space-y-6 relative text-slate-100">
+              <button
+                onClick={() => setDispatchedSuccess(null)}
+                className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
               >
-                <Share2 className="w-4 h-4" />
-                <span>Share On WhatsApp</span>
-              </a>
+                <X className="w-5 h-5" />
+              </button>
 
-              <a
-                href="/admin/bookings-dispatch"
-                className="flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider shadow-lg transition-all"
-              >
-                <span>View In Dispatch Desk</span>
-                <ArrowRight className="w-4 h-4" />
-              </a>
+              <div className="text-center space-y-2">
+                <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto">
+                  <Check className="w-6 h-6" />
+                </div>
+                <h3 className="text-2xl font-black text-slate-50">Ride Dispatched Successfully!</h3>
+                <p className="text-xs text-slate-400">
+                  The lead is now confirmed and logged as an active booking in the dispatch network.
+                </p>
+              </div>
+
+              {/* Official Booking PNR Ticket Banner */}
+              <div className="bg-slate-950 p-5 rounded-2xl border border-amber-500/30 space-y-3">
+                <div className="flex justify-between items-center border-b border-white/10 pb-3">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Official Booking PNR</span>
+                  <span className="text-xl font-black font-mono text-amber-400">{dispatchedSuccess.bookingRef}</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <span className="text-slate-400 block text-[10px] uppercase font-bold">Customer</span>
+                    <span className="font-bold text-slate-100">{dispatchedSuccess.lead?.customerName}</span>
+                    <div className="text-[11px] font-mono text-slate-400">{dispatchedSuccess.lead?.phone}</div>
+                  </div>
+
+                  <div>
+                    <span className="text-slate-400 block text-[10px] uppercase font-bold">Assigned Vehicle</span>
+                    <span className="font-bold text-amber-400 font-mono">{dispatchedSuccess.vehicle?.registrationNumber}</span>
+                    <div className="text-[11px] text-slate-300">{dispatchedSuccess.vehicle?.make} {dispatchedSuccess.vehicle?.model}</div>
+                  </div>
+
+                  <div>
+                    <span className="text-slate-400 block text-[10px] uppercase font-bold">Chauffeur</span>
+                    <span className="font-bold text-slate-100">{dispatchedSuccess.driver?.name}</span>
+                    <div className="text-[11px] font-mono text-slate-400">+91 {dispatchedSuccess.driver?.phone}</div>
+                  </div>
+
+                  <div>
+                    <span className="text-slate-400 block text-[10px] uppercase font-bold">Total Fare / Mode</span>
+                    <span className="font-black text-emerald-400 font-mono text-sm">₹{dispatchedSuccess.fare}</span>
+                    <div className="text-[10px] text-slate-400">{dispatchedSuccess.paymentMode}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 1-Click Action Buttons: WhatsApp Share & Print Slip */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                <a
+                  href={`https://wa.me/91${(dispatchedSuccess.lead?.phone || "").replace(/\D/g, "").slice(-10)}?text=${encodeURIComponent(
+                    `*TEMP TRAVEL CAR RENTALS - RIDE CONFIRMATION*\n\nDear ${dispatchedSuccess.lead?.customerName},\nYour cab has been confirmed and dispatched.\n\n*Booking Number (PNR):* ${dispatchedSuccess.bookingRef}\n*Vehicle:* ${dispatchedSuccess.vehicle?.make} ${dispatchedSuccess.vehicle?.model} (${dispatchedSuccess.vehicle?.registrationNumber})\n*Driver / Chauffeur:* ${dispatchedSuccess.driver?.name} (📞 +91-${dispatchedSuccess.driver?.phone})\n*Pickup Location:* ${dispatchedSuccess.pickupLocation}\n*Agreed Fare:* ₹${dispatchedSuccess.fare}\n\nThank you for choosing Temp Travel! For assistance call +91-9999999999.`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider shadow-lg transition-all"
+                >
+                  <Share2 className="w-4 h-4" />
+                  <span>Share On WhatsApp</span>
+                </a>
+
+                <a
+                  href="/admin/bookings-dispatch"
+                  className="flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider shadow-lg transition-all"
+                >
+                  <span>View In Dispatch Desk</span>
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+              </div>
             </div>
           </div>
-        </div>
+        </Portal>
       )}
 
       {/* Lead Inspection Modal */}
       {selectedLead && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
-            <button
-              onClick={() => setSelectedLead(null)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">Lead Record Dossier</span>
-                <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded border border-white/10 font-bold">
-                  {selectedLead.bookingRef}
-                </span>
-              </div>
-              <h3 className="text-xl font-bold text-slate-50">{selectedLead.customerName}</h3>
-            </div>
-
-            <div className="space-y-2 bg-slate-950 p-4 rounded-xl border border-white/10 text-xs font-mono">
-              <div>Phone: <strong className="text-slate-200">{selectedLead.phone}</strong></div>
-              <div>Email: <strong className="text-slate-200">{selectedLead.email}</strong></div>
-              <div>Trip Type: <strong className="text-amber-400">{selectedLead.tripType}</strong></div>
-              {(() => {
-                const req = extractLeadVehicleRequirements(selectedLead);
-                if (req.isVehiclePreSelected) {
-                  return (
-                    <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 space-y-1 my-1">
-                      <div className="text-[10px] font-bold uppercase text-amber-400">Customer Selected Fleet:</div>
-                      <div className="flex flex-wrap gap-2">
-                        {req.category && <span className="text-slate-200">Category: <strong>{req.category}</strong></span>}
-                        {req.vehicleClass && <span className="text-slate-200">• Class: <strong>{req.vehicleClass}</strong></span>}
-                        {req.model && <span className="text-slate-200">• Model: <strong className="text-emerald-400">{req.model}</strong></span>}
-                      </div>
-                    </div>
-                  );
-                }
-                return null;
-              })()}
-              <div>Pickup Address: <strong className="text-slate-200">{selectedLead.pickupLocation}</strong></div>
-              {selectedLead.dropLocation && (
-                <div>Drop Address: <strong className="text-slate-200">{selectedLead.dropLocation}</strong></div>
-              )}
-              <div>Notes: <p className="text-slate-400 font-sans mt-1">{selectedLead.notes || "No special instructions recorded."}</p></div>
-            </div>
-
-            <div className="pt-2 flex justify-between items-center">
-              <button
-                onClick={() => {
-                  const leadToDispatch = selectedLead;
-                  setSelectedLead(null);
-                  openDispatchModal(leadToDispatch);
-                }}
-                className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black px-4 py-2 rounded-xl text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 cursor-pointer"
-              >
-                <Truck className="w-4 h-4" />
-                <span>Dispatch & Book Ride</span>
-              </button>
-
+        <Portal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+            <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
               <button
                 onClick={() => setSelectedLead(null)}
-                className="px-4 py-2 bg-slate-950 hover:bg-white/10 border border-white/10 text-slate-300 font-bold rounded-xl text-xs cursor-pointer"
+                className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"
               >
-                Close
+                <X className="w-5 h-5" />
               </button>
+
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">Lead Record Dossier</span>
+                  <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded border border-white/10 font-bold">
+                    {selectedLead.bookingRef}
+                  </span>
+                </div>
+                <h3 className="text-xl font-bold text-slate-50">{selectedLead.customerName}</h3>
+              </div>
+
+              <div className="space-y-2 bg-slate-950 p-4 rounded-xl border border-white/10 text-xs font-mono">
+                <div>Phone: <strong className="text-slate-200">{selectedLead.phone}</strong></div>
+                <div>Email: <strong className="text-slate-200">{selectedLead.email}</strong></div>
+                <div>Trip Type: <strong className="text-amber-400">{selectedLead.tripType}</strong></div>
+                {(() => {
+                  const req = extractLeadVehicleRequirements(selectedLead);
+                  if (req.isVehiclePreSelected) {
+                    return (
+                      <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 space-y-1 my-1">
+                        <div className="text-[10px] font-bold uppercase text-amber-400">Customer Selected Fleet:</div>
+                        <div className="flex flex-wrap gap-2">
+                          {req.category && <span className="text-slate-200">Category: <strong>{req.category}</strong></span>}
+                          {req.vehicleClass && <span className="text-slate-200">• Class: <strong>{req.vehicleClass}</strong></span>}
+                          {req.model && <span className="text-slate-200">• Model: <strong className="text-emerald-400">{req.model}</strong></span>}
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+                <div>Pickup Address: <strong className="text-slate-200">{selectedLead.pickupLocation}</strong></div>
+                {selectedLead.dropLocation && (
+                  <div>Drop Address: <strong className="text-slate-200">{selectedLead.dropLocation}</strong></div>
+                )}
+                <div>Notes: <p className="text-slate-400 font-sans mt-1">{selectedLead.notes || "No special instructions recorded."}</p></div>
+              </div>
+
+              <div className="pt-2 flex justify-between items-center">
+                <button
+                  onClick={() => {
+                    const leadToDispatch = selectedLead;
+                    setSelectedLead(null);
+                    openDispatchModal(leadToDispatch);
+                  }}
+                  className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black px-4 py-2 rounded-xl text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 cursor-pointer"
+                >
+                  <Truck className="w-4 h-4" />
+                  <span>Dispatch & Book Ride</span>
+                </button>
+
+                <button
+                  onClick={() => setSelectedLead(null)}
+                  className="px-4 py-2 bg-slate-950 hover:bg-white/10 border border-white/10 text-slate-300 font-bold rounded-xl text-xs cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </Portal>
       )}
     </div>
   );

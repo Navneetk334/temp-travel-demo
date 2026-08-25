@@ -20,6 +20,7 @@ import {
   Calendar,
   RefreshCw
 } from "lucide-react";
+import Portal from "@/components/shared/portal";
 
 // Category to Class Mapping Hierarchy
 const CLASS_OPTIONS: Record<string, string[]> = {
@@ -475,7 +476,8 @@ export default function MasterDriversPage() {
 
       {/* Add / Edit Driver Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <Portal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
           <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-2xl shadow-2xl space-y-6 relative text-slate-100 max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setShowAddModal(false)}
@@ -792,66 +794,69 @@ export default function MasterDriversPage() {
             </form>
           </div>
         </div>
+        </Portal>
       )}
 
       {/* Inspect File Modal */}
       {selectedDriver && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-md shadow-2xl space-y-4 relative text-slate-100">
-            <button
-              onClick={() => setSelectedDriver(null)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="flex items-center gap-3 border-b border-white/10 pb-4">
-              {selectedDriver.photoUrl ? (
-                <img src={selectedDriver.photoUrl} alt={selectedDriver.name} className="w-12 h-12 rounded-2xl object-cover border border-amber-400/40" />
-              ) : (
-                <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-black text-xl">
-                  {selectedDriver.name.charAt(0)}
-                </div>
-              )}
-              <div>
-                <h3 className="text-xl font-extrabold text-slate-50">{selectedDriver.name}</h3>
-                <div className="text-xs font-mono text-amber-400">ID: {selectedDriver.id}</div>
-              </div>
-            </div>
-
-            <div className="space-y-2 text-xs font-mono bg-slate-950 p-4 rounded-2xl border border-white/5">
-              <div className="flex justify-between">
-                <span className="text-slate-400 font-sans">Date of Birth:</span>
-                <span className="text-amber-400 font-bold">{selectedDriver.dob || "N/A"} ({calculateAge(selectedDriver.dob) || 30} Yrs)</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400 font-sans">Mobile:</span>
-                <span className="text-slate-100 font-bold">+91-{selectedDriver.phone}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400 font-sans">Driving License:</span>
-                <span className="text-amber-400 font-bold">{selectedDriver.licenseNumber} (Exp: {selectedDriver.licenseExpiry})</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400 font-sans">Aadhaar:</span>
-                <span className="text-slate-200">{selectedDriver.aadhaarNumber}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400 font-sans">PAN Card:</span>
-                <span className="text-slate-200">{selectedDriver.panNumber}</span>
-              </div>
-            </div>
-
-            <div className="pt-2 flex justify-end">
+        <Portal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+            <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-md shadow-2xl space-y-4 relative text-slate-100">
               <button
                 onClick={() => setSelectedDriver(null)}
-                className="px-5 py-2 bg-slate-950 border border-white/10 hover:border-white/20 text-slate-200 rounded-xl text-xs font-bold"
+                className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
               >
-                Close File
+                <X className="w-5 h-5" />
               </button>
+
+              <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+                {selectedDriver.photoUrl ? (
+                  <img src={selectedDriver.photoUrl} alt={selectedDriver.name} className="w-12 h-12 rounded-2xl object-cover border border-amber-400/40" />
+                ) : (
+                  <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-black text-xl">
+                    {selectedDriver.name.charAt(0)}
+                  </div>
+                )}
+                <div>
+                  <h3 className="text-xl font-extrabold text-slate-50">{selectedDriver.name}</h3>
+                  <div className="text-xs font-mono text-amber-400">ID: {selectedDriver.id}</div>
+                </div>
+              </div>
+
+              <div className="space-y-2 text-xs font-mono bg-slate-950 p-4 rounded-2xl border border-white/5">
+                <div className="flex justify-between">
+                  <span className="text-slate-400 font-sans">Date of Birth:</span>
+                  <span className="text-amber-400 font-bold">{selectedDriver.dob || "N/A"} ({calculateAge(selectedDriver.dob) || 30} Yrs)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400 font-sans">Mobile:</span>
+                  <span className="text-slate-100 font-bold">+91-{selectedDriver.phone}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400 font-sans">Driving License:</span>
+                  <span className="text-amber-400 font-bold">{selectedDriver.licenseNumber} (Exp: {selectedDriver.licenseExpiry})</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400 font-sans">Aadhaar:</span>
+                  <span className="text-slate-200">{selectedDriver.aadhaarNumber}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400 font-sans">PAN Card:</span>
+                  <span className="text-slate-200">{selectedDriver.panNumber}</span>
+                </div>
+              </div>
+
+              <div className="pt-2 flex justify-end">
+                <button
+                  onClick={() => setSelectedDriver(null)}
+                  className="px-5 py-2 bg-slate-950 border border-white/10 hover:border-white/20 text-slate-200 rounded-xl text-xs font-bold"
+                >
+                  Close File
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </Portal>
       )}
     </div>
   );

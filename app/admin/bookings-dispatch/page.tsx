@@ -23,6 +23,7 @@ import {
   ArrowRight,
   UserCheck
 } from "lucide-react";
+import Portal from "@/components/shared/portal";
 
 export type BookingStatus = 
   | "PENDING" 
@@ -892,55 +893,57 @@ export default function BookingDispatchPage() {
 
       {/* Driver & Vehicle Assignment Modal */}
       {assignModalOpen && activeBooking && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-white/10 rounded-2xl max-w-md w-full p-6 space-y-6 shadow-2xl">
-            <div className="flex justify-between items-center border-b border-white/5 pb-4">
-              <div>
-                <h3 className="text-lg font-bold text-slate-50">Assign Fleet Vehicle & Driver</h3>
-                <p className="text-xs text-slate-400 font-mono mt-0.5">{activeBooking.bookingNumber}</p>
+        <Portal>
+          <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-white/10 rounded-2xl max-w-md w-full p-6 space-y-6 shadow-2xl">
+              <div className="flex justify-between items-center border-b border-white/5 pb-4">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-50">Assign Fleet Vehicle & Driver</h3>
+                  <p className="text-xs text-slate-400 font-mono mt-0.5">{activeBooking.bookingNumber}</p>
+                </div>
+                <button
+                  onClick={() => setAssignModalOpen(false)}
+                  className="text-slate-400 hover:text-white p-1"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-              <button
-                onClick={() => setAssignModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
 
-            <div className="space-y-4">
-              <label className="text-xs font-bold text-slate-300 block">Select Vehicle from Active Fleet</label>
-              <select
-                value={selectedVehicleId}
-                onChange={(e) => setSelectedVehicleId(e.target.value)}
-                className="w-full bg-slate-950 border border-white/10 rounded-lg p-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
-              >
-                <option value="">Unassign / No Vehicle</option>
-                {vehicles.map((v) => (
-                  <option key={v.id} value={v.id} className="bg-slate-900">
-                    {v.model} &bull; {v.registrationNumber} {v.driver ? `(Driver: ${v.driver.name})` : "(No Driver)"}
-                  </option>
-                ))}
-              </select>
-            </div>
+              <div className="space-y-4">
+                <label className="text-xs font-bold text-slate-300 block">Select Vehicle from Active Fleet</label>
+                <select
+                  value={selectedVehicleId}
+                  onChange={(e) => setSelectedVehicleId(e.target.value)}
+                  className="w-full bg-slate-950 border border-white/10 rounded-lg p-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                >
+                  <option value="">Unassign / No Vehicle</option>
+                  {vehicles.map((v) => (
+                    <option key={v.id} value={v.id} className="bg-slate-900">
+                      {v.model} &bull; {v.registrationNumber} {v.driver ? `(Driver: ${v.driver.name})` : "(No Driver)"}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div className="flex gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setAssignModalOpen(false)}
-                className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 rounded-lg text-xs tracking-wider uppercase transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleAssignVehicle}
-                className="flex-1 bg-accent hover:bg-yellow-500 text-slate-950 font-black py-2.5 rounded-lg text-xs tracking-wider uppercase transition-colors shadow-lg"
-              >
-                Confirm Assignment
-              </button>
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setAssignModalOpen(false)}
+                  className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 rounded-lg text-xs tracking-wider uppercase transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleAssignVehicle}
+                  className="flex-1 bg-accent hover:bg-yellow-500 text-slate-950 font-black py-2.5 rounded-lg text-xs tracking-wider uppercase transition-colors shadow-lg"
+                >
+                  Confirm Assignment
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </Portal>
       )}
 
     </div>
