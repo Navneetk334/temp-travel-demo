@@ -437,7 +437,7 @@ export default function AdminDutiesPage() {
 
   const handleStartPrinterScan = async () => {
     setIsScanningPrinter(true);
-    setScannerProgress(15);
+    setScannerProgress(20);
     setScannerStatusText(`Accessing physical scanner hardware '${selectedScannerDevice}'...`);
 
     try {
@@ -453,32 +453,38 @@ export default function AdminDutiesPage() {
       });
 
       const data = await res.json();
-      setScannerProgress(55);
+      setScannerProgress(60);
 
-      let imageToProcess = "";
-      if (data.success && data.imageBase64) {
+      if (data.success && (data.imageBase64 || data.imageUrl)) {
         setScannerStatusText(`Acquired physical scan from ${selectedScannerDevice}! Running real OCR...`);
-        imageToProcess = data.imageBase64;
+        const realScanImage = data.imageBase64 || data.imageUrl;
+        
+        setFormData((prev) => ({
+          ...prev,
+          slipImageUrl: realScanImage,
+          slipImageName: data.fileName || `hp_scan_${Date.now()}.jpg`,
+        }));
+
+        setScannerProgress(80);
+        await runRealTesseractOCR(realScanImage, data.fileName || "hp_scan.jpg");
+
+        setScannerProgress(100);
+        setScannerStatusText("Physical scan & OCR complete! Opening duty slip...");
+
+        setTimeout(() => {
+          setIsScanningPrinter(false);
+          setIsPrinterScannerModalOpen(false);
+          setIsScanOptionsModalOpen(false);
+          setIsFormModalOpen(true);
+        }, 500);
       } else {
-        setScannerStatusText(`Physical device '${selectedScannerDevice}' status verified. Running OCR parsing...`);
-        imageToProcess = formData.slipImageUrl || "/images/hero/hero-bg.webp";
-      }
-
-      setScannerProgress(85);
-      await runRealTesseractOCR(imageToProcess, `physical_scan_${Date.now()}.jpg`);
-
-      setScannerProgress(100);
-      setScannerStatusText("Physical scan & OCR complete! Opening duty slip...");
-
-      setTimeout(() => {
         setIsScanningPrinter(false);
-        setIsPrinterScannerModalOpen(false);
-        setIsScanOptionsModalOpen(false);
-        setIsFormModalOpen(true);
-      }, 600);
-    } catch (err) {
+        alert(data.message || `Physical scanner '${selectedScannerDevice}' could not be accessed. Please ensure the scanner is turned on and paper is on the glass bed.`);
+      }
+    } catch (err: any) {
       console.error("Physical scan error:", err);
       setIsScanningPrinter(false);
+      alert(`Physical scanner error: ${err.message || "Failed to communicate with scanner"}`);
     }
   };
 

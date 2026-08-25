@@ -20,87 +20,90 @@ export async function POST(req: NextRequest) {
     const outputPath = path.join(tempDir, outputFileName);
     const publicUrl = `/uploads/scans/${outputFileName}`;
 
-    let scanSucceeded = false;
-    let errorMessage = "";
-
-    // 1. Attempt Physical Windows WIA Scanner Acquisition
-    if (process.platform === "win32") {
-      const psScriptPath = path.join(tempDir, `scan_cmd_${Date.now()}.ps1`);
-      
-      const psScriptContent = `
+    const psScriptPath = path.join(tempDir, `scan_runner_${Date.now()}.ps1`);
+    
+    // PowerShell WIA Automation Script
+    const psScriptContent = `
 try {
-    $deviceManager = New-Object -ComObject WIA.DeviceManager
-    $deviceInfo = $null
+    $wia = New-Object -ComObject WIA.DeviceManager
+    if ($wia.DeviceInfos.Count -eq 0) {
+        Write-Output "ERROR: No WIA scanner devices detected."
+        exit 1
+    }
 
-    if ($deviceManager.DeviceInfos.Count -gt 0) {
-        # Select first available scanner or matching device
-        $deviceInfo = $deviceManager.DeviceInfos.Item(1)
-        $device = $deviceInfo.Connect()
-        $item = $device.Items.Item(1)
-        
-        # Format: 1=Color, 2=Grayscale, 4=B&W
-        # DPI resolution property (6147)
-        try {
-            $propDpi = $item.Properties.Item("6147")
-            if ($propDpi) { $propDpi.Value = ${dpi} }
-        } catch {}
-
-        $image = $item.Transfer()
-        if ($image) {
-            $image.SaveFile("${outputPath.replace(/\\/g, "\\\\")}")
-            Write-Output "SUCCESS"
-            exit 0
+    # Connect to first scanner or matching HP device
+    $deviceIndex = 1
+    for ($i = 1; $i -le $wia.DeviceInfos.Count; $i++) {
+        $devName = $wia.DeviceInfos.Item($i).Properties['Name'].Value
+        if ($devName -like "*Smart Tank*" -or $devName -like "*HP*") {
+            $deviceIndex = $i
+            break
         }
+    }
+
+    $device = $wia.DeviceInfos.Item($deviceIndex).Connect()
+    $item = $device.Items.Item(1)
+
+    # WIA Format JPEG GUID
+    $wiaFormatJPEG = "{B96B3CAE-0728-11D3-9D7B-0000F81EF32E}"
+    $image = $item.Transfer($wiaFormatJPEG)
+
+    if ($image) {
+        $targetFile = "${outputPath.replace(/\\/g, "\\\\")}"
+        if (Test-Path $targetFile) { Remove-Item $targetFile -Force }
+        $image.SaveFile($targetFile)
+        Write-Output "SUCCESS"
+        exit 0
     } else {
-        Write-Output "NO_WIA_SCANNER_DETECTED"
+        Write-Output "ERROR: No image acquired from scanner glass."
+        exit 1
     }
 } catch {
     Write-Output "ERROR: $($_.Exception.Message)"
+    exit 1
 }
 `;
 
-      try {
-        fs.writeFileSync(psScriptPath, psScriptContent, "utf-8");
-        const { stdout } = await execAsync(`powershell -NoProfile -ExecutionPolicy Bypass -File "${psScriptPath}"`, {
-          timeout: 15000,
+    try {
+      fs.writeFileSync(psScriptPath, psScriptContent, "utf-8");
+      
+      const { stdout, stderr } = await execAsync(
+        `powershell -NoProfile -ExecutionPolicy Bypass -File "${psScriptPath}"`,
+        { timeout: 35000 }
+      );
+
+      if (fs.existsSync(psScriptPath)) {
+        fs.unlinkSync(psScriptPath);
+      }
+
+      if (stdout.includes("SUCCESS") && fs.existsSync(outputPath)) {
+        const fileBuffer = fs.readFileSync(outputPath);
+        const base64 = `data:image/jpeg;base64,${fileBuffer.toString("base64")}`;
+
+        return NextResponse.json({
+          success: true,
+          source: "PHYSICAL_HP_SCANNER",
+          message: `Successfully acquired physical scan from ${deviceName || "HP Smart Tank 750"}`,
+          imageUrl: publicUrl,
+          imageBase64: base64,
+          fileName: outputFileName,
         });
-
-        if (fs.existsSync(psScriptPath)) {
-          fs.unlinkSync(psScriptPath);
-        }
-
-        if (stdout.includes("SUCCESS") && fs.existsSync(outputPath)) {
-          scanSucceeded = true;
-        } else {
-          errorMessage = stdout.trim();
-        }
-      } catch (err: any) {
-        console.warn("WIA scan execution notification:", err.message);
-        errorMessage = err.message;
+      } else {
+        console.warn("Scan stdout:", stdout, stderr);
+      }
+    } catch (execErr: any) {
+      console.error("WIA execution error:", execErr);
+      if (fs.existsSync(psScriptPath)) {
+        fs.unlinkSync(psScriptPath);
       }
     }
 
-    if (scanSucceeded && fs.existsSync(outputPath)) {
-      const fileBuffer = fs.readFileSync(outputPath);
-      const base64 = `data:image/jpeg;base64,${fileBuffer.toString("base64")}`;
-
-      return NextResponse.json({
-        success: true,
-        source: "PHYSICAL_WIA_SCANNER",
-        message: `Acquired physical scan from ${deviceName || "installed scanner"}`,
-        imageUrl: publicUrl,
-        imageBase64: base64,
-        fileName: outputFileName,
-      });
-    }
-
-    // 2. Fallback: If physical scanner is offline / not on feeder, return clear device status and guidance
+    // If physical scan had an issue
     return NextResponse.json({
       success: false,
       source: "HARDWARE_NOT_READY",
-      message: errorMessage || `Physical scanner device '${deviceName || "HP Smart Tank 750"}' is currently offline, in sleep mode, or no paper was loaded on the flatbed.`,
+      message: `Could not complete scan from '${deviceName || "HP Smart Tank 750"}'. Please check if paper is placed on the scanner glass bed and the scanner lid is closed.`,
       fallbackUrl: null,
-      deviceName,
     });
 
   } catch (error) {
