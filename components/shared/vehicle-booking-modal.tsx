@@ -25,6 +25,7 @@ import {
   Check
 } from "lucide-react";
 import LocationInput from "./location-input";
+import Portal from "./portal";
 
 export interface FleetVehicle {
   id: string;
@@ -255,7 +256,8 @@ export default function VehicleBookingModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md">
+    <Portal>
+      <div className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md">
       <div className="bg-slate-900 border border-amber-500/40 rounded-3xl p-5 sm:p-8 w-full max-w-3xl shadow-2xl space-y-6 relative text-slate-100 max-h-[92vh] overflow-y-auto">
         {/* Close Button */}
         <button
@@ -737,5 +739,6 @@ export default function VehicleBookingModal({
         )}
       </div>
     </div>
+    </Portal>
   );
 }

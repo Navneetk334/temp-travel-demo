@@ -16,6 +16,7 @@ import {
   MapPin
 } from "lucide-react";
 import LocationInput from "@/components/shared/location-input";
+import Portal from "@/components/shared/portal";
 
 export interface LeadDispatchModalProps {
   isOpen: boolean;
@@ -340,7 +341,8 @@ export default function LeadDispatchModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+    <Portal>
+      <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
       <div className="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 sm:p-8 w-full max-w-2xl shadow-2xl space-y-6 relative text-slate-100 max-h-[92vh] overflow-y-auto">
         <button
           onClick={onClose}
@@ -690,5 +692,6 @@ export default function LeadDispatchModal({
         )}
       </div>
     </div>
+    </Portal>
   );
 }

@@ -102,7 +102,7 @@ export default function AdminLayout({
   return (
     <div className="min-h-screen bg-slate-950 flex">
       {/* 1. Sidebar Panel for Desktop (Fixed) */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-slate-900 border-r border-white/5 z-20 shrink-0">
+      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-slate-900 border-r border-white/5 z-40 shrink-0">
         {/* Brand identity */}
         <div className="h-20 px-4 border-b border-white/5 flex items-center justify-center text-center">
           <Link href="/admin" className="inline-flex items-center justify-center" title="Admin Home">
@@ -160,10 +160,10 @@ export default function AdminLayout({
       </aside>
 
       {/* 2. Main content area (Padded for fixed sidebar) */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-64 overflow-x-hidden min-h-screen relative z-30">
+      <div className="flex-1 flex flex-col min-w-0 lg:pl-64 overflow-x-hidden min-h-screen">
 
         {/* Header toolbar */}
-        <header className="h-20 bg-slate-900 border-b border-white/5 flex items-center justify-between px-4 sm:px-6 lg:px-8 relative z-10">
+        <header className="h-20 bg-slate-900 border-b border-white/5 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-30">
           <button
             onClick={() => setMobileOpen(true)}
             className="lg:hidden p-2 text-slate-400 hover:text-slate-200"
@@ -193,7 +193,7 @@ export default function AdminLayout({
         </header>
 
         {/* Main Content Body */}
-        <main className="flex-1 overflow-y-auto relative z-30">
+        <main className="flex-1 overflow-y-auto">
           {children}
         </main>
       </div>

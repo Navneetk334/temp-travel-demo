@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 
 import { DEFAULT_BLOG_POSTS, DEFAULT_BLOG_CATEGORIES } from "@/lib/default-blogs";
+import Portal from "@/components/shared/portal";
 
 export default function MasterBlogCMSPage() {
   const [search, setSearch] = useState("");
@@ -422,152 +423,156 @@ export default function MasterBlogCMSPage() {
 
       {/* Create / Edit Blog Article Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-2xl shadow-2xl space-y-4 relative text-slate-100 max-h-[90vh] overflow-y-auto">
-            <button
-              onClick={() => setShowAddModal(false)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
+        <Portal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+            <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-2xl shadow-2xl space-y-4 relative text-slate-100 max-h-[90vh] overflow-y-auto">
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
 
-            <div className="space-y-1 border-b border-white/10 pb-3">
-              <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">
-                {editingArticle ? "Update Existing Post" : "Master Content Engine"}
-              </span>
-              <h3 className="text-xl sm:text-2xl font-black text-slate-50">
-                {editingArticle ? "Edit Blog Article" : "Publish New Blog Article"}
-              </h3>
-            </div>
-
-            <form onSubmit={handleSaveArticleSubmit} className="space-y-4 text-xs">
-              <div className="space-y-1">
-                <label className="text-slate-300 font-bold">Article Title *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Complete Guide to Renting Innova Crysta for Mumbai to Goa Outstation"
-                  value={newArticle.title}
-                  onChange={(e) => setNewArticle({ ...newArticle, title: e.target.value })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
-                />
+              <div className="space-y-1 border-b border-white/10 pb-3">
+                <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">
+                  {editingArticle ? "Update Existing Post" : "Master Content Engine"}
+                </span>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-50">
+                  {editingArticle ? "Edit Blog Article" : "Publish New Blog Article"}
+                </h3>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <form onSubmit={handleSaveArticleSubmit} className="space-y-4 text-xs">
                 <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">Blog Category</label>
-                  <select
-                    value={newArticle.category}
-                    onChange={(e) => setNewArticle({ ...newArticle, category: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
-                  >
-                    {categories.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">Target SEO Keywords *</label>
+                  <label className="text-slate-300 font-bold">Article Title *</label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Innova Crysta Rental, Mumbai Goa Cab"
-                    value={newArticle.seoKeywords}
-                    onChange={(e) => setNewArticle({ ...newArticle, seoKeywords: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                    placeholder="e.g. Complete Guide to Renting Innova Crysta for Mumbai to Goa Outstation"
+                    value={newArticle.title}
+                    onChange={(e) => setNewArticle({ ...newArticle, title: e.target.value })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
                   />
                 </div>
-              </div>
 
-              <div className="space-y-1">
-                <label className="text-slate-300 font-bold">Article Body Content *</label>
-                <textarea
-                  required
-                  rows={6}
-                  placeholder="Write complete blog content with headings, travel tips, and call-to-actions..."
-                  value={newArticle.content}
-                  onChange={(e) => setNewArticle({ ...newArticle, content: e.target.value })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-sans leading-relaxed"
-                />
-              </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Blog Category</label>
+                    <select
+                      value={newArticle.category}
+                      onChange={(e) => setNewArticle({ ...newArticle, category: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
+                    >
+                      {categories.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-              <div className="space-y-1">
-                <label className="text-slate-300 font-bold">Cover Image Upload from Device</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onload = (re) => {
-                        setNewArticle(prev => ({
-                          ...prev,
-                          coverFileName: re.target?.result as string || file.name
-                        }));
-                      };
-                      reader.readAsDataURL(file);
-                    }
-                  }}
-                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-300 text-xs file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950"
-                />
-              </div>
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Target SEO Keywords *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Innova Crysta Rental, Mumbai Goa Cab"
+                      value={newArticle.seoKeywords}
+                      onChange={(e) => setNewArticle({ ...newArticle, seoKeywords: e.target.value })}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                    />
+                  </div>
+                </div>
 
-              <div className="pt-3 border-t border-white/10 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="px-5 py-2.5 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs font-bold cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer"
-                >
-                  {editingArticle ? "Save Changes" : "Publish Article"}
-                </button>
-              </div>
-            </form>
+                <div className="space-y-1">
+                  <label className="text-slate-300 font-bold">Article Body Content *</label>
+                  <textarea
+                    required
+                    rows={6}
+                    placeholder="Write complete blog content with headings, travel tips, and call-to-actions..."
+                    value={newArticle.content}
+                    onChange={(e) => setNewArticle({ ...newArticle, content: e.target.value })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-sans leading-relaxed"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-slate-300 font-bold">Cover Image Upload from Device</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (re) => {
+                          setNewArticle(prev => ({
+                            ...prev,
+                            coverFileName: re.target?.result as string || file.name
+                          }));
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-300 text-xs file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950"
+                  />
+                </div>
+
+                <div className="pt-3 border-t border-white/10 flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddModal(false)}
+                    className="px-5 py-2.5 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs font-bold cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer"
+                  >
+                    {editingArticle ? "Save Changes" : "Publish Article"}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </Portal>
       )}
 
       {/* Article Inspector Modal */}
       {selectedArticle && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
-            <button
-              onClick={() => setSelectedArticle(null)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">CMS Article Inspector</span>
-              <h3 className="text-xl font-bold text-slate-50">{selectedArticle.title}</h3>
-            </div>
-
-            <div className="space-y-2 bg-slate-950 p-4 rounded-xl border border-white/10 text-xs">
-              <div className="font-mono text-amber-400 font-bold">Category: {selectedArticle.category}</div>
-              <div className="font-mono text-slate-300">Keywords: {selectedArticle.seoKeywords}</div>
-              <p className="text-slate-300 leading-relaxed font-sans pt-2 border-t border-white/5">{selectedArticle.content}</p>
-            </div>
-
-            <div className="pt-2 flex justify-end">
+        <Portal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+            <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
               <button
                 onClick={() => setSelectedArticle(null)}
-                className="px-4 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs cursor-pointer"
+                className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"
               >
-                Close Article
+                <X className="w-5 h-5" />
               </button>
+
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">CMS Article Inspector</span>
+                <h3 className="text-xl font-bold text-slate-50">{selectedArticle.title}</h3>
+              </div>
+
+              <div className="space-y-2 bg-slate-950 p-4 rounded-xl border border-white/10 text-xs">
+                <div className="font-mono text-amber-400 font-bold">Category: {selectedArticle.category}</div>
+                <div className="font-mono text-slate-300">Keywords: {selectedArticle.seoKeywords}</div>
+                <p className="text-slate-300 leading-relaxed font-sans pt-2 border-t border-white/5">{selectedArticle.content}</p>
+              </div>
+
+              <div className="pt-2 flex justify-end">
+                <button
+                  onClick={() => setSelectedArticle(null)}
+                  className="px-4 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs cursor-pointer"
+                >
+                  Close Article
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </Portal>
       )}
     </div>
   );
