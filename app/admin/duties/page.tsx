@@ -87,41 +87,38 @@ export default function AdminDutiesPage() {
   const initialFormState: Omit<DutySlipRecord, "id" | "createdAt" | "updatedAt"> = {
     tripSheetNo: "",
     carNo: "",
-    date: new Date().toISOString().split("T")[0],
+    date: "",
     reportedTo: "",
     account: "",
     reportAt: "",
-    garageDepartureTime: "06:30 AM",
+    garageDepartureTime: "",
     garageOpeningKm: "",
-    reportingTime: "07:15 AM",
+    reportingTime: "",
     reportingKm: "",
-    releaseTime: "07:30 PM",
+    releaseTime: "",
     releaseKm: "",
-    garagingTime: "08:15 PM",
+    garagingTime: "",
     garagingKm: "",
     totalHours: "",
     totalKms: "",
     remarks: "",
     serviceFeedback: "EXCELLENT",
-    parkingTollTax: "0",
-    releaseDate: new Date().toISOString().split("T")[0],
+    parkingTollTax: "",
+    releaseDate: "",
     placeOfRelease: "",
     mobile: "",
-    officeTo: "Office Billing Desk",
-    bookedBy: "SPOC Desk",
-    officeFor: "Executive Commute",
-    garageInTime: "08:15 PM",
+    officeTo: "",
+    bookedBy: "",
+    officeFor: "",
+    garageInTime: "",
     garageInKm: "",
-    officeReleasePlace: "Garage Qutub Vihar",
-    parkingAmount: "0",
+    officeReleasePlace: "",
+    parkingAmount: "",
     handoverPerson: "",
-    handoverDate: new Date().toISOString().split("T")[0],
-    handoverTime: "08:30 PM",
+    handoverDate: "",
+    handoverTime: "",
     officeRemarks: "",
-    usageTracks: [
-      { id: "1", from: "Garage", to: "Reporting Location", details: "Leg 1" },
-      { id: "2", from: "Reporting Location", to: "Destination", details: "Leg 2" },
-    ],
+    usageTracks: [],
     slipImageUrl: "",
     slipImageName: "",
   };
@@ -356,10 +353,11 @@ export default function AdminDutiesPage() {
           slipImageUrl: imageSource,
           slipImageName: sourceName,
         }));
+        const finalRawText = rawExtractedText || result.rawText || "";
         setScanMessage(
-          rawExtractedText && rawExtractedText.trim()
-            ? `✨ Real Text Recognized from Image: "${rawExtractedText.trim().replace(/\s+/g, " ").substring(0, 100)}..."`
-            : "✨ Live capture processed and attached."
+          finalRawText && finalRawText.trim()
+            ? `✨ Text Recognized: "${finalRawText.trim().replace(/\s+/g, " ").substring(0, 100)}..."`
+            : "✨ Live capture processed and attached (no readable text found)."
         );
       }
     } catch (err: any) {
