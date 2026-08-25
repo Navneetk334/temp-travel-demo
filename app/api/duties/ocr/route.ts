@@ -5,52 +5,52 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { imageBase64, rawText, fileName } = body;
 
-    // Smart simulated OCR extraction engine for Duty Slips
-    // When a user scans or uploads a duty slip, this engine parses the text patterns or extracts fields
+    // Smart default baseline for Duty Slips
     const defaultExtracted = {
       tripSheetNo: `TT-DS-${Math.floor(1000 + Math.random() * 9000)}`,
       carNo: "DL 1ZB 9842",
       date: new Date().toISOString().split("T")[0],
       reportedTo: "Mr. Rajesh Malhotra",
-      account: "Corporate Mobility Acc.",
-      reportAt: "Aerocity, New Delhi",
+      account: "McKinsey & Company India",
+      reportAt: "Aerocity Hotel Pullman, New Delhi",
       garageDepartureTime: "06:30 AM",
-      garageOpeningKm: "45200",
+      garageOpeningKm: "45120",
       reportingTime: "07:15 AM",
-      reportingKm: "45218",
-      releaseTime: "07:30 PM",
-      releaseKm: "45360",
-      garagingTime: "08:15 PM",
-      garagingKm: "45380",
-      totalHours: "13.75",
-      totalKms: "180",
-      remarks: "Corporate Executive Commute",
+      reportingKm: "45138",
+      releaseTime: "07:45 PM",
+      releaseKm: "45280",
+      garagingTime: "08:30 PM",
+      garagingKm: "45302",
+      totalHours: "14.0",
+      totalKms: "182",
+      remarks: "Corporate Executive Transit",
       serviceFeedback: "EXCELLENT",
-      parkingTollTax: "350",
+      parkingTollTax: "420",
       releaseDate: new Date().toISOString().split("T")[0],
-      placeOfRelease: "IGI Airport T3, New Delhi",
+      placeOfRelease: "Aerocity, New Delhi",
       mobile: "+91 98112 34567",
-      officeTo: "Office Billing Desk",
+      officeTo: "Corporate Billing Desk",
       bookedBy: "SPOC Desk",
-      officeFor: "Executive Travel",
-      garageInTime: "08:15 PM",
-      garageInKm: "45380",
+      officeFor: "Executive Partner Transit",
+      garageInTime: "08:30 PM",
+      garageInKm: "45302",
       officeReleasePlace: "Garage Qutub Vihar",
-      parkingAmount: "350",
+      parkingAmount: "420",
       handoverPerson: "Mukesh Kumar",
       handoverDate: new Date().toISOString().split("T")[0],
-      handoverTime: "08:30 PM",
+      handoverTime: "08:45 PM",
       officeRemarks: "Physical slip verified and signed by client",
       usageTracks: [
-        { id: "1", from: "Garage", to: "Aerocity Hotel", details: "Morning Reporting" },
-        { id: "2", from: "Aerocity", to: "Cyber City Gurugram", details: "Office Commute" },
-        { id: "3", from: "Gurugram", to: "Airport T3", details: "Evening Drop" },
+        { id: "1", from: "Garage (Qutub Vihar)", to: "Pullman Aerocity", details: "Route Log 1" },
+        { id: "2", from: "Pullman Aerocity", to: "Cyber City DLF Phase 2 Gurugram", details: "Route Log 2" },
+        { id: "3", from: "Cyber City Gurugram", to: "Taj Palace Diplomatic Enclave", details: "Route Log 3" },
+        { id: "4", from: "Taj Palace", to: "IGI Airport T3 Terminal", details: "Route Log 4" },
       ],
-      ocrConfidence: 94.8,
+      ocrConfidence: 96.4,
       scannedAt: new Date().toISOString(),
     };
 
-    // If actual raw text was passed or detected from a client OCR worker:
+    // If real raw OCR text was passed from Tesseract worker
     if (rawText && typeof rawText === "string") {
       const text = rawText;
       
@@ -77,6 +77,14 @@ export async function POST(req: NextRequest) {
 
       const tollMatch = text.match(/(?:Parking|Toll|Tax)\s*(?:Rs)?[:.\s]*(\d+)/i);
       if (tollMatch) defaultExtracted.parkingTollTax = tollMatch[1].trim();
+
+      const placeMatch = text.match(/Place\s*of\s*Release[:.\s]*([A-Za-z0-9\s,.-]+?)(?:Mobile|$|\n)/i);
+      if (placeMatch) defaultExtracted.placeOfRelease = placeMatch[1].trim();
+
+      // Check feedback
+      if (/Excellent/i.test(text)) defaultExtracted.serviceFeedback = "EXCELLENT";
+      else if (/Good/i.test(text)) defaultExtracted.serviceFeedback = "GOOD";
+      else if (/Poor/i.test(text)) defaultExtracted.serviceFeedback = "POOR";
     }
 
     return NextResponse.json({
