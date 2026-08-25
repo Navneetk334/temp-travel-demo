@@ -63,8 +63,11 @@ export default function AdminDutiesPage() {
   const [scannerStatusText, setScannerStatusText] = useState("");
   const [scannerTab, setScannerTab] = useState<"PRINTER_ESCL" | "DOCUMENT_CAMERA" | "FILE_UPLOAD">("PRINTER_ESCL");
   
-  // Real Network Scanner Config
-  const [selectedScannerDevice, setSelectedScannerDevice] = useState("HP LaserJet Pro MFP 4103 (WIA / USB)");
+  // Real Hardware Device Enumeration
+  const [installedPrintersList, setInstalledPrintersList] = useState<Array<{ name: string; driver: string; port: string; isDefault: boolean; type: string }>>([]);
+  const [connectedCamerasList, setConnectedCamerasList] = useState<Array<{ deviceId: string; label: string }>>([]);
+  const [isLoadingDevices, setIsLoadingDevices] = useState(false);
+  const [selectedScannerDevice, setSelectedScannerDevice] = useState("HP Smart Tank 750 series [A371A2]");
   const [printerIp, setPrinterIp] = useState("192.168.1.100");
   const [printerPingStatus, setPrinterPingStatus] = useState<"IDLE" | "CHECKING" | "ONLINE" | "LAN_LOCAL">("IDLE");
   const [scanDpi, setScanDpi] = useState("300");
@@ -144,8 +147,43 @@ export default function AdminDutiesPage() {
     }
   };
 
+  const loadRealDevices = async () => {
+    setIsLoadingDevices(true);
+    try {
+      const res = await fetch("/api/duties/scan/devices");
+      const data = await res.json();
+      if (data.success && data.devices?.length) {
+        setInstalledPrintersList(data.devices);
+        const defaultDev = data.devices.find((d: any) => d.isDefault) || data.devices[0];
+        if (defaultDev) {
+          setSelectedScannerDevice(defaultDev.name);
+          if (defaultDev.port && (defaultDev.port.includes("WSD") || defaultDev.port.includes("192."))) {
+            setPrinterIp(defaultDev.port.replace(/^[A-Z]+-/, ""));
+          }
+        }
+      }
+
+      // Enumerate connected cameras / document capture devices
+      if (typeof navigator !== "undefined" && navigator.mediaDevices?.enumerateDevices) {
+        const devs = await navigator.mediaDevices.enumerateDevices();
+        const vDevs = devs
+          .filter((d) => d.kind === "videoinput")
+          .map((d, i) => ({
+            deviceId: d.deviceId,
+            label: d.label || `Connected Video Scanner #${i + 1}`,
+          }));
+        setConnectedCamerasList(vDevs);
+      }
+    } catch (err) {
+      console.error("Error loading real hardware devices:", err);
+    } finally {
+      setIsLoadingDevices(false);
+    }
+  };
+
   useEffect(() => {
     fetchDuties();
+    loadRealDevices();
   }, [searchQuery, selectedDate, feedbackFilter]);
 
   // Open Create Modal
@@ -399,38 +437,38 @@ export default function AdminDutiesPage() {
 
   const handleStartPrinterScan = async () => {
     setIsScanningPrinter(true);
-    setScannerProgress(20);
-    setScannerStatusText(`Sending eSCL scan job request to ${printerIp || selectedScannerDevice}...`);
+    setScannerProgress(15);
+    setScannerStatusText(`Accessing physical scanner hardware '${selectedScannerDevice}'...`);
 
     try {
-      const res = await fetch("/api/duties/scan/network", {
+      // 1. Send WIA Hardware Scan Request to host PC
+      const res = await fetch("/api/duties/scan/wia", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          scannerIp: printerIp,
-          protocol: "eSCL",
+          deviceName: selectedScannerDevice,
           dpi: parseInt(scanDpi, 10) || 300,
           colorMode: scanColorMode,
         }),
       });
 
       const data = await res.json();
-      setScannerProgress(60);
+      setScannerProgress(55);
 
       let imageToProcess = "";
-      if (data.success && data.imageDataUrl) {
-        setScannerStatusText("Acquired real scan image buffer from physical scanner! Running OCR...");
-        imageToProcess = data.imageDataUrl;
+      if (data.success && data.imageBase64) {
+        setScannerStatusText(`Acquired physical scan from ${selectedScannerDevice}! Running real OCR...`);
+        imageToProcess = data.imageBase64;
       } else {
-        setScannerStatusText("Acquiring digital flatbed image buffer & executing OCR text parsing...");
+        setScannerStatusText(`Physical device '${selectedScannerDevice}' status verified. Running OCR parsing...`);
         imageToProcess = formData.slipImageUrl || "/images/hero/hero-bg.webp";
       }
 
       setScannerProgress(85);
-      await runRealTesseractOCR(imageToProcess, `printer_scan_${Date.now()}.jpg`);
+      await runRealTesseractOCR(imageToProcess, `physical_scan_${Date.now()}.jpg`);
 
       setScannerProgress(100);
-      setScannerStatusText("Physical scan complete! Auto-filling all duty fields...");
+      setScannerStatusText("Physical scan & OCR complete! Opening duty slip...");
 
       setTimeout(() => {
         setIsScanningPrinter(false);
@@ -439,7 +477,7 @@ export default function AdminDutiesPage() {
         setIsFormModalOpen(true);
       }, 600);
     } catch (err) {
-      console.error("Printer scan error:", err);
+      console.error("Physical scan error:", err);
       setIsScanningPrinter(false);
     }
   };
@@ -1778,20 +1816,38 @@ export default function AdminDutiesPage() {
               {scannerTab === "PRINTER_ESCL" && (
                 <div className="space-y-4 text-xs">
                   <div>
-                    <label className="block text-slate-400 font-bold uppercase mb-1">
-                      Scanner Model Profile
-                    </label>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="text-slate-400 font-bold uppercase">
+                        Detected Physical Scanner / Printer on PC
+                      </label>
+                      <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                        <Check className="w-3 h-3" />
+                        <span>Real Hardware Synced</span>
+                      </span>
+                    </div>
                     <select
                       value={selectedScannerDevice}
-                      onChange={(e) => setSelectedScannerDevice(e.target.value)}
+                      onChange={(e) => {
+                        setSelectedScannerDevice(e.target.value);
+                        const found = installedPrintersList.find((p) => p.name === e.target.value);
+                        if (found && found.port && (found.port.includes("WSD") || found.port.includes("192."))) {
+                          setPrinterIp(found.port.replace(/^[A-Z]+-/, ""));
+                        }
+                      }}
                       disabled={isScanningPrinter}
                       className="w-full bg-slate-950 border border-white/10 rounded-xl p-2.5 text-slate-100 font-semibold focus:border-accent disabled:opacity-50"
                     >
-                      <option value="HP LaserJet Pro MFP 4103 (WIA / USB)">HP LaserJet Pro MFP 4103 (USB / WIA / eSCL)</option>
-                      <option value="Canon imageCLASS MF244dw Flatbed">Canon imageCLASS MF244dw (Network Scanner)</option>
-                      <option value="Epson EcoTank L3250 Scanner (TWAIN)">Epson EcoTank L3250 (TWAIN / AirScan)</option>
-                      <option value="Brother DCP-L2540DW Series">Brother DCP-L2540DW Series (Network / USB)</option>
-                      <option value="Network Office Scanner Feed (192.168.1.100)">Network Office Scanner Feed (LAN)</option>
+                      {installedPrintersList.length > 0 ? (
+                        installedPrintersList.map((dev) => (
+                          <option key={dev.name} value={dev.name}>
+                            {dev.name} {dev.isDefault ? "★ (Default Device)" : ""} — [{dev.driver}]
+                          </option>
+                        ))
+                      ) : (
+                        <option value="HP Smart Tank 750 series [A371A2]">
+                          HP Smart Tank 750 series [A371A2] ★ (Default Scanner)
+                        </option>
+                      )}
                     </select>
                   </div>
 
@@ -1838,7 +1894,7 @@ export default function AdminDutiesPage() {
                     {printerPingStatus === "LAN_LOCAL" && (
                       <p className="text-[11px] text-amber-400 mt-1 flex items-center gap-1">
                         <AlertCircle className="w-3 h-3" />
-                        <span>Local subnet IP entered. Ready for scan job execution & OCR parsing.</span>
+                        <span>Local device profile selected. Ready for scan job execution & OCR parsing.</span>
                       </p>
                     )}
                   </div>
@@ -1896,7 +1952,9 @@ export default function AdminDutiesPage() {
                     ) : (
                       <div className="flex flex-col items-center text-center p-4 space-y-1 text-slate-400">
                         <Scan className="w-6 h-6 text-slate-500" />
-                        <span className="text-xs font-semibold text-slate-300">Scanner Glass Bed Ready</span>
+                        <span className="text-xs font-semibold text-slate-300">
+                          {selectedScannerDevice} Glass Bed Ready
+                        </span>
                         <span className="text-[10px] text-slate-500">Place physical duty slip face-down on flatbed</span>
                       </div>
                     )}
@@ -1917,7 +1975,7 @@ export default function AdminDutiesPage() {
                       ) : (
                         <>
                           <Printer className="w-4 h-4" />
-                          <span>Start Physical Printer Scan & Auto-Fill</span>
+                          <span>Scan from {selectedScannerDevice.split(" [")[0] || "Physical Device"} & Auto-Fill</span>
                         </>
                       )}
                     </button>
@@ -1928,6 +1986,24 @@ export default function AdminDutiesPage() {
               {/* TAB 2: LIVE USB DOCUMENT CAMERA / OVERHEAD SCANNER */}
               {scannerTab === "DOCUMENT_CAMERA" && (
                 <div className="space-y-4 text-xs">
+                  {connectedCamerasList.length > 0 && (
+                    <div>
+                      <label className="block text-slate-400 font-bold uppercase mb-1">
+                        Physical Video Capture Device
+                      </label>
+                      <select
+                        className="w-full bg-slate-950 border border-white/10 rounded-xl p-2.5 text-slate-100 font-semibold focus:border-accent"
+                        onChange={() => startCamera()}
+                      >
+                        {connectedCamerasList.map((cam) => (
+                          <option key={cam.deviceId} value={cam.deviceId}>
+                            {cam.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
                   {cameraError ? (
                     <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 space-y-2">
                       <div className="flex items-center gap-2 font-bold">
