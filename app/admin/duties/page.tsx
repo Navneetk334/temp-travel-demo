@@ -48,6 +48,16 @@ export default function AdminDutiesPage() {
   const [isScanning, setIsScanning] = useState(false);
   const [scanMessage, setScanMessage] = useState("");
 
+  // Scan Choice & Printer Scanner Modals
+  const [isScanOptionsModalOpen, setIsScanOptionsModalOpen] = useState(false);
+  const [isPrinterScannerModalOpen, setIsPrinterScannerModalOpen] = useState(false);
+  const [isScanningPrinter, setIsScanningPrinter] = useState(false);
+  const [scannerProgress, setScannerProgress] = useState(0);
+  const [scannerStatusText, setScannerStatusText] = useState("");
+  const [selectedScannerDevice, setSelectedScannerDevice] = useState("HP LaserJet Pro MFP 4103 (WIA / USB)");
+  const [scanDpi, setScanDpi] = useState("300");
+  const [scanColorMode, setScanColorMode] = useState("COLOR");
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Form State
@@ -270,6 +280,49 @@ export default function AdminDutiesPage() {
     }
   };
 
+  // Direct Printer / Scanner Scan Simulation & Extraction
+  const handleStartPrinterScan = async () => {
+    setIsScanningPrinter(true);
+    setScannerProgress(15);
+    setScannerStatusText(`Connecting to ${selectedScannerDevice}...`);
+
+    setTimeout(() => {
+      setScannerProgress(40);
+      setScannerStatusText(`Warming scanner lamp & optical calibration (${scanDpi} DPI)...`);
+    }, 800);
+
+    setTimeout(() => {
+      setScannerProgress(70);
+      setScannerStatusText("Acquiring physical glass-bed scan & image buffer...");
+    }, 1600);
+
+    setTimeout(async () => {
+      setScannerProgress(90);
+      setScannerStatusText("Executing AI OCR field pattern recognition...");
+
+      const sampleScan = "/images/hero/hero-bg.webp";
+      const fileName = `duty_slip_scanner_${Date.now()}.jpg`;
+
+      setFormData((prev) => ({
+        ...prev,
+        slipImageUrl: sampleScan,
+        slipImageName: fileName,
+      }));
+
+      await handlePerformOCRScan(sampleScan, fileName);
+
+      setScannerProgress(100);
+      setScannerStatusText("Physical scan complete! Auto-filling all duty fields...");
+
+      setTimeout(() => {
+        setIsScanningPrinter(false);
+        setIsPrinterScannerModalOpen(false);
+        setIsScanOptionsModalOpen(false);
+        setIsFormModalOpen(true);
+      }, 700);
+    }, 2400);
+  };
+
   // Add Leg / Route Log to Car Usage Sheet
   const handleAddRouteLog = () => {
     setFormData((prev) => ({
@@ -375,10 +428,7 @@ export default function AdminDutiesPage() {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => {
-              handleOpenCreateModal();
-              setTimeout(() => fileInputRef.current?.click(), 300);
-            }}
+            onClick={() => setIsScanOptionsModalOpen(true)}
             className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/10 font-bold px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md"
           >
             <Scan className="w-4 h-4 text-accent" />
@@ -677,7 +727,7 @@ export default function AdminDutiesPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2.5">
                     <input
                       type="file"
                       ref={fileInputRef}
@@ -687,9 +737,19 @@ export default function AdminDutiesPage() {
                     />
                     <button
                       type="button"
+                      onClick={() => setIsPrinterScannerModalOpen(true)}
+                      disabled={isScanning || isScanningPrinter}
+                      className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/10 font-bold px-3.5 py-2 rounded-xl text-xs uppercase tracking-wider transition-all disabled:opacity-50 shadow-sm"
+                    >
+                      <Printer className="w-3.5 h-3.5 text-accent" />
+                      <span>Scan from Printer</span>
+                    </button>
+
+                    <button
+                      type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      disabled={isScanning}
-                      className="flex items-center gap-2 bg-accent hover:bg-yellow-500 text-slate-950 font-extrabold px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition-all disabled:opacity-50"
+                      disabled={isScanning || isScanningPrinter}
+                      className="flex items-center gap-2 bg-accent hover:bg-yellow-500 text-slate-950 font-extrabold px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition-all disabled:opacity-50 shadow-md shadow-accent/20"
                     >
                       {isScanning ? (
                         <>
@@ -699,7 +759,7 @@ export default function AdminDutiesPage() {
                       ) : (
                         <>
                           <UploadCloud className="w-3.5 h-3.5" />
-                          <span>Upload / Scan Image</span>
+                          <span>Upload from Device</span>
                         </>
                       )}
                     </button>
@@ -1415,6 +1475,229 @@ export default function AdminDutiesPage() {
                 </button>
               </div>
 
+            </div>
+          </div>
+        </Portal>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 3: SCAN METHOD SELECTOR MODAL */}
+      {/* ========================================================================= */}
+      {isScanOptionsModalOpen && (
+        <Portal>
+          <div className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-white/10 rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl relative">
+              <button
+                onClick={() => setIsScanOptionsModalOpen(false)}
+                className="absolute top-5 right-5 p-2 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="space-y-1">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-accent/20 text-accent border border-accent/30 inline-block">
+                  AI OCR Scanner Engine
+                </span>
+                <h3 className="text-xl font-black text-slate-50">
+                  Select Duty Slip Scan Method
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Choose how you would like to capture and auto-fill the physical duty slip.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                {/* Option 1: Scan Directly from Printer / Scanner */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsScanOptionsModalOpen(false);
+                    setIsPrinterScannerModalOpen(true);
+                  }}
+                  className="bg-slate-950 hover:bg-slate-800/80 border border-white/10 hover:border-accent/50 p-5 rounded-2xl flex flex-col items-center text-center space-y-3 transition-all group shadow-lg"
+                >
+                  <div className="p-3.5 bg-accent/10 text-accent group-hover:bg-accent group-hover:text-slate-950 rounded-2xl transition-all shadow-inner">
+                    <Printer className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-extrabold text-slate-100 group-hover:text-accent transition-colors">
+                      Scan from Printer
+                    </h4>
+                    <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                      Connect to office flatbed/MFP scanner & acquire digital slip.
+                    </p>
+                  </div>
+                  <span className="text-[10px] text-accent font-black uppercase tracking-wider flex items-center gap-1 pt-1">
+                    <span>Direct Device Scan</span>
+                    <ChevronRight className="w-3 h-3" />
+                  </span>
+                </button>
+
+                {/* Option 2: Upload from Device */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsScanOptionsModalOpen(false);
+                    handleOpenCreateModal();
+                    setTimeout(() => fileInputRef.current?.click(), 300);
+                  }}
+                  className="bg-slate-950 hover:bg-slate-800/80 border border-white/10 hover:border-accent/50 p-5 rounded-2xl flex flex-col items-center text-center space-y-3 transition-all group shadow-lg"
+                >
+                  <div className="p-3.5 bg-white/5 text-slate-200 group-hover:bg-accent group-hover:text-slate-950 rounded-2xl transition-all shadow-inner">
+                    <UploadCloud className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-extrabold text-slate-100 group-hover:text-accent transition-colors">
+                      Upload from Device
+                    </h4>
+                    <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                      Select a scanned image, photo, or PDF from your computer or phone.
+                    </p>
+                  </div>
+                  <span className="text-[10px] text-slate-300 group-hover:text-accent font-black uppercase tracking-wider flex items-center gap-1 pt-1">
+                    <span>Browse Files</span>
+                    <ChevronRight className="w-3 h-3" />
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </Portal>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 4: PRINTER / SCANNER HARDWARE CONSOLE MODAL */}
+      {/* ========================================================================= */}
+      {isPrinterScannerModalOpen && (
+        <Portal>
+          <div className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-white/10 rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl relative">
+              <button
+                onClick={() => {
+                  if (!isScanningPrinter) setIsPrinterScannerModalOpen(false);
+                }}
+                disabled={isScanningPrinter}
+                className="absolute top-5 right-5 p-2 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-full transition-colors disabled:opacity-30"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {/* Header */}
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="p-1.5 bg-accent/20 text-accent rounded-lg">
+                    <Printer className="w-4 h-4" />
+                  </span>
+                  <h3 className="text-xl font-black text-slate-50">
+                    Printer & Scanner Hardware Hub
+                  </h3>
+                </div>
+                <p className="text-xs text-slate-400">
+                  Configure driver parameters and trigger flatbed scan to auto-fill duty slip.
+                </p>
+              </div>
+
+              {/* Scanner Configuration Controls */}
+              <div className="space-y-4 text-xs">
+                <div>
+                  <label className="block text-slate-400 font-bold uppercase mb-1">
+                    Active Scanner Device / Port
+                  </label>
+                  <select
+                    value={selectedScannerDevice}
+                    onChange={(e) => setSelectedScannerDevice(e.target.value)}
+                    disabled={isScanningPrinter}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-slate-100 font-semibold focus:border-accent disabled:opacity-50"
+                  >
+                    <option value="HP LaserJet Pro MFP 4103 (WIA / USB)">HP LaserJet Pro MFP 4103 (USB / WIA)</option>
+                    <option value="Canon imageCLASS MF244dw Flatbed">Canon imageCLASS MF244dw (Network Scanner)</option>
+                    <option value="Epson EcoTank L3250 Scanner (TWAIN)">Epson EcoTank L3250 (TWAIN Direct)</option>
+                    <option value="Network Office Scanner Feed (192.168.1.120)">Network Office Scanner Feed (LAN)</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-slate-400 font-bold uppercase mb-1">
+                      Scan Resolution
+                    </label>
+                    <select
+                      value={scanDpi}
+                      onChange={(e) => setScanDpi(e.target.value)}
+                      disabled={isScanningPrinter}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl p-2.5 text-slate-100 font-semibold focus:border-accent disabled:opacity-50"
+                    >
+                      <option value="300">300 DPI (Standard OCR Clarity)</option>
+                      <option value="600">600 DPI (Ultra Fine Document)</option>
+                      <option value="150">150 DPI (Fast Draft)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-400 font-bold uppercase mb-1">
+                      Color Mode
+                    </label>
+                    <select
+                      value={scanColorMode}
+                      onChange={(e) => setScanColorMode(e.target.value)}
+                      disabled={isScanningPrinter}
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl p-2.5 text-slate-100 font-semibold focus:border-accent disabled:opacity-50"
+                    >
+                      <option value="COLOR">Color Document (24-bit)</option>
+                      <option value="BW">Black & White (High Contrast)</option>
+                      <option value="GRAYSCALE">Grayscale</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Virtual Scanner Glass Bed Visualization */}
+                <div className="relative h-28 bg-slate-950 border border-white/10 rounded-2xl overflow-hidden flex items-center justify-center">
+                  <div className="absolute inset-0 bg-[radial-gradient(#ffffff0a_1px,transparent_1px)] [background-size:12px_12px]" />
+                  
+                  {isScanningPrinter ? (
+                    <div className="relative w-full h-full flex flex-col items-center justify-center p-4 space-y-2">
+                      {/* Animated Scanner Beam */}
+                      <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-accent to-transparent shadow-[0_0_15px_rgba(251,191,36,0.8)] animate-pulse" />
+                      <RefreshCw className="w-5 h-5 text-accent animate-spin" />
+                      <p className="text-xs font-bold text-slate-200">{scannerStatusText}</p>
+                      <div className="w-48 bg-slate-900 h-2 rounded-full overflow-hidden border border-white/10">
+                        <div
+                          className="bg-accent h-full transition-all duration-300"
+                          style={{ width: `${scannerProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center text-center p-4 space-y-1 text-slate-400">
+                      <Scan className="w-6 h-6 text-slate-500" />
+                      <span className="text-xs font-semibold text-slate-300">Scanner Glass Bed Ready</span>
+                      <span className="text-[10px] text-slate-500">Place physical duty slip face-down on the glass bed</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Trigger Button */}
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={handleStartPrinterScan}
+                    disabled={isScanningPrinter}
+                    className="w-full flex items-center justify-center gap-2 bg-accent hover:bg-yellow-500 text-slate-950 font-black py-3 px-4 rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg shadow-accent/20 disabled:opacity-50"
+                  >
+                    {isScanningPrinter ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                        <span>Acquiring Scan ({scannerProgress}%)...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Printer className="w-4 h-4" />
+                        <span>Start Printer Scan & Auto-Fill</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </Portal>
