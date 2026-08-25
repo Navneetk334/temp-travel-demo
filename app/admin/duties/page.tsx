@@ -81,6 +81,7 @@ export default function AdminDutiesPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const mobileCameraInputRef = useRef<HTMLInputElement>(null);
 
   // Form State
   const initialFormState: Omit<DutySlipRecord, "id" | "createdAt" | "updatedAt"> = {
@@ -1657,13 +1658,30 @@ export default function AdminDutiesPage() {
         </Portal>
       )}
 
+      {/* Hidden File & Camera Inputs for OCR Ingestion */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept="image/*,application/pdf"
+        className="hidden"
+        onChange={handleImageFileChange}
+      />
+      <input
+        type="file"
+        ref={mobileCameraInputRef}
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={handleImageFileChange}
+      />
+
       {/* ========================================================================= */}
       {/* MODAL 3: SCAN METHOD SELECTOR MODAL */}
       {/* ========================================================================= */}
       {isScanOptionsModalOpen && (
         <Portal>
           <div className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-white/10 rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl relative">
+            <div className="bg-slate-900 border border-white/10 rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative">
               <button
                 onClick={() => setIsScanOptionsModalOpen(false)}
                 className="absolute top-5 right-5 p-2 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-full transition-colors"
@@ -1673,44 +1691,71 @@ export default function AdminDutiesPage() {
 
               <div className="space-y-1">
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-accent/20 text-accent border border-accent/30 inline-block">
-                  AI OCR Scanner Engine
+                  Optical Character Recognition Engine
                 </span>
                 <h3 className="text-xl font-black text-slate-50">
-                  Select Duty Slip Scan Method
+                  Select Duty Slip Capture Method
                 </h3>
                 <p className="text-xs text-slate-400">
                   Choose how you would like to capture and auto-fill the physical duty slip.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                {/* Option 1: Scan Directly from Printer / Scanner */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-2">
+                {/* Option 1: Mobile HD Camera Capture */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsScanOptionsModalOpen(false);
+                    handleOpenCreateModal();
+                    setTimeout(() => mobileCameraInputRef.current?.click(), 300);
+                  }}
+                  className="bg-slate-950 hover:bg-slate-800/80 border border-white/10 hover:border-accent/50 p-4 rounded-2xl flex flex-col items-center text-center space-y-2.5 transition-all group shadow-lg"
+                >
+                  <div className="p-3 bg-accent text-slate-950 rounded-2xl transition-all shadow-md">
+                    <Camera className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-extrabold text-slate-100 group-hover:text-accent transition-colors">
+                      Live HD Camera
+                    </h4>
+                    <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">
+                      Snap a photo using your phone or webcam with autofocus.
+                    </p>
+                  </div>
+                  <span className="text-[9px] text-accent font-black uppercase tracking-wider flex items-center gap-1 pt-1">
+                    <span>Take Photo</span>
+                    <ChevronRight className="w-3 h-3" />
+                  </span>
+                </button>
+
+                {/* Option 2: Scan Directly from Printer */}
                 <button
                   type="button"
                   onClick={() => {
                     setIsScanOptionsModalOpen(false);
                     setIsPrinterScannerModalOpen(true);
                   }}
-                  className="bg-slate-950 hover:bg-slate-800/80 border border-white/10 hover:border-accent/50 p-5 rounded-2xl flex flex-col items-center text-center space-y-3 transition-all group shadow-lg"
+                  className="bg-slate-950 hover:bg-slate-800/80 border border-white/10 hover:border-accent/50 p-4 rounded-2xl flex flex-col items-center text-center space-y-2.5 transition-all group shadow-lg"
                 >
-                  <div className="p-3.5 bg-accent/10 text-accent group-hover:bg-accent group-hover:text-slate-950 rounded-2xl transition-all shadow-inner">
-                    <Printer className="w-7 h-7" />
+                  <div className="p-3 bg-accent/10 text-accent group-hover:bg-accent group-hover:text-slate-950 rounded-2xl transition-all shadow-inner">
+                    <Printer className="w-6 h-6" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-extrabold text-slate-100 group-hover:text-accent transition-colors">
+                    <h4 className="text-xs font-extrabold text-slate-100 group-hover:text-accent transition-colors">
                       Scan from Printer
                     </h4>
-                    <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                      Connect to office flatbed/MFP scanner & acquire digital slip.
+                    <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">
+                      Flatbed / WIA hardware scanner ingestion.
                     </p>
                   </div>
-                  <span className="text-[10px] text-accent font-black uppercase tracking-wider flex items-center gap-1 pt-1">
-                    <span>Direct Device Scan</span>
+                  <span className="text-[9px] text-accent font-black uppercase tracking-wider flex items-center gap-1 pt-1">
+                    <span>Scanner Hub</span>
                     <ChevronRight className="w-3 h-3" />
                   </span>
                 </button>
 
-                {/* Option 2: Upload from Device */}
+                {/* Option 3: Upload from Device */}
                 <button
                   type="button"
                   onClick={() => {
@@ -1718,20 +1763,20 @@ export default function AdminDutiesPage() {
                     handleOpenCreateModal();
                     setTimeout(() => fileInputRef.current?.click(), 300);
                   }}
-                  className="bg-slate-950 hover:bg-slate-800/80 border border-white/10 hover:border-accent/50 p-5 rounded-2xl flex flex-col items-center text-center space-y-3 transition-all group shadow-lg"
+                  className="bg-slate-950 hover:bg-slate-800/80 border border-white/10 hover:border-accent/50 p-4 rounded-2xl flex flex-col items-center text-center space-y-2.5 transition-all group shadow-lg"
                 >
-                  <div className="p-3.5 bg-white/5 text-slate-200 group-hover:bg-accent group-hover:text-slate-950 rounded-2xl transition-all shadow-inner">
-                    <UploadCloud className="w-7 h-7" />
+                  <div className="p-3 bg-white/5 text-slate-200 group-hover:bg-accent group-hover:text-slate-950 rounded-2xl transition-all shadow-inner">
+                    <UploadCloud className="w-6 h-6" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-extrabold text-slate-100 group-hover:text-accent transition-colors">
+                    <h4 className="text-xs font-extrabold text-slate-100 group-hover:text-accent transition-colors">
                       Upload from Device
                     </h4>
-                    <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                      Select a scanned image, photo, or PDF from your computer or phone.
+                    <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">
+                      Select any existing image, scan, or PDF.
                     </p>
                   </div>
-                  <span className="text-[10px] text-slate-300 group-hover:text-accent font-black uppercase tracking-wider flex items-center gap-1 pt-1">
+                  <span className="text-[9px] text-slate-300 group-hover:text-accent font-black uppercase tracking-wider flex items-center gap-1 pt-1">
                     <span>Browse Files</span>
                     <ChevronRight className="w-3 h-3" />
                   </span>
