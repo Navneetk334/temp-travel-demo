@@ -24,7 +24,8 @@ import {
   UserCheck,
   Clock,
   Briefcase,
-  MapPin
+  MapPin,
+  FileText
 } from "lucide-react";
 
 interface SidebarItem {
@@ -42,37 +43,33 @@ export default function AdminLayout({
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const [adminSession, setAdminSession] = useState({
-    name: "Admin User",
+  const [adminSession, setAdminSession] = useState<{
+    name: string;
+    email: string;
+    role: string;
+  }>({
+    name: "Operations Dispatch Desk",
     email: "admin@temptravels.com",
     role: "SUPER_ADMIN",
   });
 
+  // Fetch admin session details (or mock)
   useEffect(() => {
-    if (pathname === "/admin/login") return;
-
-    fetch("/api/admin/me")
-      .then((res) => {
-        if (res.ok) return res.json();
-        throw new Error("Unauthorized");
-      })
-      .then((data) => {
-        if (data?.admin) {
-          setAdminSession(data.admin);
-        }
-      })
-      .catch((err) => {
-        console.error("Session check error:", err);
-      });
-  }, [pathname]);
-
-  const handleLogout = async () => {
-    try {
-      await fetch("/api/admin/logout", { method: "POST" });
-      window.location.href = "/admin/login";
-    } catch (err) {
-      console.error("Logout error:", err);
+    // In production, sync with next-auth or custom session
+    const storedUser = localStorage.getItem("tt_admin_user");
+    if (storedUser) {
+      try {
+        setAdminSession(JSON.parse(storedUser));
+      } catch (e) {
+        // fallback to default
+      }
     }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("tt_admin_user");
+    localStorage.removeItem("tt_admin_token");
+    window.location.href = "/admin/login";
   };
 
   if (pathname === "/admin/login") {
@@ -91,6 +88,7 @@ export default function AdminLayout({
     { name: "Corporate Inquiry Leads", href: "/admin/corporate-inquiry-leads", icon: Briefcase },
     { name: "Tour Package Leads", href: "/admin/tour-leads", icon: MapPin },
     { name: "Contact Leads", href: "/admin/contact-leads", icon: Mail },
+    { name: "Duties", href: "/admin/duties", icon: FileText },
     { name: "Payments & Cash Ledger", href: "/admin/payments", icon: CreditCard },
   ];
 
