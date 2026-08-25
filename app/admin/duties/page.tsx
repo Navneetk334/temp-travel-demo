@@ -292,6 +292,10 @@ export default function AdminDutiesPage() {
       setScannerProgress(90);
 
       const result = await res.json();
+      if (!res.ok || !result.success) {
+        throw new Error(result.error || "Vision AI processing failed");
+      }
+
       if (result.success && result.extractedData) {
         const ext = result.extractedData;
         setFormData((prev) => ({
@@ -340,7 +344,7 @@ export default function AdminDutiesPage() {
       }
     } catch (err: any) {
       console.error("Real OCR error:", err);
-      setScanMessage("OCR parsing completed with direct text ingestion.");
+      setScanMessage(`OCR Failed: ${err.message}`);
     } finally {
       setIsScanning(false);
     }
