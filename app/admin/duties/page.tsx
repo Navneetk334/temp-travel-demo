@@ -158,8 +158,11 @@ export default function AdminDutiesPage() {
         const defaultDev = data.devices.find((d: any) => d.isDefault) || data.devices[0];
         if (defaultDev) {
           setSelectedScannerDevice(defaultDev.name);
-          if (defaultDev.port && (defaultDev.port.includes("WSD") || defaultDev.port.includes("192."))) {
-            setPrinterIp(defaultDev.port.replace(/^[A-Z]+-/, ""));
+          if (defaultDev.port && defaultDev.port.includes("192.")) {
+            const match = defaultDev.port.match(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/);
+            if (match) setPrinterIp(match[0]);
+          } else {
+            setPrinterIp("192.168.1.15");
           }
         }
       }
@@ -1837,8 +1840,11 @@ export default function AdminDutiesPage() {
                       onChange={(e) => {
                         setSelectedScannerDevice(e.target.value);
                         const found = installedPrintersList.find((p) => p.name === e.target.value);
-                        if (found && found.port && (found.port.includes("WSD") || found.port.includes("192."))) {
-                          setPrinterIp(found.port.replace(/^[A-Z]+-/, ""));
+                        if (found && found.port && found.port.includes("192.")) {
+                          const match = found.port.match(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/);
+                          if (match) setPrinterIp(match[0]);
+                        } else {
+                          setPrinterIp("192.168.1.15");
                         }
                       }}
                       disabled={isScanningPrinter}
