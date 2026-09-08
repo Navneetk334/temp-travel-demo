@@ -845,30 +845,6 @@ export default function BookingDispatchPage() {
                     </div>
                   </div>
                 )}
-
-                {/* Billing & Payment Actions */}
-                <div className="flex gap-2 pt-2">
-                  <a
-                    href={`/admin/bookings-dispatch/${activeBooking.id}/invoice`}
-                    target="_blank"
-                    className="flex-1 flex items-center justify-center gap-1.5 bg-slate-900 border border-white/10 hover:bg-slate-800 text-slate-200 py-2 rounded-lg transition-colors text-xs font-bold tracking-wide"
-                  >
-                    <FileText className="w-3.5 h-3.5" />
-                    GST Invoice
-                  </a>
-                  
-                  {activeBooking.status !== "CANCELLED" && (
-                    <button
-                      onClick={() => {
-                        alert("To send a payment link to the customer, you can copy the checkout URL or trigger an SMS integration here.");
-                      }}
-                      className="flex-1 flex items-center justify-center gap-1.5 bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 border border-blue-500/20 py-2 rounded-lg transition-colors text-xs font-bold tracking-wide"
-                    >
-                      <CreditCard className="w-3.5 h-3.5" />
-                      Payment Link
-                    </button>
-                  )}
-                </div>
               </div>
 
               {/* Dispatch Trip Notes & History Log */}
