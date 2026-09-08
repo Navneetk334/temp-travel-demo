@@ -1,64 +1,55 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
 import crypto from "crypto";
-import { verifyPaymentSchema } from "@/lib/validations/payment";
+import prisma from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const result = verifyPaymentSchema.safeParse(body);
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = await req.json();
 
-    if (!result.success) {
-      return NextResponse.json({ error: result.error.flatten() }, { status: 400 });
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return NextResponse.json({ error: "Missing Razorpay payment parameters" }, { status: 400 });
     }
 
-    const { bookingId, razorpayOrderId, razorpayPaymentId, razorpaySignature } = result.data;
-
-    // Cryptographically verify signature using key_secret
     const secret = process.env.RAZORPAY_KEY_SECRET || "placeholder_secret";
-    const generatedSignature = crypto
-      .createHmac("sha256", secret)
-      .update(`${razorpayOrderId}|${razorpayPaymentId}`)
-      .digest("hex");
 
-    if (generatedSignature !== razorpaySignature) {
-      // Record payment failure in PostgreSQL
-      await prisma.razorpayPayment.update({
-        where: { razorpayOrderId },
-        data: {
-          status: "FAILED",
-          gatewayResponse: { error: "Signature mismatch" },
-        }
+    // Verify signature
+    const hmac = crypto.createHmac("sha256", secret);
+    hmac.update(`${razorpay_order_id}|${razorpay_payment_id}`);
+    const expectedSignature = hmac.digest("hex");
+
+    const isAuthentic = expectedSignature === razorpay_signature;
+
+    if (!isAuthentic) {
+      // Log failed attempt
+      await prisma.razorpayPayment.updateMany({
+        where: { razorpayOrderId: razorpay_order_id },
+        data: { status: "FAILED", razorpayPaymentId: razorpay_payment_id },
       });
-
       return NextResponse.json({ error: "Invalid payment signature" }, { status: 400 });
     }
 
-    // Wrap in database transactions for consistency
-    const [updatedPayment, updatedBooking] = await prisma.$transaction([
-      prisma.razorpayPayment.update({
-        where: { razorpayOrderId },
+    // Payment is valid, update records
+    const payment = await prisma.razorpayPayment.findUnique({
+      where: { razorpayOrderId: razorpay_order_id },
+    });
+
+    if (payment) {
+      await prisma.razorpayPayment.update({
+        where: { id: payment.id },
         data: {
+          razorpayPaymentId: razorpay_payment_id,
+          razorpaySignature: razorpay_signature,
           status: "SUCCESS",
-          razorpayPaymentId,
-          razorpaySignature,
-        }
-      }),
-      prisma.booking.update({
-        where: { id: bookingId },
-        data: {
-          status: "CONFIRMED"
-        }
-      })
-    ]);
+        },
+      });
 
-    return NextResponse.json({
-      message: "Payment verified and booking confirmed successfully",
-      bookingNumber: updatedBooking.bookingNumber,
-    }, { status: 200 });
+      // Optionally update booking status if needed
+      // e.g. status: 'CONFIRMED'
+    }
 
-  } catch (error) {
-    console.error("POST /api/payments/verify error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ success: true, message: "Payment verified successfully" });
+  } catch (error: any) {
+    console.error("Razorpay Verify Error:", error);
+    return NextResponse.json({ error: "Failed to verify payment" }, { status: 500 });
   }
 }

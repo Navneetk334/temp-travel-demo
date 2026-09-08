@@ -1,77 +1,62 @@
 import { NextRequest, NextResponse } from "next/server";
+import Razorpay from "razorpay";
 import prisma from "@/lib/prisma";
-import { razorpay } from "@/lib/razorpay";
-import { createOrderSchema } from "@/lib/validations/payment";
+import crypto from "crypto";
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_placeholder",
+  key_secret: process.env.RAZORPAY_KEY_SECRET || "placeholder_secret",
+});
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const result = createOrderSchema.safeParse(body);
+    const { bookingId, amount } = await req.json();
 
-    if (!result.success) {
-      return NextResponse.json({ error: result.error.flatten() }, { status: 400 });
+    if (!bookingId || !amount) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const { bookingId, paymentTier } = result.data;
-
-    // Fetch booking details
+    // Verify booking exists
     const booking = await prisma.booking.findUnique({
-      where: { id: bookingId }
+      where: { id: bookingId },
     });
 
     if (!booking) {
       return NextResponse.json({ error: "Booking not found" }, { status: 404 });
     }
 
-    if (booking.status === "CONFIRMED") {
-      return NextResponse.json({ error: "Booking has already been confirmed" }, { status: 400 });
-    }
-
-    // Calculate amount based on tier
-    // Razorpay accepts amounts in paise (INR * 100)
-    let paymentAmount = Number(booking.netAmount);
-    
-    if (paymentTier === "ADVANCE") {
-      // 20% Advance Payment rate
-      paymentAmount = Number((paymentAmount * 0.20).toFixed(2));
-    }
-
-    const amountInPaise = Math.round(paymentAmount * 100);
-
-    // Create order inside Razorpay API
+    // Create Razorpay Order
+    // amount in paise (multiply by 100)
     const orderOptions = {
-      amount: amountInPaise,
+      amount: Math.round(Number(amount) * 100),
       currency: "INR",
       receipt: `receipt_${booking.bookingNumber}`,
     };
 
     const order = await razorpay.orders.create(orderOptions);
 
-    if (!order) {
-      return NextResponse.json({ error: "Failed to generate gateway order" }, { status: 500 });
+    if (!order || !order.id) {
+      throw new Error("Failed to create Razorpay order");
     }
 
-    // Save payment log in PostgreSQL
-    const payment = await prisma.razorpayPayment.create({
+    // Save PENDING payment record
+    await prisma.razorpayPayment.create({
       data: {
-        bookingId,
+        bookingId: booking.id,
         razorpayOrderId: order.id,
-        status: "PENDING",
-        amount: paymentAmount.toString(),
+        amount: Number(amount),
         currency: "INR",
-      }
+        status: "PENDING",
+      },
     });
 
     return NextResponse.json({
-      keyId: process.env.RAZORPAY_KEY_ID || "rzp_test_placeholder",
       orderId: order.id,
-      amount: amountInPaise,
-      currency: "INR",
-      bookingNumber: booking.bookingNumber,
-    }, { status: 201 });
-
-  } catch (error) {
-    console.error("POST /api/payments/order error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+      amount: orderOptions.amount,
+      currency: orderOptions.currency,
+    });
+  } catch (error: any) {
+    console.error("Razorpay Order Error:", error);
+    return NextResponse.json({ error: error.message || "Failed to initiate payment" }, { status: 500 });
   }
 }
