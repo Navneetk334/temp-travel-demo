@@ -306,7 +306,7 @@ export default function LeadDispatchModal({
       if (crmStored) {
         const crmList = JSON.parse(crmStored);
         if (Array.isArray(crmList)) {
-          const updatedCRM = crmList.map((l: any) => l.id === lead.id ? { ...l, status: "CONVERTED" } : l);
+          const updatedCRM = crmList.map((l: any) => l.id === lead.id ? { ...l, status: "WON" } : l);
           localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(updatedCRM));
         }
       }
@@ -315,13 +315,29 @@ export default function LeadDispatchModal({
     }
 
     try {
-      await fetch(`/api/rental/lead`, {
-        method: "PUT",
+      await fetch(`/api/bookings/dispatch`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: lead.id, status: "CONVERTED" }),
+        body: JSON.stringify({ 
+          leadId: lead.id,
+          vehicleId: assignedVeh?.id,
+          driverId: assignedDrv?.id,
+          fare: dispatchForm.fare,
+          advance: dispatchForm.advance,
+          paymentMode: dispatchForm.paymentMode,
+          pickupLocation: dispatchForm.pickupLocation,
+          dropLocation: dispatchForm.dropLocation,
+          pickupDateTime: dispatchForm.pickupDateTime,
+          notes: dispatchForm.notes,
+          customerName: lead.customerName || lead.name,
+          customerPhone: lead.phone,
+          customerEmail: lead.email,
+          tripType: lead.tripType,
+          bookingRef: finalBookingRef
+        }),
       });
     } catch (e) {
-      console.error(e);
+      console.error("Backend dispatch error:", e);
     }
 
     if (onSuccess) onSuccess(dispatchedBooking);
