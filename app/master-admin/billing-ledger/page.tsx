@@ -11,7 +11,7 @@ export const metadata = {
 
 export default async function BillingLedgerPage() {
   // 1. Enforce SUPER_ADMIN role securely on the server
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const token = cookieStore.get(ADMIN_COOKIE_NAME)?.value;
   
   if (!token || token === "mock-admin-token") {
