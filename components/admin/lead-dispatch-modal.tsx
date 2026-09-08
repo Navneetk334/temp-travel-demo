@@ -105,18 +105,10 @@ export default function LeadDispatchModal({
         const parsed = JSON.parse(storedVehicles);
         if (Array.isArray(parsed) && parsed.length > 0) vList = parsed;
       }
+      if (vList.length > 0) setAvailableVehicles(vList);
     } catch (e) {
       console.error(e);
     }
-    if (vList.length === 0) {
-      vList = [
-        { id: "v-1", make: "Toyota", model: "Innova Hycross", registrationNumber: "DL 01 AB 1234", categoryName: "SUV", vehicleClass: "Mid-Premium" },
-        { id: "v-2", make: "Maruti Suzuki", model: "Dzire", registrationNumber: "DL 01 CD 5678", categoryName: "Sedan", vehicleClass: "Compact" },
-        { id: "v-3", make: "Honda", model: "City", registrationNumber: "HR 26 EF 9012", categoryName: "Sedan", vehicleClass: "Executive" },
-        { id: "v-4", make: "BMW", model: "X5", registrationNumber: "DL 01 LM 4321", categoryName: "SUV", vehicleClass: "Luxury" }
-      ];
-    }
-    setAvailableVehicles(vList);
 
     // 2. Initial Load Drivers from Local Storage
     let dList: any[] = [];
@@ -126,17 +118,10 @@ export default function LeadDispatchModal({
         const parsed = JSON.parse(storedDrivers);
         if (Array.isArray(parsed) && parsed.length > 0) dList = parsed;
       }
+      if (dList.length > 0) setAvailableDrivers(dList);
     } catch (e) {
       console.error(e);
     }
-    if (dList.length === 0) {
-      dList = [
-        { id: "d-1", name: "Ramesh Sharma", phone: "9876543210", licenseNumber: "DL-042021008765" },
-        { id: "d-2", name: "Vikram Singh", phone: "9811223344", licenseNumber: "HR-262022001122" },
-        { id: "d-3", name: "Amit Kumar Verma", phone: "9988776655", licenseNumber: "DL-012020009988" }
-      ];
-    }
-    setAvailableDrivers(dList);
 
     // 3. Live Sync from API
     const syncLiveSources = async () => {
