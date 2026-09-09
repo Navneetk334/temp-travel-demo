@@ -156,21 +156,7 @@ export default function BookingDispatchPage() {
         }
       }
 
-      // Merge local dispatched bookings
-      try {
-        const stored = localStorage.getItem("user_uploaded_dispatched_bookings");
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed)) {
-            const map = new Map<string, Booking>();
-            combinedBookings.forEach(b => map.set(b.id || b.bookingNumber, b));
-            parsed.forEach((p: any) => map.set(p.id || p.bookingNumber, p));
-            combinedBookings = Array.from(map.values());
-          }
-        }
-      } catch (e) {
-        console.error(e);
-      }
+      // Removed localStorage merge for bookings
 
       setBookings(combinedBookings);
       setTotalCount(combinedBookings.length);
@@ -178,15 +164,6 @@ export default function BookingDispatchPage() {
 
       // Fetch vehicles to use for dispatch assignments
       let localVehicles: any[] = [];
-      const savedFleet = localStorage.getItem("user_uploaded_fleet_vehicles") || localStorage.getItem("user_uploaded_fleet");
-      if (savedFleet) {
-        try {
-          const parsed = JSON.parse(savedFleet);
-          if (Array.isArray(parsed)) localVehicles = parsed;
-        } catch (e) {
-          console.error(e);
-        }
-      }
 
       const vehiclesRes = await fetch("/api/fleet");
       let apiList: any[] = [];

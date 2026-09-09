@@ -277,14 +277,7 @@ export default function LeadDispatchModal({
       ]
     };
 
-    try {
-      const stored = localStorage.getItem("user_uploaded_dispatched_bookings");
-      const list = stored ? JSON.parse(stored) : [];
-      list.unshift(dispatchedBooking);
-      localStorage.setItem("user_uploaded_dispatched_bookings", JSON.stringify(list));
-    } catch (err) {
-      console.error(err);
-    }
+    // Removed localStorage save for dispatch
 
     try {
       const crmStored = localStorage.getItem("user_uploaded_crm_leads");
