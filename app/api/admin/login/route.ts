@@ -40,34 +40,9 @@ export async function POST(req: NextRequest) {
       console.warn("Database connection notice during admin login:", dbErr);
     }
 
-    // 2. Fallback default credentials (for serverless/cold-start resilience)
+    // 2. Demo logins have been removed to enforce real authentication
     if (!authenticatedAdmin) {
-      const isSuperAdmin = cleanEmail === "admin@temptravels.com" && password === "admin123";
-      const isMasterAdmin = cleanEmail === "superadmin@temptravels.com" && password === "master123";
-      const isDemoAdmin = cleanEmail === "admin@demo.com" && password === "admin123";
-
-      if (isSuperAdmin) {
-        authenticatedAdmin = {
-          id: "admin-default-super",
-          name: "Operations Dispatch Desk",
-          email: "admin@temptravels.com",
-          role: "SUPER_ADMIN",
-        };
-      } else if (isMasterAdmin) {
-        authenticatedAdmin = {
-          id: "admin-default-master",
-          name: "Managing Director",
-          email: "superadmin@temptravels.com",
-          role: "SUPER_ADMIN",
-        };
-      } else if (isDemoAdmin) {
-        authenticatedAdmin = {
-          id: "admin-default-demo",
-          name: "Demo Admin",
-          email: "admin@demo.com",
-          role: "SUPER_ADMIN",
-        };
-      }
+      return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
 
     if (!authenticatedAdmin) {
