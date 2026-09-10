@@ -70,7 +70,9 @@ export default function MasterOfficeStaffPage() {
     accountHolderName: "",
     accountNumber: "",
     confirmAccountNumber: "",
-    ifscCode: "HDFC0000123"
+    ifscCode: "HDFC0000123",
+    departmentId: "",
+    permissionProfileId: ""
   });
   const [departments, setDepartments] = useState<any[]>([]);
   const [profiles, setProfiles] = useState<any[]>([]);
@@ -149,7 +151,9 @@ export default function MasterOfficeStaffPage() {
       accountHolderName: stf.accountHolderName || stf.name || "",
       accountNumber: stf.accountNumber || "",
       confirmAccountNumber: stf.accountNumber || "",
-      ifscCode: stf.ifscCode || "HDFC0000123"
+      ifscCode: stf.ifscCode || "HDFC0000123",
+      departmentId: stf.departmentId || "",
+      permissionProfileId: stf.permissionProfileId || ""
     });
     setShowAddModal(true);
   };
