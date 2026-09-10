@@ -231,6 +231,7 @@ export default function MasterAdminLayout({
     { name: "Fleet Vehicles", href: "/master-admin/fleet-roster", icon: Car },
     { name: "Driver Roster", href: "/master-admin/drivers", icon: UserCheck },
     { name: "Office Staff", href: "/master-admin/office-staff", icon: Briefcase },
+    { name: "User Permissions", href: "/master-admin/user-permissions", icon: ShieldCheck },
     { name: "Billing & Ledger", href: "/master-admin/billing-ledger", icon: CreditCard },
     { name: "SEO & Growth", href: "/master-admin/seo-growth", icon: Globe },
     {

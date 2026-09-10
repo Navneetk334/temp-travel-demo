@@ -560,21 +560,6 @@ export default function MasterOfficeStaffPage() {
                       ))}
                     </select>
                   </div>
-
-                  <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Permission Profile *</label>
-                    <select
-                      required
-                      value={formData.permissionProfileId || ""}
-                      onChange={(e) => setFormData({ ...formData, permissionProfileId: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-bold"
-                    >
-                      <option value="">-- Select Permissions --</option>
-                      {profiles.map((prof: any) => (
-                        <option key={prof.id} value={prof.id}>{prof.name}</option>
-                      ))}
-                    </select>
-                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
