@@ -222,12 +222,16 @@ export default function MasterOfficeStaffPage() {
   };
 
   const filteredStaff = staffList.filter((stf) => {
+    const safeName = stf.name || "";
+    const safePhone = stf.phone || "";
+    const safeEmail = stf.email || "";
+    const safeRole = stf.role || "";
     const matchesSearch =
-      stf.name.toLowerCase().includes(search.toLowerCase()) ||
-      stf.phone.includes(search) ||
-      stf.email.toLowerCase().includes(search.toLowerCase()) ||
-      stf.role.toLowerCase().includes(search.toLowerCase());
-    const matchesRole = filterRole === "ALL" || stf.role.toUpperCase().includes(filterRole.toUpperCase());
+      safeName.toLowerCase().includes(search.toLowerCase()) ||
+      safePhone.includes(search) ||
+      safeEmail.toLowerCase().includes(search.toLowerCase()) ||
+      safeRole.toLowerCase().includes(search.toLowerCase());
+    const matchesRole = filterRole === "ALL" || safeRole.toUpperCase().includes(filterRole.toUpperCase());
     return matchesSearch && matchesRole;
   });
 
