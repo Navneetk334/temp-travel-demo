@@ -389,15 +389,15 @@ export default function MasterOfficeStaffPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400 font-sans">Aadhaar:</span>
-                    <span className="text-amber-400 font-bold">{stf.aadhaarNumber}</span>
+                    <span className="text-amber-400 font-bold">{stf.aadhaarNumber || "N/A"}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400 font-sans">PAN Card:</span>
-                    <span className="text-slate-200 font-bold">{stf.panNumber}</span>
+                    <span className="text-slate-200 font-bold">{stf.panNumber || "N/A"}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400 font-sans">Bank:</span>
-                    <span className="text-emerald-400 font-bold">{stf.bankName} ({stf.accountNumber.slice(-4)})</span>
+                    <span className="text-emerald-400 font-bold">{stf.bankName || "N/A"} ({(stf.accountNumber || "").slice(-4)})</span>
                   </div>
                 </div>
               </div>
