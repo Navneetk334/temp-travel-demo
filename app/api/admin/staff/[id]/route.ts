@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getAdminFromRequest, hasPermission } from "@/lib/auth";
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const admin = await getAdminFromRequest(req);
     if (!admin || (!hasPermission(admin, "USER_MGMT_EDIT") && admin.role !== "MASTER_ADMIN")) {
@@ -37,7 +37,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const admin = await getAdminFromRequest(req);
     if (!admin || (!hasPermission(admin, "USER_MGMT_EDIT") && admin.role !== "MASTER_ADMIN")) {
