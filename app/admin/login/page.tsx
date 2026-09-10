@@ -13,11 +13,31 @@ function LoginForm() {
   const [password, setPassword] = useState("admin123");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isForgotMode, setIsForgotMode] = useState(false);
+  const [forgotSuccess, setForgotSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+
+    if (isForgotMode) {
+      try {
+        const res = await fetch("/api/admin/forgot-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Request failed");
+        setForgotSuccess(true);
+      } catch (err: any) {
+        setError(err.message || "Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
 
     try {
       const res = await fetch("/api/admin/login", {
@@ -61,7 +81,7 @@ function LoginForm() {
           Admin Control Center
         </h1>
         <p className="text-xs text-slate-400">
-          Sign in to access operational dashboard & CRM systems
+          {isForgotMode ? "Request a password reset" : "Sign in to access operational dashboard & CRM systems"}
         </p>
       </div>
 
@@ -73,61 +93,85 @@ function LoginForm() {
         </div>
       )}
 
+      {/* Success Alert */}
+      {forgotSuccess && (
+        <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex items-center gap-2.5 text-xs text-emerald-400">
+          <span>Password reset requested. Please contact the Master Admin for your new password.</span>
+        </div>
+      )}
+
       {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-1">
-          <label className="text-xs font-semibold text-slate-300">Email Address</label>
-          <div className="relative">
-            <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@temptravels.com"
-              className="w-full bg-slate-950 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-colors"
-            />
+      {!forgotSuccess && (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-slate-300">Email Address</label>
+            <div className="relative">
+              <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin@temptravels.com"
+                className="w-full bg-slate-950 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-colors"
+              />
+            </div>
           </div>
-        </div>
 
-        <div className="space-y-1">
-          <label className="text-xs font-semibold text-slate-300">Password</label>
-          <div className="relative">
-            <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full bg-slate-950 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-colors"
-            />
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-primary hover:bg-blue-600 text-white font-bold py-2.5 px-4 rounded-lg text-xs tracking-wider uppercase transition-all flex items-center justify-center gap-2 shadow-lg disabled:opacity-50"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Authenticating...</span>
-            </>
-          ) : (
-            <>
-              <span>Sign In to Admin</span>
-              <ArrowRight className="w-4 h-4" />
-            </>
+          {!isForgotMode && (
+            <div className="space-y-1">
+              <div className="flex justify-between items-center">
+                <label className="text-xs font-semibold text-slate-300">Password</label>
+                <button type="button" onClick={() => setIsForgotMode(true)} className="text-[10px] text-accent hover:underline">
+                  Forgot Password?
+                </button>
+              </div>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full bg-slate-950 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-colors"
+                />
+              </div>
+            </div>
           )}
-        </button>
-      </form>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-primary hover:bg-blue-600 text-white font-bold py-2.5 px-4 rounded-lg text-xs tracking-wider uppercase transition-all flex items-center justify-center gap-2 shadow-lg disabled:opacity-50"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>{isForgotMode ? "Requesting..." : "Authenticating..."}</span>
+              </>
+            ) : (
+              <>
+                <span>{isForgotMode ? "Request Reset" : "Sign In to Admin"}</span>
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
+          </button>
+          
+          {isForgotMode && (
+            <button type="button" onClick={() => setIsForgotMode(false)} className="w-full text-center text-xs text-slate-400 hover:text-white mt-2">
+              Back to Login
+            </button>
+          )}
+        </form>
+      )}
 
       {/* Footer Hint */}
-      <div className="pt-4 border-t border-white/5 text-center text-[10px] text-slate-500">
-        Super Admin Credentials: <span className="text-slate-400 font-mono">admin@temptravels.com</span> / <span className="text-slate-400 font-mono">admin123</span>
-      </div>
+      {!isForgotMode && !forgotSuccess && (
+        <div className="pt-4 border-t border-white/5 text-center text-[10px] text-slate-500">
+          Super Admin Credentials: <span className="text-slate-400 font-mono">admin@temptravels.com</span> / <span className="text-slate-400 font-mono">admin123</span>
+        </div>
+      )}
     </div>
   );
 }

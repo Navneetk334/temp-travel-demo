@@ -108,17 +108,39 @@ model User {
 // ==========================================
 
 model Admin {
-  id           String     @id @default(uuid())
-  name         String
-  email        String     @unique
-  passwordHash String
-  role         AdminRole  @default(MANAGER)
-  isActive     Boolean    @default(true)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  blogPosts    BlogPost[]
+  id                  String             @id @default(uuid())
+  name                String
+  email               String             @unique
+  passwordHash        String
+  role                AdminRole          @default(MANAGER)
+  departmentId        String?
+  department          Department?        @relation(fields: [departmentId], references: [id])
+  permissionProfileId String?
+  permissionProfile   PermissionProfile? @relation(fields: [permissionProfileId], references: [id])
+  passwordResetRequested Boolean         @default(false)
+  isActive            Boolean            @default(true)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  blogPosts           BlogPost[]
 
   @@index([email])
+}
+
+model Department {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  admins    Admin[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PermissionProfile {
+  id          String   @id @default(uuid())
+  name        String   @unique 
+  permissions String[]
+  admins      Admin[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 // ==========================================

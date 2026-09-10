@@ -30,7 +30,7 @@ export default function MasterAdminLoginPage() {
   const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -67,35 +67,7 @@ export default function MasterAdminLoginPage() {
       mouseY = -9999;
     };
 
-    let dots: DotNode[] = [];
-    const gap = 24; // Crisp Framer dot grid spacing
-
-    const initDots = () => {
-      dots = [];
-      const cols = Math.ceil(width / gap) + 1;
-      const rows = Math.ceil(height / gap) + 1;
-
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const posX = c * gap;
-          const posY = r * gap;
-          dots.push({
-            originX: posX,
-            originY: posY,
-            x: posX,
-            y: posY,
-            vx: 0,
-            vy: 0,
-            radius: 1.2
-          });
-        }
-      }
-    };
-
-    initDots();
-
     const handleResize = () => {
-      if (!canvas) return;
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
       initDots();
@@ -105,49 +77,67 @@ export default function MasterAdminLoginPage() {
     window.addEventListener("mouseleave", handleMouseLeave);
     window.addEventListener("resize", handleResize);
 
-    const render = () => {
-      // Pure dark background
-      ctx.fillStyle = "#020617";
-      ctx.fillRect(0, 0, width, height);
+    const DOT_SPACING = 35;
+    const DOT_RADIUS = 1.2;
+    const MOUSE_RADIUS = 120;
+    const SPRING_K = 0.04;
+    const FRICTION = 0.85;
 
-      const maxRepelDist = 70;  // Tighter, precise cursor repulsion focus aura
-      const springK = 0.08;     // Return force stiffness
-      const damping = 0.82;     // Wobble damping factor
+    let dots: DotNode[] = [];
+
+    const initDots = () => {
+      dots = [];
+      const cols = Math.floor(width / DOT_SPACING) + 2;
+      const rows = Math.floor(height / DOT_SPACING) + 2;
+
+      const offsetX = (width - cols * DOT_SPACING) / 2;
+      const offsetY = (height - rows * DOT_SPACING) / 2;
+
+      for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+          const x = offsetX + i * DOT_SPACING;
+          const y = offsetY + j * DOT_SPACING;
+          dots.push({ originX: x, originY: y, x, y, vx: 0, vy: 0, radius: DOT_RADIUS });
+        }
+      }
+    };
+
+    initDots();
+
+    const render = () => {
+      ctx.clearRect(0, 0, width, height);
 
       for (let i = 0; i < dots.length; i++) {
         const dot = dots[i];
-
-        // Calculate distance vector to mouse cursor
-        const dx = dot.x - mouseX;
-        const dy = dot.y - mouseY;
+        const dx = mouseX - dot.x;
+        const dy = mouseY - dot.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
-        // Repulsion physics: Push dot AWAY from cursor
-        if (dist < maxRepelDist && dist > 0) {
-          const repelForce = (1 - dist / maxRepelDist) * 6;
-          const angle = Math.atan2(dy, dx);
-          dot.vx += Math.cos(angle) * repelForce;
-          dot.vy += Math.sin(angle) * repelForce;
+        if (dist < MOUSE_RADIUS) {
+          const force = (MOUSE_RADIUS - dist) / MOUSE_RADIUS;
+          const maxPush = 15;
+          const pushX = (dx / dist) * force * maxPush * -1;
+          const pushY = (dy / dist) * force * maxPush * -1;
+          dot.vx += pushX;
+          dot.vy += pushY;
         }
 
-        // Spring physics: Pull dot back to origin position
-        dot.vx += (dot.originX - dot.x) * springK;
-        dot.vy += (dot.originY - dot.y) * springK;
+        const springX = (dot.originX - dot.x) * SPRING_K;
+        const springY = (dot.originY - dot.y) * SPRING_K;
+        dot.vx += springX;
+        dot.vy += springY;
 
-        // Apply velocity damping for wobbling feel
-        dot.vx *= damping;
-        dot.vy *= damping;
+        dot.vx *= FRICTION;
+        dot.vy *= FRICTION;
 
-        // Update dot position
         dot.x += dot.vx;
         dot.y += dot.vy;
 
-        // Calculate displacement offset for dynamic brightness
-        const dispX = dot.x - dot.originX;
-        const dispY = dot.y - dot.originY;
-        const displacement = Math.sqrt(dispX * dispX + dispY * dispY);
+        const displacement = Math.sqrt(
+          (dot.x - dot.originX) * (dot.x - dot.originX) +
+          (dot.y - dot.originY) * (dot.y - dot.originY)
+        );
 
-        // Render pure crisp white/monochrome dot with brightness on wobble
         const alpha = Math.min(0.85, 0.22 + (displacement / 20) * 0.5);
         const radius = dot.radius + Math.min(1.2, displacement / 15);
 
@@ -179,6 +169,36 @@ export default function MasterAdminLoginPage() {
 
   const passwordInfo = getPasswordHumor(form.password);
 
+  const handleForgotSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    if (!form.email) {
+      setError("Please enter your Master HQ Email.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/admin/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSuccessMsg(data.message || "Password reset requested.");
+      } else {
+        setError(data.error || "Failed to request reset.");
+      }
+    } catch (err) {
+      setError("Network error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -197,26 +217,22 @@ export default function MasterAdminLoginPage() {
         body: JSON.stringify({ email: form.email, password: form.password }),
       });
 
-      if (res.ok) {
-        setSuccessMsg("🎉 Master Key Verified! Opening Command Center...");
-        setTimeout(() => {
-          router.push("/master-admin");
-        }, 1200);
-      } else {
-        if (form.email.includes("@") && form.password.length >= 4) {
-          setSuccessMsg("🚀 Security Clearance Granted! Launching Master HQ...");
+      const data = await res.json();
+
+      if (res.ok && data.admin) {
+        if (data.admin.role !== 'SUPER_ADMIN' && data.admin.role !== 'MASTER_ADMIN') {
+          setError("Access Denied! Standard Admins cannot access Master HQ.");
+        } else {
+          setSuccessMsg("🎉 Master Key Verified! Opening Command Center...");
           setTimeout(() => {
             router.push("/master-admin");
           }, 1200);
-        } else {
-          setError("Access Denied! Incorrect Master Key or Security Clearance Email.");
         }
+      } else {
+        setError(data.error || "Access Denied! Incorrect Master Key.");
       }
     } catch (err) {
-      setSuccessMsg("🚀 Emergency Bypass Verified! Opening Master HQ...");
-      setTimeout(() => {
-        router.push("/master-admin");
-      }, 1000);
+      setError("System Offline! Check backend server status.");
     } finally {
       setLoading(false);
     }
@@ -304,73 +320,126 @@ export default function MasterAdminLoginPage() {
             </div>
           )}
 
-          {mode === "login" ? (
-            <form onSubmit={handleLoginSubmit} className="space-y-4 text-xs">
-              <div className="space-y-1.5">
-                <label className="text-slate-300 font-extrabold uppercase text-[10px] tracking-wider">
-                  Master Official Email
-                </label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="email"
-                    required
-                    placeholder="master@temptravels.com"
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-400 transition-colors font-semibold"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-slate-300 font-extrabold uppercase text-[10px] tracking-wider">
-                  Security Clearance Password
-                </label>
-                <div className="relative">
-                  <KeyRound className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    required
-                    placeholder="••••••••••••"
-                    value={form.password}
-                    onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl pl-10 pr-10 py-3 text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-400 transition-colors font-semibold"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-amber-400 cursor-pointer"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
+            {mode === "login" && (
+              <form onSubmit={handleLoginSubmit} className="space-y-4">
+                {/* Email */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Master Email</label>
+                  <div className="relative group">
+                    <Mail className="w-5 h-5 text-slate-500 absolute left-3 top-3.5 transition-colors group-focus-within:text-amber-500" />
+                    <input
+                      type="email"
+                      value={form.email}
+                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                      placeholder="super@temptravels.com"
+                      className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 pl-11 pr-4 text-sm text-slate-100 placeholder:text-slate-700 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all"
+                    />
+                  </div>
                 </div>
 
-                {form.password && (
-                  <div className="space-y-1 pt-1">
-                    <div className="h-1.5 w-full bg-slate-950 rounded-full overflow-hidden border border-white/5">
+                {/* Password */}
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center pr-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Master Password</label>
+                    <button type="button" onClick={() => setMode("forgot")} className="text-[10px] text-amber-500/80 hover:text-amber-400 hover:underline transition-colors font-medium">Forgot Access?</button>
+                  </div>
+                  <div className="relative group">
+                    <Lock className="w-5 h-5 text-slate-500 absolute left-3 top-3.5 transition-colors group-focus-within:text-amber-500" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={form.password}
+                      onChange={(e) => setForm({ ...form, password: e.target.value })}
+                      placeholder="••••••••••••"
+                      className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 pl-11 pr-11 text-sm text-slate-100 placeholder:text-slate-700 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all font-mono"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3.5 text-slate-500 hover:text-slate-300 transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+
+                  {/* Password Humor Bar */}
+                  <div className="pt-2 px-1">
+                    <div className="flex justify-between items-center mb-1.5">
+                      <span className={`text-[10px] uppercase tracking-wider ${passwordInfo.color}`}>
+                        {passwordInfo.label}
+                      </span>
+                    </div>
+                    <div className="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-amber-500 to-emerald-400 transition-all duration-300"
+                        className="h-full bg-amber-500 transition-all duration-500 ease-out"
                         style={{ width: `${passwordInfo.progress}%` }}
                       />
                     </div>
-                    <div className={`text-[10px] font-mono ${passwordInfo.color}`}>
-                      {passwordInfo.label}
-                    </div>
                   </div>
-                )}
-              </div>
+                </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3.5 bg-gradient-to-r from-amber-500 via-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black rounded-xl text-xs uppercase tracking-widest transition-all shadow-xl shadow-amber-500/20 flex items-center justify-center gap-2 group cursor-pointer"
-              >
-                <span>{loading ? "Decrypting Clearance..." : "Authenticate & Open Master Admin"}</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
-            </form>
-          ) : (
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full mt-2 group relative overflow-hidden rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 text-white font-bold py-3.5 px-4 text-sm tracking-widest uppercase transition-all shadow-[0_0_20px_rgba(245,158,11,0.15)] hover:shadow-[0_0_30px_rgba(245,158,11,0.3)] hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
+                >
+                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+                  <div className="relative flex items-center justify-center gap-2">
+                    {loading ? (
+                      <Sparkles className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <>
+                        <KeyRound className="w-5 h-5" />
+                        <span>Initialize HQ</span>
+                      </>
+                    )}
+                  </div>
+                </button>
+              </form>
+            )}
+
+            {/* FORGOT PASSWORD FORM */}
+            {mode === "forgot" && (
+              <form onSubmit={handleForgotSubmit} className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Master Email</label>
+                  <div className="relative group">
+                    <Mail className="w-5 h-5 text-slate-500 absolute left-3 top-3.5 transition-colors group-focus-within:text-amber-500" />
+                    <input
+                      type="email"
+                      value={form.email}
+                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                      placeholder="super@temptravels.com"
+                      className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 pl-11 pr-4 text-sm text-slate-100 placeholder:text-slate-700 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full mt-2 group relative overflow-hidden rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 text-white font-bold py-3.5 px-4 text-sm tracking-widest uppercase transition-all shadow-[0_0_20px_rgba(245,158,11,0.15)] hover:shadow-[0_0_30px_rgba(245,158,11,0.3)] hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
+                >
+                  <div className="relative flex items-center justify-center gap-2">
+                    {loading ? (
+                      <Sparkles className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <>
+                        <KeyRound className="w-5 h-5" />
+                        <span>Request Recovery</span>
+                      </>
+                    )}
+                  </div>
+                </button>
+                <div className="text-center pt-2">
+                  <button type="button" onClick={() => setMode("login")} className="text-[11px] text-slate-400 hover:text-white transition-colors">
+                    Back to Login
+                  </button>
+                </div>
+              </form>
+            )}
+
+          {mode === "signup" && (
             <form onSubmit={handleSignupSubmit} className="space-y-4 text-xs">
               <div className="space-y-1.5">
                 <label className="text-slate-300 font-extrabold uppercase text-[10px] tracking-wider">Full Name</label>

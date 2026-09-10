@@ -71,33 +71,45 @@ export default function MasterOfficeStaffPage() {
     confirmAccountNumber: "",
     ifscCode: "HDFC0000123"
   });
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [profiles, setProfiles] = useState<any[]>([]);
 
-  // Load from local storage
+  // Load from API
   useEffect(() => {
-    let hasLocal = false;
-    const saved = localStorage.getItem("user_uploaded_office_staff");
-    if (saved) {
+    const loadData = async () => {
       try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setStaffList(parsed);
-          setLoading(false);
-          hasLocal = true;
+        const [staffRes, deptRes, profRes] = await Promise.all([
+          fetch("/api/admin/staff"),
+          fetch("/api/admin/departments"),
+          fetch("/api/admin/permission-profiles")
+        ]);
+        
+        if (staffRes.ok) {
+          const staffData = await staffRes.json();
+          setStaffList(staffData.staff || []);
         }
-      } catch (e) {
-        console.error(e);
+        if (deptRes.ok) {
+          const deptData = await deptRes.json();
+          setDepartments(deptData.departments || []);
+        }
+        if (profRes.ok) {
+          const profData = await profRes.json();
+          setProfiles(profData.profiles || []);
+        }
+      } catch (err) {
+        console.error("Failed to load staff data", err);
+      } finally {
+        setLoading(false);
       }
-    }
-    if (!hasLocal) {
-      setLoading(false);
-    }
+    };
+    loadData();
   }, []);
 
   const openAddModal = () => {
     setEditingStaff(null);
     setFormData({
       name: "",
-      role: "Dispatch Manager",
+      role: "MANAGER",
       dob: "1995-05-15",
       phone: "",
       email: "",
@@ -113,7 +125,7 @@ export default function MasterOfficeStaffPage() {
       accountNumber: "",
       confirmAccountNumber: "",
       ifscCode: "HDFC0000123"
-    });
+    } as any);
     setShowAddModal(true);
   };
 
@@ -141,7 +153,7 @@ export default function MasterOfficeStaffPage() {
     setShowAddModal(true);
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (formData.accountNumber !== formData.confirmAccountNumber) {
@@ -149,67 +161,50 @@ export default function MasterOfficeStaffPage() {
       return;
     }
 
-    let updated: any[] = [];
-    if (editingStaff) {
-      updated = staffList.map(s => {
-        if (s.id === editingStaff.id) {
-          return {
-            ...s,
-            name: formData.name,
-            role: formData.role,
-            dob: formData.dob,
-            phone: formData.phone,
-            email: formData.email,
-            photoName: formData.photoName,
-            photoUrl: formData.photoUrl,
-            aadhaarNumber: formData.aadhaarNumber,
-            aadhaarDocName: formData.aadhaarDocName,
-            panNumber: formData.panNumber,
-            panDocName: formData.panDocName,
-            contractDocName: formData.contractDocName,
-            bankName: formData.bankName,
-            accountHolderName: formData.accountHolderName,
-            accountNumber: formData.accountNumber,
-            ifscCode: formData.ifscCode
-          };
+    try {
+      if (editingStaff) {
+        const res = await fetch(`/api/admin/staff/${editingStaff.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData)
+        });
+        if (!res.ok) throw new Error("Failed to update staff");
+        const data = await res.json();
+        
+        setStaffList(staffList.map(s => s.id === editingStaff.id ? data.staff : s));
+      } else {
+        const res = await fetch("/api/admin/staff", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...formData,
+            password: "password123" // default temp password
+          })
+        });
+        if (!res.ok) {
+           const errData = await res.json();
+           throw new Error(errData.error || "Failed to create staff");
         }
-        return s;
-      });
-    } else {
-      const created = {
-        id: `STF-${Date.now()}`,
-        name: formData.name || "Office Executive",
-        role: formData.role || "Dispatch Manager",
-        dob: formData.dob,
-        phone: formData.phone || "9876543210",
-        email: formData.email || "staff@temptravels.com",
-        photoName: formData.photoName,
-        photoUrl: formData.photoUrl,
-        aadhaarNumber: formData.aadhaarNumber || "1122 3344 5566",
-        aadhaarDocName: formData.aadhaarDocName,
-        panNumber: formData.panNumber || "ABCDE1234F",
-        panDocName: formData.panDocName,
-        contractDocName: formData.contractDocName,
-        bankName: formData.bankName || "HDFC Bank",
-        accountHolderName: formData.accountHolderName || formData.name,
-        accountNumber: formData.accountNumber || "501009876123",
-        ifscCode: formData.ifscCode || "HDFC0000123"
-      };
-      updated = [created, ...staffList];
+        const data = await res.json();
+        setStaffList([data.staff, ...staffList]);
+      }
+      setShowAddModal(false);
+    } catch (err: any) {
+      alert(err.message);
     }
-
-    setStaffList(updated);
-    localStorage.setItem("user_uploaded_office_staff", JSON.stringify(updated));
-    setShowAddModal(false);
   };
 
-  const handleDeleteStaff = (stf: any) => {
+  const handleDeleteStaff = async (stf: any) => {
     const confirmDel = confirm(`Are you sure you want to remove office staff member ${stf.name}?`);
     if (confirmDel) {
-      const updated = staffList.filter(s => s.id !== stf.id);
-      setStaffList(updated);
-      setSelectedIds(selectedIds.filter(id => id !== stf.id));
-      localStorage.setItem("user_uploaded_office_staff", JSON.stringify(updated));
+      try {
+        const res = await fetch(`/api/admin/staff/${stf.id}`, { method: "DELETE" });
+        if (!res.ok) throw new Error("Failed to delete");
+        setStaffList(staffList.filter(s => s.id !== stf.id));
+        setSelectedIds(selectedIds.filter(id => id !== stf.id));
+      } catch (err) {
+        alert("Delete failed");
+      }
     }
   };
 
@@ -399,27 +394,63 @@ export default function MasterOfficeStaffPage() {
               </div>
 
               {/* Card Footer Actions */}
-              <div className="pt-3 border-t border-white/5 flex items-center justify-between">
-                <span className="text-[10px] font-mono text-emerald-400 font-bold flex items-center gap-1">
-                  <BadgeCheck className="w-3.5 h-3.5" /> Staff Active
-                </span>
+              <div className="pt-3 border-t border-white/5 flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono text-emerald-400 font-bold flex items-center gap-1">
+                    <BadgeCheck className="w-3.5 h-3.5" /> Staff Active
+                  </span>
 
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => openEditModal(stf)}
-                    className="p-1.5 bg-slate-950 border border-white/10 hover:border-amber-400 rounded-lg text-slate-400 hover:text-amber-400 transition-all cursor-pointer"
-                    title="Edit Staff Credentials"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteStaff(stf)}
-                    className="p-1.5 bg-slate-950 border border-white/10 hover:border-rose-400 rounded-lg text-slate-400 hover:text-rose-400 transition-all cursor-pointer"
-                    title="Delete Staff Record"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => openEditModal(stf)}
+                      className="p-1.5 bg-slate-950 border border-white/10 hover:border-amber-400 rounded-lg text-slate-400 hover:text-amber-400 transition-all cursor-pointer"
+                      title="Edit Staff Credentials"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteStaff(stf)}
+                      className="p-1.5 bg-slate-950 border border-white/10 hover:border-rose-400 rounded-lg text-slate-400 hover:text-rose-400 transition-all cursor-pointer"
+                      title="Delete Staff Record"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
+
+                {stf.passwordResetRequested && (
+                  <div className="flex items-center justify-between bg-rose-500/10 border border-rose-500/30 p-2.5 rounded-xl">
+                    <div className="flex items-center gap-2 text-rose-400">
+                      <AlertCircle className="w-4 h-4" />
+                      <span className="text-[10px] font-bold">Password Reset Requested</span>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        const newPass = prompt(`Enter new password for ${stf.name}:`);
+                        if (newPass) {
+                          try {
+                            const res = await fetch("/api/admin/reset-password", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ userId: stf.id, newPassword: newPass })
+                            });
+                            if (res.ok) {
+                              alert("Password reset successfully. Hand the password to the user.");
+                              setStaffList(staffList.map(s => s.id === stf.id ? { ...s, passwordResetRequested: false } : s));
+                            } else {
+                              alert("Failed to reset password");
+                            }
+                          } catch(err) {
+                            alert("Error");
+                          }
+                        }
+                      }}
+                      className="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-lg transition-colors cursor-pointer"
+                    >
+                      Force Reset
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -478,7 +509,7 @@ export default function MasterOfficeStaffPage() {
                 </div>
               </div>
 
-              {/* Personal Info & DOB Age Calculation */}
+              {/* Personal Info & System Access */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-slate-300 font-bold">Staff Full Name *</label>
@@ -493,17 +524,47 @@ export default function MasterOfficeStaffPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">Role / Designation *</label>
+                  <label className="text-slate-300 font-bold">System Role *</label>
                   <select
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                     className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400"
                   >
-                    <option value="Dispatch Manager">Dispatch Manager</option>
-                    <option value="Fleet Operations Head">Fleet Operations Head</option>
-                    <option value="Senior Accountant">Senior Accountant</option>
-                    <option value="HR & Compliance Manager">HR & Compliance Manager</option>
-                    <option value="Customer Support Executive">Customer Support Executive</option>
+                    <option value="MANAGER">Manager</option>
+                    <option value="ADMIN">Admin</option>
+                    <option value="DISPATCHER">Dispatcher</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-slate-300 font-bold">Department *</label>
+                  <select
+                    required
+                    value={formData.departmentId || ""}
+                    onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-bold"
+                  >
+                    <option value="">-- Select Department --</option>
+                    {departments.map((dept: any) => (
+                      <option key={dept.id} value={dept.id}>{dept.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-slate-300 font-bold">Permission Profile *</label>
+                  <select
+                    required
+                    value={formData.permissionProfileId || ""}
+                    onChange={(e) => setFormData({ ...formData, permissionProfileId: e.target.value })}
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-bold"
+                  >
+                    <option value="">-- Select Permissions --</option>
+                    {profiles.map((prof: any) => (
+                      <option key={prof.id} value={prof.id}>{prof.name}</option>
+                    ))}
                   </select>
                 </div>
               </div>

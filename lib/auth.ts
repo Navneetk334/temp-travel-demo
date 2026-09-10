@@ -12,6 +12,7 @@ export interface AdminPayload {
   name: string;
   email: string;
   role: string;
+  permissions?: string[];
   iat?: number;
   exp?: number;
 }
@@ -130,6 +131,16 @@ export async function verifyAdmin(req: NextRequest): Promise<boolean> {
   // Verify role is one of valid admin roles
   const validRoles = ["SUPER_ADMIN", "MANAGER", "DISPATCHER", "MASTER_ADMIN", "ADMIN"];
   return validRoles.includes(admin.role);
+}
+
+/**
+ * Check if the admin has a specific permission. SUPER_ADMIN bypasses all checks.
+ */
+export function hasPermission(admin: AdminPayload | null, permission: string): boolean {
+  if (!admin) return false;
+  if (admin.role === "SUPER_ADMIN" || admin.role === "MASTER_ADMIN") return true;
+  if (!admin.permissions) return false;
+  return admin.permissions.includes(permission);
 }
 
 /**
