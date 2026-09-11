@@ -57,6 +57,7 @@ export default function MasterDriversPage() {
 
   // Complete Form State with Photo Preview & DOB Age Calculation
   const [formData, setFormData] = useState({
+    employeeId: "",
     photoName: "",
     photoUrl: "",
     name: "",

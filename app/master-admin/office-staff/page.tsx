@@ -54,6 +54,7 @@ export default function MasterOfficeStaffPage() {
   const [staffList, setStaffList] = useState<any[]>([]);
 
   const [formData, setFormData] = useState({
+    employeeId: "",
     name: "",
     role: "Dispatch Manager",
     dob: "1995-05-15",
