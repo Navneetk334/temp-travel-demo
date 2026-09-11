@@ -5,10 +5,12 @@ import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { Download, Loader2 } from "lucide-react";
 import { format } from "date-fns";
+import { useDialog } from "@/app/components/DialogProvider";
 
 export default function InvoiceGenerator({ booking }: { booking: any }) {
   const invoiceRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const { showAlert } = useDialog();
 
   const generatePDF = async () => {
     if (!invoiceRef.current) return;
@@ -38,7 +40,7 @@ export default function InvoiceGenerator({ booking }: { booking: any }) {
 
     } catch (error) {
       console.error("Error generating PDF:", error);
-      alert("Failed to generate PDF. Check console for details.");
+      await showAlert("Failed to generate PDF. Check console for details.");
     } finally {
       setIsGenerating(false);
     }

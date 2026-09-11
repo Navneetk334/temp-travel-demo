@@ -16,6 +16,7 @@ import {
   ArrowRight
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
+import { useDialog } from "@/app/components/DialogProvider";
 
 interface BlogCategory {
   id: string;
@@ -66,6 +67,8 @@ export default function MasterBlogCategoriesPage() {
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<BlogCategory | null>(null);
+
+  const { showConfirm } = useDialog();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -137,8 +140,8 @@ export default function MasterBlogCategoriesPage() {
     setEditingCategory(null);
   };
 
-  const handleDeleteCategory = (id: string) => {
-    if (confirm("Are you sure you want to delete this blog category?")) {
+  const handleDeleteCategory = async (id: string) => {
+    if (await showConfirm("Are you sure you want to delete this blog category?")) {
       const updated = categories.filter(c => c.id !== id);
       setCategories(updated);
       localStorage.setItem("user_uploaded_blog_categories", JSON.stringify(updated));
@@ -167,9 +170,9 @@ export default function MasterBlogCategoriesPage() {
     );
   };
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (selectedIds.length === 0) return;
-    if (confirm(`Are you sure you want to delete ${selectedIds.length} selected category(ies)?`)) {
+    if (await showConfirm(`Are you sure you want to delete ${selectedIds.length} selected category(ies)?`)) {
       const updated = categories.filter(c => !selectedIds.includes(c.id));
       setCategories(updated);
       setSelectedIds([]);

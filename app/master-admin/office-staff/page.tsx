@@ -25,6 +25,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
+import { useDialog } from "@/app/components/DialogProvider";
 
 // Age calculation helper
 function calculateAge(dobString: string): number | null {
@@ -43,6 +44,7 @@ function calculateAge(dobString: string): number | null {
 export default function MasterOfficeStaffPage() {
   const [search, setSearch] = useState("");
   const [filterRole, setFilterRole] = useState("ALL");
+  const { showAlert, showConfirm } = useDialog();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingStaff, setEditingStaff] = useState<any | null>(null);
   const [selectedStaff, setSelectedStaff] = useState<any | null>(null);
@@ -166,7 +168,7 @@ export default function MasterOfficeStaffPage() {
     e.preventDefault();
 
     if (formData.accountNumber !== formData.confirmAccountNumber) {
-      alert("Bank Account Number and Confirm Account Number do not match!");
+      await showAlert("Bank Account Number and Confirm Account Number do not match!");
       return;
     }
 
@@ -199,12 +201,12 @@ export default function MasterOfficeStaffPage() {
       }
       setShowAddModal(false);
     } catch (err: any) {
-      alert(err.message);
+      await showAlert(err.message);
     }
   };
 
   const handleDeleteStaff = async (stf: any) => {
-    const confirmDel = confirm(`Are you sure you want to remove office staff member ${stf.name}?`);
+    const confirmDel = await showConfirm(`Are you sure you want to remove office staff member ${stf.name}?`);
     if (confirmDel) {
       try {
         const res = await fetch(`/api/admin/staff/${stf.id}`, { method: "DELETE" });
@@ -212,7 +214,7 @@ export default function MasterOfficeStaffPage() {
         setStaffList(staffList.filter(s => s.id !== stf.id));
         setSelectedIds(selectedIds.filter(id => id !== stf.id));
       } catch (err) {
-        alert("Delete failed");
+        await showAlert("Delete failed");
       }
     }
   };
@@ -281,8 +283,8 @@ export default function MasterOfficeStaffPage() {
               Clear Selection
             </button>
             <button
-              onClick={() => {
-                if (confirm(`Are you sure you want to delete ${selectedIds.length} selected staff member(s)?`)) {
+              onClick={async () => {
+                if (await showConfirm(`Are you sure you want to delete ${selectedIds.length} selected staff member(s)?`)) {
                   const updated = staffList.filter(s => !selectedIds.includes(s.id));
                   setStaffList(updated);
                   setSelectedIds([]);
@@ -447,13 +449,13 @@ export default function MasterOfficeStaffPage() {
                                 body: JSON.stringify({ userId: stf.id, newPassword: newPass })
                               });
                               if (res.ok) {
-                                alert("Password reset successfully. Hand the password to the user.");
+                                await showAlert("Password reset successfully. Hand the password to the user.");
                                 setStaffList(staffList.map(s => s.id === stf.id ? { ...s, passwordResetRequested: false } : s));
                               } else {
-                                alert("Failed to reset password");
+                                await showAlert("Failed to reset password");
                               }
                             } catch (err) {
-                              alert("Error");
+                              await showAlert("Error");
                             }
                           }
                         }}

@@ -21,9 +21,15 @@ import {
   Upload,
   Calendar,
   Shield,
-  RefreshCw
+  RefreshCw,
+  Filter,
+  Edit,
+  Image as ImageIcon,
+  AlertTriangle,
+  Settings2
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
+import { useDialog } from "@/app/components/DialogProvider";
 
 // Category to Class Mapping Hierarchy
 const CLASS_OPTIONS: Record<string, string[]> = {
@@ -38,6 +44,9 @@ export default function MasterFleetRosterPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  const { showAlert, showConfirm } = useDialog();
 
   // Multi-select state
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -305,8 +314,8 @@ export default function MasterFleetRosterPage() {
     setShowModal(false);
   };
 
-  const handleDeleteVehicle = (v: any) => {
-    const confirmDel = confirm(`Are you sure you want to delete ${v.make} ${v.model} (${v.registrationNumber})?`);
+  const handleDeleteVehicle = async (v: any) => {
+    const confirmDel = await showConfirm(`Are you sure you want to delete ${v.make} ${v.model} (${v.registrationNumber})?`);
     if (confirmDel) {
       const updated = vehicles.filter(item => item.id !== v.id);
       setVehicles(updated);
@@ -362,8 +371,8 @@ export default function MasterFleetRosterPage() {
 
         <div className="flex items-center gap-2">
           <button
-            onClick={() => {
-              if (confirm("Are you sure you want to clear all stored vehicle roster data? You will be able to upload your fresh vehicles clean.")) {
+            onClick={async () => {
+              if (await showConfirm("Are you sure you want to clear all stored vehicle roster data? You will be able to upload your fresh vehicles clean.")) {
                 localStorage.removeItem("user_uploaded_fleet");
                 setVehicles([]);
               }
@@ -526,10 +535,10 @@ export default function MasterFleetRosterPage() {
 
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => {
+                      onClick={async () => {
                         const currentFeatured = vehicles.filter(item => item.isFeatured);
                         if (!v.isFeatured && currentFeatured.length >= 3) {
-                          alert("Maximum 3 vehicles can be featured on the homepage showcase. Please unstar a vehicle first.");
+                          await showAlert("Maximum 3 vehicles can be featured on the homepage showcase. Please unstar a vehicle first.");
                           return;
                         }
                         const newFeaturedState = !v.isFeatured;

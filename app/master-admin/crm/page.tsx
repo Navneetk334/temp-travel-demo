@@ -33,6 +33,7 @@ import {
 import Portal from "@/components/shared/portal";
 import LocationInput from "@/components/shared/location-input";
 import { extractLeadVehicleRequirements } from "@/components/admin/lead-dispatch-modal";
+import { useDialog } from "@/app/components/DialogProvider";
 
 const SEDAN_CLASSES = ["Compact", "Executive", "Premium Executive", "Luxury"];
 const SUV_CLASSES = ["Subcompact/Urban", "Mid-Premium", "Premium", "Luxury"];
@@ -47,11 +48,14 @@ export default function MasterOmnichannelCRMPage() {
 
   // Dispatch Modal States
   const [dispatchModalLead, setDispatchModalLead] = useState<any | null>(null);
+  const [whatsappModalData, setWhatsappModalData] = useState<any | null>(null);
   const [dispatchedSuccess, setDispatchedSuccess] = useState<any | null>(null);
   const [availableVehicles, setAvailableVehicles] = useState<any[]>([]);
   const [availableDrivers, setAvailableDrivers] = useState<any[]>([]);
   const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
   const [classFilter, setClassFilter] = useState<string>("ALL");
+
+  const { showConfirm } = useDialog();
 
   // Dispatch Form State
   const [dispatchForm, setDispatchForm] = useState({
@@ -415,9 +419,9 @@ export default function MasterOmnichannelCRMPage() {
     localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(updated));
   };
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (selectedLeadIds.length === 0) return;
-    if (confirm(`Are you sure you want to delete ${selectedLeadIds.length} selected lead(s)?`)) {
+    if (await showConfirm(`Are you sure you want to delete ${selectedLeadIds.length} selected lead(s)?`)) {
       const updated = leads.filter(l => !selectedLeadIds.includes(l.id));
       setLeads(updated);
       setSelectedLeadIds([]);

@@ -21,6 +21,7 @@ import {
   RefreshCw
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
+import { useDialog } from "@/app/components/DialogProvider";
 
 // Category to Class Mapping Hierarchy
 const CLASS_OPTIONS: Record<string, string[]> = {
@@ -54,6 +55,8 @@ export default function MasterDriversPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const [drivers, setDrivers] = useState<any[]>([]);
+
+  const { showAlert, showConfirm } = useDialog();
 
   // Complete Form State with Photo Preview & DOB Age Calculation
   const [formData, setFormData] = useState({
@@ -185,7 +188,7 @@ export default function MasterDriversPage() {
     e.preventDefault();
 
     if (formData.accountNumber !== formData.confirmAccountNumber) {
-      alert("Bank Account Number and Confirm Account Number do not match!");
+      await showAlert("Bank Account Number and Confirm Account Number do not match!");
       return;
     }
 
@@ -291,8 +294,8 @@ export default function MasterDriversPage() {
     setShowAddModal(false);
   };
 
-  const handleDeleteDriver = (drv: any) => {
-    const confirmDel = confirm(`Are you sure you want to remove driver ${drv.name}?`);
+  const handleDeleteDriver = async (drv: any) => {
+    const confirmDel = await showConfirm(`Are you sure you want to remove driver ${drv.name}?`);
     if (confirmDel) {
       const updated = drivers.filter(d => d.id !== drv.id);
       setDrivers(updated);

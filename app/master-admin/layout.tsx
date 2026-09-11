@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { DialogProvider } from "@/app/components/DialogProvider";
 import {
   LayoutDashboard,
   Radio,
@@ -249,378 +250,380 @@ export default function MasterAdminLayout({
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 flex font-sans selection:bg-amber-500 selection:text-slate-950">
-      {/* 1. Master Desktop Sidebar Panel (Fixed Left) */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-56 lg:fixed lg:inset-y-0 bg-slate-900/95 backdrop-blur-2xl border-r border-amber-500/20 z-40 shrink-0 shadow-2xl">
-        {/* Brand Header */}
-        <div className="h-14 px-3 border-b border-amber-500/20 flex items-center justify-center relative bg-gradient-to-b from-amber-500/10 via-transparent to-transparent">
-          <Link href="/master-admin" className="w-full h-full flex items-center justify-center group" title="Master Admin Home">
-            <img
-              src="/images/logo.png"
-              alt="TEMP TRAVEL"
-              className="max-h-10 w-auto max-w-[190px] object-contain mx-auto group-hover:scale-105 transition-transform drop-shadow-[0_4px_12px_rgba(245,158,11,0.3)]"
-            />
-          </Link>
-        </div>
+    <DialogProvider>
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-amber-500/30 selection:text-amber-200">
+        {/* 1. Master Desktop Sidebar Panel (Fixed Left) */}
+        <aside className="hidden lg:flex lg:flex-col lg:w-56 lg:fixed lg:inset-y-0 bg-slate-900/95 backdrop-blur-2xl border-r border-amber-500/20 z-40 shrink-0 shadow-2xl">
+          {/* Brand Header */}
+          <div className="h-14 px-3 border-b border-amber-500/20 flex items-center justify-center relative bg-gradient-to-b from-amber-500/10 via-transparent to-transparent">
+            <Link href="/master-admin" className="w-full h-full flex items-center justify-center group" title="Master Admin Home">
+              <img
+                src="/images/logo.png"
+                alt="TEMP TRAVEL"
+                className="max-h-10 w-auto max-w-[190px] object-contain mx-auto group-hover:scale-105 transition-transform drop-shadow-[0_4px_12px_rgba(245,158,11,0.3)]"
+              />
+            </Link>
+          </div>
 
-        {/* Navigation Links */}
-        <nav className="flex-1 px-2.5 py-3 space-y-1 overflow-y-auto">
-          {navItems.map((item) => {
-            const Icon = item.icon;
+          {/* Navigation Links */}
+          <nav className="flex-1 px-2.5 py-3 space-y-1 overflow-y-auto">
+            {navItems.map((item) => {
+              const Icon = item.icon;
 
-            if (item.isParent) {
-              const isSubActive = pathname.startsWith("/master-admin/blog");
+              if (item.isParent) {
+                const isSubActive = pathname.startsWith("/master-admin/blog");
+                return (
+                  <div key={item.name} className="space-y-1">
+                    <button
+                      type="button"
+                      onClick={() => setBlogCmsOpen(!blogCmsOpen)}
+                      className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-bold tracking-wide transition-all duration-200 group cursor-pointer ${isSubActive
+                          ? "bg-amber-500/15 text-amber-300 border border-amber-500/30"
+                          : "text-slate-300 hover:text-white hover:bg-white/5"
+                        }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Icon className={`w-3.5 h-3.5 ${isSubActive ? "text-amber-400" : "text-amber-400 group-hover:scale-110"} transition-transform`} />
+                        <span>{item.name}</span>
+                      </div>
+                      <ChevronRight className={`w-3.5 h-3.5 text-amber-400 transition-transform duration-200 ${blogCmsOpen ? "rotate-90" : ""}`} />
+                    </button>
+
+                    {blogCmsOpen && (
+                      <div className="pl-3 pr-1 py-1 space-y-1 border-l-2 border-amber-500/30 ml-3.5">
+                        {item.subItems?.map((sub) => {
+                          const SubIcon = sub.icon;
+                          const isSubItemActive = pathname === sub.href;
+                          return (
+                            <Link
+                              key={sub.name}
+                              href={sub.href}
+                              className={`flex items-center justify-between px-2 py-1.5 rounded-lg text-[11px] font-bold tracking-wide transition-all ${isSubItemActive
+                                  ? "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black shadow-sm"
+                                  : "text-slate-400 hover:text-slate-100 hover:bg-white/5"
+                                }`}
+                            >
+                              <div className="flex items-center gap-1.5">
+                                <SubIcon className={`w-3 h-3 ${isSubItemActive ? "text-slate-950" : "text-amber-400"}`} />
+                                <span>{sub.name}</span>
+                              </div>
+                              {isSubItemActive && <ChevronRight className="w-2.5 h-2.5 text-slate-950" />}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              const isActive = pathname === item.href;
               return (
-                <div key={item.name} className="space-y-1">
-                  <button
-                    type="button"
-                    onClick={() => setBlogCmsOpen(!blogCmsOpen)}
-                    className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-bold tracking-wide transition-all duration-200 group cursor-pointer ${isSubActive
-                        ? "bg-amber-500/15 text-amber-300 border border-amber-500/30"
-                        : "text-slate-300 hover:text-white hover:bg-white/5"
-                      }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <Icon className={`w-3.5 h-3.5 ${isSubActive ? "text-amber-400" : "text-amber-400 group-hover:scale-110"} transition-transform`} />
-                      <span>{item.name}</span>
-                    </div>
-                    <ChevronRight className={`w-3.5 h-3.5 text-amber-400 transition-transform duration-200 ${blogCmsOpen ? "rotate-90" : ""}`} />
-                  </button>
-
-                  {blogCmsOpen && (
-                    <div className="pl-3 pr-1 py-1 space-y-1 border-l-2 border-amber-500/30 ml-3.5">
-                      {item.subItems?.map((sub) => {
-                        const SubIcon = sub.icon;
-                        const isSubItemActive = pathname === sub.href;
-                        return (
-                          <Link
-                            key={sub.name}
-                            href={sub.href}
-                            className={`flex items-center justify-between px-2 py-1.5 rounded-lg text-[11px] font-bold tracking-wide transition-all ${isSubItemActive
-                                ? "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black shadow-sm"
-                                : "text-slate-400 hover:text-slate-100 hover:bg-white/5"
-                              }`}
-                          >
-                            <div className="flex items-center gap-1.5">
-                              <SubIcon className={`w-3 h-3 ${isSubItemActive ? "text-slate-950" : "text-amber-400"}`} />
-                              <span>{sub.name}</span>
-                            </div>
-                            {isSubItemActive && <ChevronRight className="w-2.5 h-2.5 text-slate-950" />}
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
+                <Link
+                  key={item.name}
+                  href={item.href!}
+                  className={`flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-bold tracking-wide transition-all duration-200 group ${isActive
+                      ? "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md shadow-amber-500/20 font-black"
+                      : "text-slate-300 hover:text-white hover:bg-white/5"
+                    }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Icon className={`w-3.5 h-3.5 ${isActive ? "text-slate-950" : "text-amber-400 group-hover:scale-110"} transition-transform`} />
+                    <span>{item.name}</span>
+                  </div>
+                  {isActive && <ChevronRight className="w-3 h-3 text-slate-950" />}
+                </Link>
               );
-            }
+            })}
+          </nav>
 
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.name}
-                href={item.href!}
-                className={`flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-bold tracking-wide transition-all duration-200 group ${isActive
-                    ? "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md shadow-amber-500/20 font-black"
-                    : "text-slate-300 hover:text-white hover:bg-white/5"
-                  }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Icon className={`w-3.5 h-3.5 ${isActive ? "text-slate-950" : "text-amber-400 group-hover:scale-110"} transition-transform`} />
-                  <span>{item.name}</span>
-                </div>
-                {isActive && <ChevronRight className="w-3 h-3 text-slate-950" />}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* System Telemetry & Logout */}
-        <div className="p-2.5 border-t border-amber-500/20 bg-slate-950/80 space-y-2">
-          <div className="flex items-center justify-between text-[9px] font-bold text-slate-400">
-            <div className="flex items-center gap-1.5 text-emerald-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>SYSTEM ONLINE</span>
-            </div>
-            <span className="font-mono text-slate-500">v2.5 HQ</span>
-          </div>
-
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white border border-rose-500/20 hover:border-rose-500 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm"
-            title="Sign Out of Master Admin"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Sign Out</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* 2. Main Content & Right Fixed Notification Wrapper */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-56 xl:pr-72 overflow-x-hidden min-h-screen">
-        {/* Header Toolbar */}
-        <header className="h-14 bg-slate-900/80 backdrop-blur-xl border-b border-amber-500/20 flex items-center justify-between px-4 sm:px-5 lg:px-6 sticky top-0 z-30 shadow-lg">
-          <button
-            onClick={() => setMobileOpen(true)}
-            className="lg:hidden p-1.5 text-slate-400 hover:text-amber-400 rounded-lg hover:bg-white/5"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-
-          {/* Active Breadcrumb / Badge */}
-          <div className="hidden sm:flex items-center gap-2.5">
-            <span className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 rounded-full">
-              <Sparkles className="w-3 h-3" />
-              <span>TEMP TRAVEL MASTER HQ</span>
-            </span>
-            <span className="text-slate-600 text-xs">&bull;</span>
-            <span className="text-slate-400 text-xs font-semibold">
-              Real-Time Operational Telemetry & Compliance
-            </span>
-          </div>
-
-          {/* Controls: Telemetry indicator & Logout */}
-          <div className="flex items-center gap-2.5 ml-auto">
-            <div className="hidden md:flex items-center gap-1.5 bg-slate-950 border border-amber-500/20 px-2.5 py-1 rounded-lg text-xs font-bold text-slate-300">
-              <Activity className="w-3 h-3 text-emerald-400 animate-pulse" />
-              <span>Telemetry Synced</span>
+          {/* System Telemetry & Logout */}
+          <div className="p-2.5 border-t border-amber-500/20 bg-slate-950/80 space-y-2">
+            <div className="flex items-center justify-between text-[9px] font-bold text-slate-400">
+              <div className="flex items-center gap-1.5 text-emerald-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>SYSTEM ONLINE</span>
+              </div>
+              <span className="font-mono text-slate-500">v2.5 HQ</span>
             </div>
 
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 bg-slate-950 hover:bg-rose-500 text-slate-300 hover:text-white border border-white/10 hover:border-rose-500 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm"
-              title="Sign Out of Master Control Center"
+              className="w-full flex items-center justify-center gap-2 px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white border border-rose-500/20 hover:border-rose-500 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm"
+              title="Sign Out of Master Admin"
             >
-              <LogOut className="w-3.5 h-3.5 text-rose-400 hover:text-white" />
-              <span className="hidden sm:inline">Sign Out</span>
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Sign Out</span>
             </button>
           </div>
-        </header>
+        </aside>
 
-        {/* Page Content */}
-        <main className="flex-1 p-3.5 sm:p-5 lg:p-6 overflow-y-auto">
-          {children}
-        </main>
-      </div>
-
-      {/* 3. FIXED RIGHT-SIDE MASTER NOTIFICATION SIDEBAR PANEL */}
-      <aside className="hidden xl:flex xl:flex-col xl:w-72 xl:fixed xl:right-0 xl:inset-y-0 bg-slate-900/95 backdrop-blur-2xl border-l border-amber-500/20 z-40 shrink-0 shadow-2xl">
-        {/* Right Panel Header */}
-        <div className="h-14 px-4 border-b border-amber-500/20 flex items-center justify-between gap-2 bg-gradient-to-b from-amber-500/10 via-transparent to-transparent">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
-            <h3 className="font-black text-slate-100 text-xs tracking-wider uppercase truncate">
-              Notifications
-            </h3>
-          </div>
-          <span className="text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2.5 py-0.5 rounded-full font-mono whitespace-nowrap shrink-0">
-            {expiryAlerts.length + birthdayAlerts.length} Alerts
-          </span>
-        </div>
-
-        {/* Notifications Scroll Container */}
-        <div className="flex-1 px-4 py-5 space-y-6 overflow-y-auto">
-          {/* Section 1: Document Expiries (30 Days Warning) */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-[11px] font-black uppercase text-amber-400 tracking-wider">
-              <span className="flex items-center gap-1.5">
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-400" /> 30-Day Document Expiries
-              </span>
-              <span className="font-mono text-slate-500">{expiryAlerts.length}</span>
-            </div>
-
-            {expiryAlerts.length === 0 ? (
-              <div className="bg-slate-950 p-4 rounded-xl border border-white/5 text-center text-xs text-slate-500 italic">
-                All vehicle & driver compliance documents are 100% valid.
-              </div>
-            ) : (
-              <div className="space-y-2.5">
-                {expiryAlerts.map((exp, idx) => {
-                  const isUrgent = exp.daysLeft <= 7;
-                  return (
-                    <div
-                      key={idx}
-                      className={`p-3 rounded-xl border transition-all text-xs space-y-1 ${isUrgent
-                        ? "bg-rose-500/10 border-rose-500/40 text-rose-200"
-                        : "bg-amber-500/10 border-amber-500/30 text-amber-200"
-                        }`}
-                    >
-                      <div className="flex justify-between items-start font-bold">
-                        <span className="leading-tight text-slate-100">{exp.title}</span>
-                        <span
-                          className={`text-[9px] font-black font-mono px-2 py-0.5 rounded-full uppercase shrink-0 ${exp.daysLeft < 0
-                            ? "bg-rose-500 text-white"
-                            : exp.daysLeft <= 7
-                              ? "bg-rose-500/20 text-rose-300 border border-rose-500/40"
-                              : "bg-amber-500/20 text-amber-300 border border-amber-500/40"
-                            }`}
-                        >
-                          {exp.daysLeft < 0
-                            ? "EXPIRED"
-                            : exp.daysLeft === 0
-                              ? "EXPIRES TODAY"
-                              : `${exp.daysLeft} DAYS LEFT`}
-                        </span>
-                      </div>
-                      <div className="text-[10px] font-mono text-slate-400">{exp.subtitle}</div>
-                      <div className="text-[10px] font-mono text-slate-500 pt-1 border-t border-white/5 flex justify-between">
-                        <span>Expiry Date:</span>
-                        <span className="font-bold text-slate-300">{exp.date}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Section 2: Birthday Celebrations (Drivers & Office Staff) */}
-          <div className="space-y-3 pt-4 border-t border-white/10">
-            <div className="flex items-center justify-between text-[11px] font-black uppercase text-amber-400 tracking-wider">
-              <span className="flex items-center gap-1.5">
-                <Cake className="w-3.5 h-3.5 text-amber-400" /> Birthday Celebrations
-              </span>
-              <span className="font-mono text-slate-500">{birthdayAlerts.length}</span>
-            </div>
-
-            {birthdayAlerts.length === 0 ? (
-              <div className="bg-slate-950 p-4 rounded-xl border border-white/5 text-center text-xs text-slate-500 italic">
-                No birthdays scheduled for today or this week.
-              </div>
-            ) : (
-              <div className="space-y-2.5">
-                {birthdayAlerts.map((bday, idx) => (
-                  <div
-                    key={idx}
-                    className="p-3 bg-gradient-to-r from-amber-500/10 to-amber-600/10 border border-amber-500/30 rounded-xl text-xs space-y-1"
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="font-extrabold text-slate-100">{bday.name}</span>
-                      {bday.isToday && (
-                        <span className="text-[9px] font-black bg-amber-500 text-slate-950 px-2 py-0.5 rounded-full uppercase tracking-wider animate-pulse">
-                          🎉 TODAY!
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-[10px] font-mono text-amber-400 font-bold">{bday.role}</div>
-                    {bday.age !== null && (
-                      <div className="text-[10px] text-slate-400 font-mono flex items-center gap-1">
-                        <Calendar className="w-3 h-3 text-slate-500" />
-                        <span>Turning {bday.age + 1} Years Old ({bday.dob})</span>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </aside>
-
-      {/* Mobile Drawer Navigation */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 flex lg:hidden bg-black/80 backdrop-blur-md">
-          <div className="bg-slate-900 w-72 p-6 relative flex flex-col justify-between h-full border-r border-amber-500/30">
+        {/* 2. Main Content & Right Fixed Notification Wrapper */}
+        <div className="flex-1 flex flex-col min-w-0 lg:pl-56 xl:pr-72 overflow-x-hidden min-h-screen">
+          {/* Header Toolbar */}
+          <header className="h-14 bg-slate-900/80 backdrop-blur-xl border-b border-amber-500/20 flex items-center justify-between px-4 sm:px-5 lg:px-6 sticky top-0 z-30 shadow-lg">
             <button
-              onClick={() => setMobileOpen(false)}
-              className="absolute top-6 right-6 p-1.5 bg-slate-950 border border-white/10 rounded-lg text-slate-400 hover:text-white"
+              onClick={() => setMobileOpen(true)}
+              className="lg:hidden p-1.5 text-slate-400 hover:text-amber-400 rounded-lg hover:bg-white/5"
             >
-              <X className="w-5 h-5" />
+              <Menu className="w-5 h-5" />
             </button>
 
-            <div className="space-y-6 mt-4">
-              <div className="flex items-center justify-center">
-                <img
-                  src="/images/logo.png"
-                  alt="TEMP TRAVEL"
-                  className="h-[50px] w-auto object-contain mx-auto"
-                />
+            {/* Active Breadcrumb / Badge */}
+            <div className="hidden sm:flex items-center gap-2.5">
+              <span className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 rounded-full">
+                <Sparkles className="w-3 h-3" />
+                <span>TEMP TRAVEL MASTER HQ</span>
+              </span>
+              <span className="text-slate-600 text-xs">&bull;</span>
+              <span className="text-slate-400 text-xs font-semibold">
+                Real-Time Operational Telemetry & Compliance
+              </span>
+            </div>
+
+            {/* Controls: Telemetry indicator & Logout */}
+            <div className="flex items-center gap-2.5 ml-auto">
+              <div className="hidden md:flex items-center gap-1.5 bg-slate-950 border border-amber-500/20 px-2.5 py-1 rounded-lg text-xs font-bold text-slate-300">
+                <Activity className="w-3 h-3 text-emerald-400 animate-pulse" />
+                <span>Telemetry Synced</span>
               </div>
 
-              <nav className="space-y-1.5 overflow-y-auto max-h-[70vh]">
-                {navItems.map((item) => {
-                  const Icon = item.icon;
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-1.5 bg-slate-950 hover:bg-rose-500 text-slate-300 hover:text-white border border-white/10 hover:border-rose-500 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm"
+                title="Sign Out of Master Control Center"
+              >
+                <LogOut className="w-3.5 h-3.5 text-rose-400 hover:text-white" />
+                <span className="hidden sm:inline">Sign Out</span>
+              </button>
+            </div>
+          </header>
 
-                  if (item.isParent) {
-                    const isSubActive = pathname.startsWith("/master-admin/blog");
+          {/* Page Content */}
+          <main className="flex-1 p-3.5 sm:p-5 lg:p-6 overflow-y-auto">
+            {children}
+          </main>
+        </div>
+
+        {/* 3. FIXED RIGHT-SIDE MASTER NOTIFICATION SIDEBAR PANEL */}
+        <aside className="hidden xl:flex xl:flex-col xl:w-72 xl:fixed xl:right-0 xl:inset-y-0 bg-slate-900/95 backdrop-blur-2xl border-l border-amber-500/20 z-40 shrink-0 shadow-2xl">
+          {/* Right Panel Header */}
+          <div className="h-14 px-4 border-b border-amber-500/20 flex items-center justify-between gap-2 bg-gradient-to-b from-amber-500/10 via-transparent to-transparent">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
+              <h3 className="font-black text-slate-100 text-xs tracking-wider uppercase truncate">
+                Notifications
+              </h3>
+            </div>
+            <span className="text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2.5 py-0.5 rounded-full font-mono whitespace-nowrap shrink-0">
+              {expiryAlerts.length + birthdayAlerts.length} Alerts
+            </span>
+          </div>
+
+          {/* Notifications Scroll Container */}
+          <div className="flex-1 px-4 py-5 space-y-6 overflow-y-auto">
+            {/* Section 1: Document Expiries (30 Days Warning) */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-[11px] font-black uppercase text-amber-400 tracking-wider">
+                <span className="flex items-center gap-1.5">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-400" /> 30-Day Document Expiries
+                </span>
+                <span className="font-mono text-slate-500">{expiryAlerts.length}</span>
+              </div>
+
+              {expiryAlerts.length === 0 ? (
+                <div className="bg-slate-950 p-4 rounded-xl border border-white/5 text-center text-xs text-slate-500 italic">
+                  All vehicle & driver compliance documents are 100% valid.
+                </div>
+              ) : (
+                <div className="space-y-2.5">
+                  {expiryAlerts.map((exp, idx) => {
+                    const isUrgent = exp.daysLeft <= 7;
                     return (
-                      <div key={item.name} className="space-y-1">
-                        <button
-                          type="button"
-                          onClick={() => setBlogCmsOpen(!blogCmsOpen)}
-                          className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all ${isSubActive
-                              ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-                              : "text-slate-300 hover:bg-white/5"
-                            }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <Icon className="w-4.5 h-4.5 text-amber-400" />
-                            <span>{item.name}</span>
-                          </div>
-                          <ChevronRight className={`w-4 h-4 text-amber-400 transition-transform ${blogCmsOpen ? "rotate-90" : ""}`} />
-                        </button>
-
-                        {blogCmsOpen && (
-                          <div className="pl-4 pr-1 py-1 space-y-1 border-l-2 border-amber-500/30 ml-4">
-                            {item.subItems?.map((sub) => {
-                              const SubIcon = sub.icon;
-                              const isSubItemActive = pathname === sub.href;
-                              return (
-                                <Link
-                                  key={sub.name}
-                                  href={sub.href}
-                                  onClick={() => setMobileOpen(false)}
-                                  className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition-all ${isSubItemActive
-                                      ? "bg-amber-500 text-slate-950 font-black"
-                                      : "text-slate-400 hover:text-slate-100 hover:bg-white/5"
-                                    }`}
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <SubIcon className="w-3.5 h-3.5" />
-                                    <span>{sub.name}</span>
-                                  </div>
-                                  {isSubItemActive && <ChevronRight className="w-3 h-3" />}
-                                </Link>
-                              );
-                            })}
-                          </div>
-                        )}
+                      <div
+                        key={idx}
+                        className={`p-3 rounded-xl border transition-all text-xs space-y-1 ${isUrgent
+                          ? "bg-rose-500/10 border-rose-500/40 text-rose-200"
+                          : "bg-amber-500/10 border-amber-500/30 text-amber-200"
+                          }`}
+                      >
+                        <div className="flex justify-between items-start font-bold">
+                          <span className="leading-tight text-slate-100">{exp.title}</span>
+                          <span
+                            className={`text-[9px] font-black font-mono px-2 py-0.5 rounded-full uppercase shrink-0 ${exp.daysLeft < 0
+                              ? "bg-rose-500 text-white"
+                              : exp.daysLeft <= 7
+                                ? "bg-rose-500/20 text-rose-300 border border-rose-500/40"
+                                : "bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                              }`}
+                          >
+                            {exp.daysLeft < 0
+                              ? "EXPIRED"
+                              : exp.daysLeft === 0
+                                ? "EXPIRES TODAY"
+                                : `${exp.daysLeft} DAYS LEFT`}
+                          </span>
+                        </div>
+                        <div className="text-[10px] font-mono text-slate-400">{exp.subtitle}</div>
+                        <div className="text-[10px] font-mono text-slate-500 pt-1 border-t border-white/5 flex justify-between">
+                          <span>Expiry Date:</span>
+                          <span className="font-bold text-slate-300">{exp.date}</span>
+                        </div>
                       </div>
                     );
-                  }
+                  })}
+                </div>
+              )}
+            </div>
 
-                  const isActive = pathname === item.href;
-                  return (
-                    <Link
-                      key={item.name}
-                      href={item.href!}
-                      onClick={() => setMobileOpen(false)}
-                      className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-bold transition-all ${isActive
-                          ? "bg-amber-500 text-slate-950 font-black"
-                          : "text-slate-300 hover:bg-white/5"
-                        }`}
+            {/* Section 2: Birthday Celebrations (Drivers & Office Staff) */}
+            <div className="space-y-3 pt-4 border-t border-white/10">
+              <div className="flex items-center justify-between text-[11px] font-black uppercase text-amber-400 tracking-wider">
+                <span className="flex items-center gap-1.5">
+                  <Cake className="w-3.5 h-3.5 text-amber-400" /> Birthday Celebrations
+                </span>
+                <span className="font-mono text-slate-500">{birthdayAlerts.length}</span>
+              </div>
+
+              {birthdayAlerts.length === 0 ? (
+                <div className="bg-slate-950 p-4 rounded-xl border border-white/5 text-center text-xs text-slate-500 italic">
+                  No birthdays scheduled for today or this week.
+                </div>
+              ) : (
+                <div className="space-y-2.5">
+                  {birthdayAlerts.map((bday, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3 bg-gradient-to-r from-amber-500/10 to-amber-600/10 border border-amber-500/30 rounded-xl text-xs space-y-1"
                     >
-                      <Icon className="w-4.5 h-4.5" />
-                      <span>{item.name}</span>
-                    </Link>
-                  );
-                })}
-              </nav>
+                      <div className="flex justify-between items-center">
+                        <span className="font-extrabold text-slate-100">{bday.name}</span>
+                        {bday.isToday && (
+                          <span className="text-[9px] font-black bg-amber-500 text-slate-950 px-2 py-0.5 rounded-full uppercase tracking-wider animate-pulse">
+                            🎉 TODAY!
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[10px] font-mono text-amber-400 font-bold">{bday.role}</div>
+                      {bday.age !== null && (
+                        <div className="text-[10px] text-slate-400 font-mono flex items-center gap-1">
+                          <Calendar className="w-3 h-3 text-slate-500" />
+                          <span>Turning {bday.age + 1} Years Old ({bday.dob})</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </aside>
 
-              {/* Mobile Drawer Logout */}
-              <div className="pt-3 border-t border-white/10 mt-auto">
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white border border-rose-500/30 rounded-xl text-xs font-bold transition-all cursor-pointer"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Sign Out</span>
-                </button>
+        {/* Mobile Drawer Navigation */}
+        {mobileOpen && (
+          <div className="fixed inset-0 z-50 flex lg:hidden bg-black/80 backdrop-blur-md">
+            <div className="bg-slate-900 w-72 p-6 relative flex flex-col justify-between h-full border-r border-amber-500/30">
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="absolute top-6 right-6 p-1.5 bg-slate-950 border border-white/10 rounded-lg text-slate-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="space-y-6 mt-4">
+                <div className="flex items-center justify-center">
+                  <img
+                    src="/images/logo.png"
+                    alt="TEMP TRAVEL"
+                    className="h-[50px] w-auto object-contain mx-auto"
+                  />
+                </div>
+
+                <nav className="space-y-1.5 overflow-y-auto max-h-[70vh]">
+                  {navItems.map((item) => {
+                    const Icon = item.icon;
+
+                    if (item.isParent) {
+                      const isSubActive = pathname.startsWith("/master-admin/blog");
+                      return (
+                        <div key={item.name} className="space-y-1">
+                          <button
+                            type="button"
+                            onClick={() => setBlogCmsOpen(!blogCmsOpen)}
+                            className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all ${isSubActive
+                                ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                                : "text-slate-300 hover:bg-white/5"
+                              }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <Icon className="w-4.5 h-4.5 text-amber-400" />
+                              <span>{item.name}</span>
+                            </div>
+                            <ChevronRight className={`w-4 h-4 text-amber-400 transition-transform ${blogCmsOpen ? "rotate-90" : ""}`} />
+                          </button>
+
+                          {blogCmsOpen && (
+                            <div className="pl-4 pr-1 py-1 space-y-1 border-l-2 border-amber-500/30 ml-4">
+                              {item.subItems?.map((sub) => {
+                                const SubIcon = sub.icon;
+                                const isSubItemActive = pathname === sub.href;
+                                return (
+                                  <Link
+                                    key={sub.name}
+                                    href={sub.href}
+                                    onClick={() => setMobileOpen(false)}
+                                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition-all ${isSubItemActive
+                                        ? "bg-amber-500 text-slate-950 font-black"
+                                        : "text-slate-400 hover:text-slate-100 hover:bg-white/5"
+                                      }`}
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <SubIcon className="w-3.5 h-3.5" />
+                                      <span>{sub.name}</span>
+                                    </div>
+                                    {isSubItemActive && <ChevronRight className="w-3 h-3" />}
+                                  </Link>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
+
+                    const isActive = pathname === item.href;
+                    return (
+                      <Link
+                        key={item.name}
+                        href={item.href!}
+                        onClick={() => setMobileOpen(false)}
+                        className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-bold transition-all ${isActive
+                            ? "bg-amber-500 text-slate-950 font-black"
+                            : "text-slate-300 hover:bg-white/5"
+                          }`}
+                      >
+                        <Icon className="w-4.5 h-4.5" />
+                        <span>{item.name}</span>
+                      </Link>
+                    );
+                  })}
+                </nav>
+
+                {/* Mobile Drawer Logout */}
+                <div className="pt-3 border-t border-white/10 mt-auto">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white border border-rose-500/30 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </DialogProvider>
   );
 }

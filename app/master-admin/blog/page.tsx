@@ -21,6 +21,7 @@ import {
 
 import { DEFAULT_BLOG_POSTS, DEFAULT_BLOG_CATEGORIES } from "@/lib/default-blogs";
 import Portal from "@/components/shared/portal";
+import { useDialog } from "@/app/components/DialogProvider";
 
 export default function MasterBlogCMSPage() {
   const [search, setSearch] = useState("");
@@ -145,8 +146,8 @@ export default function MasterBlogCMSPage() {
     setEditingArticle(null);
   };
 
-  const handleDeleteArticle = (id: string) => {
-    if (confirm("Are you sure you want to delete this blog article?")) {
+  const handleDeleteArticle = async (id: string) => {
+    if (await showConfirm("Are you sure you want to delete this blog article?")) {
       const updated = articles.filter(a => a.id !== id);
       setArticles(updated);
       localStorage.setItem("user_uploaded_blogs", JSON.stringify(updated));
@@ -166,6 +167,7 @@ export default function MasterBlogCMSPage() {
   );
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const { showConfirm } = useDialog();
 
   const handleSelectAll = () => {
     if (selectedIds.length === filteredArticles.length && filteredArticles.length > 0) {
@@ -181,9 +183,9 @@ export default function MasterBlogCMSPage() {
     );
   };
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (selectedIds.length === 0) return;
-    if (confirm(`Are you sure you want to delete ${selectedIds.length} selected blog article(s)?`)) {
+    if (await showConfirm(`Are you sure you want to delete ${selectedIds.length} selected blog article(s)?`)) {
       const updated = articles.filter(a => !selectedIds.includes(a.id));
       setArticles(updated);
       setSelectedIds([]);

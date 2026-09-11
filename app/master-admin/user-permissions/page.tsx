@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { ShieldCheck, Search, ShieldAlert, CheckCircle2 } from "lucide-react";
+import { useDialog } from "@/app/components/DialogProvider";
 
 export default function UserPermissionsPage() {
   const [staffList, setStaffList] = useState<any[]>([]);
@@ -9,6 +10,8 @@ export default function UserPermissionsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  const { showAlert } = useDialog();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,7 +61,7 @@ export default function UserPermissionsPage() {
       const data = await res.json();
       setStaffList(staffList.map((s) => (s.id === staffId ? data.staff : s)));
     } catch (err: any) {
-      alert("Error updating permissions: " + err.message);
+      await showAlert("Error updating permissions: " + err.message);
     } finally {
       setUpdatingId(null);
     }
