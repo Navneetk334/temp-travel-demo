@@ -110,7 +110,9 @@ export default function MasterOfficeStaffPage() {
 
   const openAddModal = () => {
     setEditingStaff(null);
+    const generatedEmpId = `EMP-${Math.floor(1000 + Math.random() * 9000)}`;
     setFormData({
+      employeeId: generatedEmpId,
       name: "",
       role: "MANAGER",
       dob: "1995-05-15",
@@ -135,6 +137,7 @@ export default function MasterOfficeStaffPage() {
   const openEditModal = (stf: any) => {
     setEditingStaff(stf);
     setFormData({
+      employeeId: stf.employeeId || `EMP-${Math.floor(1000 + Math.random() * 9000)}`,
       name: stf.name || "",
       role: stf.role || "Dispatch Manager",
       dob: stf.dob || "1995-05-15",
@@ -518,7 +521,18 @@ export default function MasterOfficeStaffPage() {
                 </div>
 
                 {/* Personal Info & System Access */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-slate-300 font-bold">Employee ID *</label>
+                    <input
+                      type="text"
+                      required
+                      readOnly
+                      value={formData.employeeId}
+                      className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-3.5 py-2.5 text-amber-400 focus:outline-none font-mono cursor-not-allowed"
+                    />
+                  </div>
+
                   <div className="space-y-1">
                     <label className="text-slate-300 font-bold">Staff Full Name *</label>
                     <input
@@ -562,9 +576,9 @@ export default function MasterOfficeStaffPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                   <div className="space-y-1">
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center h-6">
                       <label className="text-slate-300 font-bold">Date of Birth *</label>
                       {computedAge !== null && (
                         <span className="text-[11px] font-black text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
@@ -582,7 +596,9 @@ export default function MasterOfficeStaffPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Mobile Number *</label>
+                    <div className="flex justify-between items-center h-6">
+                      <label className="text-slate-300 font-bold">Mobile Number *</label>
+                    </div>
                     <input
                       type="text"
                       required
@@ -594,7 +610,9 @@ export default function MasterOfficeStaffPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Email Address *</label>
+                    <div className="flex justify-between items-center h-6">
+                      <label className="text-slate-300 font-bold">Email Address *</label>
+                    </div>
                     <input
                       type="email"
                       required

@@ -125,7 +125,9 @@ export default function MasterDriversPage() {
 
   const openAddModal = () => {
     setEditingDriver(null);
+    const generatedEmpId = `EMP-${Math.floor(1000 + Math.random() * 9000)}`;
     setFormData({
+      employeeId: generatedEmpId,
       photoName: "",
       photoUrl: "",
       name: "",
@@ -153,6 +155,7 @@ export default function MasterDriversPage() {
   const openEditModal = (drv: any) => {
     setEditingDriver(drv);
     setFormData({
+      employeeId: drv.employeeId || `EMP-${Math.floor(1000 + Math.random() * 9000)}`,
       photoName: drv.photoName || "",
       photoUrl: drv.photoUrl || "",
       name: drv.name || "",
@@ -191,6 +194,7 @@ export default function MasterDriversPage() {
         if (d.id === editingDriver.id) {
           return {
             ...d,
+            employeeId: formData.employeeId,
             name: formData.name,
             dob: formData.dob,
             phone: formData.phone,
@@ -217,6 +221,7 @@ export default function MasterDriversPage() {
     } else {
       const created = {
         id: `DRV-${Date.now()}`,
+        employeeId: formData.employeeId,
         name: formData.name || "Commercial Driver",
         dob: formData.dob,
         phone: formData.phone || "9820001122",
@@ -526,9 +531,24 @@ export default function MasterDriversPage() {
               </div>
 
               {/* Personal Details & DOB Age Calculation */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                 <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">2. Driver Name *</label>
+                  <div className="flex items-center h-6">
+                    <label className="text-slate-300 font-bold">Employee ID *</label>
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    readOnly
+                    value={formData.employeeId}
+                    className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-3.5 py-2.5 text-amber-400 focus:outline-none font-mono cursor-not-allowed"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-center h-6">
+                    <label className="text-slate-300 font-bold">Driver Name *</label>
+                  </div>
                   <input
                     type="text"
                     required
@@ -540,8 +560,8 @@ export default function MasterDriversPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <div className="flex justify-between items-center">
-                    <label className="text-slate-300 font-bold">3. Date of Birth *</label>
+                  <div className="flex justify-between items-center h-6">
+                    <label className="text-slate-300 font-bold">Date of Birth *</label>
                     {computedAge !== null && (
                       <span className="text-[11px] font-black text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
                         {computedAge} Years
@@ -558,14 +578,16 @@ export default function MasterDriversPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-slate-300 font-bold">4. Mobile Number *</label>
+                  <div className="flex items-center h-6">
+                    <label className="text-slate-300 font-bold">Mobile Number *</label>
+                  </div>
                   <input
                     type="text"
                     required
                     placeholder="e.g. 9820112233"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                   />
                 </div>
               </div>
