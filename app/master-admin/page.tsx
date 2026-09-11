@@ -493,9 +493,11 @@ export default function MasterAdminDashboard() {
                       type="tel"
                       required
                       maxLength={10}
+                      pattern="\d{10}"
+                      title="Please enter a valid 10-digit mobile number"
                       placeholder="10-digit phone number"
                       value={dispatchForm.phone}
-                      onChange={(e) => setDispatchForm({ ...dispatchForm, phone: e.target.value.replace(/\D/g, "") })}
+                      onChange={(e) => setDispatchForm({ ...dispatchForm, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
                       className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold font-mono"
                     />
                   </div>

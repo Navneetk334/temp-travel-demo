@@ -58,7 +58,7 @@ export default function MasterOfficeStaffPage() {
   const [formData, setFormData] = useState({
     employeeId: "",
     name: "",
-    role: "Dispatch Manager",
+    role: "MANAGER",
     dob: "1995-05-15",
     phone: "",
     email: "",
@@ -142,7 +142,7 @@ export default function MasterOfficeStaffPage() {
     setFormData({
       employeeId: stf.employeeId || `EMP-${Math.floor(1000 + Math.random() * 9000)}`,
       name: stf.name || "",
-      role: stf.role || "Dispatch Manager",
+      role: stf.role || "MANAGER",
       dob: stf.dob || "1995-05-15",
       phone: stf.phone || "",
       email: stf.email || "",
@@ -556,7 +556,7 @@ export default function MasterOfficeStaffPage() {
                       className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400"
                     >
                       <option value="MANAGER">Manager</option>
-                      <option value="ADMIN">Admin</option>
+                      <option value="SUPER_ADMIN">Super Admin</option>
                       <option value="DISPATCHER">Dispatcher</option>
                     </select>
                   </div>
@@ -606,8 +606,11 @@ export default function MasterOfficeStaffPage() {
                       type="text"
                       required
                       placeholder="e.g. 9876543210"
+                      maxLength={10}
+                      pattern="\d{10}"
+                      title="Please enter a valid 10-digit mobile number"
                       value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                       className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                     />
                   </div>
@@ -640,8 +643,15 @@ export default function MasterOfficeStaffPage() {
                         type="text"
                         required
                         placeholder="e.g. 1122 3344 5566"
+                        maxLength={14}
+                        pattern="\d{4}\s\d{4}\s\d{4}"
+                        title="Please enter a valid 12-digit Aadhaar number format: XXXX XXXX XXXX"
                         value={formData.aadhaarNumber}
-                        onChange={(e) => setFormData({ ...formData, aadhaarNumber: e.target.value })}
+                        onChange={(e) => {
+                          let val = e.target.value.replace(/\D/g, '');
+                          val = val.replace(/(\d{4})/g, '$1 ').trim();
+                          setFormData({ ...formData, aadhaarNumber: val.slice(0, 14) });
+                        }}
                         className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                       />
                     </div>
@@ -664,8 +674,11 @@ export default function MasterOfficeStaffPage() {
                         type="text"
                         required
                         placeholder="e.g. ABCDE1234F"
+                        maxLength={10}
+                        pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}"
+                        title="Please enter a valid 10-character PAN number format: ABCDE1234F"
                         value={formData.panNumber}
-                        onChange={(e) => setFormData({ ...formData, panNumber: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, panNumber: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10) })}
                         className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono uppercase"
                       />
                     </div>

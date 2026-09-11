@@ -61,8 +61,8 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true, staff: newStaff });
-  } catch (error) {
+  } catch (error: any) {
     console.error("POST /api/admin/staff error:", error);
-    return NextResponse.json({ error: "Failed to create staff" }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Failed to create staff" }, { status: 500 });
   }
 }
