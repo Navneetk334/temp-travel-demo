@@ -112,8 +112,13 @@ export default function MasterDriversPage() {
         const res = await fetch("/api/admin/drivers");
         if (res.ok) {
           const apiList = await res.json();
-          if (Array.isArray(apiList) && apiList.length > 0) {
-            setDrivers(prev => (prev.length > 0 ? prev : apiList));
+          if (Array.isArray(apiList)) {
+            setDrivers(apiList);
+            try {
+              localStorage.setItem("user_uploaded_drivers", JSON.stringify(apiList));
+            } catch (e) {
+              console.error("Local storage quota exceeded");
+            }
           }
         }
       } catch (e) {
@@ -264,9 +269,9 @@ export default function MasterDriversPage() {
         console.error("Local storage quota exceeded or failed");
       }
 
-      // Sync to backend DB
+      let res;
       if (editingDriver) {
-        await fetch(`/api/admin/drivers/${editingDriver.id}`, {
+        res = await fetch(`/api/admin/drivers/${editingDriver.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -281,7 +286,7 @@ export default function MasterDriversPage() {
           })
         });
       } else {
-        await fetch("/api/admin/drivers", {
+        res = await fetch("/api/admin/drivers", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -295,6 +300,29 @@ export default function MasterDriversPage() {
             licenseNumber: formData.licenseNumber
           })
         });
+      }
+      
+      if (!res.ok) {
+        let errMsg = "Failed to save driver to database.";
+        if (res.status === 413) errMsg = "Photo is too large (exceeds 1MB limit). Please select a smaller image.";
+        else {
+          try {
+            const errData = await res.json();
+            if (errData.error) errMsg = errData.error;
+          } catch (e) {}
+        }
+        throw new Error(errMsg);
+      }
+      
+      const saved = await res.json();
+      
+      // Update local state with real DB id
+      const finalUpdated = updated.map(d => d.id === (editingDriver ? editingDriver.id : created.id) ? { ...d, id: saved.id } : d);
+      setDrivers(finalUpdated);
+      try {
+        localStorage.setItem("user_uploaded_drivers", JSON.stringify(finalUpdated));
+      } catch (e) {
+        console.error("Local storage quota exceeded");
       }
       
       setShowAddModal(false);
