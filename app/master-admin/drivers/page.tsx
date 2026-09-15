@@ -153,9 +153,9 @@ export default function MasterDriversPage() {
       accountNumber: "",
       confirmAccountNumber: "",
       ifscCode: "",
-      vehicleCategory: "Sedan",
-      vehicleClass: "Executive",
-      vehicleModel: "Maruti Suzuki Dzire"
+      vehicleCategory: "",
+      vehicleClass: "",
+      vehicleModel: ""
     });
     setShowAddModal(true);
   };
@@ -167,7 +167,7 @@ export default function MasterDriversPage() {
       photoName: drv.photoName || "",
       photoUrl: drv.photoUrl || "",
       name: drv.name || "",
-      dob: drv.dob || "1992-06-15",
+      dob: drv.dob || "",
       phone: drv.phone || "",
       aadhaarNumber: drv.aadhaarNumber || "",
       aadhaarDocName: drv.aadhaarDocName || "",
@@ -175,15 +175,15 @@ export default function MasterDriversPage() {
       panDocName: drv.panDocName || "",
       licenseNumber: drv.licenseNumber || "",
       licenseDocName: drv.licenseDocName || "",
-      licenseExpiry: drv.licenseExpiry || "2029-08-15",
-      bankName: drv.bankName || "HDFC Bank",
+      licenseExpiry: drv.licenseExpiry || "",
+      bankName: drv.bankName || "",
       accountHolderName: drv.accountHolderName || drv.name || "",
       accountNumber: drv.accountNumber || "",
       confirmAccountNumber: drv.accountNumber || "",
-      ifscCode: drv.ifscCode || "HDFC0000123",
-      vehicleCategory: drv.vehicleCategory || "Sedan",
-      vehicleClass: drv.vehicleClass || CLASS_OPTIONS[drv.vehicleCategory || "Sedan"]?.[0] || "Executive",
-      vehicleModel: drv.vehicleModel || "Maruti Suzuki Dzire"
+      ifscCode: drv.ifscCode || "",
+      vehicleCategory: drv.vehicleCategory || "",
+      vehicleClass: drv.vehicleClass || "",
+      vehicleModel: drv.vehicleModel || ""
     });
     setShowAddModal(true);
   };
@@ -822,6 +822,7 @@ export default function MasterDriversPage() {
                         onChange={(e) => handleCategoryChange(e.target.value)}
                         className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400"
                       >
+                        <option value="">-- Please Select --</option>
                         <option value="Sedan">Sedan</option>
                         <option value="SUV">SUV</option>
                       </select>
@@ -834,6 +835,7 @@ export default function MasterDriversPage() {
                         onChange={(e) => setFormData({ ...formData, vehicleClass: e.target.value })}
                         className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
                       >
+                        <option value="">-- Please Select --</option>
                         {(CLASS_OPTIONS[formData.vehicleCategory] || []).map((cls) => (
                           <option key={cls} value={cls}>
                             {cls}

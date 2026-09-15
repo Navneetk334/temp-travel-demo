@@ -121,7 +121,7 @@ export default function MasterOfficeStaffPage() {
     setFormData({
       employeeId: generatedEmpId,
       name: "",
-      role: "MANAGER",
+      role: "",
       dob: "",
       phone: "",
       email: "",
@@ -143,11 +143,10 @@ export default function MasterOfficeStaffPage() {
 
   const openEditModal = (stf: any) => {
     setEditingStaff(stf);
-    setFormData({
       employeeId: stf.employeeId || `EMP-${Date.now().toString().slice(-6)}${Math.floor(100 + Math.random() * 900)}`,
       name: stf.name || "",
-      role: stf.role || "MANAGER",
-      dob: stf.dob || "1995-05-15",
+      role: stf.role || "",
+      dob: stf.dob || "",
       phone: stf.phone || "",
       email: stf.email || "",
       photoName: stf.photoName || "",
@@ -157,11 +156,11 @@ export default function MasterOfficeStaffPage() {
       panNumber: stf.panNumber || "",
       panDocName: stf.panDocName || "",
       contractDocName: stf.contractDocName || "",
-      bankName: stf.bankName || "HDFC Bank",
+      bankName: stf.bankName || "",
       accountHolderName: stf.accountHolderName || stf.name || "",
       accountNumber: stf.accountNumber || "",
       confirmAccountNumber: stf.accountNumber || "",
-      ifscCode: stf.ifscCode || "HDFC0000123",
+      ifscCode: stf.ifscCode || "",
       departmentId: stf.departmentId || "",
       permissionProfileId: stf.permissionProfileId || ""
     });
@@ -571,6 +570,7 @@ export default function MasterOfficeStaffPage() {
                       onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                       className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400"
                     >
+                      <option value="">-- Please Select --</option>
                       <option value="MANAGER">Manager</option>
                       <option value="SUPER_ADMIN">Super Admin</option>
                       <option value="DISPATCHER">Dispatcher</option>
@@ -585,7 +585,7 @@ export default function MasterOfficeStaffPage() {
                       onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
                       className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-bold"
                     >
-                      <option value="">-- Select Department --</option>
+                      <option value="">-- Please Select --</option>
                       {departments.map((dept: any) => (
                         <option key={dept.id} value={dept.id}>{dept.name}</option>
                       ))}
