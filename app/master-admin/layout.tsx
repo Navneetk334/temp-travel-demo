@@ -96,11 +96,12 @@ export default function MasterAdminLayout({
       const expList: any[] = [];
       const bdayList: any[] = [];
 
-      // 1. Scan Vehicles
-      const savedFleet = localStorage.getItem("user_uploaded_fleet_vehicles") || localStorage.getItem("user_uploaded_fleet");
-      if (savedFleet) {
-        try {
-          const fleet = JSON.parse(savedFleet);
+      // 1. Scan Vehicles (From API)
+      try {
+        const fleetRes = await fetch("/api/fleet");
+        if (fleetRes.ok) {
+          const fleetData = await fleetRes.json();
+          const fleet = fleetData.vehicles || [];
           fleet.forEach((v: any) => {
             const reg = v.registrationNumber || v.model;
             // Insurance Expiry
@@ -126,14 +127,14 @@ export default function MasterAdminLayout({
               });
             }
             // All India Permit Expiry
-            const permitDays = daysUntilExpiry(v.permitExpiry);
+            const permitDays = daysUntilExpiry(v.permitExpiry || v.allIndiaPermitExpiry);
             if (permitDays !== null && permitDays <= 30) {
               expList.push({
                 type: "PERMIT",
                 title: `All India Permit Expiry: ${reg}`,
                 subtitle: `${v.make} ${v.model}`,
                 daysLeft: permitDays,
-                date: v.permitExpiry
+                date: v.permitExpiry || v.allIndiaPermitExpiry
               });
             }
             // PUC Expiry
@@ -141,16 +142,16 @@ export default function MasterAdminLayout({
             if (pucDays !== null && pucDays <= 30) {
               expList.push({
                 type: "PUC",
-                title: `PUC Cert Expiry: ${reg}`,
+                title: `PUC Expiry: ${reg}`,
                 subtitle: `${v.make} ${v.model}`,
                 daysLeft: pucDays,
                 date: v.pucExpiry
               });
             }
           });
-        } catch (e) {
-          console.error(e);
         }
+      } catch (e) {
+        console.error("Failed to fetch fleet for notifications:", e);
       }
 
       // 2. Scan Drivers (From API)
