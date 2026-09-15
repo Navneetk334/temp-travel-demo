@@ -77,7 +77,13 @@ export async function POST(req: NextRequest) {
       panNumber,
       dob,
       dateOfJoining,
-      licenseNumber
+      licenseNumber,
+      licenseExpiry,
+      employeeId,
+      bankName,
+      accountHolderName,
+      accountNumber,
+      ifscCode
     } = body;
 
     if (!name || !phone || !email) {
@@ -112,8 +118,14 @@ export async function POST(req: NextRequest) {
         aadhaarNumber: aadhaarNumber?.trim() || null,
         panNumber: panNumber?.trim()?.toUpperCase() || null,
         licenseNumber: licenseNumber?.trim()?.toUpperCase() || null,
-        dob: dob ? new Date(dob) : null,
+        licenseExpiry: licenseExpiry?.trim() || null,
+        dob: dob || null,
         dateOfJoining: dateOfJoining ? new Date(dateOfJoining) : new Date(),
+        employeeId: employeeId?.trim() || null,
+        bankName: bankName?.trim() || null,
+        accountHolderName: accountHolderName?.trim() || null,
+        accountNumber: accountNumber?.trim() || null,
+        ifscCode: ifscCode?.trim()?.toUpperCase() || null,
       },
       select: {
         id: true,
@@ -128,6 +140,12 @@ export async function POST(req: NextRequest) {
         dob: true,
         dateOfJoining: true,
         licenseNumber: true,
+        licenseExpiry: true,
+        employeeId: true,
+        bankName: true,
+        accountHolderName: true,
+        accountNumber: true,
+        ifscCode: true,
         createdAt: true,
       }
     });

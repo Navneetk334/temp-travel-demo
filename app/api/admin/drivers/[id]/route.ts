@@ -23,7 +23,13 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       panNumber,
       dob,
       dateOfJoining,
-      licenseNumber
+      licenseNumber,
+      licenseExpiry,
+      employeeId,
+      bankName,
+      accountHolderName,
+      accountNumber,
+      ifscCode
     } = body;
 
     const existingDriver = await prisma.user.findUnique({
@@ -43,8 +49,14 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (aadhaarNumber !== undefined) updateData.aadhaarNumber = aadhaarNumber ? aadhaarNumber.trim() : null;
     if (panNumber !== undefined) updateData.panNumber = panNumber ? panNumber.trim().toUpperCase() : null;
     if (licenseNumber !== undefined) updateData.licenseNumber = licenseNumber ? licenseNumber.trim().toUpperCase() : null;
-    if (dob !== undefined) updateData.dob = dob ? new Date(dob) : null;
+    if (licenseExpiry !== undefined) updateData.licenseExpiry = licenseExpiry ? licenseExpiry.trim() : null;
+    if (dob !== undefined) updateData.dob = dob || null;
     if (dateOfJoining !== undefined) updateData.dateOfJoining = dateOfJoining ? new Date(dateOfJoining) : null;
+    if (employeeId !== undefined) updateData.employeeId = employeeId ? employeeId.trim() : null;
+    if (bankName !== undefined) updateData.bankName = bankName ? bankName.trim() : null;
+    if (accountHolderName !== undefined) updateData.accountHolderName = accountHolderName ? accountHolderName.trim() : null;
+    if (accountNumber !== undefined) updateData.accountNumber = accountNumber ? accountNumber.trim() : null;
+    if (ifscCode !== undefined) updateData.ifscCode = ifscCode ? ifscCode.trim().toUpperCase() : null;
 
     if (password && password.trim()) {
       updateData.passwordHash = await bcrypt.hash(password.trim(), 10);
@@ -66,6 +78,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         dob: true,
         dateOfJoining: true,
         licenseNumber: true,
+        licenseExpiry: true,
+        employeeId: true,
+        bankName: true,
+        accountHolderName: true,
+        accountNumber: true,
+        ifscCode: true,
         updatedAt: true,
       }
     });
