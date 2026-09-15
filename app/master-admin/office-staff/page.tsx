@@ -766,8 +766,15 @@ export default function MasterOfficeStaffPage() {
                         placeholder="Repeat account number"
                         value={formData.confirmAccountNumber}
                         onChange={(e) => setFormData({ ...formData, confirmAccountNumber: e.target.value.replace(/\D/g, '') })}
-                        className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                        className={`w-full bg-slate-950 border rounded-xl px-3 py-2 text-slate-100 focus:outline-none font-mono ${
+                          formData.confirmAccountNumber && formData.accountNumber !== formData.confirmAccountNumber
+                            ? 'border-rose-500 focus:border-rose-500 ring-1 ring-rose-500'
+                            : 'border-white/10 focus:border-amber-400'
+                        }`}
                       />
+                      {formData.confirmAccountNumber && formData.accountNumber !== formData.confirmAccountNumber && (
+                        <p className="text-rose-500 text-[10px] font-bold">Account numbers do not match</p>
+                      )}
                     </div>
 
                     <div className="space-y-1">
