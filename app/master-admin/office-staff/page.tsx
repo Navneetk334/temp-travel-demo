@@ -113,7 +113,7 @@ export default function MasterOfficeStaffPage() {
 
   const openAddModal = () => {
     setEditingStaff(null);
-    const generatedEmpId = `EMP-${Math.floor(1000 + Math.random() * 9000)}`;
+    const generatedEmpId = `EMP-${Date.now().toString().slice(-6)}${Math.floor(100 + Math.random() * 900)}`;
     setFormData({
       employeeId: generatedEmpId,
       name: "",
@@ -140,7 +140,7 @@ export default function MasterOfficeStaffPage() {
   const openEditModal = (stf: any) => {
     setEditingStaff(stf);
     setFormData({
-      employeeId: stf.employeeId || `EMP-${Math.floor(1000 + Math.random() * 9000)}`,
+      employeeId: stf.employeeId || `EMP-${Date.now().toString().slice(-6)}${Math.floor(100 + Math.random() * 900)}`,
       name: stf.name || "",
       role: stf.role || "MANAGER",
       dob: stf.dob || "1995-05-15",
@@ -476,7 +476,7 @@ export default function MasterOfficeStaffPage() {
       {showAddModal && (
         <Portal>
           <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-            <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-4xl shadow-2xl space-y-6 relative text-slate-100 max-h-[90vh] overflow-y-auto">
+            <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-[95vw] md:w-[85vw] max-w-6xl shadow-2xl space-y-6 relative text-slate-100 max-h-[95vh] overflow-y-auto">
               <button
                 onClick={() => setShowAddModal(false)}
                 className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
@@ -524,7 +524,7 @@ export default function MasterOfficeStaffPage() {
                 </div>
 
                 {/* Personal Info & System Access */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="space-y-1">
                     <label className="text-slate-300 font-bold">Employee ID *</label>
                     <input
@@ -560,9 +560,7 @@ export default function MasterOfficeStaffPage() {
                       <option value="DISPATCHER">Dispatcher</option>
                     </select>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-slate-300 font-bold">Department *</label>
                     <select
@@ -619,14 +617,17 @@ export default function MasterOfficeStaffPage() {
                     <div className="flex justify-between items-center h-6">
                       <label className="text-slate-300 font-bold">Email Address *</label>
                     </div>
-                    <input
-                      type="email"
-                      required
-                      placeholder="staff@temptravels.com"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
-                    />
+                    <div className="relative">
+                      <input
+                        type="email"
+                        required
+                        placeholder="staff@temptravels.com"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        className="peer w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 focus:invalid:border-rose-500 focus:invalid:ring-1 focus:invalid:ring-rose-500 font-mono"
+                      />
+                      <p className="mt-1 hidden text-rose-500 text-[10px] peer-focus:peer-invalid:block font-bold">Please enter a valid email address with @</p>
+                    </div>
                   </div>
                 </div>
 
@@ -636,7 +637,7 @@ export default function MasterOfficeStaffPage() {
                     <ShieldCheck className="w-4 h-4" /> KYC Document Numbers & Vault Uploads
                   </h4>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="space-y-1">
                       <label className="text-slate-300 font-bold">Aadhaar Card Number *</label>
                       <input
@@ -665,9 +666,7 @@ export default function MasterOfficeStaffPage() {
                         className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                       />
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <label className="text-slate-300 font-bold">PAN Card Number *</label>
                       <input
@@ -678,7 +677,16 @@ export default function MasterOfficeStaffPage() {
                         pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}"
                         title="Please enter a valid 10-character PAN number format: ABCDE1234F"
                         value={formData.panNumber}
-                        onChange={(e) => setFormData({ ...formData, panNumber: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10) })}
+                        onChange={(e) => {
+                          let pan = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                          let formatted = '';
+                          for(let i=0; i<pan.length; i++) {
+                            if (i < 5) formatted += pan[i].replace(/[^A-Z]/, '');
+                            else if (i < 9) formatted += pan[i].replace(/[^0-9]/, '');
+                            else if (i === 9) formatted += pan[i].replace(/[^A-Z]/, '');
+                          }
+                          setFormData({ ...formData, panNumber: formatted.slice(0, 10) });
+                        }}
                         className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono uppercase"
                       />
                     </div>
@@ -717,9 +725,9 @@ export default function MasterOfficeStaffPage() {
                       <input
                         type="text"
                         required
-                        placeholder="e.g. HDFC Bank / ICICI Bank"
+                        placeholder="e.g. HDFC Bank"
                         value={formData.bankName}
-                        onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, bankName: e.target.value.replace(/[^A-Za-z\s]/g, '') })}
                         className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
                       />
                     </div>
@@ -731,7 +739,7 @@ export default function MasterOfficeStaffPage() {
                         required
                         placeholder="Name as per bank records"
                         value={formData.accountHolderName}
-                        onChange={(e) => setFormData({ ...formData, accountHolderName: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, accountHolderName: e.target.value.replace(/[^A-Za-z\s]/g, '') })}
                         className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
                       />
                     </div>
@@ -745,7 +753,7 @@ export default function MasterOfficeStaffPage() {
                         required
                         placeholder="Account number"
                         value={formData.accountNumber}
-                        onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value.replace(/\D/g, '') })}
                         className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                       />
                     </div>
@@ -757,7 +765,7 @@ export default function MasterOfficeStaffPage() {
                         required
                         placeholder="Repeat account number"
                         value={formData.confirmAccountNumber}
-                        onChange={(e) => setFormData({ ...formData, confirmAccountNumber: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, confirmAccountNumber: e.target.value.replace(/\D/g, '') })}
                         className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                       />
                     </div>
@@ -768,8 +776,20 @@ export default function MasterOfficeStaffPage() {
                         type="text"
                         required
                         placeholder="e.g. HDFC0000123"
+                        maxLength={11}
+                        pattern="[A-Z]{4}0[A-Z0-9]{6}"
+                        title="Valid IFSC: 4 letters, 1 zero, 6 alphanumeric characters"
                         value={formData.ifscCode}
-                        onChange={(e) => setFormData({ ...formData, ifscCode: e.target.value })}
+                        onChange={(e) => {
+                          let ifsc = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                          let formatted = '';
+                          for(let i=0; i<ifsc.length; i++) {
+                            if (i < 4) formatted += ifsc[i].replace(/[^A-Z]/, '');
+                            else if (i === 4) formatted += ifsc[i].replace(/[^0]/, '0');
+                            else if (i < 11) formatted += ifsc[i].replace(/[^A-Z0-9]/, '');
+                          }
+                          setFormData({ ...formData, ifscCode: formatted.slice(0, 11) });
+                        }}
                         className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono uppercase"
                       />
                     </div>
