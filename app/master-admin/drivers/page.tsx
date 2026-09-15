@@ -519,7 +519,14 @@ export default function MasterDriversPage() {
                 </h3>
               </div>
 
-              <form onSubmit={handleDriverFormSubmit} className="space-y-6 text-xs">
+              <form 
+                onSubmit={handleDriverFormSubmit} 
+                onInvalidCapture={(e) => {
+                  const target = e.target as HTMLElement;
+                  target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }}
+                className="space-y-6 text-xs"
+              >
                 {/* Photo Upload with Live Preview */}
                 <div className="space-y-2 bg-slate-950 p-4 rounded-2xl border border-white/5">
                   <label className="text-slate-300 font-bold block">1. Driver Photo Upload from Device (with Live Preview)</label>
@@ -818,6 +825,7 @@ export default function MasterDriversPage() {
                     <div className="space-y-1">
                       <label className="text-slate-300 font-bold">Vehicle Category *</label>
                       <select
+                        required
                         value={formData.vehicleCategory}
                         onChange={(e) => handleCategoryChange(e.target.value)}
                         className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400"
@@ -831,6 +839,7 @@ export default function MasterDriversPage() {
                     <div className="space-y-1">
                       <label className="text-slate-300 font-bold">Vehicle Class *</label>
                       <select
+                        required
                         value={formData.vehicleClass}
                         onChange={(e) => setFormData({ ...formData, vehicleClass: e.target.value })}
                         className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"

@@ -509,7 +509,14 @@ export default function MasterOfficeStaffPage() {
                 </h3>
               </div>
 
-              <form onSubmit={handleFormSubmit} className="space-y-6 text-xs">
+              <form 
+                onSubmit={handleFormSubmit} 
+                onInvalidCapture={(e) => {
+                  const target = e.target as HTMLElement;
+                  target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }}
+                className="space-y-6 text-xs"
+              >
                 {/* Photo Upload with Live Preview */}
                 <div className="space-y-2 bg-slate-950 p-4 rounded-2xl border border-white/5">
                   <label className="text-slate-300 font-bold block">Staff Photo Upload from Device (with Live Preview)</label>
@@ -567,6 +574,7 @@ export default function MasterOfficeStaffPage() {
                   <div className="space-y-1">
                     <label className="text-slate-300 font-bold">System Role *</label>
                     <select
+                      required
                       value={formData.role}
                       onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                       className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400"
