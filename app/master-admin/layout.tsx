@@ -92,7 +92,7 @@ export default function MasterAdminLayout({
     document.documentElement.classList.add("dark");
 
     // Scan vehicles, drivers, and office staff for 30-day document expiries and birthdays
-    const scanNotifications = () => {
+    const scanNotifications = async () => {
       const expList: any[] = [];
       const bdayList: any[] = [];
 
@@ -153,49 +153,62 @@ export default function MasterAdminLayout({
         }
       }
 
-      // 2. Scan Drivers
-      const savedDrivers = localStorage.getItem("user_uploaded_drivers");
-      const drivers = savedDrivers ? JSON.parse(savedDrivers) : [];
-      drivers.forEach((d: any) => {
-        const licDays = daysUntilExpiry(d.licenseExpiry);
-        if (licDays !== null && licDays <= 30) {
-          expList.push({
-            type: "LICENSE",
-            title: `Driver License Expiry: ${d.name}`,
-            subtitle: `Mobile: +91-${d.phone}`,
-            daysLeft: licDays,
-            date: d.licenseExpiry
-          });
-        }
+      // 2. Scan Drivers (From API)
+      try {
+        const drvRes = await fetch("/api/admin/drivers");
+        if (drvRes.ok) {
+          const drivers = await drvRes.json();
+          drivers.forEach((d: any) => {
+            const licDays = daysUntilExpiry(d.licenseExpiry);
+            if (licDays !== null && licDays <= 30) {
+              expList.push({
+                type: "LICENSE",
+                title: `Driver License Expiry: ${d.name}`,
+                subtitle: `Mobile: +91-${d.phone}`,
+                daysLeft: licDays,
+                date: d.licenseExpiry
+              });
+            }
 
-        // Driver Birthday Check
-        const bdayInfo = isBirthdayThisMonth(d.dob);
-        if (bdayInfo.isToday || bdayInfo.isComingUp) {
-          bdayList.push({
-            name: d.name,
-            role: "Driver / Chauffeur",
-            age: bdayInfo.age,
-            isToday: bdayInfo.isToday,
-            dob: d.dob
+            // Driver Birthday Check
+            const bdayInfo = isBirthdayThisMonth(d.dob);
+            if (bdayInfo.isToday || bdayInfo.isComingUp) {
+              bdayList.push({
+                name: d.name,
+                role: "Driver / Chauffeur",
+                age: bdayInfo.age,
+                isToday: bdayInfo.isToday,
+                dob: d.dob
+              });
+            }
           });
         }
-      });
+      } catch (e) {
+        console.error("Failed to fetch drivers for notifications:", e);
+      }
 
-      // 3. Scan Office Staff
-      const savedStaff = localStorage.getItem("user_uploaded_office_staff");
-      const staffList = savedStaff ? JSON.parse(savedStaff) : [];
-      staffList.forEach((stf: any) => {
-        const bdayInfo = isBirthdayThisMonth(stf.dob);
-        if (bdayInfo.isToday || bdayInfo.isComingUp) {
-          bdayList.push({
-            name: stf.name,
-            role: stf.role,
-            age: bdayInfo.age,
-            isToday: bdayInfo.isToday,
-            dob: stf.dob
+      // 3. Scan Office Staff (From API)
+      try {
+        const stfRes = await fetch("/api/admin/staff");
+        if (stfRes.ok) {
+          const resData = await stfRes.json();
+          const staffList = resData.staff || [];
+          staffList.forEach((stf: any) => {
+            const bdayInfo = isBirthdayThisMonth(stf.dob);
+            if (bdayInfo.isToday || bdayInfo.isComingUp) {
+              bdayList.push({
+                name: stf.name,
+                role: stf.role,
+                age: bdayInfo.age,
+                isToday: bdayInfo.isToday,
+                dob: stf.dob
+              });
+            }
           });
         }
-      });
+      } catch (e) {
+        console.error("Failed to fetch staff for notifications:", e);
+      }
 
       setExpiryAlerts(expList);
       setBirthdayAlerts(bdayList);
