@@ -196,71 +196,75 @@ export default function MasterDriversPage() {
       return;
     }
 
-    let updated: any[] = [];
-    if (editingDriver) {
-      updated = drivers.map(d => {
-        if (d.id === editingDriver.id) {
-          return {
-            ...d,
-            employeeId: formData.employeeId,
-            name: formData.name,
-            dob: formData.dob,
-            phone: formData.phone,
-            photoName: formData.photoName,
-            photoUrl: formData.photoUrl,
-            aadhaarNumber: formData.aadhaarNumber,
-            aadhaarDocName: formData.aadhaarDocName,
-            panNumber: formData.panNumber,
-            panDocName: formData.panDocName,
-            licenseNumber: formData.licenseNumber,
-            licenseDocName: formData.licenseDocName,
-            licenseExpiry: formData.licenseExpiry,
-            bankName: formData.bankName,
-            accountHolderName: formData.accountHolderName,
-            accountNumber: formData.accountNumber,
-            ifscCode: formData.ifscCode,
-            vehicleCategory: formData.vehicleCategory,
-            vehicleClass: formData.vehicleClass,
-            vehicleModel: formData.vehicleModel
-          };
-        }
-        return d;
-      });
-    } else {
-      const created = {
-        id: `DRV-${Date.now()}`,
-        employeeId: formData.employeeId,
-        name: formData.name || "Commercial Driver",
-        dob: formData.dob,
-        phone: formData.phone || "9820001122",
-        photoName: formData.photoName,
-        photoUrl: formData.photoUrl,
-        aadhaarNumber: formData.aadhaarNumber || "9900 8877 6655",
-        aadhaarDocName: formData.aadhaarDocName,
-        panNumber: formData.panNumber || "ABCDE1234F",
-        panDocName: formData.panDocName,
-        licenseNumber: formData.licenseNumber || "MH-022023001122",
-        licenseDocName: formData.licenseDocName,
-        licenseExpiry: formData.licenseExpiry || "2030-12-31",
-        bankName: formData.bankName || "HDFC Bank",
-        accountHolderName: formData.accountHolderName || formData.name,
-        accountNumber: formData.accountNumber || "501009876543",
-        ifscCode: formData.ifscCode || "HDFC0000123",
-        vehicleCategory: formData.vehicleCategory,
-        vehicleClass: formData.vehicleClass,
-        vehicleModel: formData.vehicleModel,
-        policeVerification: "VERIFIED",
-        status: "STANDBY"
-      };
-      updated = [created, ...drivers];
-    }
-
-    setDrivers(updated);
-    localStorage.setItem("user_uploaded_drivers", JSON.stringify(updated));
-
     setIsSubmitting(true);
-    // Sync to backend DB
     try {
+      let updated: any[] = [];
+      if (editingDriver) {
+        updated = drivers.map(d => {
+          if (d.id === editingDriver.id) {
+            return {
+              ...d,
+              employeeId: formData.employeeId,
+              name: formData.name,
+              dob: formData.dob,
+              phone: formData.phone,
+              photoName: formData.photoName,
+              photoUrl: formData.photoUrl,
+              aadhaarNumber: formData.aadhaarNumber,
+              aadhaarDocName: formData.aadhaarDocName,
+              panNumber: formData.panNumber,
+              panDocName: formData.panDocName,
+              licenseNumber: formData.licenseNumber,
+              licenseDocName: formData.licenseDocName,
+              licenseExpiry: formData.licenseExpiry,
+              bankName: formData.bankName,
+              accountHolderName: formData.accountHolderName,
+              accountNumber: formData.accountNumber,
+              ifscCode: formData.ifscCode,
+              vehicleCategory: formData.vehicleCategory,
+              vehicleClass: formData.vehicleClass,
+              vehicleModel: formData.vehicleModel
+            };
+          }
+          return d;
+        });
+      } else {
+        const created = {
+          id: `DRV-${Date.now()}`,
+          employeeId: formData.employeeId,
+          name: formData.name || "Commercial Driver",
+          dob: formData.dob,
+          phone: formData.phone || "9820001122",
+          photoName: formData.photoName,
+          photoUrl: formData.photoUrl,
+          aadhaarNumber: formData.aadhaarNumber || "9900 8877 6655",
+          aadhaarDocName: formData.aadhaarDocName,
+          panNumber: formData.panNumber || "ABCDE1234F",
+          panDocName: formData.panDocName,
+          licenseNumber: formData.licenseNumber || "MH-022023001122",
+          licenseDocName: formData.licenseDocName,
+          licenseExpiry: formData.licenseExpiry || "2030-12-31",
+          bankName: formData.bankName || "HDFC Bank",
+          accountHolderName: formData.accountHolderName || formData.name,
+          accountNumber: formData.accountNumber || "501009876543",
+          ifscCode: formData.ifscCode || "HDFC0000123",
+          vehicleCategory: formData.vehicleCategory,
+          vehicleClass: formData.vehicleClass,
+          vehicleModel: formData.vehicleModel,
+          policeVerification: "VERIFIED",
+          status: "STANDBY"
+        };
+        updated = [created, ...drivers];
+      }
+
+      setDrivers(updated);
+      try {
+        localStorage.setItem("user_uploaded_drivers", JSON.stringify(updated));
+      } catch (e) {
+        console.error("Local storage quota exceeded or failed");
+      }
+
+      // Sync to backend DB
       if (editingDriver) {
         await fetch(`/api/admin/drivers/${editingDriver.id}`, {
           method: "PUT",
@@ -292,13 +296,13 @@ export default function MasterDriversPage() {
           })
         });
       }
-    } catch (err) {
-      console.error("Save driver API error:", err);
+      
+      setShowAddModal(false);
+    } catch (err: any) {
+      await showAlert(err.message || "An error occurred while saving the driver.");
     } finally {
       setIsSubmitting(false);
     }
-
-    setShowAddModal(false);
   };
 
   const handleDeleteDriver = async (drv: any) => {
