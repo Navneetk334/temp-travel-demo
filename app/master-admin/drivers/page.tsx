@@ -204,6 +204,7 @@ export default function MasterDriversPage() {
     setIsSubmitting(true);
     try {
       let updated: any[] = [];
+      let created: any = null;
       if (editingDriver) {
         updated = drivers.map(d => {
           if (d.id === editingDriver.id) {
@@ -234,7 +235,7 @@ export default function MasterDriversPage() {
           return d;
         });
       } else {
-        const created = {
+        created = {
           id: `DRV-${Date.now()}`,
           employeeId: formData.employeeId,
           name: formData.name || "Commercial Driver",
