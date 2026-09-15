@@ -59,7 +59,7 @@ export default function MasterOfficeStaffPage() {
     employeeId: "",
     name: "",
     role: "MANAGER",
-    dob: "1995-05-15",
+    dob: "",
     phone: "",
     email: "",
     photoName: "",
@@ -69,11 +69,11 @@ export default function MasterOfficeStaffPage() {
     panNumber: "",
     panDocName: "",
     contractDocName: "",
-    bankName: "HDFC Bank",
+    bankName: "",
     accountHolderName: "",
     accountNumber: "",
     confirmAccountNumber: "",
-    ifscCode: "HDFC0000123",
+    ifscCode: "",
     departmentId: "",
     permissionProfileId: ""
   });
@@ -118,7 +118,7 @@ export default function MasterOfficeStaffPage() {
       employeeId: generatedEmpId,
       name: "",
       role: "MANAGER",
-      dob: "1995-05-15",
+      dob: "",
       phone: "",
       email: "",
       photoName: "",
@@ -128,11 +128,11 @@ export default function MasterOfficeStaffPage() {
       panNumber: "",
       panDocName: "",
       contractDocName: "",
-      bankName: "HDFC Bank",
+      bankName: "",
       accountHolderName: "",
       accountNumber: "",
       confirmAccountNumber: "",
-      ifscCode: "HDFC0000123"
+      ifscCode: ""
     } as any);
     setShowAddModal(true);
   };
