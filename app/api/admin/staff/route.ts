@@ -32,7 +32,11 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name, email, password, role, departmentId, permissionProfileId } = body;
+    const { 
+      name, email, password, role, departmentId, permissionProfileId,
+      employeeId, phone, dob, photoUrl, aadhaarNumber, panNumber, 
+      bankName, accountHolderName, accountNumber, ifscCode
+    } = body;
 
     if (!name || !email || !password) {
       return NextResponse.json({ error: "Name, email and password are required" }, { status: 400 });
@@ -53,6 +57,16 @@ export async function POST(req: NextRequest) {
         role: role || "MANAGER",
         departmentId: departmentId || null,
         permissionProfileId: permissionProfileId || null,
+        employeeId: employeeId || null,
+        phone: phone || null,
+        dob: dob || null,
+        photoUrl: photoUrl || null,
+        aadhaarNumber: aadhaarNumber || null,
+        panNumber: panNumber || null,
+        bankName: bankName || null,
+        accountHolderName: accountHolderName || null,
+        accountNumber: accountNumber || null,
+        ifscCode: ifscCode || null,
       },
       include: {
         department: true,

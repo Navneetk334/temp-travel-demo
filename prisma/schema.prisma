@@ -82,6 +82,7 @@ enum LeadStatus {
 
 model User {
   id           String        @id @default(uuid())
+  employeeId   String?       @unique
   name         String
   email        String        @unique
   passwordHash String
@@ -91,9 +92,14 @@ model User {
   photoUrl     String?
   aadhaarNumber String?
   panNumber    String?
-  dob          DateTime?
+  dob          String?
   dateOfJoining DateTime?
   licenseNumber String?
+  licenseExpiry String?
+  bankName     String?
+  accountHolderName String?
+  accountNumber String?
+  ifscCode     String?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   bookings     Booking[]
@@ -109,9 +115,19 @@ model User {
 
 model Admin {
   id                  String             @id @default(uuid())
+  employeeId          String?            @unique
   name                String
   email               String             @unique
   passwordHash        String
+  phone               String?
+  dob                 String?
+  photoUrl            String?
+  aadhaarNumber       String?
+  panNumber           String?
+  bankName            String?
+  accountHolderName   String?
+  accountNumber       String?
+  ifscCode            String?
   role                AdminRole          @default(MANAGER)
   departmentId        String?
   department          Department?        @relation(fields: [departmentId], references: [id])

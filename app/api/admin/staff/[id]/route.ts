@@ -12,7 +12,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const body = await req.json();
 
-    const { name, email, role, departmentId, permissionProfileId, isActive } = body;
+    const { 
+      name, email, role, departmentId, permissionProfileId, isActive,
+      employeeId, phone, dob, photoUrl, aadhaarNumber, panNumber, 
+      bankName, accountHolderName, accountNumber, ifscCode
+    } = body;
 
     const updatedStaff = await prisma.admin.update({
       where: { id },
@@ -23,6 +27,16 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         departmentId: departmentId || null,
         permissionProfileId: permissionProfileId || null,
         isActive: isActive !== undefined ? isActive : true,
+        employeeId: employeeId || null,
+        phone: phone || null,
+        dob: dob || null,
+        photoUrl: photoUrl || null,
+        aadhaarNumber: aadhaarNumber || null,
+        panNumber: panNumber || null,
+        bankName: bankName || null,
+        accountHolderName: accountHolderName || null,
+        accountNumber: accountNumber || null,
+        ifscCode: ifscCode || null,
       },
       include: {
         department: true,
