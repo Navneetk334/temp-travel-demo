@@ -143,6 +143,7 @@ export default function MasterOfficeStaffPage() {
 
   const openEditModal = (stf: any) => {
     setEditingStaff(stf);
+    setFormData({
       employeeId: stf.employeeId || `EMP-${Date.now().toString().slice(-6)}${Math.floor(100 + Math.random() * 900)}`,
       name: stf.name || "",
       role: stf.role || "",
