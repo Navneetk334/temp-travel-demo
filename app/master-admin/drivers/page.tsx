@@ -18,7 +18,8 @@ import {
   Landmark,
   Cake,
   Calendar,
-  RefreshCw
+  RefreshCw,
+  Loader2
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 import { useDialog } from "@/app/components/DialogProvider";
@@ -50,6 +51,9 @@ export default function MasterDriversPage() {
   const [editingDriver, setEditingDriver] = useState<any | null>(null);
   const [selectedDriver, setSelectedDriver] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [resettingId, setResettingId] = useState<string | null>(null);
 
   // Multi-selection state
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -254,6 +258,7 @@ export default function MasterDriversPage() {
     setDrivers(updated);
     localStorage.setItem("user_uploaded_drivers", JSON.stringify(updated));
 
+    setIsSubmitting(true);
     // Sync to backend DB
     try {
       if (editingDriver) {
@@ -289,6 +294,8 @@ export default function MasterDriversPage() {
       }
     } catch (err) {
       console.error("Save driver API error:", err);
+    } finally {
+      setIsSubmitting(false);
     }
 
     setShowAddModal(false);
@@ -297,11 +304,19 @@ export default function MasterDriversPage() {
   const handleDeleteDriver = async (drv: any) => {
     const confirmDel = await showConfirm(`Are you sure you want to remove driver ${drv.name}?`);
     if (confirmDel) {
-      const updated = drivers.filter(d => d.id !== drv.id);
-      setDrivers(updated);
-      setSelectedIds(selectedIds.filter(id => id !== drv.id));
-      localStorage.setItem("user_uploaded_drivers", JSON.stringify(updated));
-      fetch(`/api/admin/drivers/${drv.id}`, { method: "DELETE" }).catch(e => console.error(e));
+      setDeletingId(drv.id);
+      try {
+        const updated = drivers.filter(d => d.id !== drv.id);
+        setDrivers(updated);
+        localStorage.setItem("user_uploaded_drivers", JSON.stringify(updated));
+        setSelectedIds(selectedIds.filter(id => id !== drv.id));
+
+        await fetch(`/api/admin/drivers/${drv.id}`, { method: "DELETE" });
+      } catch (err) {
+        console.error("Delete driver API error:", err);
+      } finally {
+        setDeletingId(null);
+      }
     }
   };
 
@@ -467,13 +482,14 @@ export default function MasterDriversPage() {
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
-                    <button
-                      onClick={() => handleDeleteDriver(drv)}
-                      className="p-1.5 bg-slate-950 border border-white/10 hover:border-rose-400 rounded-lg text-slate-400 hover:text-rose-400 transition-all cursor-pointer"
-                      title="Delete Driver Account"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                      <button
+                        onClick={() => handleDeleteDriver(drv)}
+                        disabled={deletingId === drv.id}
+                        className="p-1.5 bg-slate-950 border border-white/10 hover:border-rose-400 rounded-lg text-slate-400 hover:text-rose-400 transition-all cursor-pointer disabled:opacity-50"
+                        title="Delete Driver Record"
+                      >
+                        {deletingId === drv.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                      </button>
                   </div>
                 </div>
               </div>
@@ -850,9 +866,11 @@ export default function MasterDriversPage() {
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer"
+                    disabled={isSubmitting}
+                    className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer transition-all disabled:opacity-70 flex items-center gap-2"
                   >
-                    {editingDriver ? "Update Driver Record" : "Save Driver Record"}
+                    {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                    {isSubmitting ? "Processing..." : editingDriver ? "Update Driver Record" : "Save Driver Record"}
                   </button>
                 </div>
               </form>

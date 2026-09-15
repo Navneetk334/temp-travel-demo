@@ -22,7 +22,8 @@ import {
   Cake,
   Calendar,
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 import { useDialog } from "@/app/components/DialogProvider";
@@ -49,6 +50,9 @@ export default function MasterOfficeStaffPage() {
   const [editingStaff, setEditingStaff] = useState<any | null>(null);
   const [selectedStaff, setSelectedStaff] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [resettingId, setResettingId] = useState<string | null>(null);
 
   // Multi-selection state
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -172,6 +176,7 @@ export default function MasterOfficeStaffPage() {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       if (editingStaff) {
         const res = await fetch(`/api/admin/staff/${editingStaff.id}`, {
@@ -202,12 +207,15 @@ export default function MasterOfficeStaffPage() {
       setShowAddModal(false);
     } catch (err: any) {
       await showAlert(err.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleDeleteStaff = async (stf: any) => {
     const confirmDel = await showConfirm(`Are you sure you want to remove office staff member ${stf.name}?`);
     if (confirmDel) {
+      setDeletingId(stf.id);
       try {
         const res = await fetch(`/api/admin/staff/${stf.id}`, { method: "DELETE" });
         if (!res.ok) throw new Error("Failed to delete");
@@ -215,6 +223,8 @@ export default function MasterOfficeStaffPage() {
         setSelectedIds(selectedIds.filter(id => id !== stf.id));
       } catch (err) {
         await showAlert("Delete failed");
+      } finally {
+        setDeletingId(null);
       }
     }
   };
@@ -424,10 +434,11 @@ export default function MasterOfficeStaffPage() {
                       </button>
                       <button
                         onClick={() => handleDeleteStaff(stf)}
-                        className="p-1.5 bg-slate-950 border border-white/10 hover:border-rose-400 rounded-lg text-slate-400 hover:text-rose-400 transition-all cursor-pointer"
+                        disabled={deletingId === stf.id}
+                        className="p-1.5 bg-slate-950 border border-white/10 hover:border-rose-400 rounded-lg text-slate-400 hover:text-rose-400 transition-all cursor-pointer disabled:opacity-50"
                         title="Delete Staff Record"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        {deletingId === stf.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                       </button>
                     </div>
                   </div>
@@ -439,29 +450,34 @@ export default function MasterOfficeStaffPage() {
                         <span className="text-[10px] font-bold">Password Reset Requested</span>
                       </div>
                       <button
+                        disabled={resettingId === stf.id}
                         onClick={async () => {
                           const newPass = prompt(`Enter new password for ${stf.name}:`);
                           if (newPass) {
+                            setResettingId(stf.id);
                             try {
                               const res = await fetch("/api/admin/reset-password", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
                                 body: JSON.stringify({ userId: stf.id, newPassword: newPass })
                               });
-                              if (res.ok) {
-                                await showAlert("Password reset successfully. Hand the password to the user.");
-                                setStaffList(staffList.map(s => s.id === stf.id ? { ...s, passwordResetRequested: false } : s));
-                              } else {
-                                await showAlert("Failed to reset password");
-                              }
-                            } catch (err) {
-                              await showAlert("Error");
+                              if (!res.ok) throw new Error("Failed");
+                              await showAlert("Password reset successfully. Hand the password to the user.");
+                              setStaffList(staffList.map(s => s.id === stf.id ? { ...s, passwordResetRequested: false } : s));
+                            } catch {
+                              await showAlert("Failed to reset password.");
+                            } finally {
+                              setResettingId(null);
                             }
                           }
                         }}
-                        className="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-lg transition-colors cursor-pointer"
+                        className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white text-[10px] font-bold rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1"
                       >
-                        Force Reset
+                        {resettingId === stf.id ? (
+                          <span className="animate-pulse flex items-center gap-1">
+                            <RefreshCw className="w-3 h-3 animate-spin" /> Resetting...
+                          </span>
+                        ) : "Reset Now"}
                       </button>
                     </div>
                   )}
@@ -813,9 +829,11 @@ export default function MasterOfficeStaffPage() {
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer"
+                    disabled={isSubmitting}
+                    className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer transition-all disabled:opacity-70 flex items-center gap-2"
                   >
-                    {editingStaff ? "Update Staff Record" : "Save Staff Record"}
+                    {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                    {isSubmitting ? "Processing..." : editingStaff ? "Update Staff Record" : "Save Staff Record"}
                   </button>
                 </div>
               </form>
