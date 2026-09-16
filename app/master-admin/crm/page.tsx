@@ -320,7 +320,7 @@ export default function MasterOmnichannelCRMPage() {
     : (categoryFilter === "SUV" ? SUV_CLASSES : Array.from(new Set([...SEDAN_CLASSES, ...SUV_CLASSES])));
 
   // Execute Ride Dispatch & Generate Official Booking
-  const handleConfirmDispatch = (e: React.FormEvent) => {
+  const handleConfirmDispatch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!dispatchModalLead) return;
 
@@ -369,14 +369,42 @@ export default function MasterOmnichannelCRMPage() {
       ]
     };
 
-    // 1. Save Dispatched Booking into Local Dispatch Vault
+    // 1. Save Dispatched Booking into Local Dispatch Vault (Fallback)
     try {
       const stored = localStorage.getItem("user_uploaded_dispatched_bookings");
       const list = stored ? JSON.parse(stored) : [];
       list.unshift(dispatchedBooking);
       localStorage.setItem("user_uploaded_dispatched_bookings", JSON.stringify(list));
     } catch (err) {
-      console.error("Failed to save dispatched booking:", err);
+      console.error("Failed to save dispatched booking locally:", err);
+    }
+
+    // 1.5 Send to Live Backend Database
+    try {
+      await fetch("/api/bookings/dispatch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          leadId: dispatchModalLead.id,
+          leadType: "CRM_DISPATCH",
+          vehicleId: assignedVeh?.id,
+          driverId: assignedDrv?.id,
+          fare: dispatchForm.fare,
+          advance: dispatchForm.advance,
+          paymentMode: dispatchForm.paymentMode,
+          pickupLocation: dispatchForm.pickupLocation || dispatchModalLead.pickupLocation,
+          dropLocation: dispatchForm.dropLocation || dispatchModalLead.dropLocation,
+          pickupDateTime: dispatchForm.pickupDateTime || new Date().toISOString(),
+          notes: dispatchForm.notes,
+          customerName: dispatchModalLead.customerName,
+          customerEmail: dispatchModalLead.email,
+          customerPhone: dispatchModalLead.phone,
+          tripType: dispatchModalLead.tripType,
+          bookingRef: finalBookingRef
+        })
+      });
+    } catch (err) {
+      console.error("Failed to dispatch to live API:", err);
     }
 
     // 2. Mark Lead as CONVERTED in CRM
