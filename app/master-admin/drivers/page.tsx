@@ -59,6 +59,7 @@ export default function MasterDriversPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const [drivers, setDrivers] = useState<any[]>([]);
+  const [fleetVehicles, setFleetVehicles] = useState<any[]>([]);
 
   const { showAlert, showConfirm } = useDialog();
 
@@ -120,6 +121,14 @@ export default function MasterDriversPage() {
               console.error("Local storage quota exceeded");
             }
           }
+        }
+        
+        const fleetRes = await fetch("/api/fleet");
+        if (fleetRes.ok) {
+           const fleetData = await fleetRes.json();
+           if (fleetData.vehicles) {
+             setFleetVehicles(fleetData.vehicles);
+           }
         }
       } catch (e) {
         console.error("Failed to fetch drivers from API:", e);
@@ -372,6 +381,10 @@ export default function MasterDriversPage() {
   });
 
   const computedAge = calculateAge(formData.dob);
+
+  const availableVehicles = fleetVehicles.filter(
+    (v) => v.categoryName === formData.vehicleCategory && v.vehicleClass === formData.vehicleClass
+  );
 
   return (
     <div className="space-y-6">
@@ -887,14 +900,19 @@ export default function MasterDriversPage() {
 
                     <div className="space-y-1">
                       <label className="text-slate-300 font-bold">Vehicle Model Name *</label>
-                      <input
-                        type="text"
+                      <select
                         required
-                        placeholder="e.g. Swift Dzire / Innova Crysta"
                         value={formData.vehicleModel}
                         onChange={(e) => setFormData({ ...formData, vehicleModel: e.target.value })}
                         className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
-                      />
+                      >
+                        <option value="">-- Please Select --</option>
+                        {availableVehicles.map((v) => (
+                          <option key={v.id} value={`${v.make} ${v.model}`}>
+                            {v.make} {v.model} ({v.registrationNumber})
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 </div>
