@@ -6,12 +6,27 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("search") || "";
     const status = searchParams.get("status") || "";
+    const minimal = searchParams.get("minimal") === "true";
 
     // Query user uploaded vehicles from Prisma database
     let dbVehicles: any[] = [];
     try {
       dbVehicles = await prisma.fleetVehicle.findMany({
-        include: {
+        select: minimal ? {
+          id: true,
+          make: true,
+          model: true,
+          registrationNumber: true,
+          capacity: true,
+          subCategory: true,
+          status: true,
+          insuranceExpiry: true,
+          fitnessExpiry: true,
+          permitExpiry: true,
+          category: { select: { name: true } },
+          driver: { select: { id: true, name: true, phone: true } }
+        } : undefined,
+        include: minimal ? undefined : {
           category: true,
           driver: {
             select: { id: true, name: true, phone: true }

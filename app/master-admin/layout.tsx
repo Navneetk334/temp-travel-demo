@@ -98,7 +98,7 @@ export default function MasterAdminLayout({
 
       // 1. Scan Vehicles (From API)
       try {
-        const fleetRes = await fetch("/api/fleet");
+        const fleetRes = await fetch("/api/fleet?minimal=true");
         if (fleetRes.ok) {
           const fleetData = await fleetRes.json();
           const fleet = fleetData.vehicles || [];

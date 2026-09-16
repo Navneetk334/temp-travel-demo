@@ -102,7 +102,7 @@ export default function MasterOmnichannelCRMPage() {
     const syncLiveSources = async () => {
       try {
         const [fleetRes, drvRes] = await Promise.allSettled([
-          fetch("/api/fleet"),
+          fetch("/api/fleet?minimal=true"),
           fetch("/api/admin/drivers")
         ]);
 

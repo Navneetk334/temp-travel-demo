@@ -165,7 +165,7 @@ export default function BookingDispatchPage() {
       // Fetch vehicles to use for dispatch assignments
       let localVehicles: any[] = [];
 
-      const vehiclesRes = await fetch("/api/fleet");
+      const vehiclesRes = await fetch("/api/fleet?minimal=true");
       let apiList: any[] = [];
       if (vehiclesRes.ok) {
         const fleetData = await vehiclesRes.json();

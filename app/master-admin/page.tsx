@@ -82,7 +82,7 @@ export default function MasterAdminDashboard() {
       const [rentalRes, corpRes, fleetRes] = await Promise.allSettled([
         fetch("/api/rental/lead"),
         fetch("/api/corporate/lead"),
-        fetch("/api/fleet")
+        fetch("/api/fleet?minimal=true")
       ]);
 
       let apiLeadsCount = 0;
