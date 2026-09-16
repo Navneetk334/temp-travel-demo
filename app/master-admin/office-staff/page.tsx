@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 import { useDialog } from "@/app/components/DialogProvider";
+import PermissionsModal from "./PermissionsModal";
 
 // Age calculation helper
 function calculateAge(dobString: string): number | null {
@@ -47,6 +48,7 @@ export default function MasterOfficeStaffPage() {
   const [filterRole, setFilterRole] = useState("ALL");
   const { showAlert, showConfirm } = useDialog();
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showPermissionsModal, setShowPermissionsModal] = useState(false);
   const [editingStaff, setEditingStaff] = useState<any | null>(null);
   const [selectedStaff, setSelectedStaff] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
@@ -426,6 +428,16 @@ export default function MasterOfficeStaffPage() {
 
                     <div className="flex items-center gap-2">
                       <button
+                        onClick={() => {
+                          setEditingStaff(stf);
+                          setShowPermissionsModal(true);
+                        }}
+                        className="p-1.5 bg-slate-950 border border-white/10 hover:border-amber-400 rounded-lg text-slate-400 hover:text-amber-400 transition-all cursor-pointer"
+                        title="Manage Permissions"
+                      >
+                        <ShieldCheck className="w-4 h-4" />
+                      </button>
+                      <button
                         onClick={() => openEditModal(stf)}
                         className="p-1.5 bg-slate-950 border border-white/10 hover:border-amber-400 rounded-lg text-slate-400 hover:text-amber-400 transition-all cursor-pointer"
                         title="Edit Staff Credentials"
@@ -486,6 +498,30 @@ export default function MasterOfficeStaffPage() {
             );
           })}
         </div>
+      )}
+
+      {showPermissionsModal && editingStaff && (
+        <PermissionsModal
+          staff={editingStaff}
+          onClose={() => setShowPermissionsModal(false)}
+          onSave={async (permissions) => {
+            try {
+              const res = await fetch(`/api/admin/staff/${editingStaff.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ permissions })
+              });
+              if (!res.ok) throw new Error("Failed");
+              
+              const data = await res.json();
+              setStaffList(prev => prev.map(s => s.id === editingStaff.id ? { ...s, permissions } : s));
+              setShowPermissionsModal(false);
+              await showAlert("Permissions updated successfully!");
+            } catch (e) {
+              await showAlert("Failed to save permissions.");
+            }
+          }}
+        />
       )}
 
       {/* Add / Edit Staff Modal */}

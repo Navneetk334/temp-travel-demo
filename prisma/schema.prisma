@@ -100,6 +100,7 @@ model User {
   accountHolderName String?
   accountNumber String?
   ifscCode     String?
+  permissions  String[]      @default([])
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   bookings     Booking[]
@@ -129,6 +130,7 @@ model Admin {
   accountNumber       String?
   ifscCode            String?
   role                AdminRole          @default(MANAGER)
+  permissions         String[]           @default([])
   departmentId        String?
   department          Department?        @relation(fields: [departmentId], references: [id])
   permissionProfileId String?

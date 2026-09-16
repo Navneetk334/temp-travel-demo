@@ -15,7 +15,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const { 
       name, email, role, departmentId, permissionProfileId, isActive,
       employeeId, phone, dob, photoUrl, aadhaarNumber, panNumber, 
-      bankName, accountHolderName, accountNumber, ifscCode
+      bankName, accountHolderName, accountNumber, ifscCode, permissions
     } = body;
 
     const updatedStaff = await prisma.admin.update({
@@ -37,6 +37,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         accountHolderName: accountHolderName || null,
         accountNumber: accountNumber || null,
         ifscCode: ifscCode || null,
+        ...(permissions !== undefined && { permissions })
       },
       include: {
         department: true,
