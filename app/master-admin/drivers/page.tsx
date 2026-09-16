@@ -292,7 +292,13 @@ export default function MasterDriversPage() {
             photoUrl: formData.photoUrl,
             aadhaarNumber: formData.aadhaarNumber,
             panNumber: formData.panNumber,
-            licenseNumber: formData.licenseNumber
+            licenseNumber: formData.licenseNumber,
+            licenseExpiry: formData.licenseExpiry,
+            employeeId: formData.employeeId,
+            bankName: formData.bankName,
+            accountHolderName: formData.accountHolderName,
+            accountNumber: formData.accountNumber,
+            ifscCode: formData.ifscCode
           })
         });
       } else {
@@ -307,7 +313,13 @@ export default function MasterDriversPage() {
             photoUrl: formData.photoUrl,
             aadhaarNumber: formData.aadhaarNumber,
             panNumber: formData.panNumber,
-            licenseNumber: formData.licenseNumber
+            licenseNumber: formData.licenseNumber,
+            licenseExpiry: formData.licenseExpiry,
+            employeeId: formData.employeeId,
+            bankName: formData.bankName,
+            accountHolderName: formData.accountHolderName,
+            accountNumber: formData.accountNumber,
+            ifscCode: formData.ifscCode
           })
         });
       }

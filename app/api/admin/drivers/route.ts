@@ -38,6 +38,12 @@ export async function GET(req: NextRequest) {
         dob: true,
         dateOfJoining: true,
         licenseNumber: true,
+        licenseExpiry: true,
+        employeeId: true,
+        bankName: true,
+        accountHolderName: true,
+        accountNumber: true,
+        ifscCode: true,
         createdAt: true,
         vehicle: {
           select: {
