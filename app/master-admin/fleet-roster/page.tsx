@@ -95,26 +95,7 @@ export default function MasterFleetRosterPage() {
 
   // Load User Uploaded Fleet Vehicles
   useEffect(() => {
-    // 1. Immediate local hydration for instant render without flash
-    let hasLocalData = false;
-    const saved = localStorage.getItem("user_uploaded_fleet");
-    let localList: any[] = [];
-    if (saved) {
-      try {
-        localList = JSON.parse(saved);
-        if (Array.isArray(localList) && localList.length > 0) {
-          setVehicles(localList);
-          setLoading(false);
-          hasLocalData = true;
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    if (!hasLocalData) {
-      setLoading(true);
-    }
+    setLoading(true);
 
     const loadFleet = async () => {
       try {
@@ -123,10 +104,12 @@ export default function MasterFleetRosterPage() {
           const data = await res.json();
           const apiList = data.vehicles || [];
           if (apiList.length > 0) {
-            const regMap = new Map();
-            localList.forEach(v => regMap.set(v.registrationNumber, v));
-            apiList.forEach((v: any) => regMap.set(v.registrationNumber, v));
-            setVehicles(Array.from(regMap.values()));
+            setVehicles(apiList);
+            try {
+              localStorage.setItem("user_uploaded_fleet", JSON.stringify(apiList));
+            } catch (e) {
+              console.error("Local storage quota exceeded");
+            }
           }
         }
       } catch (e) {

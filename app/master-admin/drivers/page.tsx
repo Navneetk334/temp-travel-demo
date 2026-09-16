@@ -372,10 +372,10 @@ export default function MasterDriversPage() {
 
   const filteredDrivers = drivers.filter((drv) => {
     const matchesSearch =
-      drv.name.toLowerCase().includes(search.toLowerCase()) ||
-      drv.phone.includes(search) ||
-      drv.aadhaarNumber.includes(search) ||
-      drv.panNumber.toLowerCase().includes(search.toLowerCase());
+      drv.name?.toLowerCase().includes(search.toLowerCase()) ||
+      drv.phone?.includes(search) ||
+      (drv.aadhaarNumber || "").includes(search) ||
+      (drv.panNumber || "").toLowerCase().includes(search.toLowerCase());
     const matchesDuty = filterDuty === "ALL" || drv.status === filterDuty;
     return matchesSearch && matchesDuty;
   });
