@@ -11,8 +11,10 @@ export async function GET(req: NextRequest) {
     // Query user uploaded vehicles from Prisma database
     let dbVehicles: any[] = [];
     try {
-      dbVehicles = await prisma.fleetVehicle.findMany({
-        select: minimal ? {
+      const queryOpts: any = { orderBy: { createdAt: "desc" } };
+      
+      if (minimal) {
+        queryOpts.select = {
           id: true,
           make: true,
           model: true,
@@ -22,15 +24,17 @@ export async function GET(req: NextRequest) {
           status: true,
           category: { select: { name: true } },
           driver: { select: { id: true, name: true, phone: true } }
-        } : undefined,
-        include: minimal ? undefined : {
+        };
+      } else {
+        queryOpts.include = {
           category: true,
           driver: {
             select: { id: true, name: true, phone: true }
           }
-        },
-        orderBy: { createdAt: "desc" }
-      });
+        };
+      }
+
+      dbVehicles = await prisma.fleetVehicle.findMany(queryOpts);
     } catch (e) {
       console.error("Prisma query error:", e);
     }
