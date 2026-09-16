@@ -80,6 +80,13 @@ export default async function BlogIndexPage({ searchParams }: PageProps) {
         },
       },
     });
+    
+    // Serialize dates to prevent client-side TypeErrors when calling .slice() on Date objects
+    posts = posts.map(p => ({
+      ...p,
+      createdAt: p.createdAt ? p.createdAt.toISOString() : null,
+      updatedAt: p.updatedAt ? p.updatedAt.toISOString() : null
+    }));
   } catch (e) {
     console.error("Blog posts DB error:", e);
   }
