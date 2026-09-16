@@ -20,9 +20,6 @@ export async function GET(req: NextRequest) {
           capacity: true,
           subCategory: true,
           status: true,
-          insuranceExpiry: true,
-          fitnessExpiry: true,
-          permitExpiry: true,
           category: { select: { name: true } },
           driver: { select: { id: true, name: true, phone: true } }
         } : undefined,
