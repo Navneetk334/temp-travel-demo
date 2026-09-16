@@ -156,7 +156,11 @@ export default function MasterOmnichannelCRMPage() {
       dropLocation: raw.dropLocation || raw.drop || "-",
       status: (raw.status || "NEW").toUpperCase(),
       createdAt: raw.createdAt || raw.date || new Date().toISOString(),
-      notes: raw.notes || raw.requirements || raw.message || raw.details || ""
+      notes: raw.notes || raw.requirements || raw.message || raw.details || "",
+      sourceApi: defaultType === "Rental Inquiry" ? "/api/rental/lead" :
+                 defaultType === "Corporate Inquiry" ? "/api/corporate/lead" :
+                 defaultType === "Tour Package Booking" ? "/api/bookings" :
+                 defaultType === "Contact Inquiry" ? "/api/contact" : null
     };
   };
 
@@ -422,6 +426,21 @@ export default function MasterOmnichannelCRMPage() {
   const handleBulkDelete = async () => {
     if (selectedLeadIds.length === 0) return;
     if (await showConfirm(`Are you sure you want to delete ${selectedLeadIds.length} selected lead(s)?`)) {
+      const itemsToDelete = leads.filter(l => selectedLeadIds.includes(l.id));
+      
+      // Call backend DELETE for each item if it came from the API
+      await Promise.allSettled(
+        itemsToDelete.map(async (item) => {
+          if (item.sourceApi && !item.id.startsWith('lead_')) {
+            try {
+              await fetch(`${item.sourceApi}/${item.id}`, { method: "DELETE" });
+            } catch (e) {
+              console.error(`Failed to delete lead ${item.id}`, e);
+            }
+          }
+        })
+      );
+
       const updated = leads.filter(l => !selectedLeadIds.includes(l.id));
       setLeads(updated);
       setSelectedLeadIds([]);
