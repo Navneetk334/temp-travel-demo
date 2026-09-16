@@ -86,8 +86,8 @@ function FleetContent() {
         <div className="flex justify-center items-center gap-2 sm:gap-3 flex-wrap">
           {[
             { label: "All Vehicles", value: "ALL" },
-            { label: "Executive Sedans", value: "SEDAN" },
-            { label: "Premium SUVs", value: "SUV" },
+            { label: "Sedans", value: "SEDAN" },
+            { label: "SUVs", value: "SUV" },
           ].map((tab) => {
             const isActive = selectedCategory === tab.value;
             return (
