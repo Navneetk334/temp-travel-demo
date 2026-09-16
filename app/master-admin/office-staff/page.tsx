@@ -80,20 +80,17 @@ export default function MasterOfficeStaffPage() {
     accountNumber: "",
     confirmAccountNumber: "",
     ifscCode: "",
-    departmentId: "",
-    permissionProfileId: ""
+    departmentId: ""
   });
   const [departments, setDepartments] = useState<any[]>([]);
-  const [profiles, setProfiles] = useState<any[]>([]);
 
   // Load from API
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [staffRes, deptRes, profRes] = await Promise.all([
+        const [staffRes, deptRes] = await Promise.all([
           fetch("/api/admin/staff"),
-          fetch("/api/admin/departments"),
-          fetch("/api/admin/permission-profiles")
+          fetch("/api/admin/departments")
         ]);
 
         if (staffRes.ok) {
@@ -101,12 +98,8 @@ export default function MasterOfficeStaffPage() {
           setStaffList(staffData.staff || []);
         }
         if (deptRes.ok) {
-          const deptData = await deptRes.json();
-          setDepartments(deptData.departments || []);
-        }
-        if (profRes.ok) {
-          const profData = await profRes.json();
-          setProfiles(profData.profiles || []);
+          const data = await deptRes.json();
+          setDepartments(data || []);
         }
       } catch (err) {
         console.error("Failed to load staff data", err);
@@ -164,8 +157,7 @@ export default function MasterOfficeStaffPage() {
       accountNumber: stf.accountNumber || "",
       confirmAccountNumber: stf.accountNumber || "",
       ifscCode: stf.ifscCode || "",
-      departmentId: stf.departmentId || "",
-      permissionProfileId: stf.permissionProfileId || ""
+      departmentId: stf.departmentId || ""
     });
     setShowAddModal(true);
   };

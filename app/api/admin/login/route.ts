@@ -23,8 +23,7 @@ export async function POST(req: NextRequest) {
     // 1. Try querying Database if available
     try {
       const dbAdmin = await prisma.admin.findUnique({
-        where: { email: cleanEmail },
-        include: { permissionProfile: true }
+        where: { email: cleanEmail }
       });
 
       if (dbAdmin && dbAdmin.isActive) {
@@ -32,10 +31,10 @@ export async function POST(req: NextRequest) {
         if (isValid) {
           authenticatedAdmin = {
             id: dbAdmin.id,
-            name: dbAdmin.name,
             email: dbAdmin.email,
+            name: dbAdmin.name,
             role: dbAdmin.role,
-            permissions: dbAdmin.permissionProfile ? dbAdmin.permissionProfile.permissions : []
+            permissions: dbAdmin.permissions || []
           };
         }
       }
