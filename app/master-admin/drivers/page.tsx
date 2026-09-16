@@ -507,7 +507,7 @@ export default function MasterDriversPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400 font-sans">Bank Account:</span>
-                      <span className="text-slate-300 font-bold">{drv.bankName} ({drv.accountNumber.slice(-4)})</span>
+                      <span className="text-slate-300 font-bold">{drv.bankName} ({(drv.accountNumber || "").slice(-4)})</span>
                     </div>
                   </div>
                 </div>
