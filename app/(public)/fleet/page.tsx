@@ -37,37 +37,14 @@ function FleetContent() {
   const [selectedBookingVehicle, setSelectedBookingVehicle] = useState<FleetVehicle | null>(null);
 
   useEffect(() => {
-    // 1. Instant local hydration from user uploaded fleet in Master Admin / Admin Panel
-    let localList: FleetVehicle[] = [];
-    const saved = localStorage.getItem("user_uploaded_fleet_vehicles") || localStorage.getItem("user_uploaded_fleet");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          localList = parsed;
-          setVehicles(localList);
-          setLoading(false);
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    // 2. Fetch from API fallback / sync
+    // 1. Fetch from API directly
     fetch("/api/fleet?limit=100")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data) {
           const apiList = Array.isArray(data) ? data : (data.vehicles || []);
           if (apiList.length > 0) {
-            const vMap = new Map();
-            localList.forEach(v => vMap.set(v.id || v.registrationNumber, v));
-            apiList.forEach((v: any) => {
-              if (!vMap.has(v.id || v.registrationNumber)) {
-                vMap.set(v.id || v.registrationNumber, v);
-              }
-            });
-            setVehicles(Array.from(vMap.values()));
+            setVehicles(apiList);
           }
         }
       })
