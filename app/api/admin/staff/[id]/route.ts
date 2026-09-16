@@ -13,7 +13,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const body = await req.json();
 
     const { 
-      name, email, role, departmentId, permissionProfileId, isActive,
+      name, email, role, departmentId, isActive,
       employeeId, phone, dob, photoUrl, aadhaarNumber, panNumber, 
       bankName, accountHolderName, accountNumber, ifscCode, permissions
     } = body;
@@ -25,7 +25,6 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         email,
         role,
         departmentId: departmentId || null,
-        permissionProfileId: permissionProfileId || null,
         isActive: isActive !== undefined ? isActive : true,
         employeeId: employeeId || null,
         phone: phone || null,
@@ -40,8 +39,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         ...(permissions !== undefined && { permissions })
       },
       include: {
-        department: true,
-        permissionProfile: true
+        department: true
       }
     });
 

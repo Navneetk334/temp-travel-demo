@@ -11,8 +11,7 @@ export async function GET(req: NextRequest) {
 
     const staff = await prisma.admin.findMany({
       include: {
-        department: true,
-        permissionProfile: true
+        department: true
       },
       orderBy: { createdAt: "desc" }
     });
@@ -33,7 +32,7 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const { 
-      name, email, password, role, departmentId, permissionProfileId,
+      name, email, password, role, departmentId,
       employeeId, phone, dob, photoUrl, aadhaarNumber, panNumber, 
       bankName, accountHolderName, accountNumber, ifscCode
     } = body;
@@ -56,7 +55,6 @@ export async function POST(req: NextRequest) {
         passwordHash,
         role: role || "MANAGER",
         departmentId: departmentId || null,
-        permissionProfileId: permissionProfileId || null,
         employeeId: employeeId || null,
         phone: phone || null,
         dob: dob || null,
@@ -69,8 +67,7 @@ export async function POST(req: NextRequest) {
         ifscCode: ifscCode || null,
       },
       include: {
-        department: true,
-        permissionProfile: true
+        department: true
       }
     });
 
