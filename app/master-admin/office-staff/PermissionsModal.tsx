@@ -32,6 +32,16 @@ const PERMISSION_MODULES = [
     ]
   },
   {
+    module: "Duty Slips (Physical Trip Sheets)",
+    key: "duty_slips",
+    actions: [
+      { id: "duty_slips:view", label: "View Duty Slips" },
+      { id: "duty_slips:add", label: "Add / Scan Duty Slips" },
+      { id: "duty_slips:edit", label: "Edit Duty Slips" },
+      { id: "duty_slips:delete", label: "Delete Duty Slips" }
+    ]
+  },
+  {
     module: "Fleet & Vehicles",
     key: "fleet",
     actions: [
