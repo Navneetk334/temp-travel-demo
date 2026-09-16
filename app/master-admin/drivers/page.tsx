@@ -302,7 +302,7 @@ export default function MasterDriversPage() {
           })
         });
       }
-      
+
       if (!res.ok) {
         let errMsg = "Failed to save driver to database.";
         if (res.status === 413) errMsg = "Photo is too large (exceeds 1MB limit). Please select a smaller image.";
@@ -310,13 +310,13 @@ export default function MasterDriversPage() {
           try {
             const errData = await res.json();
             if (errData.error) errMsg = errData.error;
-          } catch (e) {}
+          } catch (e) { }
         }
         throw new Error(errMsg);
       }
-      
+
       const saved = await res.json();
-      
+
       // Update local state with real DB id
       const finalUpdated = updated.map(d => d.id === (editingDriver ? editingDriver.id : created.id) ? { ...d, id: saved.id } : d);
       setDrivers(finalUpdated);
@@ -325,7 +325,7 @@ export default function MasterDriversPage() {
       } catch (e) {
         console.error("Local storage quota exceeded");
       }
-      
+
       setShowAddModal(false);
     } catch (err: any) {
       await showAlert(err.message || "An error occurred while saving the driver.");
@@ -515,14 +515,14 @@ export default function MasterDriversPage() {
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
-                      <button
-                        onClick={() => handleDeleteDriver(drv)}
-                        disabled={deletingId === drv.id}
-                        className="p-1.5 bg-slate-950 border border-white/10 hover:border-rose-400 rounded-lg text-slate-400 hover:text-rose-400 transition-all cursor-pointer disabled:opacity-50"
-                        title="Delete Driver Record"
-                      >
-                        {deletingId === drv.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                      </button>
+                    <button
+                      onClick={() => handleDeleteDriver(drv)}
+                      disabled={deletingId === drv.id}
+                      className="p-1.5 bg-slate-950 border border-white/10 hover:border-rose-400 rounded-lg text-slate-400 hover:text-rose-400 transition-all cursor-pointer disabled:opacity-50"
+                      title="Delete Driver Record"
+                    >
+                      {deletingId === drv.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -552,8 +552,8 @@ export default function MasterDriversPage() {
                 </h3>
               </div>
 
-              <form 
-                onSubmit={handleDriverFormSubmit} 
+              <form
+                onSubmit={handleDriverFormSubmit}
                 onInvalidCapture={(e) => {
                   const target = e.target as HTMLElement;
                   target.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -702,7 +702,7 @@ export default function MasterDriversPage() {
                         onChange={(e) => {
                           let pan = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
                           let formatted = '';
-                          for(let i=0; i<pan.length; i++) {
+                          for (let i = 0; i < pan.length; i++) {
                             if (i < 5) formatted += pan[i].replace(/[^A-Z]/, '');
                             else if (i < 9) formatted += pan[i].replace(/[^0-9]/, '');
                             else if (i === 9) formatted += pan[i].replace(/[^A-Z]/, '');
@@ -811,11 +811,10 @@ export default function MasterDriversPage() {
                         placeholder="Repeat account number"
                         value={formData.confirmAccountNumber}
                         onChange={(e) => setFormData({ ...formData, confirmAccountNumber: e.target.value.replace(/\D/g, '') })}
-                        className={`w-full bg-slate-950 border rounded-xl px-3 py-2 text-slate-100 focus:outline-none font-mono ${
-                          formData.confirmAccountNumber && formData.accountNumber !== formData.confirmAccountNumber
-                            ? 'border-rose-500 focus:border-rose-500 ring-1 ring-rose-500'
-                            : 'border-white/10 focus:border-amber-400'
-                        }`}
+                        className={`w-full bg-slate-950 border rounded-xl px-3 py-2 text-slate-100 focus:outline-none font-mono ${formData.confirmAccountNumber && formData.accountNumber !== formData.confirmAccountNumber
+                          ? 'border-rose-500 focus:border-rose-500 ring-1 ring-rose-500'
+                          : 'border-white/10 focus:border-amber-400'
+                          }`}
                       />
                       {formData.confirmAccountNumber && formData.accountNumber !== formData.confirmAccountNumber && (
                         <p className="text-rose-500 text-[10px] font-bold">Account numbers do not match</p>
@@ -835,7 +834,7 @@ export default function MasterDriversPage() {
                         onChange={(e) => {
                           let ifsc = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
                           let formatted = '';
-                          for(let i=0; i<ifsc.length; i++) {
+                          for (let i = 0; i < ifsc.length; i++) {
                             if (i < 4) formatted += ifsc[i].replace(/[^A-Z]/, '');
                             else if (i === 4) formatted += ifsc[i].replace(/[^0]/, '0');
                             else if (i < 11) formatted += ifsc[i].replace(/[^A-Z0-9]/, '');
