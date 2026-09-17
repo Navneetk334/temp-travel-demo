@@ -320,7 +320,7 @@ async function seedCatalogOnly() {
       value: {
         siteName: "Temp Travel Car Rentals Pvt Ltd",
         contactEmail: "support@temptravels.com",
-        contactPhone: "+91 99999 99999",
+        contactPhone: "+91 70117 29639",
         officeAddress: "Unit 402, Pinnacle Business Park, Hinjewadi Phase 1, Pune, Maharashtra 411057",
         supportHours: "24/7 Dispatch Control Room",
       },

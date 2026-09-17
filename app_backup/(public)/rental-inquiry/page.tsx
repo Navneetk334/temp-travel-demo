@@ -178,7 +178,7 @@ export default function RentalInquiryPage() {
                     <input
                       type="tel"
                       required
-                      placeholder="+919999999999"
+                      placeholder="+917011729639"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 pl-9 pr-4 text-xs text-slate-100 focus:outline-none focus:border-primary"

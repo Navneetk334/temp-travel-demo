@@ -75,7 +75,7 @@ export default function InvoiceGenerator({ booking }: { booking: any }) {
             <p className="text-xs font-semibold mt-1">CAR RENTALS PVT LTD</p>
             <div className="text-[10px] mt-2 space-y-0.5 text-slate-600">
               <p>123 Corporate Park, Sector 62, Noida, UP 201309</p>
-              <p>Phone: +91-9999999999 | Email: billing@temptravels.com</p>
+              <p>Phone: +91-7011729639 | Email: billing@temptravels.com</p>
               <p className="font-bold">GSTIN: 09ABCDE1234F1Z5</p>
               <p>State: Uttar Pradesh | Code: 09</p>
             </div>

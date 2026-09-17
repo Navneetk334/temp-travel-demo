@@ -142,7 +142,7 @@ export default function TourInquiryForm({ tourId }: TourInquiryFormProps) {
             name="phone"
             value={formData.phone}
             onChange={handleChange}
-            placeholder="+919999999999"
+            placeholder="+917011729639"
             className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3.5 text-xs text-slate-100 focus:outline-none focus:border-primary transition-all"
           />
         </div>

@@ -159,7 +159,7 @@ export default function ContactForm() {
               maxLength={10}
               value={formData.phone}
               onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value.replace(/\D/g, "").slice(0, 10) }))}
-              placeholder="e.g. 9999999999"
+              placeholder="e.g. 7011729639"
               className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"
             />
           </div>

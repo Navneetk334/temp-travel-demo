@@ -207,7 +207,7 @@ export function getCityDetails(city: string): CityDetails {
     stateCode: "IN",
     postalCode: "400001",
     streetAddress: `Temp Travel Hub, Central Area, ${formattedCity}`,
-    phone: "+91-9999999999",
+    phone: "+91-7011729639",
     airport: `${formattedCity} Domestic Airport`,
     corporateHubs: [
       "Downtown Business Park",

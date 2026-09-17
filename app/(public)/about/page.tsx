@@ -63,7 +63,7 @@ export default async function AboutPage() {
     "logo": "https://temptravels.com/images/logo.png",
     "contactPoint": {
       "@type": "ContactPoint",
-      "telephone": "+91-9999999999",
+      "telephone": "+91-7011729639",
       "contactType": "customer service",
       "areaServed": "IN",
       "availableLanguage": ["en", "hi"]

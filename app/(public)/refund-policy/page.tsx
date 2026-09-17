@@ -53,7 +53,7 @@ export default function RefundPolicyPage() {
     {
       id: "contact-support",
       title: "Contact Support",
-      content: "For cancellation requests or status updates on refund transfers, contact our billing desk at billing@temptravels.com or call support at +91 99999 99111."
+      content: "For cancellation requests or status updates on refund transfers, contact our billing desk at billing@temptravels.com or call support at +91 70117 29639."
     }
   ];
 

@@ -30,7 +30,7 @@ export default function ContactPage() {
       "@type": "LocalBusiness",
       "name": "TEMP TRAVEL CAR RENTALS PVT LTD",
       "image": "https://temptravels.com/images/hero-cover.png",
-      "telephone": "+91-9999999999",
+      "telephone": "+91-7011729639",
       "email": "sales@temptravel.co.in",
       "address": {
         "@type": "PostalAddress",
@@ -91,11 +91,11 @@ export default function ContactPage() {
                 <div className="space-y-1.5 pl-11 text-sm text-slate-300">
                   <div className="flex justify-between items-center">
                     <span className="text-slate-400">Corporate & Sales Desk:</span>
-                    <a href="tel:+919999999999" className="font-bold hover:text-accent transition-colors">+91 99999 99999</a>
+                    <a href="tel:+917011729639" className="font-bold hover:text-accent transition-colors">+91 70117 29639</a>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-slate-400">Technical Support:</span>
-                    <a href="tel:+919999988888" className="font-bold hover:text-accent transition-colors">+91 99999 88888</a>
+                    <a href="tel:+917011729639" className="font-bold hover:text-accent transition-colors">+91 70117 29639</a>
                   </div>
                 </div>
               </div>
@@ -164,7 +164,7 @@ export default function ContactPage() {
                   Active drivers and corporate commuters can reach our round-the-clock emergency dispatch desk for roadside rescue or routing delays.
                 </p>
                 <div className="pl-11 text-sm font-extrabold text-accent">
-                  Helpline: <a href="tel:+919999999111" className="hover:underline">+91 99999 99111</a>
+                  Helpline: <a href="tel:+917011729639" className="hover:underline">+91 70117 29639</a>
                 </div>
               </div>
 

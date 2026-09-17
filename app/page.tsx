@@ -154,7 +154,7 @@ export default function Homepage() {
       "addressCountry": "IN"
     },
     "url": "https://temptravels.com",
-    "telephone": "+91-9999999999",
+    "telephone": "+91-7011729639",
     "priceRange": "₹₹",
     "areaServed": ["Mumbai", "Pune", "Nashik", "Goa", "Bangalore", "Delhi NCR"]
   };
@@ -670,7 +670,7 @@ export default function Homepage() {
                 <Phone className="w-6 h-6" />
               </div>
               <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Call Support</div>
-              <a href="tel:+919999999999" className="text-slate-200 font-bold hover:underline text-base">+91 99999 99999</a>
+              <a href="tel:+917011729639" className="text-slate-200 font-bold hover:underline text-base">+91 70117 29639</a>
             </div>
 
             <div className="bg-slate-900/60 border border-white/10 p-6 rounded-2xl space-y-3 flex flex-col items-center text-center">

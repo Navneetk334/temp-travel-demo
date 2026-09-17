@@ -7,7 +7,7 @@ export default function AdminSettingsPage() {
   const [settings, setSettings] = useState({
     siteName: "TEMP TRAVEL CAR RENTALS PVT LTD",
     supportEmail: "info@temptravels.com",
-    supportPhone: "+91 99999 99999",
+    supportPhone: "+91 70117 29639",
     officeAddress: "Flat No C-102, Shanti Vihar, Lokhandwala Complex, Kandivali East, Mumbai, MH, 400101",
     seoTitle: "Temp Travel Car Rentals - Corporate Transportation & Cab Services",
     seoDescription: "ISO 9001:2015 certified vehicle fleet providing corporate commutes and leisure tours.",

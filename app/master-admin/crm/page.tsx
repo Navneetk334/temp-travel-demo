@@ -1154,7 +1154,7 @@ export default function MasterOmnichannelCRMPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 <a
                   href={`https://wa.me/91${(dispatchedSuccess.lead?.phone || "").replace(/\D/g, "").slice(-10)}?text=${encodeURIComponent(
-                    `*TEMP TRAVEL CAR RENTALS - RIDE CONFIRMATION*\n\nDear ${dispatchedSuccess.lead?.customerName},\nYour cab has been confirmed and dispatched.\n\n*Booking Number (PNR):* ${dispatchedSuccess.bookingRef}\n*Vehicle:* ${dispatchedSuccess.vehicle?.make} ${dispatchedSuccess.vehicle?.model} (${dispatchedSuccess.vehicle?.registrationNumber})\n*Driver / Chauffeur:* ${dispatchedSuccess.driver?.name} (📞 +91-${dispatchedSuccess.driver?.phone})\n*Pickup Location:* ${dispatchedSuccess.pickupLocation}\n*Agreed Fare:* ₹${dispatchedSuccess.fare}\n\nThank you for choosing Temp Travel! For assistance call +91-9999999999.`
+                    `*TEMP TRAVEL CAR RENTALS - RIDE CONFIRMATION*\n\nDear ${dispatchedSuccess.lead?.customerName},\nYour cab has been confirmed and dispatched.\n\n*Booking Number (PNR):* ${dispatchedSuccess.bookingRef}\n*Vehicle:* ${dispatchedSuccess.vehicle?.make} ${dispatchedSuccess.vehicle?.model} (${dispatchedSuccess.vehicle?.registrationNumber})\n*Driver / Chauffeur:* ${dispatchedSuccess.driver?.name} (📞 +91-${dispatchedSuccess.driver?.phone})\n*Pickup Location:* ${dispatchedSuccess.pickupLocation}\n*Agreed Fare:* ₹${dispatchedSuccess.fare}\n\nThank you for choosing Temp Travel! For assistance call +91-7011729639.`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"

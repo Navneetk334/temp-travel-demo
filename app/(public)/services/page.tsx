@@ -33,7 +33,7 @@ export default function ServicesPage() {
       "@type": "LocalBusiness",
       "name": "TEMP TRAVEL CAR RENTALS PVT LTD",
       "image": "https://temptravels.com/images/hero-cover.png",
-      "telephone": "+91-9999999999",
+      "telephone": "+91-7011729639",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "Flat No C-102, Shanti Vihar, Lokhandwala Complex",

@@ -36,7 +36,7 @@ export default function Homepage() {
       "addressCountry": "IN"
     },
     "url": "https://temptravels.com",
-    "telephone": "+91-9999999999",
+    "telephone": "+91-7011729639",
     "priceRange": "₹₹",
     "areaServed": ["Mumbai", "Pune", "Nashik", "Goa", "Bangalore"],
     "offers": {
@@ -81,7 +81,7 @@ export default function Homepage() {
               Book Cab
             </a>
             <a 
-              href="tel:+919999999999" 
+              href="tel:+917011729639" 
               className="flex items-center justify-center p-2.5 bg-slate-900 border border-white/10 rounded-lg text-slate-300 hover:text-accent transition-colors"
             >
               <Phone className="w-4 h-4" />
@@ -457,7 +457,7 @@ export default function Homepage() {
                 </div>
                 <div>
                   <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Call Support</div>
-                  <a href="tel:+919999999999" className="text-slate-200 font-bold hover:underline">+91 99999 99999</a>
+                  <a href="tel:+917011729639" className="text-slate-200 font-bold hover:underline">+91 70117 29639</a>
                 </div>
               </div>
 

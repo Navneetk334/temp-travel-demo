@@ -49,7 +49,7 @@ export default function AdminPaymentsPage() {
           order_id: "order_OG8927F389A",
           method: "upi",
           email: "ananya@example.com",
-          contact: "+919999999999",
+          contact: "+917011729639",
           created_at: 1780838400
         }
       },

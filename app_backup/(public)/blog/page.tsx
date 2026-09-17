@@ -107,7 +107,7 @@ export default async function BlogIndexPage({ searchParams }: PageProps) {
               Book Cab
             </Link>
             <a 
-              href="tel:+919999999999" 
+              href="tel:+917011729639" 
               className="flex items-center justify-center p-2.5 bg-slate-900 border border-white/10 rounded-lg text-slate-300 hover:text-accent transition-colors"
             >
               <Phone className="w-4 h-4" />

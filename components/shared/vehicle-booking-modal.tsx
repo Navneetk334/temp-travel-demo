@@ -336,7 +336,7 @@ export default function VehicleBookingModal({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               <a
                 href={`https://wa.me/91${confirmation.phone.replace(/\D/g, "").slice(-10)}?text=${encodeURIComponent(
-                  `*TEMP TRAVEL CAR RENTALS - BOOKING REQUEST*\n\nDear ${confirmation.customerName},\nWe have received your booking request.\n\n*PNR Ref:* ${confirmation.bookingRef}\n*Vehicle:* ${confirmation.vehicle} (${confirmation.category} - ${confirmation.vehicleClass})\n*Pickup Date & Time:* ${confirmation.pickupDate} at ${confirmation.pickupTime}\n*Pickup Location:* ${confirmation.pickupLocation}\n*Destination:* ${confirmation.dropLocation}\n*Estimated Tariff:* ₹${confirmation.estimatedFare}\n\nOur reservation team will assign a verified chauffeur shortly. Support: +91-9999999999.`
+                  `*TEMP TRAVEL CAR RENTALS - BOOKING REQUEST*\n\nDear ${confirmation.customerName},\nWe have received your booking request.\n\n*PNR Ref:* ${confirmation.bookingRef}\n*Vehicle:* ${confirmation.vehicle} (${confirmation.category} - ${confirmation.vehicleClass})\n*Pickup Date & Time:* ${confirmation.pickupDate} at ${confirmation.pickupTime}\n*Pickup Location:* ${confirmation.pickupLocation}\n*Destination:* ${confirmation.dropLocation}\n*Estimated Tariff:* ₹${confirmation.estimatedFare}\n\nOur reservation team will assign a verified chauffeur shortly. Support: +91-7011729639.`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"

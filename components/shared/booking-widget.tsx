@@ -1216,7 +1216,7 @@ export default function BookingWidget() {
                     type="tel"
                     required
                     maxLength={10}
-                    placeholder="e.g. 9999999999"
+                    placeholder="e.g. 7011729639"
                     value={corpData.phone}
                     onChange={(e) => setCorpData({ ...corpData, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
                     className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"
@@ -1471,7 +1471,7 @@ export default function BookingWidget() {
                     type="tel"
                     required
                     maxLength={10}
-                    placeholder="e.g. 9999999999"
+                    placeholder="e.g. 7011729639"
                     value={localData.phone}
                     onChange={(e) => setLocalData({ ...localData, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
                     className="w-full h-[42px] bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"
@@ -1835,7 +1835,7 @@ export default function BookingWidget() {
                     type="tel"
                     required
                     maxLength={10}
-                    placeholder="e.g. 9999999999"
+                    placeholder="e.g. 7011729639"
                     value={outstationData.phone}
                     onChange={(e) => setOutstationData({ ...outstationData, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
                     className="w-full h-[42px] bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"
@@ -2052,7 +2052,7 @@ export default function BookingWidget() {
                   <input
                     type="tel"
                     required
-                    placeholder="e.g. 9999999999"
+                    placeholder="e.g. 7011729639"
                     value={tourData.phone}
                     onChange={(e) => setTourData({ ...tourData, phone: e.target.value })}
                     className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"

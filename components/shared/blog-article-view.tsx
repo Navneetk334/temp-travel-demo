@@ -276,7 +276,7 @@ export default function BlogArticleView({
             Book Cab Online
           </Link>
           <a
-            href="tel:+919999999999"
+            href="tel:+917011729639"
             className="bg-slate-950 border border-white/10 hover:border-amber-400 text-slate-200 hover:text-white font-bold px-4 py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition-all"
           >
             <PhoneCall className="w-4 h-4 text-amber-400" />

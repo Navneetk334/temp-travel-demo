@@ -160,7 +160,7 @@ export default function CorporateInquiryPage() {
                     <input
                       type="tel"
                       required
-                      placeholder="e.g. +919999999999"
+                      placeholder="e.g. +917011729639"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"

@@ -28,7 +28,7 @@ export default function MasterSettingsVaultPage() {
   const [globalSettings, setGlobalSettings] = useState({
     companyName: "TEMP TRAVEL CAR RENTALS PVT LTD",
     contactEmail: "info@temptravels.com",
-    contactPhone: "+91-9999999999",
+    contactPhone: "+91-7011729639",
     supportAddress: "Flat No C-102, Shanti Vihar, Lokhandwala Complex, Mumbai - 400101",
     currencySymbol: "₹",
     defaultSedanKmRate: "12",

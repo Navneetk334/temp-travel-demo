@@ -241,7 +241,7 @@ export default function CorporateInquiryPage() {
                       type="tel"
                       required
                       maxLength={10}
-                      placeholder="e.g. 9999999999"
+                      placeholder="e.g. 7011729639"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
                       className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"

@@ -38,9 +38,9 @@ export default function PaymentFailurePage() {
 
         {/* Support contacts */}
         <div className="flex justify-center gap-6 text-xs text-slate-400 border-t border-white/5 pt-5">
-          <a href="tel:+919999999999" className="flex items-center gap-1 hover:text-accent transition-colors">
+          <a href="tel:+917011729639" className="flex items-center gap-1 hover:text-accent transition-colors">
             <Phone className="w-4 h-4 text-accent" />
-            <span>+91 99999 99999</span>
+            <span>+91 70117 29639</span>
           </a>
           <a href="mailto:info@temptravels.com" className="flex items-center gap-1 hover:text-accent transition-colors">
             <Mail className="w-4 h-4 text-accent" />
