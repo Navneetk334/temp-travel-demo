@@ -104,98 +104,42 @@ export default function PublicGalleryPage() {
   }, [activeCategory]);
 
   // Global Window Wheel Scroll Handler (Enables full-screen mouse wheel scrolling everywhere)
-  // useEffect(() => {
-  //   const handleGlobalWheel = (e: WheelEvent) => {
-  //     if (lightboxIndex !== null) return;
-  //     // Convert vertical deltaY or horizontal deltaX into horizontal cylinder scroll
-  //     const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-  //     targetScrollRef.current += delta * 1.35;
-  //   };
-
-  //   window.addEventListener("wheel", handleGlobalWheel, { passive: true });
-  //   return () => window.removeEventListener("wheel", handleGlobalWheel);
-  // }, [lightboxIndex]);
-
-  // Smooth Lerp & Concave Curved Screen Animation Loop Engine
   useEffect(() => {
-    if (loading || items.length === 0) return;
-
-    let prevTime = performance.now();
-
-    const updateMotion = (time: number) => {
-      const delta = Math.min((time - prevTime) / 1000, 0.1);
-      prevTime = time;
-
-      // Lerp smooth scroll calculation
-      const prevScroll = currentScrollRef.current;
-      currentScrollRef.current += (targetScrollRef.current - currentScrollRef.current) * 0.08;
-      velocityRef.current = currentScrollRef.current - prevScroll;
-
-      const viewportWidth = window.innerWidth;
-      const cardWidth = viewportWidth < 640 ? 320 : viewportWidth < 1024 ? 540 : 640;
-      const cardGap = viewportWidth < 640 ? 20 : 44;
-      const cardSpacing = cardWidth + cardGap;
-      const totalWidth = items.length * cardSpacing;
-
-      let closestIdx = 0;
-      let minCenterDist = Infinity;
-
-      if (containerRef.current) {
-        const cards = containerRef.current.children;
-        for (let i = 0; i < items.length; i++) {
-          const cardEl = cards[i] as HTMLElement;
-          if (!cardEl) continue;
-
-          // Wrap scroll position infinitely
-          let itemX = (i * cardSpacing - currentScrollRef.current) % totalWidth;
-          if (itemX < -cardSpacing) itemX += totalWidth;
-          if (itemX > totalWidth - cardSpacing) itemX -= totalWidth;
-
-          const centerPos = itemX + cardWidth / 2;
-          const distFromCenter = centerPos - viewportWidth / 2;
-          const normalizedDist = distFromCenter / (viewportWidth / 2);
-
-          if (Math.abs(distFromCenter) < minCenterDist) {
-            minCenterDist = Math.abs(distFromCenter);
-            closestIdx = i;
-          }
-
-          if (!reducedMotion) {
-            // Concave Curved Screen Monitor Perspective Transformation
-            let rotateY = Math.max(-32, Math.min(32, normalizedDist * -26));
-            let rotateX = 0;
-
-            // Apply interactive card mouse hover tilt if this card is currently hovered
-            if (hoveredCardIndex === i) {
-              rotateY += cardTilt.x;
-              rotateX = cardTilt.y;
-            }
-
-            const translateZ = (1 - Math.pow(Math.abs(normalizedDist), 2)) * 70 - 80;
-            const scale = Math.max(0.72, 1 - Math.pow(Math.abs(normalizedDist), 1.8) * 0.28);
-            const opacity = Math.max(0.35, 1 - Math.abs(normalizedDist) * 0.5);
-            const skewX = Math.max(-10, Math.min(10, velocityRef.current * 0.14));
-
-            cardEl.style.transform = `translate3d(${itemX}px, 0px, ${translateZ}px) rotateY(${rotateY}deg) rotateX(${rotateX}deg) skewX(${skewX}deg) scale(${scale})`;
-            cardEl.style.opacity = `${opacity}`;
-            cardEl.style.zIndex = `${30 - Math.round(Math.abs(normalizedDist) * 10)}`;
-          } else {
-            cardEl.style.transform = `translate3d(${itemX}px, 0px, 0px)`;
-            cardEl.style.opacity = Math.abs(normalizedDist) < 0.5 ? "1" : "0.5";
-          }
-        }
+    let wheelTimeout: NodeJS.Timeout | null = null;
+    
+    const handleGlobalWheel = (e: WheelEvent) => {
+      if (lightboxIndex !== null || items.length === 0) return;
+      
+      // Debounce the wheel event to prevent rapid fire scrolling
+      if (wheelTimeout) return;
+      
+      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      
+      if (delta > 10) {
+        // Scroll Right/Down
+        setActiveCardIndex((prev) => (prev + 1) % items.length);
+        wheelTimeout = setTimeout(() => { wheelTimeout = null; }, 400);
+      } else if (delta < -10) {
+        // Scroll Left/Up
+        setActiveCardIndex((prev) => (prev - 1 + items.length) % items.length);
+        wheelTimeout = setTimeout(() => { wheelTimeout = null; }, 400);
       }
-
-      setActiveCardIndex(closestIdx);
-      animationFrameRef.current = requestAnimationFrame(updateMotion);
     };
 
-    animationFrameRef.current = requestAnimationFrame(updateMotion);
+    window.addEventListener("wheel", handleGlobalWheel, { passive: true });
+    return () => window.removeEventListener("wheel", handleGlobalWheel);
+  }, [lightboxIndex, items.length]);
 
-    return () => {
-      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
-    };
-  }, [loading, items.length, reducedMotion, hoveredCardIndex, cardTilt]);
+  // Smooth Autoplay for the 3D Coverflow
+  useEffect(() => {
+    if (loading || items.length === 0 || lightboxIndex !== null) return;
+    
+    const autoplayInterval = setInterval(() => {
+      setActiveCardIndex((prev) => (prev + 1) % items.length);
+    }, 4000); // Slow, smooth progression every 4 seconds
+
+    return () => clearInterval(autoplayInterval);
+  }, [loading, items.length, lightboxIndex]);
 
   // Mouse Drag Handlers
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -361,7 +305,7 @@ export default function PublicGalleryPage() {
               imageUrl: item.imageUrl,
               thumbUrl: item.imageUrl,
               title: item.title || "Untitled",
-              palette: ['#000', '#38bdf8'],
+              palette: ['#000', 'transparent'],
               genre: item.category || "GALLERY",
               photographer: item.location || "TEMP TRAVEL",
               exif: {
