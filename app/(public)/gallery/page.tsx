@@ -6,10 +6,13 @@ import {
   ChevronLeft, 
   ChevronRight, 
   X, 
+  Maximize2,
+  Camera,
   MapPin, 
   Calendar, 
   Sparkles, 
   ArrowRight,
+  ArrowDown,
   Car
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
@@ -252,7 +255,7 @@ export default function PublicGalleryPage() {
 
 
       {/* MINIMAL CATEGORY FILTER RIBBON (TOP BAR) */}
-      <div className="absolute top-24 sm:top-28 left-0 right-0 z-40 px-6 sm:px-12 flex justify-center pointer-events-auto">
+      <div className="relative z-40 px-6 sm:px-12 flex justify-center pointer-events-auto mt-4 mb-8">
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1 text-[11px] font-mono bg-slate-950/80 p-1.5 rounded-full border border-white/10 backdrop-blur-md">
           {CATEGORIES.map((cat) => {
             const isActive = activeCategory === cat.value;
@@ -428,6 +431,15 @@ export default function PublicGalleryPage() {
         </Portal>
       )}
 
+      {/* Floating Scroll to Footer Button */}
+      <button 
+        onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
+        className="fixed bottom-8 right-8 z-[100] p-3.5 bg-slate-900/90 text-accent rounded-full border border-slate-700 shadow-[0_0_20px_rgba(0,0,0,0.5)] hover:bg-slate-800 hover:scale-110 transition-all flex items-center justify-center group backdrop-blur-md"
+        title="Scroll to Footer"
+      >
+        <ArrowDown className="w-5 h-5 group-hover:translate-y-1 transition-transform" />
+      </button>
+      
       </div>
       <Footer />
     </div>
