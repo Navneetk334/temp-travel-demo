@@ -191,7 +191,8 @@ export default function PhotoCoverflow3D({
           // 3D Mathematical Transform coordinates
           const translateX = offset * (typeof window !== 'undefined' && window.innerWidth < 640 ? 110 : 250);
           const translateZ = -absOffset * 160;
-          const rotateY = offset === 0 ? 0 : offset > 0 ? Math.min(48, offset * 48) : Math.max(-48, offset * 48);
+          // offset > 0 (right side) needs negative rotation to point left edge away from camera
+          const rotateY = offset === 0 ? 0 : offset > 0 ? Math.max(-48, offset * -48) : Math.min(48, offset * -48);
           const scale = Math.max(0, 1 - absOffset * 0.12);
           const opacity = Math.max(0.2, 1 - absOffset * 0.22);
           const zIndex = 50 - Math.round(absOffset * 10);
