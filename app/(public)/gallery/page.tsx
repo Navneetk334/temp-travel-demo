@@ -241,7 +241,7 @@ export default function PublicGalleryPage() {
 
   return (
     <div className="bg-black min-h-screen w-full text-slate-100 selection:bg-accent selection:text-slate-950 overflow-x-hidden relative select-none flex flex-col">
-      <div className="flex-grow relative flex flex-col pt-32 pb-20" onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}>
+      <div className="flex-grow relative flex flex-col pt-24 pb-8" onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}>
       
       {/* SVG CONCAVE CURVED MONITOR SCREEN MASK DEFINITION */}
       <svg width="0" height="0" className="absolute pointer-events-none">
@@ -299,7 +299,7 @@ export default function PublicGalleryPage() {
           </div>
         </div>
       ) : (
-        <div className="relative h-full w-full flex items-center justify-center overflow-hidden z-20 pt-16">
+        <div className="flex-1 relative w-full flex items-center justify-center overflow-hidden z-20">
           <PhotoCoverflow3D 
             photos={items.map((item, idx) => ({
               id: item.id || idx,
@@ -431,15 +431,6 @@ export default function PublicGalleryPage() {
         </Portal>
       )}
 
-      {/* Floating Scroll to Footer Button */}
-      <button 
-        onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
-        className="fixed bottom-8 right-8 z-[100] p-3.5 bg-slate-900/90 text-accent rounded-full border border-slate-700 shadow-[0_0_20px_rgba(0,0,0,0.5)] hover:bg-slate-800 hover:scale-110 transition-all flex items-center justify-center group backdrop-blur-md"
-        title="Scroll to Footer"
-      >
-        <ArrowDown className="w-5 h-5 group-hover:translate-y-1 transition-transform" />
-      </button>
-      
       </div>
       <Footer />
     </div>
