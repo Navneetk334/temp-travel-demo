@@ -66,20 +66,26 @@ export default function Footer() {
               <Link href="/services" className="hover:text-accent transition-colors">Corporate Transportation</Link>
             </li>
             <li>
-              <Link href="/services" className="hover:text-accent transition-colors">Employee Commutes</Link>
+              <Link href="/services" className="hover:text-accent transition-colors">Pickup & Drop</Link>
             </li>
             <li>
-              <Link href="/services" className="hover:text-accent transition-colors">Airport Transfers</Link>
+              <Link href="/services" className="hover:text-accent transition-colors">Airport Transfer</Link>
             </li>
             <li>
-              <Link href="/services" className="hover:text-accent transition-colors">Local Hourly Rentals</Link>
+              <Link href="/services" className="hover:text-accent transition-colors">Local Car Rentals</Link>
             </li>
             <li>
-              <Link href="/services" className="hover:text-accent transition-colors">Outstation Cabs</Link>
+              <Link href="/services" className="hover:text-accent transition-colors">Outstation Car Rentals</Link>
             </li>
-            {/* <li>
-              <Link href="/services" className="hover:text-accent transition-colors">Custom Holiday Packages</Link>
-            </li> */}
+            <li>
+              <Link href="/services" className="hover:text-accent transition-colors">Domestic Tour Packages</Link>
+            </li>
+            <li>
+              <Link href="/services" className="hover:text-accent transition-colors">International Tour Packages</Link>
+            </li>
+            <li>
+              <Link href="/services" className="hover:text-accent transition-colors">Customized Travel Solution</Link>
+            </li>
           </ul>
         </div>
 
