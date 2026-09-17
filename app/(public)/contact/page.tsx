@@ -196,7 +196,7 @@ export default function ContactPage() {
               {/* Real Google Maps Embed Iframe */}
               <iframe
                 title="TEMP TRAVEL CAR RENTALS PVT LTD - Google Maps Location"
-                src="https://maps.google.com/maps?q=place_id:ChIJ5Zoykd0bDTkRc8tFlL_O6rY&t=&z=16&ie=UTF8&iwloc=&output=embed"
+                src="https://maps.google.com/maps?q=TEMP+TRAVEL+CAR+RENTALS+PVT+LTD,+New+Delhi&t=&z=16&ie=UTF8&iwloc=&output=embed"
                 className="w-full h-full border-0 filter grayscale invert contrast-125 opacity-90 group-hover:filter-none group-hover:opacity-100 transition-all duration-500"
                 allowFullScreen
                 loading="lazy"
@@ -215,7 +215,7 @@ export default function ContactPage() {
                   </div>
                 </div>
                 <a
-                  href="https://www.google.com/maps/place/?q=place_id:ChIJ5Zoykd0bDTkRc8tFlL_O6rY"
+                  href="https://www.google.com/maps/search/?api=1&query=TEMP+TRAVEL+CAR+RENTALS+PVT+LTD,+New+Delhi"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-4 py-2.5 rounded-lg text-xs tracking-wider transition-all shadow-lg shrink-0 uppercase"
