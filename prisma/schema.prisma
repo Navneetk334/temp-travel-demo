@@ -512,3 +512,20 @@ model SiteSetting {
 
   @@index([key])
 }
+
+// ==========================================
+// MODULE 17: Gallery
+// ==========================================
+
+model GalleryImage {
+  id        String   @id @default(uuid())
+  src       String
+  title     String
+  category  String
+  colSpan   String   @default("col-span-12 md:col-span-4")
+  rowSpan   String   @default("row-span-1")
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+

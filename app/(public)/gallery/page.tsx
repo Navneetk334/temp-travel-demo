@@ -13,7 +13,7 @@ import {
   Car
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
-
+import PhotoCoverflow3D, { PhotoItem } from "@/components/shared/photo-coverflow-3d";
 interface GalleryItem {
   id: string;
   title?: string | null;
@@ -104,17 +104,17 @@ export default function PublicGalleryPage() {
   }, [activeCategory]);
 
   // Global Window Wheel Scroll Handler (Enables full-screen mouse wheel scrolling everywhere)
-  useEffect(() => {
-    const handleGlobalWheel = (e: WheelEvent) => {
-      if (lightboxIndex !== null) return;
-      // Convert vertical deltaY or horizontal deltaX into horizontal cylinder scroll
-      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-      targetScrollRef.current += delta * 1.35;
-    };
+  // useEffect(() => {
+  //   const handleGlobalWheel = (e: WheelEvent) => {
+  //     if (lightboxIndex !== null) return;
+  //     // Convert vertical deltaY or horizontal deltaX into horizontal cylinder scroll
+  //     const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+  //     targetScrollRef.current += delta * 1.35;
+  //   };
 
-    window.addEventListener("wheel", handleGlobalWheel, { passive: true });
-    return () => window.removeEventListener("wheel", handleGlobalWheel);
-  }, [lightboxIndex]);
+  //   window.addEventListener("wheel", handleGlobalWheel, { passive: true });
+  //   return () => window.removeEventListener("wheel", handleGlobalWheel);
+  // }, [lightboxIndex]);
 
   // Smooth Lerp & Concave Curved Screen Animation Loop Engine
   useEffect(() => {
@@ -367,113 +367,27 @@ export default function PublicGalleryPage() {
           </div>
         </div>
       ) : (
-        <div className="relative h-full w-full flex items-center justify-center overflow-hidden">
-          
-          {/* 3D CAROUSEL CONTAINER */}
-          <div 
-            ref={containerRef}
-            onMouseDown={handleMouseDown}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-            className="absolute inset-0 flex items-center perspective-[1200px] touch-pan-x z-20 pointer-events-auto"
-          >
-            {items.map((item, index) => {
-              const isCurrent = index === activeCardIndex;
-
-              return (
-                <div
-                  key={item.id}
-                  onMouseMove={(e) => handleCardMouseMove(e, index)}
-                  onMouseLeave={handleCardMouseLeave}
-                  onClick={() => {
-                    if (isCurrent) setLightboxIndex(index);
-                    else {
-                      const cardWidth = window.innerWidth < 640 ? 340 : 580;
-                      targetScrollRef.current = index * cardWidth;
-                    }
-                  }}
-                  className="absolute top-1/2 -translate-y-1/2 left-0 w-[320px] sm:w-[540px] md:w-[620px] h-[380px] sm:h-[480px] md:h-[520px] transition-all duration-200 group"
-                >
-                  {/* JESPER LANDBERG CONCAVE CURVED MONITOR SCREEN PANEL */}
-                  <div 
-                    style={{ clipPath: "url(#concave-screen-clip)" }}
-                    className="relative w-full h-full bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col justify-between p-6 sm:p-8 transition-transform duration-200 ease-out"
-                  >
-                    
-                    {/* Background Full-Bleed Image */}
-                    <div className="absolute inset-0 bg-slate-950 overflow-hidden">
-                      <img
-                        src={item.imageUrl}
-                        alt={item.altText || item.title || "TEMP TRAVEL Gallery"}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80"
-                        loading={index <= 2 ? "eager" : "lazy"}
-                      />
-                      {/* 3D Screen Surface Glare Gradient */}
-                      <div 
-                        className="absolute inset-0 pointer-events-none"
-                        style={{
-                          background: `linear-gradient(110deg, rgba(255, 255, 255, 0.15) 0%, transparent 45%, rgba(0, 0, 0, 0.5) 100%)`
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
-                    </div>
-
-                    {/* Top Left Category Pill Tag */}
-                    <div className="relative z-10 flex items-center justify-between">
-                      <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest bg-slate-950/80 text-accent border border-white/10 backdrop-blur-md">
-                        {item.category || "FLEET"}
-                      </span>
-                      {item.isFeatured && (
-                        <span className="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-accent text-slate-950 flex items-center gap-1 shadow-md">
-                          <Sparkles className="w-3 h-3" />
-                          <span>FEATURED</span>
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Bottom Content Overlays */}
-                    <div className="relative z-10 flex items-end justify-between gap-4">
-                      
-                      {/* Bottom Left Title & Location */}
-                      <div className="space-y-1 max-w-xs sm:max-w-md">
-                        <h3 className="text-xl sm:text-3xl font-extrabold text-slate-50 leading-tight group-hover:text-accent transition-colors">
-                          {item.title || "Untitled Journal Asset"}
-                        </h3>
-                        <div className="flex items-center gap-2 text-xs text-slate-300 font-mono">
-                          {item.location && <span>{item.location}</span>}
-                          {item.location && item.year && <span>&bull;</span>}
-                          {item.year && <span>{item.year}</span>}
-                        </div>
-                      </div>
-
-                      {/* Bottom Right Circular Arrow Button (Jesper Landberg style) */}
-                      <div className="w-10 h-10 rounded-full bg-slate-950/80 border border-white/20 flex items-center justify-center text-white group-hover:bg-accent group-hover:text-slate-950 transition-all shrink-0">
-                        <ArrowRight className="w-4 h-4" />
-                      </div>
-
-                    </div>
-
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* JESPER LANDBERG 3D PERSPECTIVE FLOOR GRID */}
-          <div className="absolute bottom-0 inset-x-0 h-64 pointer-events-none z-10 overflow-hidden">
-            <div 
-              className="w-full h-full opacity-[0.22]"
-              style={{
-                backgroundImage: `linear-gradient(to right, rgba(255, 255, 255, 0.4) 1px, transparent 1px),
-                                  linear-gradient(to bottom, rgba(255, 255, 255, 0.4) 1px, transparent 1px)`,
-                backgroundSize: "80px 80px",
-                transform: "perspective(900px) rotateX(76deg) translateY(180px)",
-                transformOrigin: "center top",
-              }}
-            />
-          </div>
-
+        <div className="relative h-full w-full flex items-center justify-center overflow-hidden z-20 pt-16">
+          <PhotoCoverflow3D 
+            photos={items.map((item, idx) => ({
+              id: item.id || idx,
+              imageUrl: item.imageUrl,
+              thumbUrl: item.imageUrl,
+              title: item.title || "Untitled",
+              palette: ['#000', '#38bdf8'],
+              genre: item.category || "GALLERY",
+              photographer: item.location || "TEMP TRAVEL",
+              exif: {
+                aperture: "f/2.8",
+                shutterSpeed: "1/500s",
+                camera: item.year || "2024",
+              }
+            }))}
+            activeIndex={activeCardIndex}
+            onChangeIndex={setActiveCardIndex}
+            onSelectPhoto={(photo) => setLightboxIndex(items.findIndex(i => i.id === photo.id))}
+            onInspect={(photo) => setLightboxIndex(items.findIndex(i => i.id === photo.id))}
+          />
         </div>
       )}
 
