@@ -241,7 +241,7 @@ export default function PublicGalleryPage() {
 
   return (
     <div className="bg-black min-h-screen w-full text-slate-100 selection:bg-accent selection:text-slate-950 overflow-x-hidden relative select-none flex flex-col">
-      <div className="flex-grow relative flex flex-col pt-24 pb-8" onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}>
+      <div className="flex-grow relative flex flex-col pt-36 pb-8" onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}>
       
       {/* SVG CONCAVE CURVED MONITOR SCREEN MASK DEFINITION */}
       <svg width="0" height="0" className="absolute pointer-events-none">
