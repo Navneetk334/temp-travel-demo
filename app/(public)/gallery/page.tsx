@@ -295,7 +295,7 @@ export default function PublicGalleryPage() {
     <div 
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
-      className="bg-black h-full w-full text-slate-100 selection:bg-accent selection:text-slate-950 overflow-hidden relative cursor-none select-none"
+      className="bg-black h-full w-full text-slate-100 selection:bg-accent selection:text-slate-950 overflow-hidden relative select-none"
     >
       
       {/* SVG CONCAVE CURVED MONITOR SCREEN MASK DEFINITION */}
@@ -307,20 +307,7 @@ export default function PublicGalleryPage() {
         </defs>
       </svg>
 
-      {/* FLOATING JESPER LANDBERG WHITE HAND CURSOR POINTER */}
-      {!reducedMotion && isPointerVisible && (
-        <div
-          style={{
-            transform: `translate3d(${mousePos.x - 14}px, ${mousePos.y - 14}px, 0px) scale(${isDraggingRef.current ? 0.9 : 1})`,
-          }}
-          className="fixed pointer-events-none z-50 transition-transform duration-75 ease-out text-white drop-shadow-lg"
-        >
-          {/* White Hand Icon */}
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" className="text-white">
-            <path d="M9 11.25V4.5C9 3.67157 9.67157 3 10.5 3C11.3284 3 12 3.67157 12 4.5V10.25M12 4.5C12 3.67157 12.6716 3 13.5 3C14.3284 3 15 3.67157 15 4.5V10.25M15 4.5C15 3.67157 15.6716 3 16.5 3C17.3284 3 18 3.67157 18 4.5V14.25C18 17.5637 15.3137 20.25 12 20.25H11.25C8.35051 20.25 5.86178 18.3976 5.06836 15.6033L4.17937 12.4674C3.89668 11.4704 4.54518 10.4578 5.53982 10.2603C6.30939 10.1074 7.08643 10.4907 7.42938 11.1912L9 14.4074V11.25Z" />
-          </svg>
-        </div>
-      )}
+
 
       {/* MINIMAL CATEGORY FILTER RIBBON (TOP BAR) */}
       <div className="absolute top-24 sm:top-28 left-0 right-0 z-40 px-6 sm:px-12 flex justify-center pointer-events-auto">

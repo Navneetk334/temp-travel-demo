@@ -118,7 +118,7 @@ export default function PhotoCoverflow3D({
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      className="relative w-full h-[540px] sm:h-[600px] flex flex-col items-center justify-center overflow-hidden select-none cursor-grab active:cursor-grabbing bg-[#0a0a0c]"
+      className="relative w-full h-[540px] sm:h-[600px] flex flex-col items-center justify-center overflow-hidden select-none cursor-grab active:cursor-grabbing bg-transparent"
       style={{
         perspective: '1200px',
       }}
@@ -204,7 +204,7 @@ export default function PhotoCoverflow3D({
                   {/* Badges on active card */}
                   {isCenter && (
                     <div className="absolute top-2.5 left-2.5 z-10 flex items-center gap-1.5">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-slate-950/80 backdrop-blur-md text-sky-300 border border-white/15">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-slate-950/80 backdrop-blur-md text-accent border border-white/15">
                         {photo.genre}
                       </span>
                     </div>
@@ -240,7 +240,7 @@ export default function PhotoCoverflow3D({
 
                 {/* Active Indicator Glow Ring */}
                 {isCenter && (
-                  <div className="absolute inset-0 rounded-2xl ring-2 ring-sky-500/40 pointer-events-none shadow-[0_0_30px_rgba(56,189,248,0.2)]" />
+                  <div className="absolute inset-0 rounded-2xl ring-2 ring-accent/40 pointer-events-none shadow-[0_0_30px_rgba(250,204,21,0.2)]" />
                 )}
               </div>
 
@@ -282,7 +282,7 @@ export default function PhotoCoverflow3D({
           className="cursor-pointer px-5 py-2.5 rounded-2xl bg-slate-950/80 hover:bg-slate-900 backdrop-blur-xl border border-slate-800/90 shadow-2xl flex items-center gap-3 transition-all hover:border-slate-700"
         >
           <div className="flex items-center gap-2">
-            <Camera className="w-4 h-4 text-sky-400" />
+            <Camera className="w-4 h-4 text-accent" />
             <span className="text-xs font-semibold text-white">{activePhoto?.title}</span>
           </div>
           <span className="text-slate-600">•</span>
@@ -290,7 +290,7 @@ export default function PhotoCoverflow3D({
             {activePhoto?.exif?.camera}
           </span>
           <span className="text-slate-600 hidden sm:inline">•</span>
-          <span className="text-[11px] text-sky-400 font-medium">Click to Inspect EXIF →</span>
+          <span className="text-[11px] text-accent font-medium">Click to Inspect EXIF →</span>
         </div>
 
         <button
