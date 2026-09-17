@@ -166,12 +166,9 @@ export default function PhotoCoverflow3D({
         />
       </div>
 
-      {/* 3D Horizon Line / Floor Reflection Plane */}
-      <div className="absolute bottom-16 sm:bottom-20 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-slate-700/50 to-transparent pointer-events-none" />
-
       {/* 3D Cards Stage */}
       <div
-        className="relative w-full max-w-4xl h-[360px] sm:h-[420px] flex items-center justify-center"
+        className="relative w-full max-w-[1400px] h-[360px] sm:h-[420px] flex items-center justify-center"
         style={{
           transformStyle: 'preserve-3d',
         }}
@@ -189,10 +186,10 @@ export default function PhotoCoverflow3D({
           const absOffset = Math.abs(offset);
 
           // Only render cards within visual depth range
-          if (absOffset > 4) return null;
+          if (absOffset > 6) return null;
 
           // 3D Mathematical Transform coordinates
-          const translateX = offset * (typeof window !== 'undefined' && window.innerWidth < 640 ? 110 : 190);
+          const translateX = offset * (typeof window !== 'undefined' && window.innerWidth < 640 ? 110 : 250);
           const translateZ = -absOffset * 160;
           const rotateY = offset === 0 ? 0 : offset > 0 ? Math.min(48, offset * 48) : Math.max(-48, offset * 48);
           const scale = Math.max(0, 1 - absOffset * 0.12);
@@ -300,43 +297,6 @@ export default function PhotoCoverflow3D({
         })}
       </div>
 
-      {/* Navigation Controls Bar */}
-      <div className="relative z-30 mt-6 sm:mt-10 flex items-center gap-4">
-        <button
-          type="button"
-          onClick={handlePrev}
-          className="p-3 rounded-2xl bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 shadow-xl transition-all hover:scale-105"
-          title="Previous Photograph (←)"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-
-        {/* Active Metadata Pill */}
-        <div
-          onClick={() => onSelectPhoto(activePhoto)}
-          className="cursor-pointer px-5 py-2.5 rounded-2xl bg-slate-950/80 hover:bg-slate-900 backdrop-blur-xl border border-slate-800/90 shadow-2xl flex items-center gap-3 transition-all hover:border-slate-700"
-        >
-          <div className="flex items-center gap-2">
-            <Camera className="w-4 h-4 text-accent" />
-            <span className="text-xs font-semibold text-white">{activePhoto?.title}</span>
-          </div>
-          <span className="text-slate-600">•</span>
-          <span className="text-xs text-slate-400 font-mono hidden sm:inline">
-            {activePhoto?.exif?.camera}
-          </span>
-          <span className="text-slate-600 hidden sm:inline">•</span>
-          <span className="text-[11px] text-accent font-medium">Click to Inspect EXIF →</span>
-        </div>
-
-        <button
-          type="button"
-          onClick={handleNext}
-          className="p-3 rounded-2xl bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 shadow-xl transition-all hover:scale-105"
-          title="Next Photograph (→)"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
-      </div>
     </div>
   );
 }
