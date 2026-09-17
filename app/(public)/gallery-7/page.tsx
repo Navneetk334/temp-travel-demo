@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { motion, useAnimation } from "framer-motion";
-import { useInView } from "react-intersection-observer";
+import React from "react";
+import { motion } from "framer-motion";
 
 const images = [
   { id: 1, src: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&q=80&w=2000", title: "The Executive Sedan", desc: "Uncompromising luxury and precision engineering." },
@@ -11,27 +10,12 @@ const images = [
 ];
 
 const FadeInSection = ({ children }: { children: React.ReactNode }) => {
-  const controls = useAnimation();
-  const [ref, inView] = useInView({ threshold: 0.3, triggerOnce: false });
-
-  useEffect(() => {
-    if (inView) {
-      controls.start("visible");
-    } else {
-      controls.start("hidden");
-    }
-  }, [controls, inView]);
-
   return (
     <motion.div
-      ref={ref}
-      animate={controls}
-      initial="hidden"
+      initial={{ opacity: 0, y: 50, scale: 0.98 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: false, amount: 0.3 }}
       transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} // Apple-like ease
-      variants={{
-        visible: { opacity: 1, y: 0, scale: 1 },
-        hidden: { opacity: 0, y: 50, scale: 0.98 }
-      }}
       className="w-full flex flex-col items-center"
     >
       {children}
