@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 import PhotoCoverflow3D, { PhotoItem } from "@/components/shared/photo-coverflow-3d";
+import Footer from "@/components/shared/footer";
 interface GalleryItem {
   id: string;
   title?: string | null;
@@ -236,11 +237,8 @@ export default function PublicGalleryPage() {
   const lightboxItem = lightboxIndex !== null ? items[lightboxIndex] : null;
 
   return (
-    <div 
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      className="bg-black h-full w-full text-slate-100 selection:bg-accent selection:text-slate-950 overflow-hidden relative select-none"
-    >
+    <div className="bg-black min-h-screen w-full text-slate-100 selection:bg-accent selection:text-slate-950 overflow-x-hidden relative select-none flex flex-col">
+      <div className="flex-grow relative flex flex-col pt-32 pb-20" onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}>
       
       {/* SVG CONCAVE CURVED MONITOR SCREEN MASK DEFINITION */}
       <svg width="0" height="0" className="absolute pointer-events-none">
@@ -430,6 +428,8 @@ export default function PublicGalleryPage() {
         </Portal>
       )}
 
+      </div>
+      <Footer />
     </div>
   );
 }

@@ -46,17 +46,50 @@ export default function PhotoCoverflow3D({
 
   const activePhoto = photos[activeIndex] || photos[0];
 
+  const currentScrollRef = useRef(activeIndex);
+  const targetScrollRef = useRef(activeIndex);
+  const animationFrameRef = useRef<number>(0);
+  const [, setRenderTick] = useState(0);
+
+  // Sync external activeIndex changes to targetScroll
+  useEffect(() => {
+    // We try to find the shortest path in a circular array
+    const total = photos.length;
+    let diff = (activeIndex - (targetScrollRef.current % total)) % total;
+    if (diff > total / 2) diff -= total;
+    if (diff < -total / 2) diff += total;
+    
+    targetScrollRef.current += diff;
+  }, [activeIndex, photos.length]);
+
+  // The Physics Lerp Loop
+  useEffect(() => {
+    const updateMotion = () => {
+      // Lerp current scroll towards target scroll
+      currentScrollRef.current += (targetScrollRef.current - currentScrollRef.current) * 0.08;
+      
+      // Force re-render with new floating offset
+      setRenderTick((prev) => prev + 1);
+      animationFrameRef.current = requestAnimationFrame(updateMotion);
+    };
+    animationFrameRef.current = requestAnimationFrame(updateMotion);
+    return () => cancelAnimationFrame(animationFrameRef.current);
+  }, []);
+
   const handlePrev = useCallback(() => {
-    const nextIdx = (activeIndex - 1 + photos.length) % photos.length;
-    onChangeIndex(nextIdx);
+    targetScrollRef.current -= 1;
+    // We still notify parent so the active indicator updates, but use modulo
+    const nextIdx = ((targetScrollRef.current % photos.length) + photos.length) % photos.length;
+    onChangeIndex(Math.round(nextIdx));
     galleryAudio.playInteractionPing(420);
-  }, [activeIndex, photos.length, onChangeIndex]);
+  }, [photos.length, onChangeIndex]);
 
   const handleNext = useCallback(() => {
-    const nextIdx = (activeIndex + 1) % photos.length;
-    onChangeIndex(nextIdx);
+    targetScrollRef.current += 1;
+    const nextIdx = ((targetScrollRef.current % photos.length) + photos.length) % photos.length;
+    onChangeIndex(Math.round(nextIdx));
     galleryAudio.playInteractionPing(520);
-  }, [activeIndex, photos.length, onChangeIndex]);
+  }, [photos.length, onChangeIndex]);
 
   // Drag handling for fluid swiping in 3D
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -144,15 +177,15 @@ export default function PhotoCoverflow3D({
         }}
       >
         {photos.map((photo, index) => {
-          // Calculate offset relative to active index
-          let offset = index - activeIndex;
           const total = photos.length;
+          // Calculate offset relative to smooth floating scroll
+          let offset = (index - currentScrollRef.current) % total;
 
           // Wrap around logic for seamless circular carousel
           if (offset > total / 2) offset -= total;
           if (offset < -total / 2) offset += total;
 
-          const isCenter = offset === 0;
+          const isCenter = Math.abs(offset) < 0.5;
           const absOffset = Math.abs(offset);
 
           // Only render cards within visual depth range
@@ -161,10 +194,10 @@ export default function PhotoCoverflow3D({
           // 3D Mathematical Transform coordinates
           const translateX = offset * (typeof window !== 'undefined' && window.innerWidth < 640 ? 110 : 190);
           const translateZ = -absOffset * 160;
-          const rotateY = offset === 0 ? 0 : offset > 0 ? -48 : 48;
-          const scale = 1 - absOffset * 0.12;
+          const rotateY = offset === 0 ? 0 : offset > 0 ? Math.min(48, offset * 48) : Math.max(-48, offset * 48);
+          const scale = Math.max(0, 1 - absOffset * 0.12);
           const opacity = Math.max(0.2, 1 - absOffset * 0.22);
-          const zIndex = 50 - absOffset;
+          const zIndex = 50 - Math.round(absOffset * 10);
 
           return (
             <div
@@ -175,11 +208,13 @@ export default function PhotoCoverflow3D({
                   galleryAudio.playCameraShutter();
                   onSelectPhoto(photo);
                 } else {
-                  onChangeIndex(index);
+                  targetScrollRef.current += offset;
+                  const nextIdx = ((targetScrollRef.current % photos.length) + photos.length) % photos.length;
+                  onChangeIndex(Math.round(nextIdx));
                   galleryAudio.playInteractionPing(460);
                 }
               }}
-              className="absolute w-[260px] sm:w-[340px] h-[340px] sm:h-[420px] transition-all duration-500 ease-out cursor-pointer group"
+              className="absolute w-[260px] sm:w-[340px] h-[340px] sm:h-[420px] cursor-pointer group"
               style={{
                 transformStyle: 'preserve-3d',
                 transform: `translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
