@@ -678,7 +678,7 @@ export default function Homepage() {
                 <Mail className="w-6 h-6" />
               </div>
               <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Email Sales</div>
-              <a href="mailto:info@temptravels.com" className="text-slate-200 font-bold hover:underline text-base">info@temptravels.com</a>
+              <a href="mailto:sales@temptravel.co.in" className="text-slate-200 font-bold hover:underline text-base">sales@temptravel.co.in</a>
             </div>
 
             <div className="bg-slate-900/60 border border-white/10 p-6 rounded-2xl space-y-3 flex flex-col items-center text-center">
@@ -687,7 +687,7 @@ export default function Homepage() {
               </div>
               <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Corporate Office</div>
               <div className="text-slate-300 text-xs leading-relaxed">
-                Flat No C-102, Shanti Vihar, Lokhandwala Complex, Kandivali East, Mumbai, MH 400101
+                Plot No. 183, Kh No. 16/2, A-Block, Qutub Vihar PH-I, New Delhi - 110071
               </div>
             </div>
           </div>

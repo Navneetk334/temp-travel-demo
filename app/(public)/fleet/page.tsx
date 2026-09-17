@@ -94,11 +94,10 @@ function FleetContent() {
               <button
                 key={tab.value}
                 onClick={() => setSelectedCategory(tab.value)}
-                className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
-                  isActive
-                    ? "bg-amber-400 text-slate-950 shadow-lg shadow-amber-400/20"
-                    : "bg-slate-900 border border-white/10 text-slate-400 hover:text-white hover:border-amber-500/30"
-                }`}
+                className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${isActive
+                  ? "bg-amber-400 text-slate-950 shadow-lg shadow-amber-400/20"
+                  : "bg-slate-900 border border-white/10 text-slate-400 hover:text-white hover:border-amber-500/30"
+                  }`}
               >
                 {tab.label}
               </button>
