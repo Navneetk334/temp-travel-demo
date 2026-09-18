@@ -90,8 +90,13 @@ export default function Homepage() {
       try {
         const localList = JSON.parse(saved);
         if (Array.isArray(localList) && localList.length > 0) {
-          const starred = localList.filter((v: any) => v.isFeatured);
-          const displayItems = starred.length > 0 ? starred.slice(0, 3) : localList.slice(0, 3);
+          let displayItems = localList.filter((v: any) => v.isFeatured);
+          if (displayItems.length < 3) {
+            const others = localList.filter((v: any) => !v.isFeatured);
+            displayItems = [...displayItems, ...others];
+          }
+          displayItems = displayItems.slice(0, 3);
+          
           setFeaturedVehicles(displayItems.map((v: any) => ({
             id: v.id,
             name: `${v.make} ${v.model}`,
@@ -123,8 +128,13 @@ export default function Homepage() {
         if (data) {
           const vehicles = Array.isArray(data) ? data : (data.vehicles || []);
           if (vehicles.length > 0) {
-            const starred = vehicles.filter((v: any) => v.isFeatured);
-            const displayItems = starred.length > 0 ? starred.slice(0, 3) : vehicles.slice(0, 3);
+            let displayItems = vehicles.filter((v: any) => v.isFeatured);
+            if (displayItems.length < 3) {
+              const others = vehicles.filter((v: any) => !v.isFeatured);
+              displayItems = [...displayItems, ...others];
+            }
+            displayItems = displayItems.slice(0, 3);
+            
             setFeaturedVehicles(displayItems.map((v: any) => ({
               id: v.id,
               name: `${v.make} ${v.model}`,
