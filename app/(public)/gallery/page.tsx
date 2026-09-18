@@ -240,7 +240,7 @@ export default function PublicGalleryPage() {
   const lightboxItem = lightboxIndex !== null ? items[lightboxIndex] : null;
 
   return (
-    <div className="bg-black min-h-screen w-full text-slate-100 selection:bg-accent selection:text-slate-950 overflow-x-hidden relative select-none flex flex-col">
+    <div className="bg-background min-h-screen w-full text-slate-100 selection:bg-accent selection:text-slate-950 overflow-x-hidden relative select-none flex flex-col">
       <div className="flex-grow relative flex flex-col pt-36 pb-8" onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}>
       
       {/* SVG CONCAVE CURVED MONITOR SCREEN MASK DEFINITION */}
