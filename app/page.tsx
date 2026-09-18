@@ -197,7 +197,7 @@ export default function Homepage() {
   ];
 
   return (
-    <div className="bg-slate-950 text-slate-100 min-h-screen font-sans selection:bg-amber-500 selection:text-slate-950">
+    <div className="bg-background text-foreground min-h-screen font-sans selection:bg-amber-500 selection:text-slate-950">
       <JsonLd data={businessSchema} />
 
       {/* ENTRANCE ANIMATION: GOLDEN LASER BEAM & LINE UNCLIP */}
@@ -207,7 +207,7 @@ export default function Homepage() {
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, y: "-100%" }}
             transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1] }}
-            className="fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center pointer-events-auto"
+            className="fixed inset-0 z-[100] bg-background flex items-center justify-center pointer-events-auto"
           >
             {/* Horizontal Laser Line Draw */}
             <motion.div
@@ -238,7 +238,7 @@ export default function Homepage() {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative min-h-[92vh] flex flex-col justify-center items-center pt-32 sm:pt-36 lg:pt-40 pb-20 px-4 md:px-8 overflow-hidden bg-slate-950">
+      <section className="relative min-h-[92vh] flex flex-col justify-center items-center pt-32 sm:pt-36 lg:pt-40 pb-20 px-4 md:px-8 overflow-hidden bg-background">
         {/* Ambient Glowing Background Orbs */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-tr from-amber-500/20 via-blue-600/15 to-transparent rounded-full blur-[140px] pointer-events-none z-0" />
         <div className="absolute bottom-10 right-10 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none z-0" />
@@ -268,28 +268,28 @@ export default function Homepage() {
             <span>India's Premier Chauffeur Fleet & Transit Management</span>
           </div>
 
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-slate-50 tracking-tight leading-[1.1] max-w-5xl mx-auto">
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-foreground tracking-tight leading-[1.1] max-w-5xl mx-auto">
             Executive Corporate Transit <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 drop-shadow-sm">
               & Luxury Fleet Rentals
             </span>
           </h1>
 
-          <p className="text-base sm:text-lg md:text-xl text-slate-300 max-w-3xl mx-auto font-normal leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto font-normal leading-relaxed">
             Delivering ISO-certified employee mobility rosters, executive airport chauffeuring, and seamless outstation travel across India with 24/7 live dispatch controls.
           </p>
 
           {/* Quick Metrics Pills */}
-          <div className="flex flex-wrap justify-center items-center gap-6 pt-2 text-xs font-semibold text-slate-400">
-            <div className="flex items-center gap-2 bg-slate-900/80 px-4 py-2 rounded-lg border border-white/10">
+          <div className="flex flex-wrap justify-center items-center gap-6 pt-2 text-xs font-semibold text-muted-foreground">
+            <div className="flex items-center gap-2 bg-surface/80 px-4 py-2 rounded-lg border border-white/10">
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               <span>500K+ Completed Rides</span>
             </div>
-            <div className="flex items-center gap-2 bg-slate-900/80 px-4 py-2 rounded-lg border border-white/10">
+            <div className="flex items-center gap-2 bg-surface/80 px-4 py-2 rounded-lg border border-white/10">
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               <span>99.8% On-Time SLA Guarantee</span>
             </div>
-            <div className="flex items-center gap-2 bg-slate-900/80 px-4 py-2 rounded-lg border border-white/10">
+            <div className="flex items-center gap-2 bg-surface/80 px-4 py-2 rounded-lg border border-white/10">
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               <span>Pan-India Metropolitan Coverage</span>
             </div>
@@ -309,7 +309,7 @@ export default function Homepage() {
       </section>
 
       {/* Floating High-Contrast Stats Banner */}
-      <section className="relative z-20 py-12 bg-slate-900/90 border-y border-white/10 backdrop-blur-xl">
+      <section className="relative z-20 py-12 bg-surface/90 border-y border-white/10 backdrop-blur-xl">
         <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {[
             { metric: "90,000+", label: "Verified Passengers Transported" },
@@ -319,14 +319,14 @@ export default function Homepage() {
           ].map((stat, idx) => (
             <div key={idx} className="space-y-1">
               <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-amber-400 tracking-tight">{stat.metric}</div>
-              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{stat.label}</div>
+              <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">{stat.label}</div>
             </div>
           ))}
         </div>
       </section>
 
       {/* Premium Corporate Logistics Section */}
-      <section id="corporate" className="py-24 bg-slate-950 text-slate-100 px-4 sm:px-6 lg:px-8 border-b border-white/5">
+      <section id="corporate" className="py-24 bg-background text-foreground px-4 sm:px-6 lg:px-8 border-b border-white/5">
         <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
           <div className="lg:col-span-6 space-y-6">
             <div className="inline-flex items-center gap-2 text-xs font-bold text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-md border border-amber-500/20 uppercase tracking-wider">
@@ -334,11 +334,11 @@ export default function Homepage() {
               <span>Enterprise Transit Management</span>
             </div>
 
-            <h2 className="text-3xl sm:text-5xl font-black text-slate-50 tracking-tight leading-snug">
+            <h2 className="text-3xl sm:text-5xl font-black text-foreground tracking-tight leading-snug">
               Automated Corporate Commute & Executive Fleet Dispatch
             </h2>
 
-            <p className="text-slate-300 leading-relaxed text-base">
+            <p className="text-muted-foreground leading-relaxed text-base">
               Engineered specifically for corporate HR, admin, and travel desks. We replace manual dispatch chaos with structured employee shift rosters, automated billing verification, and 100% compliant vehicles.
             </p>
 
@@ -349,12 +349,12 @@ export default function Homepage() {
                 { title: "Standardized Billing", desc: "Instant transparent invoices with full GST compliance." },
                 { title: "Chauffeur Auditing", desc: "Rigorous background checks & etiquette training." }
               ].map((feat, i) => (
-                <div key={i} className="p-4 bg-slate-900/60 border border-white/10 rounded-xl space-y-1 hover:border-amber-400/40 transition-colors">
-                  <div className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <div key={i} className="p-4 bg-surface/60 border border-white/10 rounded-xl space-y-1 hover:border-amber-400/40 transition-colors">
+                  <div className="font-bold text-foreground text-sm flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
                     <span>{feat.title}</span>
                   </div>
-                  <div className="text-xs text-slate-400 pl-6">{feat.desc}</div>
+                  <div className="text-xs text-muted-foreground pl-6">{feat.desc}</div>
                 </div>
               ))}
             </div>
@@ -373,7 +373,7 @@ export default function Homepage() {
             <div className="flex justify-between items-center border-b border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-emerald-400 rounded-full animate-ping" />
-                <span className="text-sm font-bold text-slate-100">Live SPOC Command Dashboard</span>
+                <span className="text-sm font-bold text-foreground">Live SPOC Command Dashboard</span>
               </div>
               <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest bg-amber-500/10 px-2.5 py-1 rounded">Active Shift Log</span>
             </div>
@@ -384,12 +384,12 @@ export default function Homepage() {
                 { route: "Route 04 (Gurugram CyberHub)", driver: "Sunil Verma (Swift Dzire)", status: "BOARDING COMPLETE", time: "18:45 PM" },
                 { route: "Route 12 (Bengaluru Whitefield)", driver: "Pravin Patil (Ertiga)", status: "DISPATCHED", time: "19:00 PM" }
               ].map((log, index) => (
-                <div key={index} className="p-3 bg-slate-950/80 border border-white/5 rounded-lg space-y-1">
-                  <div className="flex justify-between font-bold text-slate-200">
+                <div key={index} className="p-3 bg-background/80 border border-white/5 rounded-lg space-y-1">
+                  <div className="flex justify-between font-bold text-foreground">
                     <span>{log.route}</span>
                     <span className="text-emerald-400">{log.status}</span>
                   </div>
-                  <div className="flex justify-between text-[11px] text-slate-400 font-sans">
+                  <div className="flex justify-between text-[11px] text-muted-foreground font-sans">
                     <span>{log.driver}</span>
                     <span>Expected: {log.time}</span>
                   </div>
@@ -407,12 +407,12 @@ export default function Homepage() {
 
 
       {/* Fleet Showcase Interactive Section */}
-      <section id="fleet" className="py-24 bg-slate-900/60 px-4 sm:px-6 lg:px-8 border-b border-white/5">
+      <section id="fleet" className="py-24 bg-surface/60 px-4 sm:px-6 lg:px-8 border-b border-white/5">
         <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 space-y-12">
           <div className="text-center space-y-4">
             <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">Our Luxury & Commercial Fleet</span>
-            <h2 className="text-3xl sm:text-5xl font-black text-slate-50 tracking-tight">Immaculate Vehicles For Every Journey</h2>
-            <p className="text-slate-300 max-w-2xl mx-auto text-sm">
+            <h2 className="text-3xl sm:text-5xl font-black text-foreground tracking-tight">Immaculate Vehicles For Every Journey</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-sm">
               All vehicles are thoroughly sanitized, equipped with GPS trackers, emergency SOS buttons, and driven by certified chauffeurs.
             </p>
           </div>
@@ -421,39 +421,39 @@ export default function Homepage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {vehiclesLoading ? (
               [...Array(3)].map((_, i) => (
-                <div key={i} className="bg-slate-950 border border-white/10 rounded-2xl overflow-hidden shadow-xl animate-pulse flex flex-col h-80">
-                  <div className="h-48 bg-slate-900/80 w-full" />
+                <div key={i} className="bg-background border border-white/10 rounded-2xl overflow-hidden shadow-xl animate-pulse flex flex-col h-80">
+                  <div className="h-48 bg-surface/80 w-full" />
                   <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
                     <div className="space-y-2">
-                      <div className="h-5 bg-slate-900 rounded w-3/4" />
-                      <div className="h-4 bg-slate-900/60 rounded w-1/2" />
+                      <div className="h-5 bg-surface rounded w-3/4" />
+                      <div className="h-4 bg-surface/60 rounded w-1/2" />
                     </div>
                     <div className="pt-4 border-t border-white/5 flex justify-between items-center">
-                      <div className="h-6 bg-slate-900 rounded w-1/3" />
-                      <div className="h-8 bg-slate-900 rounded w-1/4" />
+                      <div className="h-6 bg-surface rounded w-1/3" />
+                      <div className="h-8 bg-surface rounded w-1/4" />
                     </div>
                   </div>
                 </div>
               ))
             ) : (
               featuredVehicles.map((vehicle, idx) => (
-                <div key={vehicle.id || idx} className="bg-slate-950 border border-white/10 rounded-2xl overflow-hidden hover:border-amber-400/50 transition-all duration-300 group shadow-xl flex flex-col">
-                  <div className="relative h-48 bg-slate-900 overflow-hidden">
+                <div key={vehicle.id || idx} className="bg-background border border-white/10 rounded-2xl overflow-hidden hover:border-amber-400/50 transition-all duration-300 group shadow-xl flex flex-col">
+                  <div className="relative h-48 bg-surface overflow-hidden">
                     <Image
                       src={vehicle.img}
                       alt={vehicle.name}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    <div className="absolute top-3 right-3 bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-[10px] font-bold text-amber-400">
+                    <div className="absolute top-3 right-3 bg-background/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-[10px] font-bold text-amber-400">
                       {vehicle.category}
                     </div>
                   </div>
 
                   <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
                     <div className="space-y-2">
-                      <h3 className="text-lg font-bold text-slate-100 group-hover:text-amber-400 transition-colors">{vehicle.name}</h3>
-                      <div className="flex items-center gap-4 text-xs text-slate-400">
+                      <h3 className="text-lg font-bold text-foreground group-hover:text-amber-400 transition-colors">{vehicle.name}</h3>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Users className="w-3.5 h-3.5 text-amber-400" />
                           {vehicle.seats}
@@ -467,12 +467,12 @@ export default function Homepage() {
 
                     <div className="pt-4 border-t border-white/10 flex items-center justify-between">
                       <div>
-                        <span className="text-[10px] text-slate-400 block uppercase font-bold">Base Tariff</span>
+                        <span className="text-[10px] text-muted-foreground block uppercase font-bold">Base Tariff</span>
                         <span className="text-base font-black text-amber-400">{vehicle.rate}</span>
                       </div>
                       <a
                         href="#book-widget"
-                        className="inline-flex items-center gap-1 text-xs font-extrabold text-slate-100 bg-white/5 hover:bg-amber-500 hover:text-slate-950 px-4 py-2 rounded-lg transition-all border border-white/10"
+                        className="inline-flex items-center gap-1 text-xs font-extrabold text-foreground bg-white/5 hover:bg-amber-500 hover:text-slate-950 px-4 py-2 rounded-lg transition-all border border-white/10"
                       >
                         <span>Book Now</span>
                         <ChevronRight className="w-3.5 h-3.5" />
@@ -498,15 +498,15 @@ export default function Homepage() {
       </section>
 
       {/* Safety & Quality Guarantee Banner */}
-      <section className="py-20 bg-slate-950 px-4 sm:px-6 lg:px-8 border-b border-white/5">
+      <section className="py-20 bg-background px-4 sm:px-6 lg:px-8 border-b border-white/5">
         <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 bg-gradient-to-r from-slate-900 via-slate-900/90 to-slate-950 border border-white/10 rounded-3xl p-8 md:p-12 relative overflow-hidden">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
             <div className="space-y-3">
               <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center">
                 <ShieldCheck className="w-6 h-6 text-amber-400" />
               </div>
-              <h3 className="text-xl font-bold text-slate-50">100% Police Verified Chauffeurs</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <h3 className="text-xl font-bold text-foreground">100% Police Verified Chauffeurs</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 Background credentials, driving license history, and address records are verified before driver onboarding.
               </p>
             </div>
@@ -515,8 +515,8 @@ export default function Homepage() {
               <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center">
                 <Clock className="w-6 h-6 text-amber-400" />
               </div>
-              <h3 className="text-xl font-bold text-slate-50">Guaranteed On-Time Pickup</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <h3 className="text-xl font-bold text-foreground">Guaranteed On-Time Pickup</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 Automated driver dispatch alerts ensure cab placement at pickup location at least 10 minutes prior to scheduled time.
               </p>
             </div>
@@ -525,8 +525,8 @@ export default function Homepage() {
               <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center">
                 <Award className="w-6 h-6 text-amber-400" />
               </div>
-              <h3 className="text-xl font-bold text-slate-50">Zero Cancellation Assurance</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <h3 className="text-xl font-bold text-foreground">Zero Cancellation Assurance</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 Once confirmed, your ride is guaranteed. In the rare event of vehicle breakdown, a replacement is dispatched instantly.
               </p>
             </div>
@@ -535,10 +535,10 @@ export default function Homepage() {
       </section>
 
       {/* Google Business Profile Verified Reviews Section */}
-      <section className="py-24 bg-slate-900/40 px-4 sm:px-6 lg:px-8 border-b border-white/5">
+      <section className="py-24 bg-surface/40 px-4 sm:px-6 lg:px-8 border-b border-white/5">
         <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 space-y-16">
           <div className="text-center space-y-4">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-slate-200 backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-foreground backdrop-blur-md">
               <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -547,14 +547,14 @@ export default function Homepage() {
               </svg>
               <span>Google Business Profile Verified Reviews</span>
             </div>
-            <h2 className="text-3xl sm:text-5xl font-black text-slate-50 tracking-tight">
+            <h2 className="text-3xl sm:text-5xl font-black text-foreground tracking-tight">
               {googleData.rating} ★★★★★ Rating on Google Maps
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {googleData.reviews.slice(0, 3).map((t, idx) => (
-              <div key={t.id || idx} className="bg-slate-950/90 border border-white/10 p-6 rounded-2xl space-y-4 hover:border-amber-400/40 transition-all shadow-xl flex flex-col justify-between">
+              <div key={t.id || idx} className="bg-background/90 border border-white/10 p-6 rounded-2xl space-y-4 hover:border-amber-400/40 transition-all shadow-xl flex flex-col justify-between">
                 <div className="space-y-3">
                   <div className="flex justify-between items-start">
                     <div className="flex gap-1">
@@ -562,11 +562,11 @@ export default function Homepage() {
                         <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
                       ))}
                     </div>
-                    <span className="text-[10px] font-bold text-slate-400 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
+                    <span className="text-[10px] font-bold text-muted-foreground bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
                       {t.relativeTime}
                     </span>
                   </div>
-                  <p className="text-slate-300 text-xs sm:text-sm italic leading-relaxed">"{t.text}"</p>
+                  <p className="text-muted-foreground text-xs sm:text-sm italic leading-relaxed">"{t.text}"</p>
                 </div>
 
                 <div className="border-t border-white/10 pt-4 flex items-center justify-between gap-3">
@@ -583,11 +583,11 @@ export default function Homepage() {
                       </div>
                     )}
                     <div className="min-w-0 flex-1">
-                      <div className="font-extrabold text-slate-100 text-xs sm:text-sm flex items-center gap-1">
+                      <div className="font-extrabold text-foreground text-xs sm:text-sm flex items-center gap-1">
                         <span className="truncate" title={t.authorName}>{t.authorName}</span>
                         <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                       </div>
-                      <div className="text-[10px] text-slate-400 truncate">Google Verified Customer</div>
+                      <div className="text-[10px] text-muted-foreground truncate">Google Verified Customer</div>
                     </div>
                   </div>
                   <a
@@ -619,29 +619,29 @@ export default function Homepage() {
       </section>
 
       {/* FAQ Accordion Section */}
-      <section className="py-24 bg-slate-900/40 px-4 sm:px-6 lg:px-8 border-b border-white/5">
+      <section className="py-24 bg-surface/40 px-4 sm:px-6 lg:px-8 border-b border-white/5">
         <div className="max-w-[1500px] mx-auto px-4 sm:px-8 lg:px-12 space-y-12">
           <div className="text-center space-y-4">
             <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">Frequently Asked Questions</span>
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-50 tracking-tight">Got Questions? We Have Answers.</h2>
+            <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">Got Questions? We Have Answers.</h2>
           </div>
 
           <div className="space-y-4">
             {faqs.map((faq, idx) => (
               <div
                 key={idx}
-                className="bg-slate-950 border border-white/10 rounded-2xl overflow-hidden transition-all"
+                className="bg-background border border-white/10 rounded-2xl overflow-hidden transition-all"
               >
                 <button
                   type="button"
                   onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                  className="w-full text-left p-6 flex justify-between items-center font-bold text-slate-100 hover:text-amber-400 transition-colors"
+                  className="w-full text-left p-6 flex justify-between items-center font-bold text-foreground hover:text-amber-400 transition-colors"
                 >
                   <span className="text-base">{faq.q}</span>
                   <ChevronDown className={`w-5 h-5 text-amber-400 transition-transform duration-300 ${openFaq === idx ? "rotate-180" : ""}`} />
                 </button>
                 {openFaq === idx && (
-                  <div className="px-6 pb-6 text-sm text-slate-300 leading-relaxed border-t border-white/5 pt-4">
+                  <div className="px-6 pb-6 text-sm text-muted-foreground leading-relaxed border-t border-white/5 pt-4">
                     {faq.a}
                   </div>
                 )}
@@ -652,41 +652,41 @@ export default function Homepage() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-20 bg-slate-950 text-slate-100 px-4 sm:px-6 lg:px-8 border-t border-white/5">
+      <section id="contact" className="py-20 bg-background text-foreground px-4 sm:px-6 lg:px-8 border-t border-white/5">
         <div className="max-w-[1500px] mx-auto px-4 sm:px-8 lg:px-12 space-y-8 text-center">
           <div className="space-y-3">
             <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">Get In Touch</span>
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-50 tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
               Discuss Your Executive Transport & Fleet Requirements
             </h2>
-            <p className="text-slate-300 text-sm leading-relaxed max-w-2xl mx-auto">
+            <p className="text-muted-foreground text-sm leading-relaxed max-w-2xl mx-auto">
               Looking for a custom corporate fleet quote or employee logistics management? Reach out to our team directly.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
-            <div className="bg-slate-900/60 border border-white/10 p-6 rounded-2xl space-y-3 flex flex-col items-center text-center">
+            <div className="bg-surface/60 border border-white/10 p-6 rounded-2xl space-y-3 flex flex-col items-center text-center">
               <div className="bg-white/5 p-3 rounded-xl text-amber-400">
                 <Phone className="w-6 h-6" />
               </div>
-              <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Call Support</div>
-              <a href="tel:+917011729639" className="text-slate-200 font-bold hover:underline text-base">+91 70117 29639</a>
+              <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Call Support</div>
+              <a href="tel:+917011729639" className="text-foreground font-bold hover:underline text-base">+91 70117 29639</a>
             </div>
 
-            <div className="bg-slate-900/60 border border-white/10 p-6 rounded-2xl space-y-3 flex flex-col items-center text-center">
+            <div className="bg-surface/60 border border-white/10 p-6 rounded-2xl space-y-3 flex flex-col items-center text-center">
               <div className="bg-white/5 p-3 rounded-xl text-amber-400">
                 <Mail className="w-6 h-6" />
               </div>
-              <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Email Sales</div>
-              <a href="mailto:sales@temptravel.co.in" className="text-slate-200 font-bold hover:underline text-base">sales@temptravel.co.in</a>
+              <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Email Sales</div>
+              <a href="mailto:sales@temptravel.co.in" className="text-foreground font-bold hover:underline text-base">sales@temptravel.co.in</a>
             </div>
 
-            <div className="bg-slate-900/60 border border-white/10 p-6 rounded-2xl space-y-3 flex flex-col items-center text-center">
+            <div className="bg-surface/60 border border-white/10 p-6 rounded-2xl space-y-3 flex flex-col items-center text-center">
               <div className="bg-white/5 p-3 rounded-xl text-amber-400">
                 <MapPin className="w-6 h-6" />
               </div>
-              <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Corporate Office</div>
-              <div className="text-slate-300 text-xs leading-relaxed">
+              <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Corporate Office</div>
+              <div className="text-muted-foreground text-xs leading-relaxed">
                 Plot No. 183, Kh No. 16/2, A-Block, Qutub Vihar PH-I, New Delhi - 110071
               </div>
             </div>
@@ -699,3 +699,4 @@ export default function Homepage() {
     </div>
   );
 }
+

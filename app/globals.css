@@ -154,4 +154,33 @@ input[type="time"]::-webkit-clear-button {
   opacity: 0 !important;
   width: 0 !important;
   height: 0 !important;
+}/* ------------------------------------- */
+/* CUSTOM THEME PREVIEW VARIANTS         */
+/* ------------------------------------- */
+
+.theme-high-contrast {
+  --background: 224 71% 2%;
+  --card: 222 47% 12%;
+  --surface: 222 47% 16%;
+  --border: 222 47% 25%;
+  --foreground: 0 0% 100%;
+  --muted-foreground: 215 16% 75%;
+}
+
+.theme-soft-dark {
+  --background: 224 50% 12%;
+  --card: 224 40% 16%;
+  --surface: 224 40% 20%;
+  --border: 224 40% 28%;
+  --foreground: 213 30% 90%;
+  --muted-foreground: 215 15% 65%;
+}
+
+.theme-obsidian {
+  --background: 0 0% 0%;
+  --card: 0 0% 5%;
+  --surface: 0 0% 10%;
+  --border: 0 0% 15%;
+  --foreground: 0 0% 98%;
+  --muted-foreground: 0 0% 60%;
 }
