@@ -10,7 +10,7 @@ export default function Footer() {
   if (pathname === "/gallery") return null;
 
   return (
-    <footer className="bg-slate-950 border-t border-white/5 text-slate-400 pt-16 pb-8 text-xs">
+    <footer className="bg-white border-t border-white/5 text-slate-9000 pt-16 pb-8 text-xs">
       <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
         {/* Brand Column */}
         <div className="space-y-4">
@@ -21,7 +21,7 @@ export default function Footer() {
               className="h-10 sm:h-12 w-auto object-contain"
             />
           </Link>
-          <p className="text-slate-400 leading-relaxed">
+          <p className="text-slate-9000 leading-relaxed">
             TEMP TRAVEL CAR RENTALS PVT LTD is India's leading corporate transit and leisure travel management partner, specializing in compliant, safe, and efficient mobility.
           </p>
           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-[10px] font-semibold text-accent uppercase tracking-wider backdrop-blur-sm">
@@ -32,7 +32,7 @@ export default function Footer() {
 
         {/* Quick Links Column */}
         <div className="space-y-4">
-          <h4 className="text-slate-50 font-bold uppercase tracking-wider text-[10px]">Quick Links</h4>
+          <h4 className="text-slate-900 font-bold uppercase tracking-wider text-[10px]">Quick Links</h4>
           <ul className="space-y-2.5">
             <li>
               <Link href="/" className="hover:text-accent transition-colors">Home</Link>
@@ -60,7 +60,7 @@ export default function Footer() {
 
         {/* Services Column */}
         <div className="space-y-4">
-          <h4 className="text-slate-50 font-bold uppercase tracking-wider text-[10px]">Our Offerings</h4>
+          <h4 className="text-slate-900 font-bold uppercase tracking-wider text-[10px]">Our Offerings</h4>
           <ul className="space-y-2.5">
             <li>
               <Link href="/services" className="hover:text-accent transition-colors">Corporate Transportation</Link>
@@ -91,27 +91,27 @@ export default function Footer() {
 
         {/* Contact Info Column */}
         <div className="space-y-4">
-          <h4 className="text-slate-50 font-bold uppercase tracking-wider text-[10px]">Corporate Office</h4>
+          <h4 className="text-slate-900 font-bold uppercase tracking-wider text-[10px]">Corporate Office</h4>
           <ul className="space-y-3">
             <li className="flex gap-2 items-start">
               <MapPin className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-              <span className="leading-relaxed text-slate-300">
+              <span className="leading-relaxed text-slate-700">
                 Plot No. 183, Kh No. 16/2, A-Block, Qutub Vihar PH-I, New Delhi - 110071
               </span>
             </li>
             <li className="flex gap-2 items-center">
               <Phone className="w-4 h-4 text-accent shrink-0" />
-              <a href="tel:+917011729639" className="text-slate-300 hover:underline font-bold">+91 70117 29639</a>
+              <a href="tel:+917011729639" className="text-slate-700 hover:underline font-bold">+91 70117 29639</a>
             </li>
             <li className="flex gap-2 items-center">
               <Mail className="w-4 h-4 text-accent shrink-0" />
-              <a href="mailto:sales@temptravel.co.in" className="text-slate-300 hover:underline">sales@temptravel.co.in</a>
+              <a href="mailto:sales@temptravel.co.in" className="text-slate-700 hover:underline">sales@temptravel.co.in</a>
             </li>
           </ul>
         </div>
       </div>
 
-      <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 mt-8 pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between text-slate-500 gap-4">
+      <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 mt-8 pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between text-slate-9000 gap-4">
         <div>
           &copy; 2026 TEMP TRAVEL CAR RENTALS PVT LTD. All rights reserved.
         </div>
