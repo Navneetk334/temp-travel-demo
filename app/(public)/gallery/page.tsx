@@ -371,7 +371,7 @@ export default function PublicGalleryPage() {
                   
                   <div className="flex items-center gap-2">
                     <span className="px-3 py-1 rounded-full text-[10px] font-mono bg-accent/10 text-accent border border-accent/20 uppercase tracking-wider">
-                      {lightboxItem.category || lightboxItem.genre || "TEMP TRAVEL Fleet"}
+                      {lightboxItem.category || "TEMP TRAVEL Fleet"}
                     </span>
                     {lightboxItem.isFeatured && (
                       <span className="px-3 py-1 rounded-full text-[10px] font-mono bg-background text-foreground border border-border flex items-center gap-1 shadow-sm">
