@@ -258,11 +258,11 @@ export default function PublicGalleryPage() {
       <div className="relative z-40 px-6 sm:px-12 flex justify-center pointer-events-auto mt-4 mb-8">
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1 text-[11px] font-mono bg-card/80 p-1.5 rounded-full border border-border backdrop-blur-md shadow-sm">
           {CATEGORIES.map((cat) => {
-            const isActive = activeCategory === (cat.id || cat.value);
+            const isActive = activeCategory === cat.value;
             return (
               <button
-                key={cat.id || cat.value}
-                onClick={() => handleCategorySelect(cat.id || cat.value)}
+                key={cat.value}
+                onClick={() => setActiveCategory(cat.value)}
                 className={`px-4 py-1.5 rounded-full whitespace-nowrap transition-all duration-300 ${
                   isActive
                     ? "bg-accent text-accent-foreground font-bold shadow-[0_0_15px_rgba(250,204,21,0.3)]"
