@@ -221,9 +221,9 @@ export default function PhotoCoverflow3D({
               }}
             >
               {/* The Physical 3D Framed Photograph */}
-              <div className="relative w-full h-full rounded-2xl p-3 sm:p-4 bg-card border border-border shadow-[0_25px_60px_rgba(0,0,0,0.2)] backdrop-blur-xl flex flex-col justify-between overflow-hidden">
+              <div className="relative w-full h-full rounded-2xl p-3 sm:p-4 bg-white/90 border border-slate-200/80 shadow-[0_25px_60px_rgba(0,0,0,0.8)] backdrop-blur-xl flex flex-col justify-between overflow-hidden">
                 {/* Image Frame */}
-                <div className="relative w-full h-[230px] sm:h-[280px] rounded-xl overflow-hidden bg-muted border border-border">
+                <div className="relative w-full h-[230px] sm:h-[280px] rounded-xl overflow-hidden bg-white border border-slate-200">
                   <img
                     src={photo.imageUrl}
                     alt={photo.title}
@@ -232,12 +232,12 @@ export default function PhotoCoverflow3D({
                   />
 
                   {/* Specular lighting gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-white/60 pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-tr from-black/40 via-transparent to-white/15 pointer-events-none" />
 
                   {/* Badges on active card */}
                   {isCenter && (
                     <div className="absolute top-2.5 left-2.5 z-10 flex items-center gap-1.5">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-background/80 backdrop-blur-md text-accent border border-border shadow-sm">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-white/80 backdrop-blur-md text-accent border border-slate-300">
                         {photo.genre}
                       </span>
                     </div>
@@ -250,7 +250,7 @@ export default function PhotoCoverflow3D({
                         e.stopPropagation();
                         onInspect(photo);
                       }}
-                      className="absolute top-2.5 right-2.5 p-2 rounded-xl bg-background/80 hover:bg-background text-foreground backdrop-blur-md border border-border shadow-lg transition-colors z-10"
+                      className="absolute top-2.5 right-2.5 p-2 rounded-xl bg-white/80 hover:bg-white text-slate-700 hover:text-slate-900 backdrop-blur-md border border-slate-300 shadow-lg transition-colors z-10"
                       title="Inspect in Full Lightbox"
                     >
                       <Maximize2 className="w-3.5 h-3.5" />
@@ -260,12 +260,12 @@ export default function PhotoCoverflow3D({
 
                 {/* Card Title & Specs */}
                 <div className="pt-2 px-1">
-                  <h3 className="text-sm sm:text-base font-semibold text-foreground truncate">
+                  <h3 className="text-sm sm:text-base font-semibold text-slate-900 truncate">
                     {photo.title}
                   </h3>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground mt-0.5">
+                  <div className="flex items-center justify-between text-xs text-slate-500 mt-0.5">
                     <span className="truncate">{photo.photographer}</span>
-                    <span className="text-[11px] font-mono text-muted-foreground truncate max-w-[100px]">
+                    <span className="text-[11px] font-mono text-slate-500 truncate max-w-[100px]">
                       {photo.exif.aperture} • {photo.exif.shutterSpeed}
                     </span>
                   </div>

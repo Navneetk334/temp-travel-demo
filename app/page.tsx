@@ -197,7 +197,7 @@ export default function Homepage() {
   ];
 
   return (
-    <div className="bg-background text-foreground min-h-screen font-sans selection:bg-accent selection:text-accent-foreground">
+    <div className="bg-slate-950 text-slate-100 min-h-screen font-sans selection:bg-amber-500 selection:text-slate-950">
       <JsonLd data={businessSchema} />
 
       {/* ENTRANCE ANIMATION: GOLDEN LASER BEAM & LINE UNCLIP */}
@@ -207,7 +207,7 @@ export default function Homepage() {
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, y: "-100%" }}
             transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1] }}
-            className="fixed inset-0 z-[100] bg-background flex items-center justify-center pointer-events-auto"
+            className="fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center pointer-events-auto"
           >
             {/* Horizontal Laser Line Draw */}
             <motion.div
@@ -238,11 +238,22 @@ export default function Homepage() {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative min-h-[92vh] flex flex-col justify-center items-center pt-32 sm:pt-36 lg:pt-40 pb-20 px-4 md:px-8 overflow-hidden bg-background">
-        {/* Ambient Glowing Background Orbs for Depth */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-tr from-accent/10 via-primary/10 to-transparent rounded-full blur-[140px] pointer-events-none z-0" />
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none z-0" />
-        <div className="absolute top-1/2 left-0 w-80 h-80 bg-accent/5 rounded-full blur-[100px] pointer-events-none z-0" />
+      <section className="relative min-h-[92vh] flex flex-col justify-center items-center pt-32 sm:pt-36 lg:pt-40 pb-20 px-4 md:px-8 overflow-hidden bg-slate-950">
+        {/* Ambient Glowing Background Orbs */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-tr from-amber-500/20 via-blue-600/15 to-transparent rounded-full blur-[140px] pointer-events-none z-0" />
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none z-0" />
+
+        {/* Hero Background Image */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/hero-cover.png"
+            alt="Ultra Luxury Executive Fleet"
+            fill
+            priority
+            className="object-cover opacity-25"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/85 to-slate-950/60" />
+        </div>
 
         {/* Hero Content */}
         <motion.div
@@ -252,34 +263,34 @@ export default function Homepage() {
           className="relative z-10 w-full max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 text-center space-y-6 mb-12"
         >
           {/* Floating Luxury Tag */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent/10 border border-accent/20 rounded-full text-accent font-extrabold uppercase tracking-widest backdrop-blur-md shadow-sm text-xs">
-            <Sparkles className="w-3.5 h-3.5 text-accent animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-full text-amber-400 text-xs font-extrabold uppercase tracking-widest backdrop-blur-md shadow-lg shadow-amber-500/5">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
             <span>India's Premier Chauffeur Fleet & Transit Management</span>
           </div>
 
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-foreground tracking-tight leading-[1.1] max-w-5xl mx-auto">
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-slate-50 tracking-tight leading-[1.1] max-w-5xl mx-auto">
             Executive Corporate Transit <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent via-yellow-500 to-amber-600 drop-shadow-sm">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 drop-shadow-sm">
               & Luxury Fleet Rentals
             </span>
           </h1>
 
-          <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto font-medium leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl text-slate-300 max-w-3xl mx-auto font-normal leading-relaxed">
             Delivering ISO-certified employee mobility rosters, executive airport chauffeuring, and seamless outstation travel across India with 24/7 live dispatch controls.
           </p>
 
           {/* Quick Metrics Pills */}
-          <div className="flex flex-wrap justify-center items-center gap-6 pt-2 text-xs font-semibold text-muted-foreground">
-            <div className="flex items-center gap-2 bg-card/80 px-4 py-2 rounded-lg border border-border shadow-sm backdrop-blur-sm">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+          <div className="flex flex-wrap justify-center items-center gap-6 pt-2 text-xs font-semibold text-slate-400">
+            <div className="flex items-center gap-2 bg-slate-900/80 px-4 py-2 rounded-lg border border-white/10">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               <span>500K+ Completed Rides</span>
             </div>
-            <div className="flex items-center gap-2 bg-card/80 px-4 py-2 rounded-lg border border-border shadow-sm backdrop-blur-sm">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            <div className="flex items-center gap-2 bg-slate-900/80 px-4 py-2 rounded-lg border border-white/10">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               <span>99.8% On-Time SLA Guarantee</span>
             </div>
-            <div className="flex items-center gap-2 bg-card/80 px-4 py-2 rounded-lg border border-border shadow-sm backdrop-blur-sm">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            <div className="flex items-center gap-2 bg-slate-900/80 px-4 py-2 rounded-lg border border-white/10">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               <span>Pan-India Metropolitan Coverage</span>
             </div>
           </div>

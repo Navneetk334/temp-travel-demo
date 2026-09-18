@@ -51,12 +51,9 @@ export default function ContactPage() {
     <>
       <JsonLd data={contactSchema} />
 
-      <div className="bg-background min-h-screen font-sans selection:bg-accent selection:text-accent-foreground text-foreground flex flex-col">
-        {/* 
-          HERO SECTION
-          Clean, centered layout focusing on intent
-        */}
-        <section className="relative pt-36 sm:pt-48 pb-16 sm:pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden bg-background border-b border-border">
+      <div className="bg-white text-slate-900 min-h-screen">
+        {/* Combined Page Header & Breadcrumbs Section */}
+        <section className="relative bg-white overflow-hidden border-b border-slate-200 pb-20">
           <div className="absolute inset-0 bg-gradient-to-b from-blue-900/10 via-slate-950 to-slate-950 pointer-events-none" />
           
           <div className="relative z-10">
@@ -67,167 +64,135 @@ export default function ContactPage() {
             <span className="text-xs font-bold text-accent uppercase tracking-widest bg-white/5 border border-white/10 px-3 py-1 rounded-full">
               Get In Touch
             </span>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-foreground tracking-tight leading-[1.1]">
-              Global <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent via-yellow-500 to-amber-600 drop-shadow-sm">Corporate Transit</span>
-              <br />
-              Command Center
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900">
+              Contact <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-accent">Our Travel Desk</span>
             </h1>
-            <p className="mt-6 text-lg sm:text-xl text-muted-foreground font-medium leading-relaxed max-w-2xl mx-auto">
-              Connect with our dispatch and enterprise mobility directors to engineer a custom travel architecture for your organization.
+            <p className="text-slate-700 max-w-3xl mx-auto text-base sm:text-lg leading-relaxed font-medium">
+              Have questions about corporate roster plans, executive rentals, or custom travel contracts? Speak directly to our team.
             </p>
           </div>
         </section>
 
         {/* Form and Info Columns */}
-        <section className="py-20 bg-background">
-          <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 space-y-12">
+        <section className="py-20 bg-white">
+          <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
             
-            {/* Quick Contact Bar */}
-            <div className="flex flex-col md:flex-row gap-6 md:gap-12 w-full max-w-4xl border-y border-border py-8 mb-12 items-center justify-between mx-auto bg-card px-8 rounded-2xl shadow-sm">
-              <div className="flex items-center gap-4 group cursor-pointer w-full md:w-auto p-4 rounded-2xl hover:bg-muted transition-colors">
-                <div className="p-3 bg-accent/10 rounded-xl text-accent group-hover:scale-110 transition-transform shadow-sm">
-                  <Phone className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground font-mono uppercase tracking-wider mb-1">Direct Operations</div>
-                  <a href="tel:+917011729639" className="text-xl sm:text-2xl font-black text-foreground hover:text-accent transition-colors">+91 70117 29639</a>
-                </div>
-              </div>
-
-              <div className="hidden md:block w-px h-16 bg-border"></div>
-
-              <div className="flex items-center gap-4 group cursor-pointer w-full md:w-auto p-4 rounded-2xl hover:bg-muted transition-colors">
-                <div className="p-3 bg-accent/10 rounded-xl text-accent group-hover:scale-110 transition-transform shadow-sm">
-                  <Mail className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground font-mono uppercase tracking-wider mb-1">Enterprise Sales</div>
-                  <a href="mailto:sales@temptravel.co.in" className="text-xl sm:text-2xl font-black text-foreground hover:text-accent transition-colors">sales@temptravel.co.in</a>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+            {/* Contact Information Column */}
+            <div className="lg:col-span-5 space-y-6">
               
-              {/* Contact Information Column */}
-              <div className="lg:col-span-5 space-y-6">
-                
-                {/* Phone Numbers Card */}
-                <div className="bg-card border border-border p-6 rounded-xl space-y-3 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-primary/10 border border-primary/20 p-2.5 rounded-lg text-accent">
-                      <Phone className="w-5 h-5" />
-                    </div>
-                    <h3 className="font-bold text-foreground text-base">Phone Hotlines</h3>
+              {/* Phone Numbers Card */}
+              <div className="glassmorphism p-6 rounded-xl border border-slate-200 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="bg-primary/10 border border-primary/20 p-2.5 rounded-lg text-accent">
+                    <Phone className="w-5 h-5" />
                   </div>
-                  <div className="space-y-1.5 pl-11 text-sm text-muted-foreground">
-                    <div className="flex justify-between items-center">
-                      <span className="text-foreground">Corporate & Sales Desk:</span>
-                      <a href="tel:+917011729639" className="font-bold hover:text-accent transition-colors">+91 70117 29639</a>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-foreground">Technical Support:</span>
-                      <a href="tel:+917011729639" className="font-bold hover:text-accent transition-colors">+91 70117 29639</a>
-                    </div>
+                  <h3 className="font-bold text-slate-900 text-base">Phone Hotlines</h3>
+                </div>
+                <div className="space-y-1.5 pl-11 text-sm text-slate-700">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-9000">Corporate & Sales Desk:</span>
+                    <a href="tel:+917011729639" className="font-bold hover:text-accent transition-colors">+91 70117 29639</a>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-9000">Technical Support:</span>
+                    <a href="tel:+917011729639" className="font-bold hover:text-accent transition-colors">+91 70117 29639</a>
                   </div>
                 </div>
-
-                {/* Email Addresses Card */}
-                <div className="bg-card border border-border p-6 rounded-xl space-y-3 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-primary/10 border border-primary/20 p-2.5 rounded-lg text-accent">
-                      <Mail className="w-5 h-5" />
-                    </div>
-                    <h3 className="font-bold text-foreground text-base">Email Inquiries</h3>
-                  </div>
-                  <div className="space-y-1.5 pl-11 text-sm text-muted-foreground">
-                    <div className="flex justify-between items-center">
-                      <span className="text-foreground">Sales Support:</span>
-                      <a href="mailto:sales@temptravel.co.in" className="font-bold hover:text-accent transition-colors">sales@temptravel.co.in</a>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Office Address Card */}
-                <div className="bg-card border border-border p-6 rounded-xl space-y-3 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-primary/10 border border-primary/20 p-2.5 rounded-lg text-accent">
-                      <MapPin className="w-5 h-5" />
-                    </div>
-                    <h3 className="font-bold text-foreground text-base">Corporate Head Office</h3>
-                  </div>
-                  <div className="pl-11 text-sm text-muted-foreground leading-relaxed font-semibold">
-                    TEMP TRAVEL CAR RENTALS PVT. LTD.
-                    <div className="font-normal text-muted-foreground mt-1">
-                      Plot No. 183, Kh No. 16/2, A-Block, Qutub Vihar PH-I, New Delhi - 110071
-                    </div>
-                  </div>
-                </div>
-
-                {/* Business Hours Card */}
-                <div className="bg-card border border-border p-6 rounded-xl space-y-3 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-primary/10 border border-primary/20 p-2.5 rounded-lg text-accent">
-                      <Clock className="w-5 h-5" />
-                    </div>
-                    <h3 className="font-bold text-foreground text-base">Business Hours</h3>
-                  </div>
-                  <div className="space-y-1.5 pl-11 text-sm text-muted-foreground">
-                    <div className="flex justify-between">
-                      <span className="text-foreground">Monday - Saturday:</span>
-                      <span className="font-semibold text-foreground">10:00 AM - 7:00 PM</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-foreground">Sunday:</span>
-                      <span className="font-semibold text-foreground">Closed</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Emergency Support Card */}
-                <div className="bg-amber-950/20 border border-accent/20 p-6 rounded-xl space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-accent/10 p-2.5 rounded-lg text-accent">
-                      <ShieldAlert className="w-5 h-5" />
-                    </div>
-                    <h3 className="font-bold text-foreground text-base">24/7 Emergency Support</h3>
-                  </div>
-                  <p className="text-xs text-muted-foreground pl-11 leading-relaxed">
-                    Active drivers and corporate commuters can reach our round-the-clock emergency dispatch desk for roadside rescue or routing delays.
-                  </p>
-                  <div className="pl-11 text-sm font-extrabold text-accent">
-                    Helpline: <a href="tel:+917011729639" className="hover:underline">+91 70117 29639</a>
-                  </div>
-                </div>
-
               </div>
 
-              {/* Interactive Form Column */}
-              <div className="lg:col-span-7">
-                <div className="bg-card border border-border p-8 rounded-2xl shadow-sm">
-                  <ContactForm />
+              {/* Email Addresses Card */}
+              <div className="glassmorphism p-6 rounded-xl border border-slate-200 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="bg-primary/10 border border-primary/20 p-2.5 rounded-lg text-accent">
+                    <Mail className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-bold text-slate-900 text-base">Email Inquiries</h3>
+                </div>
+                <div className="space-y-1.5 pl-11 text-sm text-slate-700">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-9000">Sales Support:</span>
+                    <a href="mailto:sales@temptravel.co.in" className="font-bold hover:text-accent transition-colors">sales@temptravel.co.in</a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Office Address Card */}
+              <div className="glassmorphism p-6 rounded-xl border border-slate-200 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="bg-primary/10 border border-primary/20 p-2.5 rounded-lg text-accent">
+                    <MapPin className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-bold text-slate-900 text-base">Corporate Head Office</h3>
+                </div>
+                <div className="pl-11 text-sm text-slate-700 leading-relaxed font-semibold">
+                  TEMP TRAVEL CAR RENTALS PVT. LTD.
+                  <div className="font-normal text-slate-700 mt-1">
+                    Plot No. 183, Kh No. 16/2, A-Block, Qutub Vihar PH-I, New Delhi - 110071
+                  </div>
+                </div>
+              </div>
+
+              {/* Business Hours Card */}
+              <div className="glassmorphism p-6 rounded-xl border border-slate-200 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="bg-primary/10 border border-primary/20 p-2.5 rounded-lg text-accent">
+                    <Clock className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-bold text-slate-900 text-base">Business Hours</h3>
+                </div>
+                <div className="space-y-1.5 pl-11 text-sm text-slate-700">
+                  <div className="flex justify-between">
+                    <span className="text-slate-9000">Monday - Saturday:</span>
+                    <span className="font-semibold text-slate-200">10:00 AM - 7:00 PM</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-9000">Sunday:</span>
+                    <span className="font-semibold text-slate-9000">Closed</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Emergency Support Card */}
+              <div className="bg-amber-950/20 border border-accent/20 p-6 rounded-xl space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="bg-accent/10 p-2.5 rounded-lg text-accent">
+                    <ShieldAlert className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-bold text-slate-900 text-base">24/7 Emergency Support</h3>
+                </div>
+                <p className="text-xs text-slate-700 pl-11 leading-relaxed">
+                  Active drivers and corporate commuters can reach our round-the-clock emergency dispatch desk for roadside rescue or routing delays.
+                </p>
+                <div className="pl-11 text-sm font-extrabold text-accent">
+                  Helpline: <a href="tel:+917011729639" className="hover:underline">+91 70117 29639</a>
                 </div>
               </div>
 
             </div>
+
+            {/* Interactive Form Column */}
+            <div className="lg:col-span-7">
+              <ContactForm />
+            </div>
+
           </div>
         </section>
 
         {/* Google Maps Placeholder */}
-        <section className="py-16 bg-muted/20 border-t border-border">
+        <section className="py-16 bg-slate-50/20 border-t border-slate-200">
           <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 space-y-8">
             <div className="space-y-3 text-center">
-              <h2 className="text-2xl font-bold text-foreground flex items-center justify-center gap-2">
+              <h2 className="text-2xl font-bold text-slate-900 flex items-center justify-center gap-2">
                 <Map className="w-6 h-6 text-accent" />
                 <span>Our Office Location</span>
               </h2>
-              <p className="text-muted-foreground text-sm max-w-xl mx-auto">
+              <p className="text-slate-9000 text-sm max-w-xl mx-auto">
                 Plot No. 183, Kh No. 16/2, A-Block, Qutub Vihar PH-I, New Delhi - 110071
               </p>
             </div>
 
             {/* Real Interactive Google Maps Container */}
-            <div className="relative bg-card border border-border rounded-2xl h-[420px] overflow-hidden shadow-2xl group">
+            <div className="relative bg-slate-50 border border-white/10 rounded-2xl h-[420px] overflow-hidden shadow-2xl group">
               {/* Real Google Maps Embed Iframe */}
               <iframe
                 title="TEMP TRAVEL CAR RENTALS PVT LTD - Google Maps Location"
@@ -239,21 +204,21 @@ export default function ContactPage() {
               />
 
               {/* Direct Click Overlay Bar */}
-              <div className="absolute bottom-4 left-4 right-4 md:left-auto md:right-4 bg-card/90 backdrop-blur-md border border-border p-4 rounded-xl flex items-center justify-between gap-4 shadow-2xl z-10">
+              <div className="absolute bottom-4 left-4 right-4 md:left-auto md:right-4 bg-white/90 backdrop-blur-md border border-white/15 p-4 rounded-xl flex items-center justify-between gap-4 shadow-2xl z-10">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-amber-500/20 text-amber-400 rounded-lg border border-amber-500/30">
                     <MapPin className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-extrabold text-foreground text-xs sm:text-sm">TEMP TRAVEL CAR RENTALS PVT. LTD.</h3>
-                    <p className="text-[11px] text-muted-foreground truncate max-w-xs sm:max-w-md">Plot No. 183, Kh No. 16/2, Qutub Vihar PH-I, New Delhi - 110071</p>
+                    <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm">TEMP TRAVEL CAR RENTALS PVT. LTD.</h3>
+                    <p className="text-[11px] text-slate-9000 truncate max-w-xs sm:max-w-md">Plot No. 183, Kh No. 16/2, Qutub Vihar PH-I, New Delhi - 110071</p>
                   </div>
                 </div>
                 <a
                   href="https://www.google.com/maps/search/?api=1&query=28.5763965,77.0282025"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-accent-foreground font-black px-4 py-2.5 rounded-lg text-xs tracking-wider transition-all shadow-lg shrink-0 uppercase"
+                  className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-4 py-2.5 rounded-lg text-xs tracking-wider transition-all shadow-lg shrink-0 uppercase"
                 >
                   <span>Open Business Listing</span>
                   <ExternalLink className="w-3.5 h-3.5" />

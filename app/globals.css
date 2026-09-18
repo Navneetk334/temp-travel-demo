@@ -4,7 +4,43 @@
 
 @layer base {
   :root {
-    /* Premium Dark Theme Variables by Default (Admin) */
+    /* Premium Dark Theme Variables by Default */
+    --background: 224 71% 8%;
+    --foreground: 213 31% 91%;
+
+    --card: 222 47% 12%;
+    --card-foreground: 213 31% 91%;
+
+    --popover: 222 47% 10%;
+    --popover-foreground: 213 31% 91%;
+
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 222 47% 18%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 222 47% 18%;
+    --muted-foreground: 215.4 16.3% 66.9%; /* Brightened muted text slightly */
+
+    --accent: 48 96% 48%; /* Premium Amber/Gold */
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 222 47% 20%;
+    --input: 222 47% 18%;
+    --ring: 217.2 91.2% 59.8%;
+
+    --radius: 0.75rem;
+
+    /* Semantic Design Tokens */
+    --surface: 222 47% 14%;
+  }
+
+  .dark {
+    /* Duplicate variables for fallback when class is explicitly targeted */
     --background: 224 71% 8%;
     --foreground: 213 31% 91%;
 
@@ -23,7 +59,7 @@
     --muted: 222 47% 18%;
     --muted-foreground: 215.4 16.3% 66.9%;
 
-    --accent: 48 96% 48%; /* Premium Amber/Gold */
+    --accent: 48 96% 48%;
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 62.8% 30.6%;
@@ -33,76 +69,7 @@
     --input: 222 47% 18%;
     --ring: 217.2 91.2% 59.8%;
 
-    --radius: 0.75rem;
-
-    /* Semantic Design Tokens */
     --surface: 222 47% 14%;
-  }
-
-  /* Pastel Light Theme for Public Website */
-  .pastel-theme {
-    --background: 40 33% 96%; /* Soft cream #F9F8F6 */
-    --foreground: 217 33% 17%; /* Dark navy/charcoal #1E293B */
-
-    --card: 0 0% 100%; /* Pure white */
-    --card-foreground: 217 33% 17%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 217 33% 17%;
-
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 40 33% 92%; /* Slightly darker cream */
-    --secondary-foreground: 217 33% 17%;
-
-    --muted: 40 33% 92%;
-    --muted-foreground: 215 16% 47%; /* Slate gray #64748B */
-
-    --accent: 48 96% 48%; /* Premium Amber/Gold */
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214 32% 91%; /* Light slate border #E2E8F0 */
-    --input: 214 32% 91%;
-    --ring: 217.2 91.2% 59.8%;
-
-    --surface: 0 0% 100%;
-  }
-
-  .dark {
-    /* Duplicate variables for fallback when class is explicitly targeted */
-    --background: 40 33% 96%;
-    --foreground: 217 33% 17%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 217 33% 17%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 217 33% 17%;
-
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 40 33% 92%;
-    --secondary-foreground: 217 33% 17%;
-
-    --muted: 40 33% 92%;
-    --muted-foreground: 215 16% 47%;
-
-    --accent: 48 96% 48%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 217.2 91.2% 59.8%;
-
-    --surface: 0 0% 100%;
   }
 }
 
@@ -116,27 +83,27 @@
   }
 }
 
-/* Premium Glassmorphism Design Class (Light by Default) */
+/* Premium Glassmorphism Design Class (Dark by Default) */
 .glassmorphism {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .dark .glassmorphism {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Google Maps Places Autocomplete Native Dropdown Styling */
 .pac-container {
-  background-color: hsl(0, 0%, 100%) !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  background-color: hsl(222, 47%, 14%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
   border-radius: 0.75rem !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5) !important;
   margin-top: 4px !important;
   z-index: 99999 !important;
   font-family: inherit !important;
@@ -145,34 +112,34 @@
 
 .pac-item {
   padding: 10px 14px !important;
-  color: hsl(217, 33%, 17%) !important;
-  border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
+  color: #cbd5e1 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
   cursor: pointer !important;
   font-size: 13px !important;
 }
 
 .pac-item:hover, .pac-item-selected {
-  background-color: rgba(37, 99, 235, 0.05) !important;
-  color: hsl(217, 33%, 17%) !important;
+  background-color: rgba(37, 99, 235, 0.3) !important;
+  color: #ffffff !important;
 }
 
 .pac-item-query {
-  color: hsl(217, 33%, 17%) !important;
+  color: #ffffff !important;
   font-weight: 600 !important;
   font-size: 13px !important;
 }
 
 .pac-matched {
-  color: hsl(217.2, 91.2%, 59.8%) !important;
+  color: #fbbf24 !important;
   font-weight: 700 !important;
 }
 
 .pac-icon {
-  /* Lighten icon */
+  filter: invert(1) brightness(1.5) !important;
 }
 
 .gradient-bg {
-  background: linear-gradient(135deg, hsl(40, 33%, 96%) 0%, hsl(0, 0%, 100%) 100%);
+  background: linear-gradient(135deg, hsl(217.2, 91.2%, 59.8%) 0%, hsl(222.2, 84%, 4.9%) 100%);
 }
 
 /* Completely Hide Native Browser Black Calendar & Clock Picker Indicators across Chrome/Edge/Brave/Safari */
