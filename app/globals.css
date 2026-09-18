@@ -4,7 +4,43 @@
 
 @layer base {
   :root {
-    /* Soft Pastel Light Theme Variables */
+    /* Premium Dark Theme Variables by Default (Admin) */
+    --background: 224 71% 8%;
+    --foreground: 213 31% 91%;
+
+    --card: 222 47% 12%;
+    --card-foreground: 213 31% 91%;
+
+    --popover: 222 47% 10%;
+    --popover-foreground: 213 31% 91%;
+
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 222 47% 18%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 222 47% 18%;
+    --muted-foreground: 215.4 16.3% 66.9%;
+
+    --accent: 48 96% 48%; /* Premium Amber/Gold */
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 222 47% 20%;
+    --input: 222 47% 18%;
+    --ring: 217.2 91.2% 59.8%;
+
+    --radius: 0.75rem;
+
+    /* Semantic Design Tokens */
+    --surface: 222 47% 14%;
+  }
+
+  /* Pastel Light Theme for Public Website */
+  .pastel-theme {
     --background: 40 33% 96%; /* Soft cream #F9F8F6 */
     --foreground: 217 33% 17%; /* Dark navy/charcoal #1E293B */
 
@@ -33,9 +69,6 @@
     --input: 214 32% 91%;
     --ring: 217.2 91.2% 59.8%;
 
-    --radius: 0.75rem;
-
-    /* Semantic Design Tokens */
     --surface: 0 0% 100%;
   }
 

@@ -240,7 +240,7 @@ export default function PublicGalleryPage() {
   const lightboxItem = lightboxIndex !== null ? items[lightboxIndex] : null;
 
   return (
-    <div className="bg-background min-h-screen w-full text-slate-900 selection:bg-accent selection:text-slate-950 overflow-x-hidden relative select-none flex flex-col">
+    <div className="bg-background min-h-screen w-full text-foreground selection:bg-accent selection:text-foreground overflow-x-hidden relative select-none flex flex-col">
       <div className="flex-grow relative flex flex-col pt-36 pb-8" onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}>
       
       {/* SVG CONCAVE CURVED MONITOR SCREEN MASK DEFINITION */}
@@ -256,17 +256,17 @@ export default function PublicGalleryPage() {
 
       {/* MINIMAL CATEGORY FILTER RIBBON (TOP BAR) */}
       <div className="relative z-40 px-6 sm:px-12 flex justify-center pointer-events-auto mt-4 mb-8">
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1 text-[11px] font-mono bg-white/80 p-1.5 rounded-full border border-slate-200 backdrop-blur-md">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1 text-[11px] font-mono bg-card/80 p-1.5 rounded-full border border-border backdrop-blur-md shadow-sm">
           {CATEGORIES.map((cat) => {
-            const isActive = activeCategory === cat.value;
+            const isActive = activeCategory === (cat.id || cat.value);
             return (
               <button
-                key={cat.value}
-                onClick={() => setActiveCategory(cat.value)}
-                className={`px-3.5 py-1.5 rounded-full font-bold uppercase tracking-wider transition-all duration-300 whitespace-nowrap ${
+                key={cat.id || cat.value}
+                onClick={() => handleCategorySelect(cat.id || cat.value)}
+                className={`px-4 py-1.5 rounded-full whitespace-nowrap transition-all duration-300 ${
                   isActive
-                    ? "bg-accent text-slate-950 shadow-md font-extrabold"
-                    : "text-slate-500 hover:text-white"
+                    ? "bg-accent text-accent-foreground font-bold shadow-[0_0_15px_rgba(250,204,21,0.3)]"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >
                 {cat.label}
@@ -287,15 +287,15 @@ export default function PublicGalleryPage() {
       ) : error ? (
         <div className="h-full flex items-center justify-center text-center p-6">
           <div className="space-y-2">
-            <h3 className="text-base font-bold text-slate-200">Unable to load journal media</h3>
-            <p className="text-xs text-slate-500">Please refresh or check back shortly.</p>
+            <h3 className="text-base font-bold text-foreground">Unable to load journal media</h3>
+            <p className="text-xs text-muted-foreground">Please refresh or check back shortly.</p>
           </div>
         </div>
       ) : items.length === 0 ? (
         <div className="h-full flex items-center justify-center text-center p-6">
           <div className="space-y-2">
-            <h3 className="text-xl font-extrabold text-slate-200">More journeys coming soon.</h3>
-            <p className="text-xs text-slate-500">No media assets found matching the selected category.</p>
+            <h3 className="text-xl font-extrabold text-foreground">More journeys coming soon.</h3>
+            <p className="text-xs text-muted-foreground">No media assets found matching the selected category.</p>
           </div>
         </div>
       ) : (
@@ -327,37 +327,37 @@ export default function PublicGalleryPage() {
       {lightboxItem && (
         <Portal>
           <div 
-            className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[99999] flex items-center justify-center p-4 sm:p-6 cursor-default"
+            className="fixed inset-0 bg-background/95 backdrop-blur-xl z-[99999] flex items-center justify-center p-4 sm:p-6 cursor-default"
             onClick={() => setLightboxIndex(null)}
           >
             <div 
-              className="relative max-w-5xl w-full bg-slate-900 border border-slate-200 rounded-3xl overflow-hidden shadow-2xl flex flex-col lg:flex-row max-h-[90vh]"
+              className="w-full max-w-6xl max-h-[90vh] bg-card border border-border rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col lg:flex-row relative"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close Button */}
               <button
                 onClick={() => setLightboxIndex(null)}
-                className="absolute top-4 right-4 p-2.5 bg-white/80 text-slate-200 hover:text-white rounded-full border border-slate-200 z-30 transition-all"
+                className="absolute top-4 right-4 z-50 p-2 bg-background/80 hover:bg-background text-foreground rounded-full backdrop-blur-md border border-border shadow-lg transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
 
               {/* Prev / Next Overlay Buttons */}
               <button
                 onClick={() => setLightboxIndex((prev) => (prev !== null ? (prev - 1 + items.length) % items.length : null))}
-                className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/80 text-slate-200 hover:text-accent rounded-full border border-slate-200 z-30 transition-all"
+                className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-background/80 hover:bg-accent hover:text-accent-foreground text-foreground rounded-full border border-border z-30 transition-all backdrop-blur-md shadow-lg"
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
               <button
                 onClick={() => setLightboxIndex((prev) => (prev !== null ? (prev + 1) % items.length : null))}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/80 text-slate-200 hover:text-accent rounded-full border border-slate-200 z-30 transition-all"
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-background/80 hover:bg-accent hover:text-accent-foreground text-foreground rounded-full border border-border z-30 transition-all backdrop-blur-md shadow-lg"
               >
                 <ChevronRight className="w-6 h-6" />
               </button>
 
               {/* Lightbox Image Box */}
-              <div className="lg:w-2/3 h-[320px] sm:h-[480px] lg:h-auto bg-black flex items-center justify-center relative">
+              <div className="lg:w-2/3 h-[320px] sm:h-[480px] lg:h-auto bg-muted flex items-center justify-center relative">
                 <img
                   src={lightboxItem.imageUrl}
                   alt={lightboxItem.altText || lightboxItem.title || "TEMP TRAVEL Lightbox"}
@@ -366,39 +366,40 @@ export default function PublicGalleryPage() {
               </div>
 
               {/* Lightbox Info Panel */}
-              <div className="lg:w-1/3 p-6 sm:p-8 flex flex-col justify-between space-y-6 bg-slate-900 border-t lg:border-t-0 lg:border-l border-white/5 overflow-y-auto">
-                <div className="space-y-4">
+              <div className="lg:w-1/3 p-6 sm:p-8 flex flex-col justify-between space-y-6 bg-card border-t lg:border-t-0 lg:border-l border-border overflow-y-auto custom-scrollbar">
+                <div className="space-y-6">
+                  
                   <div className="flex items-center gap-2">
-                    <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-accent/20 text-accent border border-accent/30">
-                      {lightboxItem.category || "TEMP TRAVEL Fleet"}
+                    <span className="px-3 py-1 rounded-full text-[10px] font-mono bg-accent/10 text-accent border border-accent/20 uppercase tracking-wider">
+                      {lightboxItem.category || lightboxItem.genre || "TEMP TRAVEL Fleet"}
                     </span>
                     {lightboxItem.isFeatured && (
-                      <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1">
-                        <Sparkles className="w-3 h-3" />
+                      <span className="px-3 py-1 rounded-full text-[10px] font-mono bg-background text-foreground border border-border flex items-center gap-1 shadow-sm">
+                        <Sparkles className="w-3 h-3 text-accent" />
                         Featured
                       </span>
                     )}
                   </div>
 
-                  <h3 className="text-xl sm:text-2xl font-black text-slate-50 leading-tight">
+                  <h3 className="text-xl sm:text-2xl font-black text-foreground leading-tight">
                     {lightboxItem.title || "Chauffeur Drive Experience"}
                   </h3>
 
                   {lightboxItem.description && (
-                    <p className="text-xs text-slate-700 leading-relaxed font-sans">
+                    <p className="text-xs text-muted-foreground leading-relaxed font-sans">
                       {lightboxItem.description}
                     </p>
                   )}
 
                   {lightboxItem.caption && (
-                    <div className="p-3 bg-white/60 border border-white/5 rounded-xl text-xs text-slate-500 italic">
+                    <div className="p-3 bg-muted border border-border rounded-xl text-xs text-muted-foreground italic shadow-sm">
                       &ldquo;{lightboxItem.caption}&rdquo;
                     </div>
                   )}
                 </div>
 
-                <div className="space-y-4 border-t border-white/5 pt-4">
-                  <div className="space-y-2 text-xs text-slate-500 font-mono">
+                <div className="space-y-4 border-t border-border pt-4 mt-6">
+                  <div className="space-y-2 text-xs text-muted-foreground font-mono">
                     {lightboxItem.location && (
                       <div className="flex items-center gap-2">
                         <MapPin className="w-3.5 h-3.5 text-accent" />
