@@ -68,9 +68,9 @@ export default function PrivacyPolicyPage() {
   ];
 
   return (
-    <div className="bg-slate-950 text-slate-100 min-h-screen">
+    <div className="bg-background text-slate-100 min-h-screen">
       {/* Combined Page Header & Breadcrumbs Section */}
-      <section className="relative bg-slate-950 overflow-hidden border-b border-white/5 pb-16">
+      <section className="relative bg-background overflow-hidden border-b border-border pb-16">
         <div className="absolute inset-0 bg-gradient-to-b from-blue-900/10 via-slate-950 to-slate-950 pointer-events-none" />
         
         <div className="relative z-10">
@@ -78,7 +78,7 @@ export default function PrivacyPolicyPage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4 relative z-10 pt-4">
-          <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1 rounded-full text-xs text-accent">
+          <div className="inline-flex items-center gap-2 bg-white/5 border border-border px-3 py-1 rounded-full text-xs text-accent">
             <Lock className="w-3.5 h-3.5" />
             <span>Secure Data Management</span>
           </div>
@@ -102,7 +102,7 @@ export default function PrivacyPolicyPage() {
               <a 
                 key={sec.id}
                 href={`#${sec.id}`}
-                className="block pl-3 py-1.5 border-l border-white/5 hover:border-accent text-slate-400 hover:text-accent text-xs font-semibold tracking-wide transition-all"
+                className="block pl-3 py-1.5 border-l border-border hover:border-accent text-slate-400 hover:text-accent text-xs font-semibold tracking-wide transition-all"
               >
                 {sec.title}
               </a>
@@ -111,10 +111,10 @@ export default function PrivacyPolicyPage() {
 
           {/* Legal Text Sections */}
           <div className="lg:col-span-9 space-y-10">
-            <div className="glassmorphism p-6 sm:p-8 rounded-2xl border border-white/5 space-y-8">
+            <div className="glassmorphism p-6 sm:p-8 rounded-2xl border border-border space-y-8">
               {sections.map((sec) => (
                 <div key={sec.id} id={sec.id} className="space-y-3 scroll-mt-28">
-                  <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2 border-b border-white/5 pb-2">
+                  <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2 border-b border-border pb-2">
                     <ShieldCheck className="w-4 h-4 text-accent shrink-0" />
                     <span>{sec.title}</span>
                   </h2>
@@ -126,14 +126,14 @@ export default function PrivacyPolicyPage() {
             </div>
 
             {/* Quick Contact Box */}
-            <div className="bg-slate-900/40 border border-white/5 p-6 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="bg-surface/40 border border-border p-6 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="space-y-1">
                 <h4 className="font-bold text-slate-50 text-sm">Need Data Assistance?</h4>
                 <p className="text-xs text-slate-400">Request account closures or export driver profile data logs.</p>
               </div>
               <a 
                 href="mailto:compliance@temptravels.com" 
-                className="bg-slate-900 border border-white/10 hover:border-accent/40 text-slate-200 hover:text-accent font-bold py-2.5 px-5 rounded-lg text-xs flex items-center gap-1.5 transition-all uppercase tracking-wider shrink-0"
+                className="bg-surface border border-border hover:border-accent/40 text-slate-200 hover:text-accent font-bold py-2.5 px-5 rounded-lg text-xs flex items-center gap-1.5 transition-all uppercase tracking-wider shrink-0"
               >
                 <Mail className="w-4 h-4" />
                 <span>Contact Compliance</span>
@@ -147,3 +147,4 @@ export default function PrivacyPolicyPage() {
     </div>
   );
 }
+

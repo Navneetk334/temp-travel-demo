@@ -244,9 +244,9 @@ export default function AdminTourLeadsPage() {
   });
 
   return (
-    <div className="bg-slate-950 min-h-screen text-slate-100 p-8 space-y-8">
+    <div className="bg-background min-h-screen text-slate-100 p-8 space-y-8">
       {/* Title Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/5 pb-6 gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-border pb-6 gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-50 tracking-tight flex items-center gap-2.5">
             <MapPin className="w-8 h-8 text-accent" />
@@ -258,7 +258,7 @@ export default function AdminTourLeadsPage() {
         </div>
         <button
           onClick={handleExportCSV}
-          className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold py-2.5 px-6 rounded-lg text-xs tracking-wider uppercase transition-all border border-white/10 shadow-lg"
+          className="flex items-center gap-1.5 bg-surface hover:bg-slate-800 text-slate-300 font-bold py-2.5 px-6 rounded-lg text-xs tracking-wider uppercase transition-all border border-border shadow-lg"
         >
           <Download className="w-4 h-4 text-accent" />
           <span>Export CSV Report</span>
@@ -270,7 +270,7 @@ export default function AdminTourLeadsPage() {
         <div 
           onClick={() => { setStatusFilter(""); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "" ? "border-accent bg-accent/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "" ? "border-accent bg-accent/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Total Bookings</div>
@@ -280,7 +280,7 @@ export default function AdminTourLeadsPage() {
         <div 
           onClick={() => { setStatusFilter("PENDING"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "PENDING" ? "border-yellow-400 bg-yellow-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "PENDING" ? "border-yellow-400 bg-yellow-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-yellow-400 uppercase font-bold tracking-wider">PENDING</div>
@@ -290,7 +290,7 @@ export default function AdminTourLeadsPage() {
         <div 
           onClick={() => { setStatusFilter("CONFIRMED"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "CONFIRMED" ? "border-blue-400 bg-blue-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "CONFIRMED" ? "border-blue-400 bg-blue-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-blue-400 uppercase font-bold tracking-wider">CONFIRMED</div>
@@ -300,7 +300,7 @@ export default function AdminTourLeadsPage() {
         <div 
           onClick={() => { setStatusFilter("COMPLETED"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "COMPLETED" ? "border-green-400 bg-green-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "COMPLETED" ? "border-green-400 bg-green-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-green-400 uppercase font-bold tracking-wider">COMPLETED</div>
@@ -310,7 +310,7 @@ export default function AdminTourLeadsPage() {
         <div 
           onClick={() => { setStatusFilter("CANCELLED"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "CANCELLED" ? "border-rose-400 bg-rose-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "CANCELLED" ? "border-rose-400 bg-rose-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-rose-400 uppercase font-bold tracking-wider">CANCELLED</div>
@@ -319,7 +319,7 @@ export default function AdminTourLeadsPage() {
       </div>
 
       {/* Filter & Control Toolbar */}
-      <div className="glassmorphism p-6 rounded-xl border border-white/5 flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="glassmorphism p-6 rounded-xl border border-border flex flex-col md:flex-row gap-4 items-center justify-between">
         
         {/* Search */}
         <div className="relative w-full md:w-72">
@@ -329,7 +329,7 @@ export default function AdminTourLeadsPage() {
             placeholder="Search ref #, customer, details..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-            className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all"
+            className="w-full bg-background/60 border border-border rounded-lg py-2 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all"
           />
         </div>
 
@@ -338,13 +338,13 @@ export default function AdminTourLeadsPage() {
           <select
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+            className="bg-background/60 border border-border rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
           >
-            <option value="" className="bg-slate-900">All Booking Statuses</option>
-            <option value="PENDING" className="bg-slate-900 text-yellow-400">PENDING</option>
-            <option value="CONFIRMED" className="bg-slate-900 text-blue-400">CONFIRMED</option>
-            <option value="COMPLETED" className="bg-slate-900 text-green-400">COMPLETED</option>
-            <option value="CANCELLED" className="bg-slate-900 text-rose-400">CANCELLED</option>
+            <option value="" className="bg-surface">All Booking Statuses</option>
+            <option value="PENDING" className="bg-surface text-yellow-400">PENDING</option>
+            <option value="CONFIRMED" className="bg-surface text-blue-400">CONFIRMED</option>
+            <option value="COMPLETED" className="bg-surface text-green-400">COMPLETED</option>
+            <option value="CANCELLED" className="bg-surface text-rose-400">CANCELLED</option>
           </select>
         </div>
 
@@ -354,7 +354,7 @@ export default function AdminTourLeadsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* Leads Table */}
-        <div className="lg:col-span-7 glassmorphism rounded-xl border border-white/5 overflow-hidden flex flex-col space-y-2 p-2 sm:p-0">
+        <div className="lg:col-span-7 glassmorphism rounded-xl border border-border overflow-hidden flex flex-col space-y-2 p-2 sm:p-0">
           {/* Bulk Action Header Bar */}
           {selectedIds.length > 0 && (
             <div className="bg-amber-500/10 border-b border-amber-500/20 p-3 flex items-center justify-between text-xs">
@@ -378,13 +378,13 @@ export default function AdminTourLeadsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="bg-slate-900 border-b border-white/5 text-slate-400 font-semibold uppercase tracking-wider">
+                    <tr className="bg-surface border-b border-border text-slate-400 font-semibold uppercase tracking-wider">
                       <th className="p-4 w-10 text-center" onClick={(e) => e.stopPropagation()}>
                         <input
                           type="checkbox"
                           checked={filteredLeads.length > 0 && selectedIds.length === filteredLeads.length}
                           onChange={handleSelectAll}
-                          className="w-4 h-4 rounded text-amber-500 bg-slate-950 border-white/20 focus:ring-0 cursor-pointer"
+                          className="w-4 h-4 rounded text-amber-500 bg-background border-white/20 focus:ring-0 cursor-pointer"
                         />
                       </th>
                       <th className="p-4 w-12 text-center">S. No.</th>
@@ -415,7 +415,7 @@ export default function AdminTourLeadsPage() {
                               type="checkbox"
                               checked={selectedIds.includes(lead.id)}
                               onChange={() => handleSelectOne(lead.id)}
-                              className="w-4 h-4 rounded text-amber-500 bg-slate-950 border-white/20 focus:ring-0 cursor-pointer"
+                              className="w-4 h-4 rounded text-amber-500 bg-background border-white/20 focus:ring-0 cursor-pointer"
                             />
                           </td>
                           <td className="p-4 text-center font-mono font-bold text-slate-400">
@@ -446,7 +446,7 @@ export default function AdminTourLeadsPage() {
                             <button
                               onClick={() => handleDelete(lead.id)}
                               title="Delete Lead"
-                              className="inline-flex p-1.5 bg-slate-900 border border-white/5 rounded-lg text-slate-400 hover:text-red-400 transition-colors"
+                              className="inline-flex p-1.5 bg-surface border border-border rounded-lg text-slate-400 hover:text-red-400 transition-colors"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -464,10 +464,10 @@ export default function AdminTourLeadsPage() {
         {/* Lead Inspection Dashboard Panel */}
         <div className="lg:col-span-5">
           {activeLead ? (
-            <div className="bg-slate-900 border border-white/5 p-6 rounded-2xl space-y-6 glassmorphism">
+            <div className="bg-surface border border-border p-6 rounded-2xl space-y-6 glassmorphism">
               
               {/* Header */}
-              <div className="flex justify-between items-start border-b border-white/5 pb-4">
+              <div className="flex justify-between items-start border-b border-border pb-4">
                 <div>
                   <span className="text-[9px] font-extrabold text-amber-400 font-mono uppercase tracking-widest block">{activeLead.bookingNumber}</span>
                   <h3 className="text-xl font-extrabold text-slate-50 mt-0.5">{activeLead.contactName}</h3>
@@ -499,7 +499,7 @@ export default function AdminTourLeadsPage() {
                       className={`py-1.5 px-2 rounded-lg text-[10px] font-extrabold tracking-wider border transition-all ${
                         activeLead.status === st
                           ? "bg-accent text-slate-950 border-accent font-black shadow-md"
-                          : "bg-slate-950/60 text-slate-400 border-white/10 hover:border-white/20 hover:text-slate-200"
+                          : "bg-background/60 text-slate-400 border-border hover:border-white/20 hover:text-slate-200"
                       }`}
                     >
                       {st}
@@ -509,29 +509,29 @@ export default function AdminTourLeadsPage() {
               </div>
 
               {/* Details Specs */}
-              <div className="space-y-3 border-t border-white/5 pt-4 text-xs text-slate-300">
-                <div className="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-lg border border-white/5">
+              <div className="space-y-3 border-t border-border pt-4 text-xs text-slate-300">
+                <div className="flex justify-between items-center bg-background/40 p-2.5 rounded-lg border border-border">
                   <span className="text-slate-400">Customer Name:</span>
                   <span className="font-bold text-slate-100">{activeLead.contactName}</span>
                 </div>
-                <div className="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-lg border border-white/5">
+                <div className="flex justify-between items-center bg-background/40 p-2.5 rounded-lg border border-border">
                   <span className="text-slate-400">Email:</span>
                   <span className="font-mono font-bold text-accent">{activeLead.email}</span>
                 </div>
-                <div className="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-lg border border-white/5">
+                <div className="flex justify-between items-center bg-background/40 p-2.5 rounded-lg border border-border">
                   <span className="text-slate-400">Phone:</span>
                   <span className="font-mono font-bold text-slate-100">{activeLead.phone}</span>
                 </div>
-                <div className="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-lg border border-white/5">
+                <div className="flex justify-between items-center bg-background/40 p-2.5 rounded-lg border border-border">
                   <span className="text-slate-400">Travel Date:</span>
                   <span className="font-mono font-bold text-amber-400">{new Date(activeLead.travelDate).toLocaleDateString("en-IN")}</span>
                 </div>
-                <div className="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-lg border border-white/5">
+                <div className="flex justify-between items-center bg-background/40 p-2.5 rounded-lg border border-border">
                   <span className="text-slate-400">Number of Guests:</span>
                   <span className="font-bold text-slate-100">{activeLead.numPassengers} Pax</span>
                 </div>
 
-                <div className="bg-slate-950/40 p-3 rounded-lg border border-white/5 space-y-1">
+                <div className="bg-background/40 p-3 rounded-lg border border-border space-y-1">
                   <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Tour Package Requested</div>
                   <div className="text-slate-200 leading-relaxed font-bold">{activeLead.details || "Tour Package Booking"}</div>
                 </div>
@@ -539,7 +539,7 @@ export default function AdminTourLeadsPage() {
 
             </div>
           ) : (
-            <div className="bg-slate-900/40 border border-white/5 p-12 rounded-2xl text-center text-slate-500 text-xs italic space-y-2">
+            <div className="bg-surface/40 border border-border p-12 rounded-2xl text-center text-slate-500 text-xs italic space-y-2">
               <AlertCircle className="w-8 h-8 mx-auto text-slate-600 animate-pulse" />
               <p>Select a tour package booking lead from the table to inspect details and update status.</p>
             </div>
@@ -562,3 +562,4 @@ export default function AdminTourLeadsPage() {
     </div>
   );
 }
+

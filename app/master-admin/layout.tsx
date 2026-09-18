@@ -264,9 +264,9 @@ export default function MasterAdminLayout({
 
   return (
     <DialogProvider>
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-amber-500/30 selection:text-amber-200">
+      <div className="min-h-screen bg-background text-slate-100 flex flex-col font-sans selection:bg-amber-500/30 selection:text-amber-200">
         {/* 1. Master Desktop Sidebar Panel (Fixed Left) */}
-        <aside className="hidden lg:flex lg:flex-col lg:w-56 lg:fixed lg:inset-y-0 bg-slate-900/95 backdrop-blur-2xl border-r border-amber-500/20 z-40 shrink-0 shadow-2xl">
+        <aside className="hidden lg:flex lg:flex-col lg:w-56 lg:fixed lg:inset-y-0 bg-surface/95 backdrop-blur-2xl border-r border-amber-500/20 z-40 shrink-0 shadow-2xl">
           {/* Brand Header */}
           <div className="h-14 px-3 border-b border-amber-500/20 flex items-center justify-center relative bg-gradient-to-b from-amber-500/10 via-transparent to-transparent">
             <Link href="/master-admin" className="w-full h-full flex items-center justify-center group" title="Master Admin Home">
@@ -351,7 +351,7 @@ export default function MasterAdminLayout({
           </nav>
 
           {/* System Telemetry & Logout */}
-          <div className="p-2.5 border-t border-amber-500/20 bg-slate-950/80 space-y-2">
+          <div className="p-2.5 border-t border-amber-500/20 bg-background/80 space-y-2">
             <div className="flex items-center justify-between text-[9px] font-bold text-slate-400">
               <div className="flex items-center gap-1.5 text-emerald-400">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -374,7 +374,7 @@ export default function MasterAdminLayout({
         {/* 2. Main Content & Right Fixed Notification Wrapper */}
         <div className="flex-1 flex flex-col min-w-0 lg:pl-56 xl:pr-72 overflow-x-hidden min-h-screen">
           {/* Header Toolbar */}
-          <header className="h-14 bg-slate-900/80 backdrop-blur-xl border-b border-amber-500/20 flex items-center justify-between px-4 sm:px-5 lg:px-6 sticky top-0 z-30 shadow-lg">
+          <header className="h-14 bg-surface/80 backdrop-blur-xl border-b border-amber-500/20 flex items-center justify-between px-4 sm:px-5 lg:px-6 sticky top-0 z-30 shadow-lg">
             <button
               onClick={() => setMobileOpen(true)}
               className="lg:hidden p-1.5 text-slate-400 hover:text-amber-400 rounded-lg hover:bg-white/5"
@@ -396,14 +396,14 @@ export default function MasterAdminLayout({
 
             {/* Controls: Telemetry indicator & Logout */}
             <div className="flex items-center gap-2.5 ml-auto">
-              <div className="hidden md:flex items-center gap-1.5 bg-slate-950 border border-amber-500/20 px-2.5 py-1 rounded-lg text-xs font-bold text-slate-300">
+              <div className="hidden md:flex items-center gap-1.5 bg-background border border-amber-500/20 px-2.5 py-1 rounded-lg text-xs font-bold text-slate-300">
                 <Activity className="w-3 h-3 text-emerald-400 animate-pulse" />
                 <span>Telemetry Synced</span>
               </div>
 
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-1.5 bg-slate-950 hover:bg-rose-500 text-slate-300 hover:text-white border border-white/10 hover:border-rose-500 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm"
+                className="flex items-center gap-1.5 bg-background hover:bg-rose-500 text-slate-300 hover:text-white border border-border hover:border-rose-500 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm"
                 title="Sign Out of Master Control Center"
               >
                 <LogOut className="w-3.5 h-3.5 text-rose-400 hover:text-white" />
@@ -419,7 +419,7 @@ export default function MasterAdminLayout({
         </div>
 
         {/* 3. FIXED RIGHT-SIDE MASTER NOTIFICATION SIDEBAR PANEL */}
-        <aside className="hidden xl:flex xl:flex-col xl:w-72 xl:fixed xl:right-0 xl:inset-y-0 bg-slate-900/95 backdrop-blur-2xl border-l border-amber-500/20 z-40 shrink-0 shadow-2xl">
+        <aside className="hidden xl:flex xl:flex-col xl:w-72 xl:fixed xl:right-0 xl:inset-y-0 bg-surface/95 backdrop-blur-2xl border-l border-amber-500/20 z-40 shrink-0 shadow-2xl">
           {/* Right Panel Header */}
           <div className="h-14 px-4 border-b border-amber-500/20 flex items-center justify-between gap-2 bg-gradient-to-b from-amber-500/10 via-transparent to-transparent">
             <div className="flex items-center gap-1.5 min-w-0">
@@ -445,7 +445,7 @@ export default function MasterAdminLayout({
               </div>
 
               {expiryAlerts.length === 0 ? (
-                <div className="bg-slate-950 p-4 rounded-xl border border-white/5 text-center text-xs text-slate-500 italic">
+                <div className="bg-background p-4 rounded-xl border border-border text-center text-xs text-slate-500 italic">
                   All vehicle & driver compliance documents are 100% valid.
                 </div>
               ) : (
@@ -478,7 +478,7 @@ export default function MasterAdminLayout({
                           </span>
                         </div>
                         <div className="text-[10px] font-mono text-slate-400">{exp.subtitle}</div>
-                        <div className="text-[10px] font-mono text-slate-500 pt-1 border-t border-white/5 flex justify-between">
+                        <div className="text-[10px] font-mono text-slate-500 pt-1 border-t border-border flex justify-between">
                           <span>Expiry Date:</span>
                           <span className="font-bold text-slate-300">{exp.date}</span>
                         </div>
@@ -490,7 +490,7 @@ export default function MasterAdminLayout({
             </div>
 
             {/* Section 2: Birthday Celebrations (Drivers & Office Staff) */}
-            <div className="space-y-3 pt-4 border-t border-white/10">
+            <div className="space-y-3 pt-4 border-t border-border">
               <div className="flex items-center justify-between text-[11px] font-black uppercase text-amber-400 tracking-wider">
                 <span className="flex items-center gap-1.5">
                   <Cake className="w-3.5 h-3.5 text-amber-400" /> Birthday Celebrations
@@ -499,7 +499,7 @@ export default function MasterAdminLayout({
               </div>
 
               {birthdayAlerts.length === 0 ? (
-                <div className="bg-slate-950 p-4 rounded-xl border border-white/5 text-center text-xs text-slate-500 italic">
+                <div className="bg-background p-4 rounded-xl border border-border text-center text-xs text-slate-500 italic">
                   No birthdays scheduled for today or this week.
                 </div>
               ) : (
@@ -535,10 +535,10 @@ export default function MasterAdminLayout({
         {/* Mobile Drawer Navigation */}
         {mobileOpen && (
           <div className="fixed inset-0 z-50 flex lg:hidden bg-black/80 backdrop-blur-md">
-            <div className="bg-slate-900 w-72 p-6 relative flex flex-col justify-between h-full border-r border-amber-500/30">
+            <div className="bg-surface w-72 p-6 relative flex flex-col justify-between h-full border-r border-amber-500/30">
               <button
                 onClick={() => setMobileOpen(false)}
-                className="absolute top-6 right-6 p-1.5 bg-slate-950 border border-white/10 rounded-lg text-slate-400 hover:text-white"
+                className="absolute top-6 right-6 p-1.5 bg-background border border-border rounded-lg text-slate-400 hover:text-white"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -623,7 +623,7 @@ export default function MasterAdminLayout({
                 </nav>
 
                 {/* Mobile Drawer Logout */}
-                <div className="pt-3 border-t border-white/10 mt-auto">
+                <div className="pt-3 border-t border-border mt-auto">
                   <button
                     onClick={handleLogout}
                     className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white border border-rose-500/30 rounded-xl text-xs font-bold transition-all cursor-pointer"
@@ -640,3 +640,4 @@ export default function MasterAdminLayout({
     </DialogProvider>
   );
 }
+

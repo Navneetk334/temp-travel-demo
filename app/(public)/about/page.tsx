@@ -123,9 +123,9 @@ export default async function AboutPage() {
     <>
       <JsonLd data={organizationSchema} />
 
-      <div className="bg-slate-950 text-slate-100 min-h-screen">
+      <div className="bg-background text-slate-100 min-h-screen">
         {/* Combined Hero & Breadcrumbs Section */}
-        <section className="relative bg-slate-950 overflow-hidden border-b border-white/5 pb-20">
+        <section className="relative bg-background overflow-hidden border-b border-border pb-20">
           <div className="absolute inset-0 bg-gradient-to-b from-blue-900/10 via-slate-950 to-slate-950 pointer-events-none" />
           
           <div className="relative z-10">
@@ -133,7 +133,7 @@ export default async function AboutPage() {
           </div>
 
           <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 text-center space-y-6 relative z-10 pt-4">
-            <span className="text-xs font-bold text-accent uppercase tracking-widest bg-white/5 border border-white/10 px-3 py-1 rounded-full">
+            <span className="text-xs font-bold text-accent uppercase tracking-widest bg-white/5 border border-border px-3 py-1 rounded-full">
               Who We Are
             </span>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-50">
@@ -146,22 +146,22 @@ export default async function AboutPage() {
         </section>
 
         {/* Statistics Grid */}
-        <section className="py-12 bg-slate-950">
+        <section className="py-12 bg-background">
           <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div className="glassmorphism p-6 rounded-xl border border-white/5 text-center hover:border-primary/20 transition-all">
+              <div className="glassmorphism p-6 rounded-xl border border-border text-center hover:border-primary/20 transition-all">
                 <div className="text-2xl sm:text-3xl font-extrabold text-accent">{companyInfo.stats.completedRides || "500K+"}</div>
                 <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold mt-1">Completed Rides</div>
               </div>
-              <div className="glassmorphism p-6 rounded-xl border border-white/5 text-center hover:border-primary/20 transition-all">
+              <div className="glassmorphism p-6 rounded-xl border border-border text-center hover:border-primary/20 transition-all">
                 <div className="text-2xl sm:text-3xl font-extrabold text-accent">{companyInfo.stats.corporateContracts || "120+"}</div>
                 <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold mt-1">Corporate Contracts</div>
               </div>
-              <div className="glassmorphism p-6 rounded-xl border border-white/5 text-center hover:border-primary/20 transition-all">
+              <div className="glassmorphism p-6 rounded-xl border border-border text-center hover:border-primary/20 transition-all">
                 <div className="text-2xl sm:text-3xl font-extrabold text-accent">{companyInfo.stats.hubs || "30+"}</div>
                 <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold mt-1">Regional Hubs</div>
               </div>
-              <div className="glassmorphism p-6 rounded-xl border border-white/5 text-center hover:border-primary/20 transition-all">
+              <div className="glassmorphism p-6 rounded-xl border border-border text-center hover:border-primary/20 transition-all">
                 <div className="text-2xl sm:text-3xl font-extrabold text-accent flex items-center justify-center gap-1">
                   <span>{companyInfo.stats.rating || "4.9/5"}</span>
                   <Star className="w-5 h-5 text-accent fill-accent shrink-0 inline-block mb-1" />
@@ -173,7 +173,7 @@ export default async function AboutPage() {
         </section>
 
         {/* About details & Why Choose Us */}
-        <section className="py-16 bg-slate-950">
+        <section className="py-16 bg-background">
           <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             <div className="space-y-6">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-50 flex items-center gap-2">
@@ -188,7 +188,7 @@ export default async function AboutPage() {
               </p>
             </div>
 
-            <div className="space-y-6 glassmorphism p-8 rounded-xl border border-white/5">
+            <div className="space-y-6 glassmorphism p-8 rounded-xl border border-border">
               <h2 className="text-2xl font-bold text-slate-50 flex items-center gap-2">
                 <Award className="w-6 h-6 text-accent" />
                 <span>Why Corporate Partners Choose Us</span>
@@ -206,9 +206,9 @@ export default async function AboutPage() {
         </section>
 
         {/* Mission & Vision */}
-        <section className="py-16 bg-slate-900/30 border-y border-white/5">
+        <section className="py-16 bg-surface/30 border-y border-border">
           <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="glassmorphism p-8 rounded-xl border border-white/5 space-y-4 hover:border-primary/20 transition-all flex flex-col justify-between">
+            <div className="glassmorphism p-8 rounded-xl border border-border space-y-4 hover:border-primary/20 transition-all flex flex-col justify-between">
               <div className="space-y-4">
                 <div className="bg-primary/10 border border-primary/20 w-12 h-12 rounded-lg flex items-center justify-center text-accent">
                   <Target className="w-6 h-6" />
@@ -220,7 +220,7 @@ export default async function AboutPage() {
               </div>
             </div>
 
-            <div className="glassmorphism p-8 rounded-xl border border-white/5 space-y-4 hover:border-primary/20 transition-all flex flex-col justify-between">
+            <div className="glassmorphism p-8 rounded-xl border border-border space-y-4 hover:border-primary/20 transition-all flex flex-col justify-between">
               <div className="space-y-4">
                 <div className="bg-primary/10 border border-primary/20 w-12 h-12 rounded-lg flex items-center justify-center text-accent">
                   <Eye className="w-6 h-6" />
@@ -235,7 +235,7 @@ export default async function AboutPage() {
         </section>
 
         {/* Style 1: Our Growth Journey (Alternating Glowing Timeline) */}
-        <section className="py-20 bg-slate-950">
+        <section className="py-20 bg-background">
           <div className="max-w-6xl mx-auto px-4 sm:px-8 lg:px-12 space-y-12">
             <div className="text-center space-y-4 max-w-3xl mx-auto">
               <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-50 tracking-tight">Our Growth Journey</h2>
@@ -264,7 +264,7 @@ export default async function AboutPage() {
                     >
                       {/* Left or Right Card Content */}
                       <div className="w-full md:w-1/2 p-4">
-                        <div className="bg-slate-900/60 border border-white/10 hover:border-accent/40 rounded-2xl p-6 sm:p-8 space-y-4 shadow-xl transition-all group glassmorphism hover:-translate-y-1">
+                        <div className="bg-surface/60 border border-border hover:border-accent/40 rounded-2xl p-6 sm:p-8 space-y-4 shadow-xl transition-all group glassmorphism hover:-translate-y-1">
                           
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
@@ -289,7 +289,7 @@ export default async function AboutPage() {
                             </p>
                           </div>
 
-                          <div className="pt-3 border-t border-white/5 flex items-center justify-between">
+                          <div className="pt-3 border-t border-border flex items-center justify-between">
                             <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 py-1 px-3 rounded-full">
                               <CheckCircle2 className="w-3.5 h-3.5" />
                               <span>{item.metric}</span>
@@ -302,7 +302,7 @@ export default async function AboutPage() {
 
                       {/* Central Node Badge */}
                       <div className="relative z-10 my-4 md:my-0 flex items-center justify-center">
-                        <div className="w-12 h-12 rounded-full bg-slate-950 border-2 border-accent flex items-center justify-center font-mono font-bold text-xs text-accent shadow-lg shadow-amber-500/10 group-hover:scale-125 transition-transform">
+                        <div className="w-12 h-12 rounded-full bg-background border-2 border-accent flex items-center justify-center font-mono font-bold text-xs text-accent shadow-lg shadow-amber-500/10 group-hover:scale-125 transition-transform">
                           {item.year.slice(2)}
                         </div>
                       </div>
@@ -319,7 +319,7 @@ export default async function AboutPage() {
         </section>
 
         {/* Core Values */}
-        <section className="py-16 bg-slate-900/30 border-t border-white/5">
+        <section className="py-16 bg-surface/30 border-t border-border">
           <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 space-y-12">
             <div className="text-center space-y-4">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-50">Our Core Values</h2>
@@ -345,7 +345,7 @@ export default async function AboutPage() {
                 };
 
                 return (
-                  <div key={idx} className="glassmorphism p-6 rounded-xl border border-white/5 hover:border-accent/30 transition-all space-y-3 flex flex-col justify-between group hover:-translate-y-1">
+                  <div key={idx} className="glassmorphism p-6 rounded-xl border border-border hover:border-accent/30 transition-all space-y-3 flex flex-col justify-between group hover:-translate-y-1">
                     <div className="space-y-3">
                       <div className="text-accent font-mono font-extrabold text-sm">0{idx + 1}.</div>
                       <h4 className="font-bold text-slate-100 text-base group-hover:text-amber-400 transition-colors leading-snug">{val}</h4>
@@ -361,7 +361,7 @@ export default async function AboutPage() {
         </section>
 
         {/* Service Coverage areas */}
-        <section className="py-16 bg-slate-950">
+        <section className="py-16 bg-background">
           <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 space-y-8">
             <div className="text-center space-y-4">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-50 flex items-center justify-center gap-2">
@@ -375,7 +375,7 @@ export default async function AboutPage() {
 
             <div className="flex flex-wrap gap-3 justify-center">
               {companyInfo.serviceAreas.map((area: string, idx: number) => (
-                <div key={idx} className="glassmorphism py-2 px-5 rounded-full border border-white/5 text-slate-300 text-xs font-semibold flex items-center gap-2 hover:border-primary/20 transition-all">
+                <div key={idx} className="glassmorphism py-2 px-5 rounded-full border border-border text-slate-300 text-xs font-semibold flex items-center gap-2 hover:border-primary/20 transition-all">
                   <MapPin className="w-3.5 h-3.5 text-accent" />
                   <span>{area}</span>
                 </div>
@@ -387,3 +387,4 @@ export default async function AboutPage() {
     </>
   );
 }
+

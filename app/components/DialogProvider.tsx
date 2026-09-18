@@ -71,8 +71,8 @@ export function DialogProvider({ children }: { children: ReactNode }) {
 
       {/* Render Dialogs */}
       {dialogs.length > 0 && (
-        <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm transition-all">
-          <div className="relative w-full max-w-sm bg-slate-900 border border-amber-500/30 rounded-2xl p-6 shadow-2xl flex flex-col items-center text-center animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm transition-all">
+          <div className="relative w-full max-w-sm bg-surface border border-amber-500/30 rounded-2xl p-6 shadow-2xl flex flex-col items-center text-center animate-in zoom-in-95 duration-200">
             {dialogs[0].type === "confirm" ? (
               <AlertTriangle className="w-12 h-12 text-amber-500 mb-4" />
             ) : (
@@ -91,7 +91,7 @@ export function DialogProvider({ children }: { children: ReactNode }) {
               {dialogs[0].type === "confirm" && (
                 <button
                   onClick={() => handleClose(dialogs[0].id, false)}
-                  className="flex-1 py-2.5 px-4 bg-slate-800 hover:bg-slate-700 border border-white/5 text-slate-300 font-bold rounded-xl text-xs transition-colors"
+                  className="flex-1 py-2.5 px-4 bg-slate-800 hover:bg-slate-700 border border-border text-slate-300 font-bold rounded-xl text-xs transition-colors"
                 >
                   Cancel
                 </button>
@@ -117,3 +117,4 @@ export function useDialog() {
   }
   return context;
 }
+

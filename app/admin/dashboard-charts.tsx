@@ -24,7 +24,7 @@ export default function DashboardCharts({ monthlyRevenueData, leadConversionsDat
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
       {/* Revenue Line Chart */}
-      <div className="lg:col-span-8 glassmorphism p-6 rounded-xl border border-white/5 space-y-4">
+      <div className="lg:col-span-8 glassmorphism p-6 rounded-xl border border-border space-y-4">
         <h2 className="text-lg font-bold text-slate-50 flex items-center gap-2">
           <TrendingUp className="w-5 h-5 text-accent" />
           <span>Monthly Revenue & Rides Analytics</span>
@@ -47,7 +47,7 @@ export default function DashboardCharts({ monthlyRevenueData, leadConversionsDat
       </div>
 
       {/* Lead conversions Bar Chart */}
-      <div className="lg:col-span-4 glassmorphism p-6 rounded-xl border border-white/5 space-y-4">
+      <div className="lg:col-span-4 glassmorphism p-6 rounded-xl border border-border space-y-4">
         <h2 className="text-lg font-bold text-slate-50 flex items-center gap-2">
           <Users className="w-5 h-5 text-accent" />
           <span>Lead Conversions Pipeline</span>
@@ -71,3 +71,4 @@ export default function DashboardCharts({ monthlyRevenueData, leadConversionsDat
     </div>
   );
 }
+

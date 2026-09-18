@@ -385,10 +385,10 @@ export default function BookingDispatchPage() {
   };
 
   return (
-    <div className="bg-slate-950 min-h-screen text-slate-100 p-8 space-y-8">
+    <div className="bg-background min-h-screen text-slate-100 p-8 space-y-8">
       
       {/* Title Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/5 pb-6 gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-border pb-6 gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-50 tracking-tight flex items-center gap-2.5">
             <Truck className="w-8 h-8 text-accent" />
@@ -400,7 +400,7 @@ export default function BookingDispatchPage() {
         </div>
         <button
           onClick={handleExport}
-          className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold py-2.5 px-6 rounded-lg text-xs tracking-wider uppercase transition-all border border-white/10 shadow-lg"
+          className="flex items-center gap-1.5 bg-surface hover:bg-slate-800 text-slate-300 font-bold py-2.5 px-6 rounded-lg text-xs tracking-wider uppercase transition-all border border-border shadow-lg"
         >
           <Download className="w-4 h-4 text-accent" />
           <span>Export Dispatch Report</span>
@@ -412,7 +412,7 @@ export default function BookingDispatchPage() {
         <div 
           onClick={() => { setStatusFilter(""); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "" ? "border-accent bg-accent/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "" ? "border-accent bg-accent/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Total Dispatches</div>
@@ -422,7 +422,7 @@ export default function BookingDispatchPage() {
         <div 
           onClick={() => { setStatusFilter("PENDING"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "PENDING" ? "border-yellow-400 bg-yellow-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "PENDING" ? "border-yellow-400 bg-yellow-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-yellow-400 uppercase font-bold tracking-wider">PENDING</div>
@@ -432,7 +432,7 @@ export default function BookingDispatchPage() {
         <div 
           onClick={() => { setStatusFilter("CONFIRMED"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "CONFIRMED" ? "border-blue-400 bg-blue-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "CONFIRMED" ? "border-blue-400 bg-blue-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-blue-400 uppercase font-bold tracking-wider">CONFIRMED</div>
@@ -442,7 +442,7 @@ export default function BookingDispatchPage() {
         <div 
           onClick={() => { setStatusFilter("VEHICLE_ASSIGNED"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "VEHICLE_ASSIGNED" || statusFilter === "DRIVER_ASSIGNED" ? "border-purple-400 bg-purple-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "VEHICLE_ASSIGNED" || statusFilter === "DRIVER_ASSIGNED" ? "border-purple-400 bg-purple-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-purple-400 uppercase font-bold tracking-wider">ASSIGNED</div>
@@ -452,7 +452,7 @@ export default function BookingDispatchPage() {
         <div 
           onClick={() => { setStatusFilter("IN_PROGRESS"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "IN_PROGRESS" ? "border-amber-400 bg-amber-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "IN_PROGRESS" ? "border-amber-400 bg-amber-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-amber-400 uppercase font-bold tracking-wider">IN PROGRESS</div>
@@ -462,7 +462,7 @@ export default function BookingDispatchPage() {
         <div 
           onClick={() => { setStatusFilter("COMPLETED"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "COMPLETED" ? "border-emerald-400 bg-emerald-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "COMPLETED" ? "border-emerald-400 bg-emerald-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-emerald-400 uppercase font-bold tracking-wider">COMPLETED</div>
@@ -472,7 +472,7 @@ export default function BookingDispatchPage() {
         <div 
           onClick={() => { setStatusFilter("CANCELLED"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "CANCELLED" ? "border-rose-400 bg-rose-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "CANCELLED" ? "border-rose-400 bg-rose-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-rose-400 uppercase font-bold tracking-wider">CANCELLED</div>
@@ -481,7 +481,7 @@ export default function BookingDispatchPage() {
       </div>
 
       {/* Filter & Control Toolbar */}
-      <div className="glassmorphism p-6 rounded-xl border border-white/5 flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="glassmorphism p-6 rounded-xl border border-border flex flex-col md:flex-row gap-4 items-center justify-between">
         
         {/* Search */}
         <div className="relative w-full md:w-80">
@@ -491,7 +491,7 @@ export default function BookingDispatchPage() {
             placeholder="Search PNR, customer, driver, reg..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-            className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all"
+            className="w-full bg-background/60 border border-border rounded-lg py-2 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all"
           />
         </div>
 
@@ -502,44 +502,44 @@ export default function BookingDispatchPage() {
           <select
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+            className="bg-background/60 border border-border rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
           >
-            <option value="" className="bg-slate-900">All Dispatch Statuses</option>
-            <option value="PENDING" className="bg-slate-900 text-yellow-400">PENDING</option>
-            <option value="CONFIRMED" className="bg-slate-900 text-blue-400">CONFIRMED</option>
-            <option value="VEHICLE_ASSIGNED" className="bg-slate-900 text-purple-400">ASSIGNED (DRIVER/VEHICLE)</option>
-            <option value="IN_PROGRESS" className="bg-slate-900 text-amber-400">IN PROGRESS</option>
-            <option value="COMPLETED" className="bg-slate-900 text-emerald-400">COMPLETED</option>
-            <option value="CANCELLED" className="bg-slate-900 text-rose-400">CANCELLED</option>
+            <option value="" className="bg-surface">All Dispatch Statuses</option>
+            <option value="PENDING" className="bg-surface text-yellow-400">PENDING</option>
+            <option value="CONFIRMED" className="bg-surface text-blue-400">CONFIRMED</option>
+            <option value="VEHICLE_ASSIGNED" className="bg-surface text-purple-400">ASSIGNED (DRIVER/VEHICLE)</option>
+            <option value="IN_PROGRESS" className="bg-surface text-amber-400">IN PROGRESS</option>
+            <option value="COMPLETED" className="bg-surface text-emerald-400">COMPLETED</option>
+            <option value="CANCELLED" className="bg-surface text-rose-400">CANCELLED</option>
           </select>
 
           {/* Payment Filter */}
           <select
             value={paymentFilter}
             onChange={(e) => { setPaymentFilter(e.target.value); setCurrentPage(1); }}
-            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+            className="bg-background/60 border border-border rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
           >
-            <option value="" className="bg-slate-900">All Payment Statuses</option>
-            <option value="SUCCESS" className="bg-slate-900 text-emerald-400">PAID (SUCCESS)</option>
-            <option value="PENDING" className="bg-slate-900 text-yellow-400">PAYMENT PENDING</option>
-            <option value="REFUNDED" className="bg-slate-900 text-slate-400">REFUNDED</option>
+            <option value="" className="bg-surface">All Payment Statuses</option>
+            <option value="SUCCESS" className="bg-surface text-emerald-400">PAID (SUCCESS)</option>
+            <option value="PENDING" className="bg-surface text-yellow-400">PAYMENT PENDING</option>
+            <option value="REFUNDED" className="bg-surface text-slate-400">REFUNDED</option>
           </select>
 
           {/* Sort By */}
           <select
             value={sortBy}
             onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }}
-            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+            className="bg-background/60 border border-border rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
           >
-            <option value="createdAt" className="bg-slate-900">Sort by Date</option>
-            <option value="pickupDateTime" className="bg-slate-900">Sort by Pickup Date</option>
-            <option value="netAmount" className="bg-slate-900">Sort by Net Amount</option>
+            <option value="createdAt" className="bg-surface">Sort by Date</option>
+            <option value="pickupDateTime" className="bg-surface">Sort by Pickup Date</option>
+            <option value="netAmount" className="bg-surface">Sort by Net Amount</option>
           </select>
 
           {/* Sort Order */}
           <button
             onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs font-semibold text-slate-300 hover:text-slate-100 transition-colors"
+            className="bg-background/60 border border-border rounded-lg py-2 px-3 text-xs font-semibold text-slate-300 hover:text-slate-100 transition-colors"
           >
             {sortOrder === "desc" ? "↓ Newest / High" : "↑ Oldest / Low"}
           </button>
@@ -551,7 +551,7 @@ export default function BookingDispatchPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* Bookings Table */}
-        <div className="lg:col-span-7 glassmorphism rounded-xl border border-white/5 overflow-hidden flex flex-col">
+        <div className="lg:col-span-7 glassmorphism rounded-xl border border-border overflow-hidden flex flex-col">
           {loading ? (
             <div className="text-center py-16 text-slate-400 text-xs">Loading dispatch bookings...</div>
           ) : (
@@ -559,7 +559,7 @@ export default function BookingDispatchPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="bg-slate-900 border-b border-white/5 text-slate-400 font-semibold uppercase tracking-wider">
+                    <tr className="bg-surface border-b border-border text-slate-400 font-semibold uppercase tracking-wider">
                       <th className="p-4">PNR & Customer</th>
                       <th className="p-4">Vehicle & Driver</th>
                       <th className="p-4">Amount & Status</th>
@@ -623,7 +623,7 @@ export default function BookingDispatchPage() {
                                   setAssignModalOpen(true);
                                 }}
                                 title="Assign Vehicle & Driver"
-                                className="inline-flex p-1.5 bg-slate-900 border border-white/5 rounded-lg text-slate-400 hover:text-accent transition-colors"
+                                className="inline-flex p-1.5 bg-surface border border-border rounded-lg text-slate-400 hover:text-accent transition-colors"
                               >
                                 <UserCheck className="w-4 h-4" />
                               </button>
@@ -637,7 +637,7 @@ export default function BookingDispatchPage() {
               </div>
 
               {/* Pagination Bar */}
-              <div className="p-4 bg-slate-900/60 border-t border-white/5 flex items-center justify-between text-xs text-slate-400">
+              <div className="p-4 bg-surface/60 border-t border-border flex items-center justify-between text-xs text-slate-400">
                 <div>
                   Showing <span className="font-bold text-slate-200">{totalCount > 0 ? (currentPage - 1) * pageSize + 1 : 0}</span> to <span className="font-bold text-slate-200">{Math.min(currentPage * pageSize, totalCount)}</span> of <span className="font-bold text-slate-200">{totalCount}</span> dispatches
                 </div>
@@ -648,7 +648,7 @@ export default function BookingDispatchPage() {
                     <select
                       value={pageSize}
                       onChange={(e) => { setPageSize(parseInt(e.target.value)); setCurrentPage(1); }}
-                      className="bg-slate-950 border border-white/10 rounded px-2 py-1 text-slate-200"
+                      className="bg-background border border-border rounded px-2 py-1 text-slate-200"
                     >
                       <option value="5">5</option>
                       <option value="10">10</option>
@@ -661,7 +661,7 @@ export default function BookingDispatchPage() {
                     <button
                       disabled={currentPage === 1}
                       onClick={() => setCurrentPage(currentPage - 1)}
-                      className="p-1 bg-slate-950 border border-white/10 rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
+                      className="p-1 bg-background border border-border rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </button>
@@ -669,7 +669,7 @@ export default function BookingDispatchPage() {
                     <button
                       disabled={currentPage >= totalPages}
                       onClick={() => setCurrentPage(currentPage + 1)}
-                      className="p-1 bg-slate-950 border border-white/10 rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
+                      className="p-1 bg-background border border-border rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
                     >
                       <ChevronRight className="w-4 h-4" />
                     </button>
@@ -683,10 +683,10 @@ export default function BookingDispatchPage() {
         {/* Dispatch & Lifecycle Inspection Dashboard Panel */}
         <div className="lg:col-span-5">
           {activeBooking ? (
-            <div className="bg-slate-900 border border-white/5 p-6 rounded-2xl space-y-6 glassmorphism">
+            <div className="bg-surface border border-border p-6 rounded-2xl space-y-6 glassmorphism">
               
               {/* Header */}
-              <div className="flex justify-between items-start border-b border-white/5 pb-4">
+              <div className="flex justify-between items-start border-b border-border pb-4">
                 <div>
                   <span className="text-[9px] font-extrabold text-accent uppercase tracking-widest block font-mono">{activeBooking.bookingNumber}</span>
                   <h3 className="text-xl font-extrabold text-slate-50 mt-0.5">{activeBooking.customer?.name}</h3>
@@ -698,7 +698,7 @@ export default function BookingDispatchPage() {
               </div>
 
               {/* Visual Booking Lifecycle Timeline */}
-              <div className="space-y-2 border-b border-white/5 pb-5">
+              <div className="space-y-2 border-b border-border pb-5">
                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-accent" />
                   <span>Dispatch Lifecycle Timeline</span>
@@ -742,7 +742,7 @@ export default function BookingDispatchPage() {
                       className={`py-1.5 px-2 rounded-lg text-[10px] font-extrabold tracking-wider border transition-all ${
                         activeBooking.status === st
                           ? "bg-accent text-slate-950 border-accent font-black shadow-md"
-                          : "bg-slate-950/60 text-slate-400 border-white/10 hover:border-white/20 hover:text-slate-200"
+                          : "bg-background/60 text-slate-400 border-border hover:border-white/20 hover:text-slate-200"
                       }`}
                     >
                       {st === "VEHICLE_ASSIGNED" ? "ASSIGNED" : st}
@@ -752,7 +752,7 @@ export default function BookingDispatchPage() {
               </div>
 
               {/* Driver & Vehicle Assignment Card */}
-              <div className="bg-slate-950/60 p-4 rounded-xl border border-white/10 space-y-3">
+              <div className="bg-background/60 p-4 rounded-xl border border-border space-y-3">
                 <div className="flex justify-between items-center">
                   <div className="text-[10px] font-extrabold text-accent uppercase tracking-wider flex items-center gap-1.5">
                     <Car className="w-4 h-4" />
@@ -761,7 +761,7 @@ export default function BookingDispatchPage() {
                   <button
                     type="button"
                     onClick={() => setAssignModalOpen(true)}
-                    className="text-[10px] font-bold text-slate-300 hover:text-white bg-slate-900 border border-white/10 px-2.5 py-1 rounded transition-colors"
+                    className="text-[10px] font-bold text-slate-300 hover:text-white bg-surface border border-border px-2.5 py-1 rounded transition-colors"
                   >
                     Change Assignment
                   </button>
@@ -792,25 +792,25 @@ export default function BookingDispatchPage() {
               </div>
 
               {/* Financial & Payment Breakdown */}
-              <div className="space-y-2 border-t border-white/5 pt-4 text-xs text-slate-300">
-                <div className="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-lg border border-white/5">
+              <div className="space-y-2 border-t border-border pt-4 text-xs text-slate-300">
+                <div className="flex justify-between items-center bg-background/40 p-2.5 rounded-lg border border-border">
                   <span className="text-slate-400">Pickup Location:</span>
                   <span className="font-medium text-slate-100">{activeBooking.pickupLocation}</span>
                 </div>
                 {activeBooking.dropLocation && (
-                  <div className="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-lg border border-white/5">
+                  <div className="flex justify-between items-center bg-background/40 p-2.5 rounded-lg border border-border">
                     <span className="text-slate-400">Drop Location:</span>
                     <span className="font-medium text-slate-100">{activeBooking.dropLocation}</span>
                   </div>
                 )}
-                <div className="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-lg border border-white/5">
+                <div className="flex justify-between items-center bg-background/40 p-2.5 rounded-lg border border-border">
                   <span className="text-slate-400">Net Amount / Tariff:</span>
                   <span className="font-mono font-black text-accent text-sm">₹{Number(activeBooking.netAmount).toLocaleString("en-IN")}</span>
                 </div>
 
                 {/* Razorpay transaction badge */}
                 {activeBooking.payments && activeBooking.payments.length > 0 && (
-                  <div className="bg-slate-950/40 p-3 rounded-lg border border-white/5 space-y-1 font-mono text-[11px]">
+                  <div className="bg-background/40 p-3 rounded-lg border border-border space-y-1 font-mono text-[11px]">
                     <div className="text-[10px] text-slate-400 font-bold uppercase font-sans tracking-wider">Razorpay Payment Transaction</div>
                     <div className="flex justify-between text-slate-300">
                       <span>Order ID:</span>
@@ -825,14 +825,14 @@ export default function BookingDispatchPage() {
               </div>
 
               {/* Dispatch Trip Notes & History Log */}
-              <div className="space-y-3 border-t border-white/5 pt-4">
+              <div className="space-y-3 border-t border-border pt-4">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                   <MessageSquare className="w-3.5 h-3.5 text-accent" />
                   <span>Dispatch Notes & Trip Log</span>
                 </label>
 
                 {activeBooking.notes ? (
-                  <div className="bg-slate-950/80 p-3 rounded-lg border border-white/10 text-xs font-mono text-slate-300 max-h-36 overflow-y-auto whitespace-pre-wrap leading-relaxed space-y-1 scrollbar-thin">
+                  <div className="bg-background/80 p-3 rounded-lg border border-border text-xs font-mono text-slate-300 max-h-36 overflow-y-auto whitespace-pre-wrap leading-relaxed space-y-1 scrollbar-thin">
                     {activeBooking.notes}
                   </div>
                 ) : (
@@ -845,7 +845,7 @@ export default function BookingDispatchPage() {
                     value={newNoteInput}
                     onChange={(e) => setNewNoteInput(e.target.value)}
                     placeholder="Type dispatch comment or trip log entry..."
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent resize-none"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent resize-none"
                   />
                   <button
                     type="button"
@@ -859,7 +859,7 @@ export default function BookingDispatchPage() {
 
             </div>
           ) : (
-            <div className="bg-slate-900/40 border border-white/5 p-12 rounded-2xl text-center text-slate-500 text-xs italic space-y-2">
+            <div className="bg-surface/40 border border-border p-12 rounded-2xl text-center text-slate-500 text-xs italic space-y-2">
               <AlertCircle className="w-8 h-8 mx-auto text-slate-600 animate-pulse" />
               <p>Select a dispatch booking from the table to assign fleet vehicles, inspect timelines, and manage trip notes.</p>
             </div>
@@ -872,8 +872,8 @@ export default function BookingDispatchPage() {
       {assignModalOpen && activeBooking && (
         <Portal>
           <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-white/10 rounded-2xl max-w-md w-full p-6 space-y-6 shadow-2xl">
-              <div className="flex justify-between items-center border-b border-white/5 pb-4">
+            <div className="bg-surface border border-border rounded-2xl max-w-md w-full p-6 space-y-6 shadow-2xl">
+              <div className="flex justify-between items-center border-b border-border pb-4">
                 <div>
                   <h3 className="text-lg font-bold text-slate-50">Assign Fleet Vehicle & Driver</h3>
                   <p className="text-xs text-slate-400 font-mono mt-0.5">{activeBooking.bookingNumber}</p>
@@ -891,11 +891,11 @@ export default function BookingDispatchPage() {
                 <select
                   value={selectedVehicleId}
                   onChange={(e) => setSelectedVehicleId(e.target.value)}
-                  className="w-full bg-slate-950 border border-white/10 rounded-lg p-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                  className="w-full bg-background border border-border rounded-lg p-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
                 >
                   <option value="">Unassign / No Vehicle</option>
                   {vehicles.map((v) => (
-                    <option key={v.id} value={v.id} className="bg-slate-900">
+                    <option key={v.id} value={v.id} className="bg-surface">
                       {v.model} &bull; {v.registrationNumber} {v.driver ? `(Driver: ${v.driver.name})` : "(No Driver)"}
                     </option>
                   ))}
@@ -926,3 +926,4 @@ export default function BookingDispatchPage() {
     </div>
   );
 }
+

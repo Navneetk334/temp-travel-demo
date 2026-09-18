@@ -143,7 +143,7 @@ export default function CorporateInquiryPage() {
   };
 
   return (
-    <div className="bg-slate-950 min-h-screen text-slate-100 py-16 px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
+    <div className="bg-background min-h-screen text-slate-100 py-16 px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
       <div className="max-w-4xl mx-auto w-full space-y-12">
         {/* Intro Head */}
         <div className="text-center space-y-4">
@@ -171,8 +171,8 @@ export default function CorporateInquiryPage() {
             </button>
           </div>
         ) : (
-          <div className="glassmorphism rounded-2xl border border-white/5 shadow-2xl p-6 md:p-10 max-w-3xl mx-auto relative">
-            <h2 className="text-xl font-bold text-slate-50 border-b border-white/5 pb-4 mb-6">
+          <div className="glassmorphism rounded-2xl border border-border shadow-2xl p-6 md:p-10 max-w-3xl mx-auto relative">
+            <h2 className="text-xl font-bold text-slate-50 border-b border-border pb-4 mb-6">
               Corporate Requirement Capture Form
             </h2>
 
@@ -195,7 +195,7 @@ export default function CorporateInquiryPage() {
                       placeholder="e.g. Acme Tech Private Ltd"
                       value={formData.companyName}
                       onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                      className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                      className="w-full bg-background/60 border border-border rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
                     />
                   </div>
                 </div>
@@ -210,7 +210,7 @@ export default function CorporateInquiryPage() {
                       placeholder="e.g. John Doe"
                       value={formData.contactName}
                       onChange={(e) => setFormData({ ...formData, contactName: e.target.value.replace(/[^a-zA-Z\s.-]/g, "") })}
-                      className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                      className="w-full bg-background/60 border border-border rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
                     />
                   </div>
                 </div>
@@ -228,7 +228,7 @@ export default function CorporateInquiryPage() {
                       placeholder="e.g. hr@acmetech.com"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                      className="w-full bg-background/60 border border-border rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
                     />
                   </div>
                 </div>
@@ -244,7 +244,7 @@ export default function CorporateInquiryPage() {
                       placeholder="e.g. 7011729639"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
-                      className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"
+                      className="w-full bg-background/60 border border-border rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all font-mono"
                     />
                   </div>
                 </div>
@@ -261,7 +261,7 @@ export default function CorporateInquiryPage() {
                       placeholder="e.g. 150"
                       value={formData.employeeCount}
                       onChange={(e) => setFormData({ ...formData, employeeCount: e.target.value })}
-                      className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                      className="w-full bg-background/60 border border-border rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
                     />
                   </div>
                 </div>
@@ -273,12 +273,12 @@ export default function CorporateInquiryPage() {
                     <select
                       value={formData.serviceType}
                       onChange={(e) => setFormData({ ...formData, serviceType: e.target.value })}
-                      className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
+                      className="w-full bg-background/60 border border-border rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
                     >
-                      <option value="Employee Transportation Shuttle" className="bg-slate-900">Employee Transportation Shuttle</option>
-                      <option value="Executive Monthly Cabs" className="bg-slate-900">Executive Monthly Cabs</option>
-                      <option value="Event Logistics Support" className="bg-slate-900">Event Logistics Support</option>
-                      <option value="Airport VIP Transfers" className="bg-slate-900">Airport VIP Transfers</option>
+                      <option value="Employee Transportation Shuttle" className="bg-surface">Employee Transportation Shuttle</option>
+                      <option value="Executive Monthly Cabs" className="bg-surface">Executive Monthly Cabs</option>
+                      <option value="Event Logistics Support" className="bg-surface">Event Logistics Support</option>
+                      <option value="Airport VIP Transfers" className="bg-surface">Airport VIP Transfers</option>
                     </select>
                   </div>
                 </div>
@@ -290,11 +290,11 @@ export default function CorporateInquiryPage() {
                     <select
                       value={formData.gender}
                       onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                      className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
+                      className="w-full bg-background/60 border border-border rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none"
                     >
-                      <option value="Male" className="bg-slate-900">Male</option>
-                      <option value="Female" className="bg-slate-900">Female</option>
-                      <option value="Other" className="bg-slate-900">Other</option>
+                      <option value="Male" className="bg-surface">Male</option>
+                      <option value="Female" className="bg-surface">Female</option>
+                      <option value="Other" className="bg-surface">Other</option>
                     </select>
                   </div>
                 </div>
@@ -308,28 +308,28 @@ export default function CorporateInquiryPage() {
                     <select
                       value={formData.shiftStartHour}
                       onChange={(e) => setFormData({ ...formData, shiftStartHour: e.target.value })}
-                      className="flex-1 bg-slate-950/60 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
+                      className="flex-1 bg-background/60 border border-border rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
                     >
                       {["01","02","03","04","05","06","07","08","09","10","11","12"].map(h => (
-                        <option key={h} value={h} className="bg-slate-900">{h}</option>
+                        <option key={h} value={h} className="bg-surface">{h}</option>
                       ))}
                     </select>
                     <select
                       value={formData.shiftStartMinute}
                       onChange={(e) => setFormData({ ...formData, shiftStartMinute: e.target.value })}
-                      className="flex-1 bg-slate-950/60 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
+                      className="flex-1 bg-background/60 border border-border rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
                     >
                       {["00","15","30","45"].map(m => (
-                        <option key={m} value={m} className="bg-slate-900">{m}</option>
+                        <option key={m} value={m} className="bg-surface">{m}</option>
                       ))}
                     </select>
                     <select
                       value={formData.shiftStartAmpm}
                       onChange={(e) => setFormData({ ...formData, shiftStartAmpm: e.target.value })}
-                      className="bg-slate-950/60 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-bold"
+                      className="bg-background/60 border border-border rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-bold"
                     >
-                      <option value="AM" className="bg-slate-900">AM</option>
-                      <option value="PM" className="bg-slate-900">PM</option>
+                      <option value="AM" className="bg-surface">AM</option>
+                      <option value="PM" className="bg-surface">PM</option>
                     </select>
                   </div>
                 </div>
@@ -340,28 +340,28 @@ export default function CorporateInquiryPage() {
                     <select
                       value={formData.shiftEndHour}
                       onChange={(e) => setFormData({ ...formData, shiftEndHour: e.target.value })}
-                      className="flex-1 bg-slate-950/60 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
+                      className="flex-1 bg-background/60 border border-border rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
                     >
                       {["01","02","03","04","05","06","07","08","09","10","11","12"].map(h => (
-                        <option key={h} value={h} className="bg-slate-900">{h}</option>
+                        <option key={h} value={h} className="bg-surface">{h}</option>
                       ))}
                     </select>
                     <select
                       value={formData.shiftEndMinute}
                       onChange={(e) => setFormData({ ...formData, shiftEndMinute: e.target.value })}
-                      className="flex-1 bg-slate-950/60 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
+                      className="flex-1 bg-background/60 border border-border rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-mono"
                     >
                       {["00","15","30","45"].map(m => (
-                        <option key={m} value={m} className="bg-slate-900">{m}</option>
+                        <option key={m} value={m} className="bg-surface">{m}</option>
                       ))}
                     </select>
                     <select
                       value={formData.shiftEndAmpm}
                       onChange={(e) => setFormData({ ...formData, shiftEndAmpm: e.target.value })}
-                      className="bg-slate-950/60 border border-white/10 rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-bold"
+                      className="bg-background/60 border border-border rounded-lg py-2.5 px-3 text-sm text-slate-100 focus:outline-none focus:border-primary font-bold"
                     >
-                      <option value="AM" className="bg-slate-900">AM</option>
-                      <option value="PM" className="bg-slate-900">PM</option>
+                      <option value="AM" className="bg-surface">AM</option>
+                      <option value="PM" className="bg-surface">PM</option>
                     </select>
                   </div>
                 </div>
@@ -386,7 +386,7 @@ export default function CorporateInquiryPage() {
                   placeholder="Detail preferred shift hours (In/Out timings), route distances, or vehicle model expectations (e.g. sedans, travellers)..."
                   value={formData.requirements}
                   onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
-                  className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all resize-none"
+                  className="w-full bg-background/60 border border-border rounded-lg py-2.5 px-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all resize-none"
                 />
               </div>
 
@@ -412,3 +412,4 @@ export default function CorporateInquiryPage() {
     </div>
   );
 }
+

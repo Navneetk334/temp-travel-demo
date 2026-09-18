@@ -147,7 +147,7 @@ export default function PermissionsModal({
   return (
     <Portal>
       <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-        <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-[95vw] md:w-[70vw] max-w-4xl shadow-2xl flex flex-col h-[90vh] relative text-slate-100">
+        <div className="bg-surface border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-[95vw] md:w-[70vw] max-w-4xl shadow-2xl flex flex-col h-[90vh] relative text-slate-100">
           {/* Header */}
           <button
             onClick={onClose}
@@ -156,7 +156,7 @@ export default function PermissionsModal({
             <X className="w-6 h-6" />
           </button>
 
-          <div className="border-b border-white/10 pb-5 mb-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="border-b border-border pb-5 mb-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="space-y-1">
               <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4" />
@@ -183,9 +183,9 @@ export default function PermissionsModal({
               const hasSome = modPerms.some(p => permissions.includes(p)) && !hasAll;
 
               return (
-                <div key={mod.key} className="bg-slate-950/50 border border-white/5 rounded-2xl overflow-hidden">
+                <div key={mod.key} className="bg-background/50 border border-border rounded-2xl overflow-hidden">
                   <div 
-                    className={`px-5 py-3 border-b border-white/5 flex items-center justify-between cursor-pointer transition-colors ${hasAll ? 'bg-amber-500/10' : 'hover:bg-slate-900'}`}
+                    className={`px-5 py-3 border-b border-border flex items-center justify-between cursor-pointer transition-colors ${hasAll ? 'bg-amber-500/10' : 'hover:bg-surface'}`}
                     onClick={() => handleToggleModule(mod.key)}
                   >
                     <h4 className="font-bold text-slate-200">{mod.module}</h4>
@@ -230,7 +230,7 @@ export default function PermissionsModal({
           </div>
 
           {/* Footer */}
-          <div className="pt-5 mt-5 border-t border-white/10 flex justify-end gap-3">
+          <div className="pt-5 mt-5 border-t border-border flex justify-end gap-3">
             <button
               onClick={onClose}
               disabled={isSaving}
@@ -252,3 +252,4 @@ export default function PermissionsModal({
     </Portal>
   );
 }
+

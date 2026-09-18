@@ -212,7 +212,7 @@ export default function MasterAdminDashboard() {
           <button
             onClick={handleSyncSystems}
             disabled={loading}
-            className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-300 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer"
+            className="flex items-center gap-1.5 bg-surface hover:bg-slate-800 border border-border text-slate-300 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-amber-400" : ""}`} />
             <span>{loading ? "Syncing..." : "Sync Systems"}</span>
@@ -230,7 +230,7 @@ export default function MasterAdminDashboard() {
 
       {/* 4 Primary Master KPI Telemetry Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-amber-500/30 rounded-2xl p-4 sm:p-5 shadow-xl relative overflow-hidden group hover:border-amber-500/60 transition-all">
+        <div className="bg-surface/80 backdrop-blur-xl border border-amber-500/30 rounded-2xl p-4 sm:p-5 shadow-xl relative overflow-hidden group hover:border-amber-500/60 transition-all">
           <div className="absolute top-0 right-0 w-28 h-28 bg-amber-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-amber-500/20 transition-all" />
           <div className="flex justify-between items-start mb-3">
             <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
@@ -249,7 +249,7 @@ export default function MasterAdminDashboard() {
           </div>
         </div>
 
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-amber-500/30 rounded-2xl p-4 sm:p-5 shadow-xl relative overflow-hidden group hover:border-amber-500/60 transition-all">
+        <div className="bg-surface/80 backdrop-blur-xl border border-amber-500/30 rounded-2xl p-4 sm:p-5 shadow-xl relative overflow-hidden group hover:border-amber-500/60 transition-all">
           <div className="absolute top-0 right-0 w-28 h-28 bg-blue-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-blue-500/20 transition-all" />
           <div className="flex justify-between items-start mb-3">
             <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
@@ -269,7 +269,7 @@ export default function MasterAdminDashboard() {
           </div>
         </div>
 
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-amber-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden group hover:border-amber-500/60 transition-all">
+        <div className="bg-surface/80 backdrop-blur-xl border border-amber-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden group hover:border-amber-500/60 transition-all">
           <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-purple-500/20 transition-all" />
           <div className="flex justify-between items-start mb-4">
             <div className="p-3 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
@@ -288,7 +288,7 @@ export default function MasterAdminDashboard() {
           </div>
         </div>
 
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-amber-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden group hover:border-amber-500/60 transition-all">
+        <div className="bg-surface/80 backdrop-blur-xl border border-amber-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden group hover:border-amber-500/60 transition-all">
           <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-emerald-500/20 transition-all" />
           <div className="flex justify-between items-start mb-4">
             <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -310,8 +310,8 @@ export default function MasterAdminDashboard() {
       </div>
 
       {/* Live System Activity Ticker */}
-      <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl space-y-4">
-        <div className="flex items-center justify-between border-b border-white/5 pb-4">
+      <div className="bg-surface/80 backdrop-blur-xl border border-border rounded-2xl p-6 shadow-2xl space-y-4">
+        <div className="flex items-center justify-between border-b border-border pb-4">
           <div className="flex items-center gap-2">
             <Activity className="w-5 h-5 text-amber-400" />
             <h2 className="text-lg font-bold text-slate-50">Master Real-Time Event Telemetry</h2>
@@ -323,7 +323,7 @@ export default function MasterAdminDashboard() {
           {recentLogs.map((log) => (
             <div
               key={log.id}
-              className="flex items-center justify-between p-3 rounded-xl bg-slate-950/80 border border-white/5 text-xs"
+              className="flex items-center justify-between p-3 rounded-xl bg-background/80 border border-border text-xs"
             >
               <div className="flex items-center gap-3">
                 <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
@@ -336,8 +336,8 @@ export default function MasterAdminDashboard() {
       </div>
 
       {/* Subsystem Sync Status Grid */}
-      <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl space-y-6">
-        <div className="flex items-center justify-between border-b border-white/5 pb-4">
+      <div className="bg-surface/80 backdrop-blur-xl border border-border rounded-2xl p-6 shadow-2xl space-y-6">
+        <div className="flex items-center justify-between border-b border-border pb-4">
           <div className="flex items-center gap-2">
             <Layers className="w-5 h-5 text-amber-400" />
             <h2 className="text-lg font-bold text-slate-50">Subsystem Synchronization Radar</h2>
@@ -348,7 +348,7 @@ export default function MasterAdminDashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div className="bg-slate-950/80 p-4 rounded-xl border border-white/5 space-y-2">
+          <div className="bg-background/80 p-4 rounded-xl border border-border space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-200">Public Web Portal</span>
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -357,7 +357,7 @@ export default function MasterAdminDashboard() {
             <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Sync: Live WebSockets</div>
           </div>
 
-          <div className="bg-slate-950/80 p-4 rounded-xl border border-white/5 space-y-2">
+          <div className="bg-background/80 p-4 rounded-xl border border-border space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-200">Website Admin</span>
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -366,7 +366,7 @@ export default function MasterAdminDashboard() {
             <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Sync: Bi-Directional</div>
           </div>
 
-          <div className="bg-slate-950/80 p-4 rounded-xl border border-white/5 space-y-2">
+          <div className="bg-background/80 p-4 rounded-xl border border-border space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-200">Razorpay Gateway</span>
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -375,7 +375,7 @@ export default function MasterAdminDashboard() {
             <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Sync: Webhook Synced</div>
           </div>
 
-          <div className="bg-slate-950/80 p-4 rounded-xl border border-white/5 space-y-2">
+          <div className="bg-background/80 p-4 rounded-xl border border-border space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-200">Driver Telematics</span>
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -384,7 +384,7 @@ export default function MasterAdminDashboard() {
             <div className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">Sync: Ready for App</div>
           </div>
 
-          <div className="bg-slate-950/80 p-4 rounded-xl border border-white/5 space-y-2">
+          <div className="bg-background/80 p-4 rounded-xl border border-border space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-200">Google Business & SEO</span>
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -399,7 +399,7 @@ export default function MasterAdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Link
           href="/master-admin/dispatch-radar"
-          className="group bg-slate-900/80 border border-white/10 hover:border-amber-500/50 p-6 rounded-2xl transition-all shadow-xl space-y-3"
+          className="group bg-surface/80 border border-border hover:border-amber-500/50 p-6 rounded-2xl transition-all shadow-xl space-y-3"
         >
           <div className="flex items-center justify-between">
             <div className="p-3 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20 group-hover:scale-105 transition-transform">
@@ -415,7 +415,7 @@ export default function MasterAdminDashboard() {
 
         <Link
           href="/master-admin/crm"
-          className="group bg-slate-900/80 border border-white/10 hover:border-amber-500/50 p-6 rounded-2xl transition-all shadow-xl space-y-3"
+          className="group bg-surface/80 border border-border hover:border-amber-500/50 p-6 rounded-2xl transition-all shadow-xl space-y-3"
         >
           <div className="flex items-center justify-between">
             <div className="p-3 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20 group-hover:scale-105 transition-transform">
@@ -431,7 +431,7 @@ export default function MasterAdminDashboard() {
 
         <Link
           href="/master-admin/billing-ledger"
-          className="group bg-slate-900/80 border border-white/10 hover:border-amber-500/50 p-6 rounded-2xl transition-all shadow-xl space-y-3"
+          className="group bg-surface/80 border border-border hover:border-amber-500/50 p-6 rounded-2xl transition-all shadow-xl space-y-3"
         >
           <div className="flex items-center justify-between">
             <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 group-hover:scale-105 transition-transform">
@@ -450,7 +450,7 @@ export default function MasterAdminDashboard() {
       {showDispatchModal && (
         <Portal>
           <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-          <div className="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 sm:p-8 w-full max-w-xl shadow-2xl space-y-6 relative text-slate-100 max-h-[90vh] overflow-y-auto">
+          <div className="bg-surface border border-amber-500/40 rounded-3xl p-6 sm:p-8 w-full max-w-xl shadow-2xl space-y-6 relative text-slate-100 max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setShowDispatchModal(false)}
               className="absolute top-5 right-5 text-slate-400 hover:text-white"
@@ -483,7 +483,7 @@ export default function MasterAdminDashboard() {
                       placeholder="e.g. Vikram Malhotra"
                       value={dispatchForm.customerName}
                       onChange={(e) => setDispatchForm({ ...dispatchForm, customerName: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold"
+                      className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold"
                     />
                   </div>
 
@@ -498,7 +498,7 @@ export default function MasterAdminDashboard() {
                       placeholder="10-digit phone number"
                       value={dispatchForm.phone}
                       onChange={(e) => setDispatchForm({ ...dispatchForm, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold font-mono"
+                      className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold font-mono"
                     />
                   </div>
                 </div>
@@ -509,7 +509,7 @@ export default function MasterAdminDashboard() {
                     <select
                       value={dispatchForm.vehicleCategory}
                       onChange={(e) => setDispatchForm({ ...dispatchForm, vehicleCategory: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold"
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold"
                     >
                       <option value="Pickup & Drop / Airport Transfer">Airport / Transfer</option>
                       <option value="Local Rental">Local Rental (8h/80km)</option>
@@ -523,7 +523,7 @@ export default function MasterAdminDashboard() {
                     <select
                       value={dispatchForm.vehicleClass}
                       onChange={(e) => setDispatchForm({ ...dispatchForm, vehicleClass: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold"
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold"
                     >
                       <option value="Sedan">Sedan (Dzire/City)</option>
                       <option value="SUV">SUV (Innova/Crysta)</option>
@@ -536,7 +536,7 @@ export default function MasterAdminDashboard() {
                     <select
                       value={dispatchForm.vehicleModel}
                       onChange={(e) => setDispatchForm({ ...dispatchForm, vehicleModel: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold"
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold"
                     >
                       <option value="Maruti Suzuki Dzire">Maruti Swift Dzire</option>
                       <option value="Honda City">Honda City</option>
@@ -563,12 +563,12 @@ export default function MasterAdminDashboard() {
                         setDispatchForm({ ...dispatchForm, pickupLocation: e.target.value });
                         setShowLocationSuggestions(true);
                       }}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold"
+                      className="w-full bg-background border border-border rounded-xl pl-9 pr-4 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold"
                     />
                   </div>
 
                   {showLocationSuggestions && (
-                    <div className="absolute z-30 left-0 right-0 top-full mt-1 bg-slate-950 border border-amber-500/30 rounded-xl shadow-2xl overflow-hidden max-h-48 overflow-y-auto divide-y divide-white/5">
+                    <div className="absolute z-30 left-0 right-0 top-full mt-1 bg-background border border-amber-500/30 rounded-xl shadow-2xl overflow-hidden max-h-48 overflow-y-auto divide-y divide-white/5">
                       {popularLocations
                         .filter(loc => loc.toLowerCase().includes(dispatchForm.pickupLocation.toLowerCase()))
                         .map((loc, idx) => (
@@ -588,11 +588,11 @@ export default function MasterAdminDashboard() {
                   )}
                 </div>
 
-                <div className="pt-4 flex justify-end gap-3 border-t border-white/10">
+                <div className="pt-4 flex justify-end gap-3 border-t border-border">
                   <button
                     type="button"
                     onClick={() => setShowDispatchModal(false)}
-                    className="px-5 py-2.5 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs font-bold"
+                    className="px-5 py-2.5 bg-background text-slate-400 hover:text-white rounded-xl text-xs font-bold"
                   >
                     Cancel
                   </button>
@@ -612,3 +612,4 @@ export default function MasterAdminDashboard() {
     </div>
   );
 }
+

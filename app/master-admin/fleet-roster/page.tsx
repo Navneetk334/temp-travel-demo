@@ -360,7 +360,7 @@ export default function MasterFleetRosterPage() {
                 setVehicles([]);
               }
             }}
-            className="px-3 py-1.5 bg-slate-900 border border-white/10 hover:border-rose-400 text-slate-400 hover:text-rose-400 rounded-xl text-xs font-bold transition-all cursor-pointer"
+            className="px-3 py-1.5 bg-surface border border-border hover:border-rose-400 text-slate-400 hover:text-rose-400 rounded-xl text-xs font-bold transition-all cursor-pointer"
           >
             Clear Stored Roster
           </button>
@@ -375,7 +375,7 @@ export default function MasterFleetRosterPage() {
       </div>
 
       {/* Search & Category Filter Toolbar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-2xl border border-white/10">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-surface/60 p-4 rounded-2xl border border-border">
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
@@ -383,7 +383,7 @@ export default function MasterFleetRosterPage() {
             placeholder="Search by make, model or reg number..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-slate-950 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
+            className="w-full bg-background border border-border rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
           />
         </div>
 
@@ -396,7 +396,7 @@ export default function MasterFleetRosterPage() {
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   categoryFilter === cat
                     ? "bg-amber-500 text-slate-950 font-black"
-                    : "bg-slate-950 text-slate-400 hover:text-white border border-white/5"
+                    : "bg-background text-slate-400 hover:text-white border border-border"
                 }`}
               >
                 {cat}
@@ -408,7 +408,7 @@ export default function MasterFleetRosterPage() {
 
       {/* Fleet Vehicles Grid */}
       {loading && vehicles.length === 0 ? (
-        <div className="bg-slate-900/60 border border-white/10 rounded-3xl p-16 text-center space-y-4">
+        <div className="bg-surface/60 border border-border rounded-3xl p-16 text-center space-y-4">
           <RefreshCw className="w-10 h-10 text-amber-400 mx-auto animate-spin" />
           <div className="space-y-1">
             <h3 className="text-base font-bold text-slate-100">Loading Master Fleet Roster...</h3>
@@ -416,7 +416,7 @@ export default function MasterFleetRosterPage() {
           </div>
         </div>
       ) : filteredVehicles.length === 0 ? (
-        <div className="bg-slate-900/60 border border-white/10 rounded-3xl p-12 text-center space-y-4">
+        <div className="bg-surface/60 border border-border rounded-3xl p-12 text-center space-y-4">
           <Car className="w-12 h-12 text-amber-400 mx-auto opacity-80" />
           <div className="space-y-1">
             <h3 className="text-xl font-bold text-slate-100">No Uploaded Vehicles Found</h3>
@@ -438,8 +438,8 @@ export default function MasterFleetRosterPage() {
             return (
               <div
                 key={v.id}
-                className={`bg-slate-900/80 backdrop-blur-xl border rounded-2xl p-6 shadow-xl space-y-4 transition-all flex flex-col justify-between relative ${
-                  isSelected ? "border-amber-400 bg-amber-500/5 ring-1 ring-amber-400/40" : "border-white/10 hover:border-amber-500/40"
+                className={`bg-surface/80 backdrop-blur-xl border rounded-2xl p-6 shadow-xl space-y-4 transition-all flex flex-col justify-between relative ${
+                  isSelected ? "border-amber-400 bg-amber-500/5 ring-1 ring-amber-400/40" : "border-border hover:border-amber-500/40"
                 }`}
               >
                 <div className="space-y-3">
@@ -465,7 +465,7 @@ export default function MasterFleetRosterPage() {
                   </div>
 
                   {/* Vehicle Image Banner */}
-                  <div className="relative h-32 bg-slate-950 rounded-xl overflow-hidden border border-white/5 group">
+                  <div className="relative h-32 bg-background rounded-xl overflow-hidden border border-border group">
                     <img
                       src={v.imageUrl || "/images/hero-car.png"}
                       alt={`${v.make} ${v.model}`}
@@ -490,7 +490,7 @@ export default function MasterFleetRosterPage() {
                   </div>
 
                   {/* Specs & Tariffs Grid */}
-                  <div className="grid grid-cols-2 gap-2 bg-slate-950 p-3 rounded-xl border border-white/5 text-xs font-mono">
+                  <div className="grid grid-cols-2 gap-2 bg-background p-3 rounded-xl border border-border text-xs font-mono">
                     <div>
                       <span className="text-slate-500 text-[10px] block font-sans">Per Km Rate</span>
                       <span className="font-bold text-amber-400">₹{v.perKmRate} / Km</span>
@@ -511,7 +511,7 @@ export default function MasterFleetRosterPage() {
                 </div>
 
                 {/* Footer Action Icons */}
-                <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[11px]">
+                <div className="pt-3 border-t border-border flex items-center justify-between text-[11px]">
                   <span className="font-mono text-slate-400">
                     Permit Exp: <strong className="text-emerald-400">{v.allIndiaPermitExpiry || v.permitExpiry || "2028-03-15"}</strong>
                   </span>
@@ -529,10 +529,10 @@ export default function MasterFleetRosterPage() {
                         setVehicles(updated);
                         localStorage.setItem("user_uploaded_fleet", JSON.stringify(updated));
                       }}
-                      className={`p-1.5 bg-slate-950 border rounded-lg transition-all cursor-pointer ${
+                      className={`p-1.5 bg-background border rounded-lg transition-all cursor-pointer ${
                         v.isFeatured
                           ? "border-amber-400 text-amber-400 bg-amber-500/10 shadow-sm"
-                          : "border-white/10 text-slate-500 hover:text-amber-400"
+                          : "border-border text-slate-500 hover:text-amber-400"
                       }`}
                       title={v.isFeatured ? "Featured on Homepage (Click to Unstar)" : "Star to Feature on Homepage (Max 3)"}
                     >
@@ -540,14 +540,14 @@ export default function MasterFleetRosterPage() {
                     </button>
                     <button
                       onClick={() => openEditModal(v)}
-                      className="p-1.5 bg-slate-950 border border-white/10 hover:border-amber-400 rounded-lg text-slate-400 hover:text-amber-400 transition-all cursor-pointer"
+                      className="p-1.5 bg-background border border-border hover:border-amber-400 rounded-lg text-slate-400 hover:text-amber-400 transition-all cursor-pointer"
                       title="Edit Vehicle Specs & Uploads"
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDeleteVehicle(v)}
-                      className="p-1.5 bg-slate-950 border border-white/10 hover:border-rose-400 rounded-lg text-slate-400 hover:text-rose-400 transition-all cursor-pointer"
+                      className="p-1.5 bg-background border border-border hover:border-rose-400 rounded-lg text-slate-400 hover:text-rose-400 transition-all cursor-pointer"
                       title="Delete Vehicle"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -564,7 +564,7 @@ export default function MasterFleetRosterPage() {
       {showModal && (
         <Portal>
           <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-          <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-3xl shadow-2xl space-y-6 relative text-slate-100 max-h-[90vh] overflow-y-auto">
+          <div className="bg-surface border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-3xl shadow-2xl space-y-6 relative text-slate-100 max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setShowModal(false)}
               className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
@@ -572,7 +572,7 @@ export default function MasterFleetRosterPage() {
               <X className="w-5 h-5" />
             </button>
 
-            <div className="space-y-1 border-b border-white/10 pb-3">
+            <div className="space-y-1 border-b border-border pb-3">
               <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">
                 {editingVehicle ? "Edit Commercial Vehicle & Vault Uploads" : "Master Commercial Fleet Entry"}
               </span>
@@ -597,7 +597,7 @@ export default function MasterFleetRosterPage() {
                       placeholder="e.g. Toyota / Maruti Suzuki / Hyundai"
                       value={formData.make}
                       onChange={(e) => setFormData({ ...formData, make: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
+                      className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
                     />
                   </div>
 
@@ -609,7 +609,7 @@ export default function MasterFleetRosterPage() {
                       placeholder="e.g. Innova Crysta / Swift Dzire / Fortuner"
                       value={formData.model}
                       onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
+                      className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
                     />
                   </div>
                 </div>
@@ -620,7 +620,7 @@ export default function MasterFleetRosterPage() {
                     <select
                       value={formData.categoryName}
                       onChange={(e) => handleCategoryChange(e.target.value)}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400"
+                      className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400"
                     >
                       <option value="Sedan">Sedan</option>
                       <option value="SUV">SUV</option>
@@ -632,7 +632,7 @@ export default function MasterFleetRosterPage() {
                     <select
                       value={formData.vehicleClass}
                       onChange={(e) => setFormData({ ...formData, vehicleClass: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
+                      className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
                     >
                       {(CLASS_OPTIONS[formData.categoryName] || []).map((cls) => (
                         <option key={cls} value={cls}>
@@ -650,14 +650,14 @@ export default function MasterFleetRosterPage() {
                       placeholder="e.g. MH 04 ER 8890"
                       value={formData.registrationNumber}
                       onChange={(e) => setFormData({ ...formData, registrationNumber: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-mono font-extrabold text-emerald-400 uppercase"
+                      className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-mono font-extrabold text-emerald-400 uppercase"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Section 2: Transmission, Fuel & Tariffs */}
-              <div className="space-y-3 pt-3 border-t border-white/10">
+              <div className="space-y-3 pt-3 border-t border-border">
                 <h4 className="text-amber-400 font-extrabold uppercase text-[11px] tracking-wider flex items-center gap-1.5">
                   <IndianRupee className="w-4 h-4" /> 2. Technical Specs, Rates & Allowances
                 </h4>
@@ -668,7 +668,7 @@ export default function MasterFleetRosterPage() {
                     <select
                       value={formData.transmission}
                       onChange={(e) => setFormData({ ...formData, transmission: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
                     >
                       <option value="Manual">Manual</option>
                       <option value="Automatic">Automatic</option>
@@ -680,7 +680,7 @@ export default function MasterFleetRosterPage() {
                     <select
                       value={formData.fuelType}
                       onChange={(e) => setFormData({ ...formData, fuelType: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
                     >
                       <option value="Diesel">Diesel</option>
                       <option value="Petrol">Petrol</option>
@@ -697,7 +697,7 @@ export default function MasterFleetRosterPage() {
                       required
                       value={formData.capacity}
                       onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-bold"
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-bold"
                     />
                   </div>
                 </div>
@@ -710,7 +710,7 @@ export default function MasterFleetRosterPage() {
                       required
                       value={formData.perKmRate}
                       onChange={(e) => setFormData({ ...formData, perKmRate: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400"
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400"
                     />
                   </div>
 
@@ -721,7 +721,7 @@ export default function MasterFleetRosterPage() {
                       required
                       value={formData.perHourRate}
                       onChange={(e) => setFormData({ ...formData, perHourRate: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400"
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400"
                     />
                   </div>
 
@@ -731,7 +731,7 @@ export default function MasterFleetRosterPage() {
                       type="number"
                       value={formData.driverAllowance}
                       onChange={(e) => setFormData({ ...formData, driverAllowance: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
                     />
                   </div>
 
@@ -741,14 +741,14 @@ export default function MasterFleetRosterPage() {
                       type="number"
                       value={formData.nightAllowance}
                       onChange={(e) => setFormData({ ...formData, nightAllowance: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Section 3: RC, Insurance & Expiry Documents */}
-              <div className="space-y-3 pt-3 border-t border-white/10">
+              <div className="space-y-3 pt-3 border-t border-border">
                 <h4 className="text-amber-400 font-extrabold uppercase text-[11px] tracking-wider flex items-center gap-1.5">
                   <Shield className="w-4 h-4" /> 3. Vehicle RC, Insurance & Expiry Document Vault Uploads
                 </h4>
@@ -762,7 +762,7 @@ export default function MasterFleetRosterPage() {
                       placeholder="e.g. MH04/RC/8890"
                       value={formData.rcNumber}
                       onChange={(e) => setFormData({ ...formData, rcNumber: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                      className="w-full bg-background border border-border rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                     />
                   </div>
                   <div className="space-y-1">
@@ -771,7 +771,7 @@ export default function MasterFleetRosterPage() {
                       type="file"
                       accept=".pdf,image/*"
                       onChange={(e) => setFormData({ ...formData, rcDocName: e.target.files?.[0]?.name || "" })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                     />
                   </div>
                 </div>
@@ -785,7 +785,7 @@ export default function MasterFleetRosterPage() {
                       placeholder="e.g. HDFC ERGO General Insurance"
                       value={formData.insuranceProvider}
                       onChange={(e) => setFormData({ ...formData, insuranceProvider: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
+                      className="w-full bg-background border border-border rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
                     />
                   </div>
                   <div className="space-y-1">
@@ -795,7 +795,7 @@ export default function MasterFleetRosterPage() {
                       placeholder="e.g. POL-8829102"
                       value={formData.insuranceNumber}
                       onChange={(e) => setFormData({ ...formData, insuranceNumber: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                      className="w-full bg-background border border-border rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                     />
                   </div>
                   <div className="space-y-1">
@@ -804,7 +804,7 @@ export default function MasterFleetRosterPage() {
                       type="date"
                       value={formData.insuranceExpiry}
                       onChange={(e) => setFormData({ ...formData, insuranceExpiry: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                     />
                   </div>
                 </div>
@@ -818,13 +818,13 @@ export default function MasterFleetRosterPage() {
                         type="date"
                         value={formData.fitnessExpiry}
                         onChange={(e) => setFormData({ ...formData, fitnessExpiry: e.target.value })}
-                        className="w-1/2 bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                        className="w-1/2 bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                       />
                       <input
                         type="file"
                         accept=".pdf,image/*"
                         onChange={(e) => setFormData({ ...formData, fitnessDocName: e.target.files?.[0]?.name || "" })}
-                        className="w-1/2 bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
+                        className="w-1/2 bg-background border border-border rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                       />
                     </div>
                   </div>
@@ -836,13 +836,13 @@ export default function MasterFleetRosterPage() {
                         type="date"
                         value={formData.allIndiaPermitExpiry}
                         onChange={(e) => setFormData({ ...formData, allIndiaPermitExpiry: e.target.value })}
-                        className="w-1/2 bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                        className="w-1/2 bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                       />
                       <input
                         type="file"
                         accept=".pdf,image/*"
                         onChange={(e) => setFormData({ ...formData, allIndiaPermitDocName: e.target.files?.[0]?.name || "" })}
-                        className="w-1/2 bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
+                        className="w-1/2 bg-background border border-border rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                       />
                     </div>
                   </div>
@@ -857,13 +857,13 @@ export default function MasterFleetRosterPage() {
                         type="date"
                         value={formData.yearlyPermitExpiry}
                         onChange={(e) => setFormData({ ...formData, yearlyPermitExpiry: e.target.value })}
-                        className="w-1/2 bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                        className="w-1/2 bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                       />
                       <input
                         type="file"
                         accept=".pdf,image/*"
                         onChange={(e) => setFormData({ ...formData, yearlyPermitDocName: e.target.files?.[0]?.name || "" })}
-                        className="w-1/2 bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
+                        className="w-1/2 bg-background border border-border rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                       />
                     </div>
                   </div>
@@ -875,13 +875,13 @@ export default function MasterFleetRosterPage() {
                         type="date"
                         value={formData.pucExpiry}
                         onChange={(e) => setFormData({ ...formData, pucExpiry: e.target.value })}
-                        className="w-1/2 bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                        className="w-1/2 bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                       />
                       <input
                         type="file"
                         accept=".pdf,image/*"
                         onChange={(e) => setFormData({ ...formData, pucDocName: e.target.files?.[0]?.name || "" })}
-                        className="w-1/2 bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
+                        className="w-1/2 bg-background border border-border rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                       />
                     </div>
                   </div>
@@ -889,13 +889,13 @@ export default function MasterFleetRosterPage() {
               </div>
 
               {/* Section 4: Device Image Upload with Live Preview */}
-              <div className="space-y-2 pt-3 border-t border-white/10">
+              <div className="space-y-2 pt-3 border-t border-border">
                 <label className="text-slate-300 font-bold block">20. Vehicle Image Upload from Device (with Live Preview)</label>
-                <div className="flex items-center gap-4 bg-slate-950 p-3 rounded-2xl border border-white/5">
+                <div className="flex items-center gap-4 bg-background p-3 rounded-2xl border border-border">
                   {formData.imageUrl ? (
                     <img src={formData.imageUrl} alt="Vehicle Preview" className="w-20 h-14 object-cover rounded-xl border-2 border-amber-400" />
                   ) : (
-                    <div className="w-20 h-14 bg-slate-900 border border-dashed border-white/20 rounded-xl flex items-center justify-center text-slate-500 font-bold text-[10px]">
+                    <div className="w-20 h-14 bg-surface border border-dashed border-white/20 rounded-xl flex items-center justify-center text-slate-500 font-bold text-[10px]">
                       No Image
                     </div>
                   )}
@@ -916,16 +916,16 @@ export default function MasterFleetRosterPage() {
                         reader.readAsDataURL(file);
                       }
                     }}
-                    className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
+                    className="w-full bg-surface border border-border rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                   />
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-white/10 flex justify-end gap-3">
+              <div className="pt-4 border-t border-border flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-5 py-2.5 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs font-bold"
+                  className="px-5 py-2.5 bg-background text-slate-400 hover:text-white rounded-xl text-xs font-bold"
                 >
                   Cancel
                 </button>
@@ -944,3 +944,4 @@ export default function MasterFleetRosterPage() {
     </div>
   );
 }
+

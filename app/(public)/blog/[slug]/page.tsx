@@ -132,7 +132,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     <>
       <JsonLd data={blogPostingSchema} />
 
-      <div className="w-full bg-slate-950 text-slate-100 min-h-screen">
+      <div className="w-full bg-background text-slate-100 min-h-screen">
         {/* Breadcrumbs */}
         <Breadcrumbs items={breadcrumbsList} />
 

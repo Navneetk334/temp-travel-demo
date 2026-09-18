@@ -125,10 +125,10 @@ export default function MasterDispatchRadarPage() {
         className: "custom-leaflet-marker",
         html: `
           <div class="relative group cursor-pointer">
-            <div class="w-9 h-9 rounded-full bg-slate-900 border-2 border-amber-400 shadow-2xl flex items-center justify-center text-amber-400 font-bold hover:scale-125 transition-transform">
+            <div class="w-9 h-9 rounded-full bg-surface border-2 border-amber-400 shadow-2xl flex items-center justify-center text-amber-400 font-bold hover:scale-125 transition-transform">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
             </div>
-            <div class="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-slate-950/95 border border-amber-500/40 text-amber-400 text-[10px] font-mono font-bold px-2 py-0.5 rounded shadow-2xl whitespace-nowrap z-50">
+            <div class="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-background/95 border border-amber-500/40 text-amber-400 text-[10px] font-mono font-bold px-2 py-0.5 rounded shadow-2xl whitespace-nowrap z-50">
               ${drv.driverName} (${drv.regNumber})
             </div>
           </div>
@@ -240,8 +240,8 @@ export default function MasterDispatchRadarPage() {
       </div>
 
       {/* Real Interactive Google Maps Style Map Window */}
-      <div className="bg-slate-900/90 backdrop-blur-2xl border border-amber-500/30 rounded-2xl p-4 sm:p-5 shadow-xl relative overflow-hidden space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-3">
+      <div className="bg-surface/90 backdrop-blur-2xl border border-amber-500/30 rounded-2xl p-4 sm:p-5 shadow-xl relative overflow-hidden space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-3">
           <div className="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wider">
             <Radio className="w-3.5 h-3.5 animate-pulse" />
             <span>Interactive Google Maps Telematics View (HQ: Temp Travel Car Rentals Pvt Ltd)</span>
@@ -250,7 +250,7 @@ export default function MasterDispatchRadarPage() {
           {/* Google Maps Day / Night Mode Toggle Switch */}
           <div className="flex items-center gap-3">
             <span className="text-xs text-slate-400 font-mono">Map Style Mode:</span>
-            <div className="flex bg-slate-950 p-1 rounded-xl border border-white/10">
+            <div className="flex bg-background p-1 rounded-xl border border-border">
               <button
                 onClick={() => setMapMode("DAY")}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${mapMode === "DAY"
@@ -276,11 +276,11 @@ export default function MasterDispatchRadarPage() {
         </div>
 
         {/* Real Leaflet Map Render Container */}
-        <div className={`relative h-80 sm:h-[350px] w-full rounded-xl overflow-hidden border border-amber-500/30 shadow-xl bg-slate-950 ${mapMode === "NIGHT" ? "google-maps-night-mode" : "google-maps-day-mode"}`}>
+        <div className={`relative h-80 sm:h-[350px] w-full rounded-xl overflow-hidden border border-amber-500/30 shadow-xl bg-background ${mapMode === "NIGHT" ? "google-maps-night-mode" : "google-maps-day-mode"}`}>
           <div ref={mapRef} className="w-full h-full z-10" />
 
           {!mapLoaded && (
-            <div className="absolute inset-0 z-20 bg-slate-950 flex flex-col items-center justify-center space-y-3">
+            <div className="absolute inset-0 z-20 bg-background flex flex-col items-center justify-center space-y-3">
               <RefreshCw className="w-8 h-8 text-amber-400 animate-spin" />
               <div className="text-xs font-mono text-amber-400 font-bold">Loading Google Maps Vector Tiles...</div>
             </div>
@@ -298,7 +298,7 @@ export default function MasterDispatchRadarPage() {
       </div>
 
       {/* Search & Filter Toolbar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-2xl border border-white/10">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-surface/60 p-4 rounded-2xl border border-border">
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
@@ -306,7 +306,7 @@ export default function MasterDispatchRadarPage() {
             placeholder="Search driver, vehicle or location..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-slate-950 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
+            className="w-full bg-background border border-border rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
           />
         </div>
 
@@ -317,7 +317,7 @@ export default function MasterDispatchRadarPage() {
               onClick={() => setFilterStatus(status)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${filterStatus === status
                   ? "bg-amber-500 text-slate-950 font-black"
-                  : "bg-slate-950 text-slate-400 hover:text-white border border-white/5"
+                  : "bg-background text-slate-400 hover:text-white border border-border"
                 }`}
             >
               {status}
@@ -331,7 +331,7 @@ export default function MasterDispatchRadarPage() {
         {filtered.map((drv) => (
           <div
             key={drv.id}
-            className="bg-slate-900/80 backdrop-blur-xl border border-white/10 hover:border-amber-500/40 rounded-2xl p-5 shadow-xl space-y-4 transition-all flex flex-col justify-between"
+            className="bg-surface/80 backdrop-blur-xl border border-border hover:border-amber-500/40 rounded-2xl p-5 shadow-xl space-y-4 transition-all flex flex-col justify-between"
           >
             <div className="space-y-3">
               <div className="flex justify-between items-start">
@@ -354,7 +354,7 @@ export default function MasterDispatchRadarPage() {
                 <div className="text-[10px] font-mono text-slate-400 mt-0.5">{drv.regNumber}</div>
               </div>
 
-              <div className="space-y-2 bg-slate-950 p-3 rounded-xl border border-white/5 text-[11px]">
+              <div className="space-y-2 bg-background p-3 rounded-xl border border-border text-[11px]">
                 <div className="flex items-start gap-2 text-slate-300">
                   <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
                   <div>
@@ -377,10 +377,10 @@ export default function MasterDispatchRadarPage() {
               </div>
             </div>
 
-            <div className="pt-3 border-t border-white/5 flex items-center justify-between gap-2">
+            <div className="pt-3 border-t border-border flex items-center justify-between gap-2">
               <button
                 onClick={() => setSelectedDriver(drv)}
-                className="w-full bg-slate-950 hover:bg-white/5 text-amber-400 border border-amber-500/30 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full bg-background hover:bg-white/5 text-amber-400 border border-amber-500/30 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <Activity className="w-3.5 h-3.5" /> Inspect GPS Ping
               </button>
@@ -393,7 +393,7 @@ export default function MasterDispatchRadarPage() {
       {showAssignModal && (
         <Portal>
           <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-            <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100 max-h-[90vh] overflow-y-auto">
+            <div className="bg-surface border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100 max-h-[90vh] overflow-y-auto">
               <button
                 onClick={() => setShowAssignModal(false)}
                 className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
@@ -401,7 +401,7 @@ export default function MasterDispatchRadarPage() {
                 <X className="w-5 h-5" />
               </button>
 
-              <div className="space-y-1 border-b border-white/10 pb-3">
+              <div className="space-y-1 border-b border-border pb-3">
                 <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">Master Duty Roster</span>
                 <h3 className="text-2xl font-black text-slate-50">Assign Chauffeur Duty</h3>
               </div>
@@ -420,7 +420,7 @@ export default function MasterDispatchRadarPage() {
                       <select
                         value={assignForm.driverName}
                         onChange={(e) => setAssignForm({ ...assignForm, driverName: e.target.value })}
-                        className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
+                        className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
                       >
                         <option value="Rajesh Kumar">Rajesh Kumar (Swift Dzire)</option>
                         <option value="Suresh Patil">Suresh Patil (Innova Crysta)</option>
@@ -434,7 +434,7 @@ export default function MasterDispatchRadarPage() {
                       <select
                         value={assignForm.tripType}
                         onChange={(e) => setAssignForm({ ...assignForm, tripType: e.target.value })}
-                        className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
+                        className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
                       >
                         <option value="Airport Transfer">Airport Transfer</option>
                         <option value="Local Rental">Local Rental (8hr / 80km)</option>
@@ -452,7 +452,7 @@ export default function MasterDispatchRadarPage() {
                       placeholder="e.g. Vikram Malhotra"
                       value={assignForm.customerName}
                       onChange={(e) => setAssignForm({ ...assignForm, customerName: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
+                      className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
                     />
                   </div>
 
@@ -464,7 +464,7 @@ export default function MasterDispatchRadarPage() {
                       placeholder="e.g. Chhatrapati Shivaji Maharaj Intl Airport (T2)"
                       value={assignForm.pickupLocation}
                       onChange={(e) => setAssignForm({ ...assignForm, pickupLocation: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
+                      className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
                     />
                   </div>
 
@@ -475,15 +475,15 @@ export default function MasterDispatchRadarPage() {
                       placeholder="e.g. BKC G-Block, Bandra East, Mumbai"
                       value={assignForm.destination}
                       onChange={(e) => setAssignForm({ ...assignForm, destination: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
+                      className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
                     />
                   </div>
 
-                  <div className="pt-3 border-t border-white/10 flex justify-end gap-3">
+                  <div className="pt-3 border-t border-border flex justify-end gap-3">
                     <button
                       type="button"
                       onClick={() => setShowAssignModal(false)}
-                      className="px-5 py-2.5 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs font-bold"
+                      className="px-5 py-2.5 bg-background text-slate-400 hover:text-white rounded-xl text-xs font-bold"
                     >
                       Cancel
                     </button>
@@ -505,7 +505,7 @@ export default function MasterDispatchRadarPage() {
       {selectedDriver && (
         <Portal>
           <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-            <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 relative text-slate-100">
+            <div className="bg-surface border border-amber-500/30 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 relative text-slate-100">
               <button
                 onClick={() => setSelectedDriver(null)}
                 className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"
@@ -519,7 +519,7 @@ export default function MasterDispatchRadarPage() {
                 <div className="text-xs text-amber-400 font-mono font-bold">{selectedDriver.vehicleModel} &bull; {selectedDriver.regNumber}</div>
               </div>
 
-              <div className="space-y-2 bg-slate-950 p-4 rounded-xl border border-white/10 text-xs font-mono">
+              <div className="space-y-2 bg-background p-4 rounded-xl border border-border text-xs font-mono">
                 <div className="flex justify-between">
                   <span className="text-slate-400">Current Speed:</span>
                   <strong className="text-emerald-400">{selectedDriver.speed}</strong>
@@ -553,3 +553,4 @@ export default function MasterDispatchRadarPage() {
     </div>
   );
 }
+

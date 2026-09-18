@@ -35,7 +35,7 @@ export default function GalleryThree() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 overflow-hidden flex flex-col justify-center pt-20">
+    <div className="min-h-screen bg-background text-slate-100 overflow-hidden flex flex-col justify-center pt-20">
       
       {/* Header */}
       <div className="text-center mb-12 relative z-20 px-4">
@@ -90,7 +90,7 @@ export default function GalleryThree() {
               }}
               onClick={() => setActiveIndex(i)}
             >
-              <div className="w-full h-full rounded-2xl overflow-hidden border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative group">
+              <div className="w-full h-full rounded-2xl overflow-hidden border border-border shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative group">
                 <img 
                   src={img.src} 
                   alt={img.title}
@@ -111,13 +111,13 @@ export default function GalleryThree() {
         {/* Controls */}
         <button 
           onClick={prevSlide}
-          className="absolute left-4 md:left-12 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-amber-500 hover:text-slate-950 transition-colors z-20"
+          className="absolute left-4 md:left-12 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/5 border border-border flex items-center justify-center text-white hover:bg-amber-500 hover:text-slate-950 transition-colors z-20"
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
         <button 
           onClick={nextSlide}
-          className="absolute right-4 md:right-12 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-amber-500 hover:text-slate-950 transition-colors z-20"
+          className="absolute right-4 md:right-12 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/5 border border-border flex items-center justify-center text-white hover:bg-amber-500 hover:text-slate-950 transition-colors z-20"
         >
           <ChevronRight className="w-6 h-6" />
         </button>
@@ -126,3 +126,4 @@ export default function GalleryThree() {
     </div>
   );
 }
+

@@ -13,7 +13,7 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
   const bookingNumber = resolvedParams.bookingNumber || "TT-MUM-9837";
 
   return (
-    <div className="bg-slate-950 min-h-[80vh] text-slate-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="bg-background min-h-[80vh] text-slate-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-xl w-full glassmorphism rounded-2xl border border-green-500/20 shadow-2xl p-8 space-y-6 text-center">
         
         {/* Banner icon */}
@@ -31,13 +31,13 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
         </div>
 
         {/* Details Card */}
-        <div className="bg-slate-950/60 p-6 border border-white/5 rounded-xl text-left space-y-4">
+        <div className="bg-background/60 p-6 border border-border rounded-xl text-left space-y-4">
           <div className="flex justify-between items-center text-xs">
             <span className="text-slate-400 font-semibold uppercase tracking-wider">Booking Number</span>
             <span className="font-mono font-bold text-accent text-sm">{bookingNumber}</span>
           </div>
 
-          <div className="flex justify-between items-center text-xs border-t border-white/5 pt-3">
+          <div className="flex justify-between items-center text-xs border-t border-border pt-3">
             <span className="text-slate-400 font-semibold uppercase tracking-wider">Payment Status</span>
             <span className="text-green-400 font-bold uppercase tracking-wider flex items-center gap-1">
               <ShieldCheck className="w-4 h-4" />
@@ -69,7 +69,7 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
           </Link>
           <Link
             href="/"
-            className="bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold py-2.5 px-6 rounded-lg text-xs tracking-wider uppercase transition-all border border-white/10"
+            className="bg-surface hover:bg-slate-800 text-slate-300 font-bold py-2.5 px-6 rounded-lg text-xs tracking-wider uppercase transition-all border border-border"
           >
             Go to Homepage
           </Link>
@@ -79,3 +79,4 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
     </div>
   );
 }
+

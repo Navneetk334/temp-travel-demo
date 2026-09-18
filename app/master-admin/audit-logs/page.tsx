@@ -62,7 +62,7 @@ export default function MasterAuditLogsPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={exportAuditCSV}
-            className="flex items-center gap-2 bg-slate-900 border border-white/10 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold hover:text-white transition-all"
+            className="flex items-center gap-2 bg-surface border border-border text-slate-300 px-4 py-2 rounded-xl text-xs font-bold hover:text-white transition-all"
           >
             <Download className="w-3.5 h-3.5 text-amber-400" />
             <span>Export Audit Log</span>
@@ -71,7 +71,7 @@ export default function MasterAuditLogsPage() {
       </div>
 
       {/* Search & Severity Filter Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-2xl border border-white/10">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-surface/60 p-4 rounded-2xl border border-border">
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
@@ -79,7 +79,7 @@ export default function MasterAuditLogsPage() {
             placeholder="Search audit action, user or details..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-slate-950 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
+            className="w-full bg-background border border-border rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
           />
         </div>
 
@@ -93,7 +93,7 @@ export default function MasterAuditLogsPage() {
               className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase transition-all ${
                 severityFilter === st
                   ? "bg-amber-500 text-slate-950 font-black"
-                  : "bg-slate-950 text-slate-400 hover:text-white"
+                  : "bg-background text-slate-400 hover:text-white"
               }`}
             >
               {st}
@@ -103,8 +103,8 @@ export default function MasterAuditLogsPage() {
       </div>
 
       {/* Audit Logs Table */}
-      <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl space-y-4">
-        <div className="flex justify-between items-center pb-4 border-b border-white/10">
+      <div className="bg-surface/80 backdrop-blur-xl border border-border rounded-2xl p-6 shadow-2xl space-y-4">
+        <div className="flex justify-between items-center pb-4 border-b border-border">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-amber-400" />
             <h3 className="text-base font-bold text-slate-100">Live Security Event Log</h3>
@@ -114,7 +114,7 @@ export default function MasterAuditLogsPage() {
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-950 text-slate-400 font-extrabold uppercase text-[10px] tracking-wider border-b border-white/10">
+            <thead className="bg-background text-slate-400 font-extrabold uppercase text-[10px] tracking-wider border-b border-border">
               <tr>
                 <th className="py-3 px-4">Event ID & Timestamp</th>
                 <th className="py-3 px-4">Admin User & Role</th>
@@ -150,3 +150,4 @@ export default function MasterAuditLogsPage() {
     </div>
   );
 }
+

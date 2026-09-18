@@ -292,10 +292,10 @@ export default function AdminBlogPage() {
   };
 
   return (
-    <div className="bg-slate-950 min-h-screen text-slate-100 p-8 space-y-8">
+    <div className="bg-background min-h-screen text-slate-100 p-8 space-y-8">
       
       {/* Title Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/5 pb-6 gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-border pb-6 gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-50 tracking-tight flex items-center gap-2.5">
             <BookOpen className="w-8 h-8 text-accent" />
@@ -319,7 +319,7 @@ export default function AdminBlogPage() {
         <div 
           onClick={() => { setStatusFilter(""); setCurrentPage(1); }}
           className={`glassmorphism p-4 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "" ? "border-accent bg-accent/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "" ? "border-accent bg-accent/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Total Articles</div>
@@ -329,7 +329,7 @@ export default function AdminBlogPage() {
         <div 
           onClick={() => { setStatusFilter("PUBLISHED"); setCurrentPage(1); }}
           className={`glassmorphism p-4 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "PUBLISHED" ? "border-emerald-400 bg-emerald-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "PUBLISHED" ? "border-emerald-400 bg-emerald-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-emerald-400 uppercase font-bold tracking-wider">PUBLISHED / LIVE</div>
@@ -339,7 +339,7 @@ export default function AdminBlogPage() {
         <div 
           onClick={() => { setStatusFilter("DRAFT"); setCurrentPage(1); }}
           className={`glassmorphism p-4 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "DRAFT" ? "border-yellow-400 bg-yellow-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "DRAFT" ? "border-yellow-400 bg-yellow-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-yellow-400 uppercase font-bold tracking-wider">DRAFT ARTICLES</div>
@@ -349,7 +349,7 @@ export default function AdminBlogPage() {
         <div 
           onClick={() => { setStatusFilter("SCHEDULED"); setCurrentPage(1); }}
           className={`glassmorphism p-4 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "SCHEDULED" ? "border-blue-400 bg-blue-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "SCHEDULED" ? "border-blue-400 bg-blue-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-blue-400 uppercase font-bold tracking-wider">SCHEDULED</div>
@@ -358,7 +358,7 @@ export default function AdminBlogPage() {
       </div>
 
       {/* Filter & Control Toolbar */}
-      <div className="glassmorphism p-6 rounded-xl border border-white/5 flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="glassmorphism p-6 rounded-xl border border-border flex flex-col md:flex-row gap-4 items-center justify-between">
         
         {/* Search */}
         <div className="relative w-full md:w-80">
@@ -368,7 +368,7 @@ export default function AdminBlogPage() {
             placeholder="Search article title, content, summary..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-            className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all"
+            className="w-full bg-background/60 border border-border rounded-lg py-2 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all"
           />
         </div>
 
@@ -379,11 +379,11 @@ export default function AdminBlogPage() {
           <select
             value={categoryFilter}
             onChange={(e) => { setCategoryFilter(e.target.value); setCurrentPage(1); }}
-            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+            className="bg-background/60 border border-border rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
           >
-            <option value="" className="bg-slate-900">All Categories</option>
+            <option value="" className="bg-surface">All Categories</option>
             {categories.map((c) => (
-              <option key={c.id} value={c.slug} className="bg-slate-900">{c.name}</option>
+              <option key={c.id} value={c.slug} className="bg-surface">{c.name}</option>
             ))}
           </select>
 
@@ -391,28 +391,28 @@ export default function AdminBlogPage() {
           <select
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+            className="bg-background/60 border border-border rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
           >
-            <option value="" className="bg-slate-900">All Statuses</option>
-            <option value="PUBLISHED" className="bg-slate-900 text-emerald-400">PUBLISHED</option>
-            <option value="DRAFT" className="bg-slate-900 text-yellow-400">DRAFT</option>
-            <option value="SCHEDULED" className="bg-slate-900 text-blue-400">SCHEDULED</option>
+            <option value="" className="bg-surface">All Statuses</option>
+            <option value="PUBLISHED" className="bg-surface text-emerald-400">PUBLISHED</option>
+            <option value="DRAFT" className="bg-surface text-yellow-400">DRAFT</option>
+            <option value="SCHEDULED" className="bg-surface text-blue-400">SCHEDULED</option>
           </select>
 
           {/* Sort By */}
           <select
             value={sortBy}
             onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }}
-            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+            className="bg-background/60 border border-border rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
           >
-            <option value="createdAt" className="bg-slate-900">Sort by Date</option>
-            <option value="title" className="bg-slate-900">Sort by Title</option>
+            <option value="createdAt" className="bg-surface">Sort by Date</option>
+            <option value="title" className="bg-surface">Sort by Title</option>
           </select>
 
           {/* Sort Order */}
           <button
             onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs font-semibold text-slate-300 hover:text-slate-100 transition-colors"
+            className="bg-background/60 border border-border rounded-lg py-2 px-3 text-xs font-semibold text-slate-300 hover:text-slate-100 transition-colors"
           >
             {sortOrder === "desc" ? "↓ Newest" : "↑ Oldest"}
           </button>
@@ -440,7 +440,7 @@ export default function AdminBlogPage() {
       )}
 
       {/* Blog Articles Table Grid */}
-      <div className="glassmorphism rounded-xl border border-white/5 overflow-hidden flex flex-col">
+      <div className="glassmorphism rounded-xl border border-border overflow-hidden flex flex-col">
         {loading ? (
           <div className="text-center py-16 text-slate-400 text-xs">Loading blog articles...</div>
         ) : (
@@ -448,13 +448,13 @@ export default function AdminBlogPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-slate-900 border-b border-white/5 text-slate-400 font-semibold uppercase tracking-wider">
+                  <tr className="bg-surface border-b border-border text-slate-400 font-semibold uppercase tracking-wider">
                     <th className="p-4 w-10 text-center">
                       <input
                         type="checkbox"
                         checked={posts.length > 0 && selectedIds.length === posts.length}
                         onChange={handleSelectAll}
-                        className="w-4 h-4 rounded text-amber-500 bg-slate-950 border-white/20 focus:ring-0 cursor-pointer"
+                        className="w-4 h-4 rounded text-amber-500 bg-background border-white/20 focus:ring-0 cursor-pointer"
                       />
                     </th>
                     <th className="p-4 w-12 text-center">S. No.</th>
@@ -480,7 +480,7 @@ export default function AdminBlogPage() {
                             type="checkbox"
                             checked={selectedIds.includes(post.id)}
                             onChange={() => handleSelectOne(post.id)}
-                            className="w-4 h-4 rounded text-amber-500 bg-slate-950 border-white/20 focus:ring-0 cursor-pointer"
+                            className="w-4 h-4 rounded text-amber-500 bg-background border-white/20 focus:ring-0 cursor-pointer"
                           />
                         </td>
                         <td className="p-4 text-center font-mono font-bold text-slate-400">
@@ -499,7 +499,7 @@ export default function AdminBlogPage() {
                           {post.tags && post.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1 mt-1">
                               {post.tags.slice(0, 3).map((t, i) => (
-                                <span key={i} className="text-[9px] bg-slate-900 border border-white/10 text-slate-400 px-1.5 py-0.5 rounded">
+                                <span key={i} className="text-[9px] bg-surface border border-border text-slate-400 px-1.5 py-0.5 rounded">
                                   #{t}
                                 </span>
                               ))}
@@ -522,7 +522,7 @@ export default function AdminBlogPage() {
                           <button
                             disabled={actionId === post.id}
                             onClick={() => handleTogglePublish(post)}
-                            className="p-1.5 bg-slate-900 border border-white/5 rounded-lg text-slate-400 hover:text-emerald-400 transition-colors disabled:opacity-50"
+                            className="p-1.5 bg-surface border border-border rounded-lg text-slate-400 hover:text-emerald-400 transition-colors disabled:opacity-50"
                             title={post.published ? "Unpublish to Draft" : "Publish Article"}
                           >
                             {actionId === post.id ? (
@@ -536,7 +536,7 @@ export default function AdminBlogPage() {
 
                           <Link
                             href={`/admin/blog/${post.id}/edit`}
-                            className="p-1.5 bg-slate-900 border border-white/5 rounded-lg text-slate-400 hover:text-accent transition-colors inline-block"
+                            className="p-1.5 bg-surface border border-border rounded-lg text-slate-400 hover:text-accent transition-colors inline-block"
                             title="Edit Article"
                           >
                             <Edit className="w-4 h-4" />
@@ -545,7 +545,7 @@ export default function AdminBlogPage() {
                           <button
                             disabled={actionId === post.id}
                             onClick={() => handleDelete(post.id)}
-                            className="p-1.5 bg-slate-900 border border-white/5 rounded-lg text-slate-400 hover:text-red-400 transition-colors disabled:opacity-50"
+                            className="p-1.5 bg-surface border border-border rounded-lg text-slate-400 hover:text-red-400 transition-colors disabled:opacity-50"
                             title="Delete Article"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -559,7 +559,7 @@ export default function AdminBlogPage() {
             </div>
 
             {/* Pagination Bar */}
-            <div className="p-4 bg-slate-900/60 border-t border-white/5 flex items-center justify-between text-xs text-slate-400">
+            <div className="p-4 bg-surface/60 border-t border-border flex items-center justify-between text-xs text-slate-400">
               <div>
                 Showing <span className="font-bold text-slate-200">{totalCount > 0 ? (currentPage - 1) * pageSize + 1 : 0}</span> to <span className="font-bold text-slate-200">{Math.min(currentPage * pageSize, totalCount)}</span> of <span className="font-bold text-slate-200">{totalCount}</span> blog articles
               </div>
@@ -570,7 +570,7 @@ export default function AdminBlogPage() {
                   <select
                     value={pageSize}
                     onChange={(e) => { setPageSize(parseInt(e.target.value)); setCurrentPage(1); }}
-                    className="bg-slate-950 border border-white/10 rounded px-2 py-1 text-slate-200"
+                    className="bg-background border border-border rounded px-2 py-1 text-slate-200"
                   >
                     <option value="5">5</option>
                     <option value="10">10</option>
@@ -583,7 +583,7 @@ export default function AdminBlogPage() {
                   <button
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage(currentPage - 1)}
-                    className="p-1 bg-slate-950 border border-white/10 rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
+                    className="p-1 bg-background border border-border rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
@@ -591,7 +591,7 @@ export default function AdminBlogPage() {
                   <button
                     disabled={currentPage >= totalPages}
                     onClick={() => setCurrentPage(currentPage + 1)}
-                    className="p-1 bg-slate-950 border border-white/10 rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
+                    className="p-1 bg-background border border-border rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -605,3 +605,4 @@ export default function AdminBlogPage() {
     </div>
   );
 }
+

@@ -595,7 +595,7 @@ export default function AdminDutiesPage() {
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
       
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
         <div>
           <div className="flex items-center gap-3">
             <div className="p-2.5 bg-accent/10 border border-accent/20 rounded-xl text-accent">
@@ -615,7 +615,7 @@ export default function AdminDutiesPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsScanOptionsModalOpen(true)}
-            className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/10 font-bold px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md"
+            className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-border font-bold px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md"
           >
             <Scan className="w-4 h-4 text-accent" />
             <span>Scan Slip (OCR)</span>
@@ -633,7 +633,7 @@ export default function AdminDutiesPage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-slate-900 border border-white/10 p-5 rounded-2xl space-y-2">
+        <div className="bg-surface border border-border p-5 rounded-2xl space-y-2">
           <div className="flex justify-between items-center text-slate-400">
             <span className="text-xs font-bold uppercase tracking-wider">Total Duty Slips</span>
             <FileText className="w-4 h-4 text-accent" />
@@ -645,7 +645,7 @@ export default function AdminDutiesPage() {
           </span>
         </div>
 
-        <div className="bg-slate-900 border border-white/10 p-5 rounded-2xl space-y-2">
+        <div className="bg-surface border border-border p-5 rounded-2xl space-y-2">
           <div className="flex justify-between items-center text-slate-400">
             <span className="text-xs font-bold uppercase tracking-wider">Total Fleet Distance</span>
             <Car className="w-4 h-4 text-accent" />
@@ -654,7 +654,7 @@ export default function AdminDutiesPage() {
           <span className="text-[11px] text-slate-400">Garage to Garage Basis</span>
         </div>
 
-        <div className="bg-slate-900 border border-white/10 p-5 rounded-2xl space-y-2">
+        <div className="bg-surface border border-border p-5 rounded-2xl space-y-2">
           <div className="flex justify-between items-center text-slate-400">
             <span className="text-xs font-bold uppercase tracking-wider">Chauffeur Hours</span>
             <Clock className="w-4 h-4 text-accent" />
@@ -663,7 +663,7 @@ export default function AdminDutiesPage() {
           <span className="text-[11px] text-slate-400">Duty Duration Logged</span>
         </div>
 
-        <div className="bg-slate-900 border border-white/10 p-5 rounded-2xl space-y-2">
+        <div className="bg-surface border border-border p-5 rounded-2xl space-y-2">
           <div className="flex justify-between items-center text-slate-400">
             <span className="text-xs font-bold uppercase tracking-wider">Toll & Parking Reconciled</span>
             <Receipt className="w-4 h-4 text-accent" />
@@ -674,7 +674,7 @@ export default function AdminDutiesPage() {
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="bg-slate-900/80 border border-white/10 p-4 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="bg-surface/80 border border-border p-4 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="relative flex-1 w-full">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
@@ -682,12 +682,12 @@ export default function AdminDutiesPage() {
             placeholder="Search by Trip Sheet No, Vehicle Number, Guest Name, Corporate Account, or Location..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-950 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-accent"
+            className="w-full bg-background border border-border rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-accent"
           />
         </div>
 
         <div className="flex items-center gap-3 w-full md:w-auto">
-          <div className="flex items-center gap-2 bg-slate-950 border border-white/10 px-3 py-2 rounded-xl text-xs text-slate-300">
+          <div className="flex items-center gap-2 bg-background border border-border px-3 py-2 rounded-xl text-xs text-slate-300">
             <Calendar className="w-3.5 h-3.5 text-accent" />
             <input
               type="date"
@@ -700,7 +700,7 @@ export default function AdminDutiesPage() {
           <select
             value={feedbackFilter}
             onChange={(e) => setFeedbackFilter(e.target.value)}
-            className="bg-slate-950 border border-white/10 px-3 py-2.5 rounded-xl text-xs text-slate-300 focus:outline-none focus:border-accent font-semibold"
+            className="bg-background border border-border px-3 py-2.5 rounded-xl text-xs text-slate-300 focus:outline-none focus:border-accent font-semibold"
           >
             <option value="ALL">All Feedback</option>
             <option value="EXCELLENT">Excellent</option>
@@ -715,7 +715,7 @@ export default function AdminDutiesPage() {
                 setSelectedDate("");
                 setFeedbackFilter("ALL");
               }}
-              className="p-2.5 text-slate-400 hover:text-white bg-slate-950 border border-white/10 rounded-xl"
+              className="p-2.5 text-slate-400 hover:text-white bg-background border border-border rounded-xl"
               title="Reset Filters"
             >
               <RefreshCw className="w-4 h-4" />
@@ -725,10 +725,10 @@ export default function AdminDutiesPage() {
       </div>
 
       {/* Main Registry Table */}
-      <div className="bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+      <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-2xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-950/80 border-b border-white/10 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+            <thead className="bg-background/80 border-b border-border text-[11px] font-bold text-slate-400 uppercase tracking-wider">
               <tr>
                 <th className="py-3.5 px-4">Trip Sheet / Date</th>
                 <th className="py-3.5 px-4">Vehicle / Account</th>
@@ -768,7 +768,7 @@ export default function AdminDutiesPage() {
 
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 bg-slate-950 border border-white/10 font-mono font-bold text-slate-200 rounded">
+                        <span className="px-2 py-0.5 bg-background border border-border font-mono font-bold text-slate-200 rounded">
                           {duty.carNo}
                         </span>
                       </div>
@@ -791,7 +791,7 @@ export default function AdminDutiesPage() {
                           <span className="font-mono font-extrabold text-slate-100">{duty.totalKms} KM</span>
                           <span className="text-[10px] text-slate-500 block">Dist. Covered</span>
                         </div>
-                        <div className="border-l border-white/10 pl-3">
+                        <div className="border-l border-border pl-3">
                           <span className="font-mono font-bold text-slate-300">{duty.totalHours} Hrs</span>
                           <span className="text-[10px] text-slate-500 block">Duration</span>
                         </div>
@@ -872,10 +872,10 @@ export default function AdminDutiesPage() {
       {isFormModalOpen && (
         <Portal>
           <div className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-            <div className="bg-slate-900 border border-white/10 rounded-3xl max-w-4xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative my-auto max-h-[92vh] overflow-y-auto scrollbar-thin">
+            <div className="bg-surface border border-border rounded-3xl max-w-4xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative my-auto max-h-[92vh] overflow-y-auto scrollbar-thin">
               
               {/* Modal Header */}
-              <div className="flex justify-between items-start border-b border-white/10 pb-4">
+              <div className="flex justify-between items-start border-b border-border pb-4">
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-accent/20 text-accent border border-accent/30">
@@ -899,7 +899,7 @@ export default function AdminDutiesPage() {
               </div>
 
               {/* SCANNER & OCR UPLOAD BOX */}
-              <div className="bg-slate-950 p-4 sm:p-5 rounded-2xl border border-white/10 space-y-4">
+              <div className="bg-background p-4 sm:p-5 rounded-2xl border border-border space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="p-2.5 bg-accent/10 border border-accent/20 rounded-xl text-accent">
@@ -925,7 +925,7 @@ export default function AdminDutiesPage() {
                       type="button"
                       onClick={() => setIsPrinterScannerModalOpen(true)}
                       disabled={isScanning || isScanningPrinter}
-                      className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/10 font-bold px-3.5 py-2 rounded-xl text-xs uppercase tracking-wider transition-all disabled:opacity-50 shadow-sm"
+                      className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-border font-bold px-3.5 py-2 rounded-xl text-xs uppercase tracking-wider transition-all disabled:opacity-50 shadow-sm"
                     >
                       <Printer className="w-3.5 h-3.5 text-accent" />
                       <span>Scan from Printer</span>
@@ -961,12 +961,12 @@ export default function AdminDutiesPage() {
                 )}
 
                 {formData.slipImageUrl && (
-                  <div className="flex items-center justify-between bg-slate-900 p-3 rounded-xl border border-white/5">
+                  <div className="flex items-center justify-between bg-surface p-3 rounded-xl border border-border">
                     <div className="flex items-center gap-3">
                       <img
                         src={formData.slipImageUrl}
                         alt="Scanned Slip Preview"
-                        className="w-14 h-14 object-cover rounded-lg border border-white/10"
+                        className="w-14 h-14 object-cover rounded-lg border border-border"
                       />
                       <div>
                         <span className="text-xs font-bold text-slate-200 block">{formData.slipImageName || "duty_slip_scan.jpg"}</span>
@@ -978,7 +978,7 @@ export default function AdminDutiesPage() {
                       href={formData.slipImageUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 text-xs text-accent hover:underline font-bold bg-slate-950 px-3 py-1.5 rounded-lg border border-white/10"
+                      className="flex items-center gap-1.5 text-xs text-accent hover:underline font-bold bg-background px-3 py-1.5 rounded-lg border border-border"
                     >
                       <Maximize2 className="w-3.5 h-3.5" />
                       <span>View Full Resolution Scan</span>
@@ -992,7 +992,7 @@ export default function AdminDutiesPage() {
                 
                 {/* SECTION 1: HEADER DETAILS */}
                 <div className="space-y-3">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2 border-b border-white/5 pb-2">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2 border-b border-border pb-2">
                     <FileText className="w-4 h-4 text-accent" />
                     <span>1. Header & Passenger Reporting Info</span>
                   </h3>
@@ -1006,7 +1006,7 @@ export default function AdminDutiesPage() {
                         placeholder="e.g. TT-DS-9842"
                         value={formData.tripSheetNo}
                         onChange={(e) => setFormData({ ...formData, tripSheetNo: e.target.value })}
-                        className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 font-mono font-bold focus:border-accent"
+                        className="w-full bg-background border border-border rounded-lg p-2.5 text-slate-100 font-mono font-bold focus:border-accent"
                       />
                     </div>
                     <div>
@@ -1017,7 +1017,7 @@ export default function AdminDutiesPage() {
                         placeholder="e.g. DL 1ZB 9842"
                         value={formData.carNo}
                         onChange={(e) => setFormData({ ...formData, carNo: e.target.value.toUpperCase() })}
-                        className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 font-mono font-bold focus:border-accent"
+                        className="w-full bg-background border border-border rounded-lg p-2.5 text-slate-100 font-mono font-bold focus:border-accent"
                       />
                     </div>
                     <div>
@@ -1027,7 +1027,7 @@ export default function AdminDutiesPage() {
                         required
                         value={formData.date}
                         onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                        className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 focus:border-accent"
+                        className="w-full bg-background border border-border rounded-lg p-2.5 text-slate-100 focus:border-accent"
                       />
                     </div>
                   </div>
@@ -1041,7 +1041,7 @@ export default function AdminDutiesPage() {
                         placeholder="e.g. Mr. Rajesh Malhotra"
                         value={formData.reportedTo}
                         onChange={(e) => setFormData({ ...formData, reportedTo: e.target.value })}
-                        className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 focus:border-accent"
+                        className="w-full bg-background border border-border rounded-lg p-2.5 text-slate-100 focus:border-accent"
                       />
                     </div>
                     <div>
@@ -1051,7 +1051,7 @@ export default function AdminDutiesPage() {
                         placeholder="e.g. McKinsey & Company"
                         value={formData.account}
                         onChange={(e) => setFormData({ ...formData, account: e.target.value })}
-                        className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 focus:border-accent"
+                        className="w-full bg-background border border-border rounded-lg p-2.5 text-slate-100 focus:border-accent"
                       />
                     </div>
                     <div>
@@ -1061,7 +1061,7 @@ export default function AdminDutiesPage() {
                         placeholder="e.g. Aerocity Hotel Pullman, New Delhi"
                         value={formData.reportAt}
                         onChange={(e) => setFormData({ ...formData, reportAt: e.target.value })}
-                        className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 focus:border-accent"
+                        className="w-full bg-background border border-border rounded-lg p-2.5 text-slate-100 focus:border-accent"
                       />
                     </div>
                   </div>
@@ -1069,7 +1069,7 @@ export default function AdminDutiesPage() {
 
                 {/* SECTION 2: TIME & KM TRACKING (PHYSICAL SLIP TABLE) */}
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                  <div className="flex justify-between items-center border-b border-border pb-2">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
                       <Clock className="w-4 h-4 text-accent" />
                       <span>2. Garage-to-Garage Time & KM Tracking Table</span>
@@ -1079,74 +1079,74 @@ export default function AdminDutiesPage() {
                     </span>
                   </div>
 
-                  <div className="bg-slate-950 border border-white/10 rounded-xl overflow-x-auto">
+                  <div className="bg-background border border-border rounded-xl overflow-x-auto">
                     <table className="w-full text-center border-collapse">
-                      <thead className="bg-slate-900 border-b border-white/10 text-[10px] uppercase font-bold text-slate-300">
+                      <thead className="bg-surface border-b border-border text-[10px] uppercase font-bold text-slate-300">
                         <tr>
-                          <th className="p-2 border-r border-white/10">Departure Garage</th>
-                          <th className="p-2 border-r border-white/10">Reporting Time</th>
-                          <th className="p-2 border-r border-white/10">Release Time</th>
-                          <th className="p-2 border-r border-white/10">Garaging Time</th>
-                          <th className="p-2 bg-slate-900/90 font-extrabold text-accent">Total Hours</th>
+                          <th className="p-2 border-r border-border">Departure Garage</th>
+                          <th className="p-2 border-r border-border">Reporting Time</th>
+                          <th className="p-2 border-r border-border">Release Time</th>
+                          <th className="p-2 border-r border-border">Garaging Time</th>
+                          <th className="p-2 bg-surface/90 font-extrabold text-accent">Total Hours</th>
                         </tr>
                       </thead>
                       <tbody>
-                        <tr className="border-b border-white/5">
-                          <td className="p-2 border-r border-white/10">
+                        <tr className="border-b border-border">
+                          <td className="p-2 border-r border-border">
                             <input
                               type="text"
                               placeholder="06:30 AM"
                               value={formData.garageDepartureTime}
                               onChange={(e) => setFormData({ ...formData, garageDepartureTime: e.target.value })}
-                              className="w-full bg-slate-900 text-center text-slate-100 p-1.5 rounded border border-white/5 focus:border-accent"
+                              className="w-full bg-surface text-center text-slate-100 p-1.5 rounded border border-border focus:border-accent"
                             />
                           </td>
-                          <td className="p-2 border-r border-white/10">
+                          <td className="p-2 border-r border-border">
                             <input
                               type="text"
                               placeholder="07:15 AM"
                               value={formData.reportingTime}
                               onChange={(e) => setFormData({ ...formData, reportingTime: e.target.value })}
-                              className="w-full bg-slate-900 text-center text-slate-100 p-1.5 rounded border border-white/5 focus:border-accent"
+                              className="w-full bg-surface text-center text-slate-100 p-1.5 rounded border border-border focus:border-accent"
                             />
                           </td>
-                          <td className="p-2 border-r border-white/10">
+                          <td className="p-2 border-r border-border">
                             <input
                               type="text"
                               placeholder="07:45 PM"
                               value={formData.releaseTime}
                               onChange={(e) => setFormData({ ...formData, releaseTime: e.target.value })}
-                              className="w-full bg-slate-900 text-center text-slate-100 p-1.5 rounded border border-white/5 focus:border-accent"
+                              className="w-full bg-surface text-center text-slate-100 p-1.5 rounded border border-border focus:border-accent"
                             />
                           </td>
-                          <td className="p-2 border-r border-white/10">
+                          <td className="p-2 border-r border-border">
                             <input
                               type="text"
                               placeholder="08:30 PM"
                               value={formData.garagingTime}
                               onChange={(e) => setFormData({ ...formData, garagingTime: e.target.value })}
-                              className="w-full bg-slate-900 text-center text-slate-100 p-1.5 rounded border border-white/5 focus:border-accent"
+                              className="w-full bg-surface text-center text-slate-100 p-1.5 rounded border border-border focus:border-accent"
                             />
                           </td>
-                          <td className="p-2 bg-slate-900/50">
+                          <td className="p-2 bg-surface/50">
                             <input
                               type="text"
                               placeholder="14.0"
                               value={formData.totalHours}
                               onChange={(e) => setFormData({ ...formData, totalHours: e.target.value })}
-                              className="w-full bg-slate-900 text-center text-accent font-extrabold p-1.5 rounded border border-accent/20 focus:border-accent"
+                              className="w-full bg-surface text-center text-accent font-extrabold p-1.5 rounded border border-accent/20 focus:border-accent"
                             />
                           </td>
                         </tr>
-                        <tr className="bg-slate-900/40 text-[10px] uppercase font-bold text-slate-300 border-b border-white/10">
-                          <td className="p-2 border-r border-white/10">Opening KM (Garage)</td>
-                          <td className="p-2 border-r border-white/10">Reporting KM</td>
-                          <td className="p-2 border-r border-white/10">Release KM</td>
-                          <td className="p-2 border-r border-white/10">Garaging KM</td>
-                          <td className="p-2 bg-slate-900/90 font-extrabold text-accent">Total KMs</td>
+                        <tr className="bg-surface/40 text-[10px] uppercase font-bold text-slate-300 border-b border-border">
+                          <td className="p-2 border-r border-border">Opening KM (Garage)</td>
+                          <td className="p-2 border-r border-border">Reporting KM</td>
+                          <td className="p-2 border-r border-border">Release KM</td>
+                          <td className="p-2 border-r border-border">Garaging KM</td>
+                          <td className="p-2 bg-surface/90 font-extrabold text-accent">Total KMs</td>
                         </tr>
                         <tr>
-                          <td className="p-2 border-r border-white/10">
+                          <td className="p-2 border-r border-border">
                             <input
                               type="number"
                               placeholder="45120"
@@ -1155,28 +1155,28 @@ export default function AdminDutiesPage() {
                                 setFormData({ ...formData, garageOpeningKm: e.target.value });
                                 handleCalculateTotals(e.target.value, formData.garagingKm);
                               }}
-                              className="w-full bg-slate-900 text-center font-mono font-bold text-slate-100 p-1.5 rounded border border-white/5 focus:border-accent"
+                              className="w-full bg-surface text-center font-mono font-bold text-slate-100 p-1.5 rounded border border-border focus:border-accent"
                             />
                           </td>
-                          <td className="p-2 border-r border-white/10">
+                          <td className="p-2 border-r border-border">
                             <input
                               type="number"
                               placeholder="45138"
                               value={formData.reportingKm}
                               onChange={(e) => setFormData({ ...formData, reportingKm: e.target.value })}
-                              className="w-full bg-slate-900 text-center font-mono text-slate-100 p-1.5 rounded border border-white/5 focus:border-accent"
+                              className="w-full bg-surface text-center font-mono text-slate-100 p-1.5 rounded border border-border focus:border-accent"
                             />
                           </td>
-                          <td className="p-2 border-r border-white/10">
+                          <td className="p-2 border-r border-border">
                             <input
                               type="number"
                               placeholder="45280"
                               value={formData.releaseKm}
                               onChange={(e) => setFormData({ ...formData, releaseKm: e.target.value })}
-                              className="w-full bg-slate-900 text-center font-mono text-slate-100 p-1.5 rounded border border-white/5 focus:border-accent"
+                              className="w-full bg-surface text-center font-mono text-slate-100 p-1.5 rounded border border-border focus:border-accent"
                             />
                           </td>
-                          <td className="p-2 border-r border-white/10">
+                          <td className="p-2 border-r border-border">
                             <input
                               type="number"
                               placeholder="45302"
@@ -1185,16 +1185,16 @@ export default function AdminDutiesPage() {
                                 setFormData({ ...formData, garagingKm: e.target.value });
                                 handleCalculateTotals(formData.garageOpeningKm, e.target.value);
                               }}
-                              className="w-full bg-slate-900 text-center font-mono font-bold text-slate-100 p-1.5 rounded border border-white/5 focus:border-accent"
+                              className="w-full bg-surface text-center font-mono font-bold text-slate-100 p-1.5 rounded border border-border focus:border-accent"
                             />
                           </td>
-                          <td className="p-2 bg-slate-900/50">
+                          <td className="p-2 bg-surface/50">
                             <input
                               type="text"
                               placeholder="182"
                               value={formData.totalKms}
                               onChange={(e) => setFormData({ ...formData, totalKms: e.target.value })}
-                              className="w-full bg-slate-900 text-center text-accent font-mono font-black p-1.5 rounded border border-accent/20 focus:border-accent"
+                              className="w-full bg-surface text-center text-accent font-mono font-black p-1.5 rounded border border-accent/20 focus:border-accent"
                             />
                           </td>
                         </tr>
@@ -1209,14 +1209,14 @@ export default function AdminDutiesPage() {
                       placeholder="e.g. Airport Transfer + Local Client Commute with night halt"
                       value={formData.remarks}
                       onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 focus:border-accent"
+                      className="w-full bg-background border border-border rounded-lg p-2.5 text-slate-100 focus:border-accent"
                     />
                   </div>
                 </div>
 
                 {/* SECTION 3: SETTLEMENT, TOLL & USER RATING */}
                 <div className="space-y-3">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2 border-b border-white/5 pb-2">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2 border-b border-border pb-2">
                     <Receipt className="w-4 h-4 text-accent" />
                     <span>3. Service Rating, Toll Settlement & Release</span>
                   </h3>
@@ -1231,7 +1231,7 @@ export default function AdminDutiesPage() {
                             className={`flex items-center justify-center text-center px-2 py-2 rounded-lg border text-[11px] font-bold cursor-pointer transition-all ${
                               formData.serviceFeedback === opt
                                 ? "bg-accent text-slate-950 border-accent font-black shadow-sm"
-                                : "bg-slate-950 text-slate-400 border-white/10 hover:text-white"
+                                : "bg-background text-slate-400 border-border hover:text-white"
                             }`}
                           >
                             <input
@@ -1257,7 +1257,7 @@ export default function AdminDutiesPage() {
                         placeholder="e.g. 420"
                         value={formData.parkingTollTax}
                         onChange={(e) => setFormData({ ...formData, parkingTollTax: e.target.value })}
-                        className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-amber-400 font-mono font-extrabold focus:border-accent"
+                        className="w-full bg-background border border-border rounded-lg p-2.5 text-amber-400 font-mono font-extrabold focus:border-accent"
                       />
                     </div>
 
@@ -1270,7 +1270,7 @@ export default function AdminDutiesPage() {
                         placeholder="e.g. Aerocity Terminal 3"
                         value={formData.placeOfRelease}
                         onChange={(e) => setFormData({ ...formData, placeOfRelease: e.target.value })}
-                        className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 focus:border-accent"
+                        className="w-full bg-background border border-border rounded-lg p-2.5 text-slate-100 focus:border-accent"
                       />
                     </div>
 
@@ -1283,7 +1283,7 @@ export default function AdminDutiesPage() {
                         placeholder="+91 98112 34567"
                         value={formData.mobile}
                         onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                        className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 font-mono focus:border-accent"
+                        className="w-full bg-background border border-border rounded-lg p-2.5 text-slate-100 font-mono focus:border-accent"
                       />
                     </div>
                   </div>
@@ -1291,7 +1291,7 @@ export default function AdminDutiesPage() {
 
                 {/* SECTION 4: CAR USAGE TRACK SHEET */}
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                  <div className="flex justify-between items-center border-b border-border pb-2">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
                       <MapPin className="w-4 h-4 text-accent" />
                       <span>4. Car Usage Track Sheet (Route Details)</span>
@@ -1308,7 +1308,7 @@ export default function AdminDutiesPage() {
 
                   <div className="space-y-2">
                     {formData.usageTracks.map((leg, idx) => (
-                      <div key={leg.id || idx} className="flex flex-col sm:flex-row items-center gap-2.5 bg-slate-950 p-2.5 rounded-xl border border-white/5">
+                      <div key={leg.id || idx} className="flex flex-col sm:flex-row items-center gap-2.5 bg-background p-2.5 rounded-xl border border-border">
                         <span className="shrink-0 w-8 text-center font-mono font-bold text-slate-500">#{idx + 1}</span>
                         
                         <div className="flex-1 w-full">
@@ -1317,11 +1317,11 @@ export default function AdminDutiesPage() {
                             placeholder="FROM (e.g. Garage / Hotel Pullman)"
                             value={leg.from}
                             onChange={(e) => handleUpdateUsageLeg(idx, "from", e.target.value)}
-                            className="w-full bg-slate-900 border border-white/10 rounded-lg p-2.5 text-slate-100 text-xs focus:border-accent"
+                            className="w-full bg-surface border border-border rounded-lg p-2.5 text-slate-100 text-xs focus:border-accent"
                           />
                         </div>
 
-                        <span className="shrink-0 px-2.5 py-1 bg-slate-900 border border-white/10 rounded-md text-xs font-bold text-amber-400 lowercase">
+                        <span className="shrink-0 px-2.5 py-1 bg-surface border border-border rounded-md text-xs font-bold text-amber-400 lowercase">
                           to
                         </span>
 
@@ -1331,7 +1331,7 @@ export default function AdminDutiesPage() {
                             placeholder="TO (e.g. Cyber City Gurugram / Airport)"
                             value={leg.to}
                             onChange={(e) => handleUpdateUsageLeg(idx, "to", e.target.value)}
-                            className="w-full bg-slate-900 border border-white/10 rounded-lg p-2.5 text-slate-100 text-xs focus:border-accent"
+                            className="w-full bg-surface border border-border rounded-lg p-2.5 text-slate-100 text-xs focus:border-accent"
                           />
                         </div>
 
@@ -1349,8 +1349,8 @@ export default function AdminDutiesPage() {
                 </div>
 
                 {/* SECTION 5: OFFICE USE ONLY */}
-                <div className="space-y-3 bg-slate-950/60 p-4 rounded-2xl border border-white/5">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2 border-b border-white/5 pb-2">
+                <div className="space-y-3 bg-background/60 p-4 rounded-2xl border border-border">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2 border-b border-border pb-2">
                     <ShieldCheck className="w-4 h-4 text-amber-400" />
                     <span>5. Office Use Only Section</span>
                   </h3>
@@ -1362,7 +1362,7 @@ export default function AdminDutiesPage() {
                         type="text"
                         value={formData.officeTo}
                         onChange={(e) => setFormData({ ...formData, officeTo: e.target.value })}
-                        className="w-full bg-slate-900 border border-white/10 rounded-lg p-2 text-slate-100 focus:border-accent"
+                        className="w-full bg-surface border border-border rounded-lg p-2 text-slate-100 focus:border-accent"
                       />
                     </div>
                     <div>
@@ -1371,7 +1371,7 @@ export default function AdminDutiesPage() {
                         type="text"
                         value={formData.bookedBy}
                         onChange={(e) => setFormData({ ...formData, bookedBy: e.target.value })}
-                        className="w-full bg-slate-900 border border-white/10 rounded-lg p-2 text-slate-100 focus:border-accent"
+                        className="w-full bg-surface border border-border rounded-lg p-2 text-slate-100 focus:border-accent"
                       />
                     </div>
                     <div>
@@ -1380,7 +1380,7 @@ export default function AdminDutiesPage() {
                         type="text"
                         value={formData.officeFor}
                         onChange={(e) => setFormData({ ...formData, officeFor: e.target.value })}
-                        className="w-full bg-slate-900 border border-white/10 rounded-lg p-2 text-slate-100 focus:border-accent"
+                        className="w-full bg-surface border border-border rounded-lg p-2 text-slate-100 focus:border-accent"
                       />
                     </div>
                   </div>
@@ -1392,7 +1392,7 @@ export default function AdminDutiesPage() {
                         type="text"
                         value={formData.garageInTime}
                         onChange={(e) => setFormData({ ...formData, garageInTime: e.target.value })}
-                        className="w-full bg-slate-900 border border-white/10 rounded-lg p-2 text-slate-100 focus:border-accent"
+                        className="w-full bg-surface border border-border rounded-lg p-2 text-slate-100 focus:border-accent"
                       />
                     </div>
                     <div>
@@ -1401,7 +1401,7 @@ export default function AdminDutiesPage() {
                         type="text"
                         value={formData.garageInKm}
                         onChange={(e) => setFormData({ ...formData, garageInKm: e.target.value })}
-                        className="w-full bg-slate-900 border border-white/10 rounded-lg p-2 text-slate-100 font-mono focus:border-accent"
+                        className="w-full bg-surface border border-border rounded-lg p-2 text-slate-100 font-mono focus:border-accent"
                       />
                     </div>
                     <div>
@@ -1411,7 +1411,7 @@ export default function AdminDutiesPage() {
                         placeholder="Chauffeur Name"
                         value={formData.handoverPerson}
                         onChange={(e) => setFormData({ ...formData, handoverPerson: e.target.value })}
-                        className="w-full bg-slate-900 border border-white/10 rounded-lg p-2 text-slate-100 focus:border-accent"
+                        className="w-full bg-surface border border-border rounded-lg p-2 text-slate-100 focus:border-accent"
                       />
                     </div>
                     <div>
@@ -1420,14 +1420,14 @@ export default function AdminDutiesPage() {
                         type="text"
                         value={`${formData.handoverDate} ${formData.handoverTime}`}
                         onChange={(e) => setFormData({ ...formData, handoverTime: e.target.value })}
-                        className="w-full bg-slate-900 border border-white/10 rounded-lg p-2 text-slate-100 focus:border-accent"
+                        className="w-full bg-surface border border-border rounded-lg p-2 text-slate-100 focus:border-accent"
                       />
                     </div>
                   </div>
                 </div>
 
                 {/* Submit Controls */}
-                <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+                <div className="flex justify-end gap-3 pt-4 border-t border-border">
                   <button
                     type="button"
                     onClick={() => setIsFormModalOpen(false)}
@@ -1454,7 +1454,7 @@ export default function AdminDutiesPage() {
       {viewingDuty && (
         <Portal>
           <div className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-            <div className="bg-slate-900 border border-white/10 rounded-3xl max-w-3xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative my-auto max-h-[92vh] overflow-y-auto scrollbar-thin">
+            <div className="bg-surface border border-border rounded-3xl max-w-3xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative my-auto max-h-[92vh] overflow-y-auto scrollbar-thin">
               
               <button
                 onClick={() => setViewingDuty(null)}
@@ -1624,12 +1624,12 @@ export default function AdminDutiesPage() {
 
               {/* Scanned Image Link Preview */}
               {viewingDuty.slipImageUrl && (
-                <div className="bg-slate-950 p-4 rounded-2xl border border-white/10 flex items-center justify-between">
+                <div className="bg-background p-4 rounded-2xl border border-border flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <img
                       src={viewingDuty.slipImageUrl}
                       alt="Scanned Slip"
-                      className="w-12 h-12 object-cover rounded-lg border border-white/10"
+                      className="w-12 h-12 object-cover rounded-lg border border-border"
                     />
                     <div>
                       <span className="text-xs font-bold text-slate-200 block">Original Scanned Duty Slip</span>
@@ -1689,7 +1689,7 @@ export default function AdminDutiesPage() {
       {isScanOptionsModalOpen && (
         <Portal>
           <div className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-white/10 rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative">
+            <div className="bg-surface border border-border rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative">
               <button
                 onClick={() => setIsScanOptionsModalOpen(false)}
                 className="absolute top-5 right-5 p-2 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-full transition-colors"
@@ -1718,7 +1718,7 @@ export default function AdminDutiesPage() {
                     handleOpenCreateModal();
                     setTimeout(() => mobileCameraInputRef.current?.click(), 300);
                   }}
-                  className="bg-slate-950 hover:bg-slate-800/80 border border-white/10 hover:border-accent/50 p-4 rounded-2xl flex flex-col items-center text-center space-y-2.5 transition-all group shadow-lg"
+                  className="bg-background hover:bg-slate-800/80 border border-border hover:border-accent/50 p-4 rounded-2xl flex flex-col items-center text-center space-y-2.5 transition-all group shadow-lg"
                 >
                   <div className="p-3 bg-accent text-slate-950 rounded-2xl transition-all shadow-md">
                     <Camera className="w-6 h-6" />
@@ -1744,7 +1744,7 @@ export default function AdminDutiesPage() {
                     setIsScanOptionsModalOpen(false);
                     setIsPrinterScannerModalOpen(true);
                   }}
-                  className="bg-slate-950 hover:bg-slate-800/80 border border-white/10 hover:border-accent/50 p-4 rounded-2xl flex flex-col items-center text-center space-y-2.5 transition-all group shadow-lg"
+                  className="bg-background hover:bg-slate-800/80 border border-border hover:border-accent/50 p-4 rounded-2xl flex flex-col items-center text-center space-y-2.5 transition-all group shadow-lg"
                 >
                   <div className="p-3 bg-accent/10 text-accent group-hover:bg-accent group-hover:text-slate-950 rounded-2xl transition-all shadow-inner">
                     <Printer className="w-6 h-6" />
@@ -1771,7 +1771,7 @@ export default function AdminDutiesPage() {
                     handleOpenCreateModal();
                     setTimeout(() => fileInputRef.current?.click(), 300);
                   }}
-                  className="bg-slate-950 hover:bg-slate-800/80 border border-white/10 hover:border-accent/50 p-4 rounded-2xl flex flex-col items-center text-center space-y-2.5 transition-all group shadow-lg"
+                  className="bg-background hover:bg-slate-800/80 border border-border hover:border-accent/50 p-4 rounded-2xl flex flex-col items-center text-center space-y-2.5 transition-all group shadow-lg"
                 >
                   <div className="p-3 bg-white/5 text-slate-200 group-hover:bg-accent group-hover:text-slate-950 rounded-2xl transition-all shadow-inner">
                     <UploadCloud className="w-6 h-6" />
@@ -1801,7 +1801,7 @@ export default function AdminDutiesPage() {
       {isPrinterScannerModalOpen && (
         <Portal>
           <div className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-            <div className="bg-slate-900 border border-white/10 rounded-3xl max-w-xl w-full p-6 sm:p-7 space-y-5 shadow-2xl relative my-auto max-h-[94vh] overflow-y-auto scrollbar-thin">
+            <div className="bg-surface border border-border rounded-3xl max-w-xl w-full p-6 sm:p-7 space-y-5 shadow-2xl relative my-auto max-h-[94vh] overflow-y-auto scrollbar-thin">
               <button
                 onClick={() => {
                   if (!isScanningPrinter) {
@@ -1831,7 +1831,7 @@ export default function AdminDutiesPage() {
               </div>
 
               {/* Hardware Source Tabs */}
-              <div className="grid grid-cols-3 gap-2 bg-slate-950 p-1.5 rounded-xl border border-white/5 text-xs font-bold">
+              <div className="grid grid-cols-3 gap-2 bg-background p-1.5 rounded-xl border border-border text-xs font-bold">
                 <button
                   type="button"
                   onClick={() => {
@@ -1907,7 +1907,7 @@ export default function AdminDutiesPage() {
                         }
                       }}
                       disabled={isScanningPrinter}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl p-2.5 text-slate-100 font-semibold focus:border-accent disabled:opacity-50"
+                      className="w-full bg-background border border-border rounded-xl p-2.5 text-slate-100 font-semibold focus:border-accent disabled:opacity-50"
                     >
                       {installedPrintersList.length > 0 ? (
                         installedPrintersList.map((dev) => (
@@ -1939,7 +1939,7 @@ export default function AdminDutiesPage() {
                           setPrinterIp(e.target.value);
                           setPrinterPingStatus("IDLE");
                         }}
-                        className="flex-1 bg-slate-950 border border-white/10 rounded-xl p-2.5 text-slate-100 font-mono focus:border-accent"
+                        className="flex-1 bg-background border border-border rounded-xl p-2.5 text-slate-100 font-mono focus:border-accent"
                       />
                       <button
                         type="button"
@@ -1980,7 +1980,7 @@ export default function AdminDutiesPage() {
                         value={scanDpi}
                         onChange={(e) => setScanDpi(e.target.value)}
                         disabled={isScanningPrinter}
-                        className="w-full bg-slate-950 border border-white/10 rounded-xl p-2.5 text-slate-100 font-semibold focus:border-accent disabled:opacity-50"
+                        className="w-full bg-background border border-border rounded-xl p-2.5 text-slate-100 font-semibold focus:border-accent disabled:opacity-50"
                       >
                         <option value="300">300 DPI (Standard OCR Clarity)</option>
                         <option value="600">600 DPI (High Precision Archive)</option>
@@ -1996,7 +1996,7 @@ export default function AdminDutiesPage() {
                         value={scanColorMode}
                         onChange={(e) => setScanColorMode(e.target.value)}
                         disabled={isScanningPrinter}
-                        className="w-full bg-slate-950 border border-white/10 rounded-xl p-2.5 text-slate-100 font-semibold focus:border-accent disabled:opacity-50"
+                        className="w-full bg-background border border-border rounded-xl p-2.5 text-slate-100 font-semibold focus:border-accent disabled:opacity-50"
                       >
                         <option value="COLOR">Full Color (24-bit RGB)</option>
                         <option value="BW">Black & White (High Contrast)</option>
@@ -2006,7 +2006,7 @@ export default function AdminDutiesPage() {
                   </div>
 
                   {/* Virtual Scanner Glass Bed Visualization */}
-                  <div className="relative h-28 bg-slate-950 border border-white/10 rounded-2xl overflow-hidden flex items-center justify-center">
+                  <div className="relative h-28 bg-background border border-border rounded-2xl overflow-hidden flex items-center justify-center">
                     <div className="absolute inset-0 bg-[radial-gradient(#ffffff0a_1px,transparent_1px)] [background-size:12px_12px]" />
                     
                     {isScanningPrinter ? (
@@ -2014,7 +2014,7 @@ export default function AdminDutiesPage() {
                         <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-accent to-transparent shadow-[0_0_15px_rgba(251,191,36,0.8)] animate-pulse" />
                         <RefreshCw className="w-5 h-5 text-accent animate-spin" />
                         <p className="text-xs font-bold text-slate-200">{scannerStatusText}</p>
-                        <div className="w-48 bg-slate-900 h-2 rounded-full overflow-hidden border border-white/10">
+                        <div className="w-48 bg-surface h-2 rounded-full overflow-hidden border border-border">
                           <div
                             className="bg-accent h-full transition-all duration-300"
                             style={{ width: `${scannerProgress}%` }}
@@ -2098,7 +2098,7 @@ export default function AdminDutiesPage() {
                         Physical Video Capture Device
                       </label>
                       <select
-                        className="w-full bg-slate-950 border border-white/10 rounded-xl p-2.5 text-slate-100 font-semibold focus:border-accent"
+                        className="w-full bg-background border border-border rounded-xl p-2.5 text-slate-100 font-semibold focus:border-accent"
                         onChange={() => startCamera()}
                       >
                         {connectedCamerasList.map((cam) => (
@@ -2128,7 +2128,7 @@ export default function AdminDutiesPage() {
                   ) : (
                     <div className="space-y-3">
                       {/* Live Camera Viewfinder */}
-                      <div className="relative aspect-[4/3] bg-black rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center">
+                      <div className="relative aspect-[4/3] bg-black rounded-2xl overflow-hidden border border-border flex items-center justify-center">
                         <video
                           ref={videoRef}
                           autoPlay
@@ -2170,7 +2170,7 @@ export default function AdminDutiesPage() {
                 <div className="space-y-4 text-xs">
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-white/20 hover:border-accent/60 bg-slate-950 p-8 rounded-2xl text-center space-y-3 cursor-pointer transition-all group"
+                    className="border-2 border-dashed border-white/20 hover:border-accent/60 bg-background p-8 rounded-2xl text-center space-y-3 cursor-pointer transition-all group"
                   >
                     <div className="p-4 bg-white/5 group-hover:bg-accent group-hover:text-slate-950 text-slate-200 rounded-2xl w-max mx-auto transition-all">
                       <UploadCloud className="w-8 h-8" />
@@ -2198,3 +2198,4 @@ export default function AdminDutiesPage() {
     </div>
   );
 }
+

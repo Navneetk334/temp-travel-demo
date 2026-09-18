@@ -56,7 +56,7 @@ export default function GalleryOne() {
   }, []);
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-slate-950 text-slate-100 overflow-x-hidden pt-24 pb-12">
+    <div ref={containerRef} className="min-h-screen bg-background text-slate-100 overflow-x-hidden pt-24 pb-12">
       {/* Header */}
       <div className="max-w-7xl mx-auto px-6 mb-16 text-center">
         <h1 className="gallery-title text-4xl md:text-6xl font-black tracking-tight mb-4 text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600">
@@ -72,7 +72,7 @@ export default function GalleryOne() {
         {galleryImages.map((img) => (
           <div 
             key={img.id} 
-            className="gallery-item break-inside-avoid relative rounded-3xl overflow-hidden group cursor-pointer border border-white/5 shadow-2xl"
+            className="gallery-item break-inside-avoid relative rounded-3xl overflow-hidden group cursor-pointer border border-border shadow-2xl"
             onClick={() => setSelectedImage(img)}
           >
             {/* Image */}
@@ -109,7 +109,7 @@ export default function GalleryOne() {
           onClick={() => setSelectedImage(null)}
         >
           <button 
-            className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors border border-white/10"
+            className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors border border-border"
             onClick={(e) => {
               e.stopPropagation();
               setSelectedImage(null);
@@ -118,7 +118,7 @@ export default function GalleryOne() {
             <X className="w-6 h-6" />
           </button>
           
-          <div className="relative w-full max-w-5xl aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="relative w-full max-w-5xl aspect-video rounded-2xl overflow-hidden border border-border shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <img 
               src={selectedImage.src} 
               alt={selectedImage.title}
@@ -134,3 +134,4 @@ export default function GalleryOne() {
     </div>
   );
 }
+

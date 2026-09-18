@@ -51,9 +51,9 @@ export default function ContactPage() {
     <>
       <JsonLd data={contactSchema} />
 
-      <div className="bg-slate-950 text-slate-100 min-h-screen">
+      <div className="bg-background text-slate-100 min-h-screen">
         {/* Combined Page Header & Breadcrumbs Section */}
-        <section className="relative bg-slate-950 overflow-hidden border-b border-white/5 pb-20">
+        <section className="relative bg-background overflow-hidden border-b border-border pb-20">
           <div className="absolute inset-0 bg-gradient-to-b from-blue-900/10 via-slate-950 to-slate-950 pointer-events-none" />
           
           <div className="relative z-10">
@@ -61,7 +61,7 @@ export default function ContactPage() {
           </div>
 
           <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 text-center space-y-6 relative z-10 pt-4">
-            <span className="text-xs font-bold text-accent uppercase tracking-widest bg-white/5 border border-white/10 px-3 py-1 rounded-full">
+            <span className="text-xs font-bold text-accent uppercase tracking-widest bg-white/5 border border-border px-3 py-1 rounded-full">
               Get In Touch
             </span>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-50">
@@ -74,14 +74,14 @@ export default function ContactPage() {
         </section>
 
         {/* Form and Info Columns */}
-        <section className="py-20 bg-slate-950">
+        <section className="py-20 bg-background">
           <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
             
             {/* Contact Information Column */}
             <div className="lg:col-span-5 space-y-6">
               
               {/* Phone Numbers Card */}
-              <div className="glassmorphism p-6 rounded-xl border border-white/5 space-y-3">
+              <div className="glassmorphism p-6 rounded-xl border border-border space-y-3">
                 <div className="flex items-center gap-3">
                   <div className="bg-primary/10 border border-primary/20 p-2.5 rounded-lg text-accent">
                     <Phone className="w-5 h-5" />
@@ -101,7 +101,7 @@ export default function ContactPage() {
               </div>
 
               {/* Email Addresses Card */}
-              <div className="glassmorphism p-6 rounded-xl border border-white/5 space-y-3">
+              <div className="glassmorphism p-6 rounded-xl border border-border space-y-3">
                 <div className="flex items-center gap-3">
                   <div className="bg-primary/10 border border-primary/20 p-2.5 rounded-lg text-accent">
                     <Mail className="w-5 h-5" />
@@ -117,7 +117,7 @@ export default function ContactPage() {
               </div>
 
               {/* Office Address Card */}
-              <div className="glassmorphism p-6 rounded-xl border border-white/5 space-y-3">
+              <div className="glassmorphism p-6 rounded-xl border border-border space-y-3">
                 <div className="flex items-center gap-3">
                   <div className="bg-primary/10 border border-primary/20 p-2.5 rounded-lg text-accent">
                     <MapPin className="w-5 h-5" />
@@ -133,7 +133,7 @@ export default function ContactPage() {
               </div>
 
               {/* Business Hours Card */}
-              <div className="glassmorphism p-6 rounded-xl border border-white/5 space-y-3">
+              <div className="glassmorphism p-6 rounded-xl border border-border space-y-3">
                 <div className="flex items-center gap-3">
                   <div className="bg-primary/10 border border-primary/20 p-2.5 rounded-lg text-accent">
                     <Clock className="w-5 h-5" />
@@ -179,7 +179,7 @@ export default function ContactPage() {
         </section>
 
         {/* Google Maps Placeholder */}
-        <section className="py-16 bg-slate-900/20 border-t border-white/5">
+        <section className="py-16 bg-surface/20 border-t border-border">
           <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 space-y-8">
             <div className="space-y-3 text-center">
               <h2 className="text-2xl font-bold text-slate-50 flex items-center justify-center gap-2">
@@ -192,7 +192,7 @@ export default function ContactPage() {
             </div>
 
             {/* Real Interactive Google Maps Container */}
-            <div className="relative bg-slate-900 border border-white/10 rounded-2xl h-[420px] overflow-hidden shadow-2xl group">
+            <div className="relative bg-surface border border-border rounded-2xl h-[420px] overflow-hidden shadow-2xl group">
               {/* Real Google Maps Embed Iframe */}
               <iframe
                 title="TEMP TRAVEL CAR RENTALS PVT LTD - Google Maps Location"
@@ -204,7 +204,7 @@ export default function ContactPage() {
               />
 
               {/* Direct Click Overlay Bar */}
-              <div className="absolute bottom-4 left-4 right-4 md:left-auto md:right-4 bg-slate-950/90 backdrop-blur-md border border-white/15 p-4 rounded-xl flex items-center justify-between gap-4 shadow-2xl z-10">
+              <div className="absolute bottom-4 left-4 right-4 md:left-auto md:right-4 bg-background/90 backdrop-blur-md border border-white/15 p-4 rounded-xl flex items-center justify-between gap-4 shadow-2xl z-10">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-amber-500/20 text-amber-400 rounded-lg border border-amber-500/30">
                     <MapPin className="w-5 h-5" />
@@ -233,3 +233,4 @@ export default function ContactPage() {
     </>
   );
 }
+

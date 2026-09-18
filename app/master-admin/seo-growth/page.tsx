@@ -77,7 +77,7 @@ export default function MasterSEOGrowthPage() {
 
       {/* GBP Performance Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-amber-500/30 rounded-2xl p-6 shadow-xl">
+        <div className="bg-surface/80 backdrop-blur-xl border border-amber-500/30 rounded-2xl p-6 shadow-xl">
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs text-slate-400 font-bold uppercase">Google Rating</span>
             <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
@@ -86,7 +86,7 @@ export default function MasterSEOGrowthPage() {
           <div className="text-[11px] text-emerald-400 mt-1">Synced across 120+ Verified Reviews</div>
         </div>
 
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-blue-500/30 rounded-2xl p-6 shadow-xl">
+        <div className="bg-surface/80 backdrop-blur-xl border border-blue-500/30 rounded-2xl p-6 shadow-xl">
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs text-slate-400 font-bold uppercase">Monthly Search Impressions</span>
             <Search className="w-5 h-5 text-blue-400" />
@@ -95,7 +95,7 @@ export default function MasterSEOGrowthPage() {
           <div className="text-[11px] text-blue-400 mt-1">Organic Search & Maps Views</div>
         </div>
 
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-6 shadow-xl">
+        <div className="bg-surface/80 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-6 shadow-xl">
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs text-slate-400 font-bold uppercase">City SEO Landing Pages</span>
             <MapPin className="w-5 h-5 text-purple-400" />
@@ -104,7 +104,7 @@ export default function MasterSEOGrowthPage() {
           <div className="text-[11px] text-purple-400 mt-1">Dynamic Schema & Local Content</div>
         </div>
 
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-emerald-500/30 rounded-2xl p-6 shadow-xl">
+        <div className="bg-surface/80 backdrop-blur-xl border border-emerald-500/30 rounded-2xl p-6 shadow-xl">
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs text-slate-400 font-bold uppercase">Schema.org Compliance</span>
             <CheckCircle2 className="w-5 h-5 text-emerald-400" />
@@ -115,8 +115,8 @@ export default function MasterSEOGrowthPage() {
       </div>
 
       {/* Google Business Profile Reviews Section */}
-      <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl space-y-4">
-        <div className="flex justify-between items-center pb-4 border-b border-white/10">
+      <div className="bg-surface/80 backdrop-blur-xl border border-border rounded-2xl p-6 shadow-2xl space-y-4">
+        <div className="flex justify-between items-center pb-4 border-b border-border">
           <div className="flex items-center gap-2">
             <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
             <h3 className="text-base font-bold text-slate-100">Google Business Profile (GBP) Live Reviews</h3>
@@ -126,7 +126,7 @@ export default function MasterSEOGrowthPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {gbpReviews.map((rev) => (
-            <div key={rev.id} className="bg-slate-950 p-4 rounded-xl border border-white/5 space-y-2 text-xs">
+            <div key={rev.id} className="bg-background p-4 rounded-xl border border-border space-y-2 text-xs">
               <div className="flex justify-between items-center">
                 <span className="font-bold text-slate-200">{rev.author}</span>
                 <div className="flex text-amber-400 font-bold">★★★★★</div>
@@ -147,8 +147,8 @@ export default function MasterSEOGrowthPage() {
       </div>
 
       {/* City Landing Pages Manager Table */}
-      <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl space-y-4">
-        <div className="flex justify-between items-center pb-4 border-b border-white/10">
+      <div className="bg-surface/80 backdrop-blur-xl border border-border rounded-2xl p-6 shadow-2xl space-y-4">
+        <div className="flex justify-between items-center pb-4 border-b border-border">
           <div className="flex items-center gap-2">
             <Globe className="w-5 h-5 text-amber-400" />
             <h3 className="text-base font-bold text-slate-100">City Landing Pages & Organic Search Rankings</h3>
@@ -160,7 +160,7 @@ export default function MasterSEOGrowthPage() {
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-950 text-slate-400 font-extrabold uppercase text-[10px] tracking-wider border-b border-white/10">
+            <thead className="bg-background text-slate-400 font-extrabold uppercase text-[10px] tracking-wider border-b border-border">
               <tr>
                 <th className="py-3 px-4">Metropolitan Region</th>
                 <th className="py-3 px-4">Target Search Keyword</th>
@@ -187,7 +187,7 @@ export default function MasterSEOGrowthPage() {
                       href={`/car-rental/${cp.slug}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 bg-slate-950 text-amber-400 hover:text-white border border-amber-500/30 px-3 py-1 rounded-lg text-[11px] font-bold transition-all"
+                      className="inline-flex items-center gap-1 bg-background text-amber-400 hover:text-white border border-amber-500/30 px-3 py-1 rounded-lg text-[11px] font-bold transition-all"
                     >
                       View Live Page <ExternalLink className="w-3 h-3" />
                     </a>
@@ -203,7 +203,7 @@ export default function MasterSEOGrowthPage() {
       {selectedReview && (
         <Portal>
           <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-            <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
+            <div className="bg-surface border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
               <button
                 onClick={() => setSelectedReview(null)}
                 className="absolute top-4 right-4 text-slate-400 hover:text-white"
@@ -223,7 +223,7 @@ export default function MasterSEOGrowthPage() {
                 </div>
               ) : (
                 <form onSubmit={handleReplySubmit} className="space-y-4 text-xs">
-                  <div className="p-3 bg-slate-950 rounded-xl border border-white/5 italic text-slate-300">
+                  <div className="p-3 bg-background rounded-xl border border-border italic text-slate-300">
                     "{selectedReview.text}"
                   </div>
 
@@ -235,7 +235,7 @@ export default function MasterSEOGrowthPage() {
                       placeholder="Thank you for choosing TEMP TRAVEL! We are committed to providing premium chauffeur transit..."
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
                     />
                   </div>
 
@@ -243,7 +243,7 @@ export default function MasterSEOGrowthPage() {
                     <button
                       type="button"
                       onClick={() => setSelectedReview(null)}
-                      className="px-4 py-2 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs"
+                      className="px-4 py-2 bg-background text-slate-400 hover:text-white rounded-xl text-xs"
                     >
                       Cancel
                     </button>
@@ -263,3 +263,4 @@ export default function MasterSEOGrowthPage() {
     </div>
   );
 }
+

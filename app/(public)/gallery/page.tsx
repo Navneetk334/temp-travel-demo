@@ -331,7 +331,7 @@ export default function PublicGalleryPage() {
             onClick={() => setLightboxIndex(null)}
           >
             <div 
-              className="relative max-w-5xl w-full bg-slate-900 border border-slate-200 rounded-3xl overflow-hidden shadow-2xl flex flex-col lg:flex-row max-h-[90vh]"
+              className="relative max-w-5xl w-full bg-surface border border-slate-200 rounded-3xl overflow-hidden shadow-2xl flex flex-col lg:flex-row max-h-[90vh]"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close Button */}
@@ -366,7 +366,7 @@ export default function PublicGalleryPage() {
               </div>
 
               {/* Lightbox Info Panel */}
-              <div className="lg:w-1/3 p-6 sm:p-8 flex flex-col justify-between space-y-6 bg-slate-900 border-t lg:border-t-0 lg:border-l border-white/5 overflow-y-auto">
+              <div className="lg:w-1/3 p-6 sm:p-8 flex flex-col justify-between space-y-6 bg-surface border-t lg:border-t-0 lg:border-l border-border overflow-y-auto">
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-accent/20 text-accent border border-accent/30">
@@ -391,13 +391,13 @@ export default function PublicGalleryPage() {
                   )}
 
                   {lightboxItem.caption && (
-                    <div className="p-3 bg-white/60 border border-white/5 rounded-xl text-xs text-slate-500 italic">
+                    <div className="p-3 bg-white/60 border border-border rounded-xl text-xs text-slate-500 italic">
                       &ldquo;{lightboxItem.caption}&rdquo;
                     </div>
                   )}
                 </div>
 
-                <div className="space-y-4 border-t border-white/5 pt-4">
+                <div className="space-y-4 border-t border-border pt-4">
                   <div className="space-y-2 text-xs text-slate-500 font-mono">
                     {lightboxItem.location && (
                       <div className="flex items-center gap-2">
@@ -436,3 +436,4 @@ export default function PublicGalleryPage() {
     </div>
   );
 }
+

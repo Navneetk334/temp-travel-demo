@@ -364,10 +364,10 @@ export default function AdminToursPage() {
   };
 
   return (
-    <div className="bg-slate-950 min-h-screen text-slate-100 p-8 space-y-8">
+    <div className="bg-background min-h-screen text-slate-100 p-8 space-y-8">
       
       {/* Title Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/5 pb-6 gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-border pb-6 gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-50 tracking-tight flex items-center gap-2.5">
             <Compass className="w-8 h-8 text-accent" />
@@ -391,7 +391,7 @@ export default function AdminToursPage() {
         <div 
           onClick={() => { setStatusFilter(""); setCurrentPage(1); }}
           className={`glassmorphism p-4 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "" ? "border-accent bg-accent/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "" ? "border-accent bg-accent/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Total Packages</div>
@@ -401,7 +401,7 @@ export default function AdminToursPage() {
         <div 
           onClick={() => { setStatusFilter("PUBLISHED"); setCurrentPage(1); }}
           className={`glassmorphism p-4 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "PUBLISHED" ? "border-emerald-400 bg-emerald-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "PUBLISHED" ? "border-emerald-400 bg-emerald-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-emerald-400 uppercase font-bold tracking-wider">PUBLISHED / LIVE</div>
@@ -411,7 +411,7 @@ export default function AdminToursPage() {
         <div 
           onClick={() => { setStatusFilter("DRAFT"); setCurrentPage(1); }}
           className={`glassmorphism p-4 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "DRAFT" ? "border-yellow-400 bg-yellow-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "DRAFT" ? "border-yellow-400 bg-yellow-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-yellow-400 uppercase font-bold tracking-wider">DRAFT</div>
@@ -421,7 +421,7 @@ export default function AdminToursPage() {
         <div 
           onClick={() => { setStatusFilter("FEATURED"); setCurrentPage(1); }}
           className={`glassmorphism p-4 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "FEATURED" ? "border-amber-400 bg-amber-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "FEATURED" ? "border-amber-400 bg-amber-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-amber-400 uppercase font-bold tracking-wider flex items-center gap-1">
@@ -433,7 +433,7 @@ export default function AdminToursPage() {
       </div>
 
       {/* Filter & Control Toolbar */}
-      <div className="glassmorphism p-6 rounded-xl border border-white/5 flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="glassmorphism p-6 rounded-xl border border-border flex flex-col md:flex-row gap-4 items-center justify-between">
         
         {/* Search */}
         <div className="relative w-full md:w-80">
@@ -443,7 +443,7 @@ export default function AdminToursPage() {
             placeholder="Search tour title, destination, category..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-            className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all"
+            className="w-full bg-background/60 border border-border rounded-lg py-2 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all"
           />
         </div>
 
@@ -454,11 +454,11 @@ export default function AdminToursPage() {
           <select
             value={categoryFilter}
             onChange={(e) => { setCategoryFilter(e.target.value); setCurrentPage(1); }}
-            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+            className="bg-background/60 border border-border rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
           >
-            <option value="" className="bg-slate-900">All Categories</option>
+            <option value="" className="bg-surface">All Categories</option>
             {categories.map((c) => (
-              <option key={c.id} value={c.id} className="bg-slate-900">{c.name}</option>
+              <option key={c.id} value={c.id} className="bg-surface">{c.name}</option>
             ))}
           </select>
 
@@ -466,30 +466,30 @@ export default function AdminToursPage() {
           <select
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+            className="bg-background/60 border border-border rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
           >
-            <option value="" className="bg-slate-900">All Package Statuses</option>
-            <option value="PUBLISHED" className="bg-slate-900 text-emerald-400">PUBLISHED</option>
-            <option value="DRAFT" className="bg-slate-900 text-yellow-400">DRAFT</option>
-            <option value="FEATURED" className="bg-slate-900 text-amber-400">FEATURED ONLY</option>
+            <option value="" className="bg-surface">All Package Statuses</option>
+            <option value="PUBLISHED" className="bg-surface text-emerald-400">PUBLISHED</option>
+            <option value="DRAFT" className="bg-surface text-yellow-400">DRAFT</option>
+            <option value="FEATURED" className="bg-surface text-amber-400">FEATURED ONLY</option>
           </select>
 
           {/* Sort By */}
           <select
             value={sortBy}
             onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }}
-            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+            className="bg-background/60 border border-border rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
           >
-            <option value="createdAt" className="bg-slate-900">Sort by Date</option>
-            <option value="title" className="bg-slate-900">Sort by Title</option>
-            <option value="basePrice" className="bg-slate-900">Sort by Price</option>
-            <option value="durationDays" className="bg-slate-900">Sort by Duration</option>
+            <option value="createdAt" className="bg-surface">Sort by Date</option>
+            <option value="title" className="bg-surface">Sort by Title</option>
+            <option value="basePrice" className="bg-surface">Sort by Price</option>
+            <option value="durationDays" className="bg-surface">Sort by Duration</option>
           </select>
 
           {/* Sort Order */}
           <button
             onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs font-semibold text-slate-300 hover:text-slate-100 transition-colors"
+            className="bg-background/60 border border-border rounded-lg py-2 px-3 text-xs font-semibold text-slate-300 hover:text-slate-100 transition-colors"
           >
             {sortOrder === "desc" ? "↓ Newest / High" : "↑ Oldest / Low"}
           </button>
@@ -498,7 +498,7 @@ export default function AdminToursPage() {
       </div>
 
       {/* Tour Packages Table Grid */}
-      <div className="glassmorphism rounded-xl border border-white/5 overflow-hidden flex flex-col">
+      <div className="glassmorphism rounded-xl border border-border overflow-hidden flex flex-col">
         {loading ? (
           <div className="text-center py-16 text-slate-400 text-xs">Loading tour package CMS...</div>
         ) : (
@@ -506,7 +506,7 @@ export default function AdminToursPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-slate-900 border-b border-white/5 text-slate-400 font-semibold uppercase tracking-wider">
+                  <tr className="bg-surface border-b border-border text-slate-400 font-semibold uppercase tracking-wider">
                     <th className="p-4">Tour Package & Destination</th>
                     <th className="p-4">Category & Duration</th>
                     <th className="p-4">Pricing & Offer</th>
@@ -564,14 +564,14 @@ export default function AdminToursPage() {
                         <td className="p-4 text-right space-x-2">
                           <button
                             onClick={() => openModal(tour)}
-                            className="p-1.5 bg-slate-900 border border-white/5 rounded-lg text-slate-400 hover:text-accent transition-colors"
+                            className="p-1.5 bg-surface border border-border rounded-lg text-slate-400 hover:text-accent transition-colors"
                             title="Edit Tour Package"
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(tour.id)}
-                            className="p-1.5 bg-slate-900 border border-white/5 rounded-lg text-slate-400 hover:text-red-400 transition-colors"
+                            className="p-1.5 bg-surface border border-border rounded-lg text-slate-400 hover:text-red-400 transition-colors"
                             title="Delete Tour Package"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -585,7 +585,7 @@ export default function AdminToursPage() {
             </div>
 
             {/* Pagination Bar */}
-            <div className="p-4 bg-slate-900/60 border-t border-white/5 flex items-center justify-between text-xs text-slate-400">
+            <div className="p-4 bg-surface/60 border-t border-border flex items-center justify-between text-xs text-slate-400">
               <div>
                 Showing <span className="font-bold text-slate-200">{totalCount > 0 ? (currentPage - 1) * pageSize + 1 : 0}</span> to <span className="font-bold text-slate-200">{Math.min(currentPage * pageSize, totalCount)}</span> of <span className="font-bold text-slate-200">{totalCount}</span> tour packages
               </div>
@@ -596,7 +596,7 @@ export default function AdminToursPage() {
                   <select
                     value={pageSize}
                     onChange={(e) => { setPageSize(parseInt(e.target.value)); setCurrentPage(1); }}
-                    className="bg-slate-950 border border-white/10 rounded px-2 py-1 text-slate-200"
+                    className="bg-background border border-border rounded px-2 py-1 text-slate-200"
                   >
                     <option value="5">5</option>
                     <option value="10">10</option>
@@ -609,7 +609,7 @@ export default function AdminToursPage() {
                   <button
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage(currentPage - 1)}
-                    className="p-1 bg-slate-950 border border-white/10 rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
+                    className="p-1 bg-background border border-border rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
@@ -617,7 +617,7 @@ export default function AdminToursPage() {
                   <button
                     disabled={currentPage >= totalPages}
                     onClick={() => setCurrentPage(currentPage + 1)}
-                    className="p-1 bg-slate-950 border border-white/10 rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
+                    className="p-1 bg-background border border-border rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -632,9 +632,9 @@ export default function AdminToursPage() {
       {isModalOpen && (
         <Portal>
           <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-white/10 rounded-2xl max-w-4xl w-full p-6 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-thin">
+          <div className="bg-surface border border-border rounded-2xl max-w-4xl w-full p-6 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-thin">
             
-            <div className="flex justify-between items-center border-b border-white/5 pb-4">
+            <div className="flex justify-between items-center border-b border-border pb-4">
               <div>
                 <h3 className="text-lg font-bold text-slate-50">
                   {editingTour ? "Edit Tour Package & Itinerary" : "Create New Tour Package & Itinerary"}
@@ -660,7 +660,7 @@ export default function AdminToursPage() {
               
               {/* Section 1: Basic Info */}
               <div className="space-y-4">
-                <h4 className="text-xs font-extrabold text-accent uppercase tracking-widest font-mono border-b border-white/5 pb-2">
+                <h4 className="text-xs font-extrabold text-accent uppercase tracking-widest font-mono border-b border-border pb-2">
                   1. Basic Package Information
                 </h4>
 
@@ -673,7 +673,7 @@ export default function AdminToursPage() {
                       placeholder="e.g. Golden Triangle 5 Days Heritage Tour"
                       value={formData.title}
                       onChange={(e) => handleTitleChange(e.target.value)}
-                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                      className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                     />
                   </div>
 
@@ -685,7 +685,7 @@ export default function AdminToursPage() {
                       placeholder="golden-triangle-5-days-heritage-tour"
                       value={formData.slug}
                       onChange={(e) => setFormData({ ...formData, slug: generateSlug(e.target.value) })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
+                      className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
                     />
                   </div>
                 </div>
@@ -698,7 +698,7 @@ export default function AdminToursPage() {
                       placeholder="e.g. Delhi, Agra, Jaipur"
                       value={formData.destination}
                       onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                      className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                     />
                   </div>
 
@@ -708,11 +708,11 @@ export default function AdminToursPage() {
                       required
                       value={formData.categoryId}
                       onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                      className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                     >
                       <option value="" disabled>Select Package Category</option>
                       {categories.map((c) => (
-                        <option key={c.id} value={c.id} className="bg-slate-900">{c.name}</option>
+                        <option key={c.id} value={c.id} className="bg-surface">{c.name}</option>
                       ))}
                     </select>
                   </div>
@@ -726,7 +726,7 @@ export default function AdminToursPage() {
                         required
                         value={formData.durationDays}
                         onChange={(e) => setFormData({ ...formData, durationDays: parseInt(e.target.value, 10) || 1 })}
-                        className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                        className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                       />
                     </div>
                     <div>
@@ -737,7 +737,7 @@ export default function AdminToursPage() {
                         required
                         value={formData.durationNights}
                         onChange={(e) => setFormData({ ...formData, durationNights: parseInt(e.target.value, 10) || 0 })}
-                        className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                        className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                       />
                     </div>
                   </div>
@@ -751,14 +751,14 @@ export default function AdminToursPage() {
                     placeholder="Comprehensive overview of the tour package experience..."
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent resize-none"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent resize-none"
                   />
                 </div>
               </div>
 
               {/* Section 2: Pricing & Features */}
               <div className="space-y-4">
-                <h4 className="text-xs font-extrabold text-accent uppercase tracking-widest font-mono border-b border-white/5 pb-2">
+                <h4 className="text-xs font-extrabold text-accent uppercase tracking-widest font-mono border-b border-border pb-2">
                   2. Pricing & Inclusions
                 </h4>
 
@@ -771,7 +771,7 @@ export default function AdminToursPage() {
                       placeholder="12500"
                       value={formData.basePrice}
                       onChange={(e) => setFormData({ ...formData, basePrice: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
+                      className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
                     />
                   </div>
 
@@ -782,7 +782,7 @@ export default function AdminToursPage() {
                       placeholder="9999"
                       value={formData.offerPrice}
                       onChange={(e) => setFormData({ ...formData, offerPrice: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
+                      className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
                     />
                   </div>
                 </div>
@@ -795,7 +795,7 @@ export default function AdminToursPage() {
                       placeholder="Private AC Vehicle&#10;3-Star Hotel Stay&#10;Daily Breakfast&#10;Sightseeing Guide"
                       value={formData.inclusionsText}
                       onChange={(e) => setFormData({ ...formData, inclusionsText: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent resize-none font-mono"
+                      className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent resize-none font-mono"
                     />
                   </div>
 
@@ -806,7 +806,7 @@ export default function AdminToursPage() {
                       placeholder="Airfare / Train fare&#10;Monument Tickets&#10;Personal Expenses & Tips"
                       value={formData.exclusionsText}
                       onChange={(e) => setFormData({ ...formData, exclusionsText: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent resize-none font-mono"
+                      className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent resize-none font-mono"
                     />
                   </div>
                 </div>
@@ -818,21 +818,21 @@ export default function AdminToursPage() {
                     placeholder="https://images.unsplash.com/photo-1&#10;https://images.unsplash.com/photo-2"
                     value={formData.imagesText}
                     onChange={(e) => setFormData({ ...formData, imagesText: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent resize-none font-mono text-[11px]"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent resize-none font-mono text-[11px]"
                   />
                 </div>
               </div>
 
               {/* Section 3: Day-wise Itinerary Builder */}
               <div className="space-y-4">
-                <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                <div className="flex justify-between items-center border-b border-border pb-2">
                   <h4 className="text-xs font-extrabold text-accent uppercase tracking-widest font-mono">
                     3. Day-Wise Itinerary Planner ({itinerary.length} Days)
                   </h4>
                   <button
                     type="button"
                     onClick={handleAddItineraryDay}
-                    className="text-xs font-bold text-slate-200 hover:text-white bg-slate-800 border border-white/10 px-3 py-1 rounded-lg flex items-center gap-1 transition-all"
+                    className="text-xs font-bold text-slate-200 hover:text-white bg-slate-800 border border-border px-3 py-1 rounded-lg flex items-center gap-1 transition-all"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Add Itinerary Day</span>
@@ -841,7 +841,7 @@ export default function AdminToursPage() {
 
                 <div className="space-y-3">
                   {itinerary.map((dayItem, index) => (
-                    <div key={index} className="bg-slate-950/60 p-4 rounded-xl border border-white/10 space-y-3">
+                    <div key={index} className="bg-background/60 p-4 rounded-xl border border-border space-y-3">
                       <div className="flex justify-between items-center">
                         <span className="text-xs font-black text-accent uppercase font-mono">Day {dayItem.day}</span>
                         {itinerary.length > 1 && (
@@ -861,7 +861,7 @@ export default function AdminToursPage() {
                             placeholder="Day Title"
                             value={dayItem.title}
                             onChange={(e) => handleItineraryChange(index, "title", e.target.value)}
-                            className="w-full bg-slate-900 border border-white/10 rounded-lg p-2 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                            className="w-full bg-surface border border-border rounded-lg p-2 text-xs text-slate-100 focus:outline-none focus:border-accent"
                           />
                         </div>
                         <div className="sm:col-span-8">
@@ -870,7 +870,7 @@ export default function AdminToursPage() {
                             placeholder="Day schedule details..."
                             value={dayItem.description}
                             onChange={(e) => handleItineraryChange(index, "description", e.target.value)}
-                            className="w-full bg-slate-900 border border-white/10 rounded-lg p-2 text-xs text-slate-100 focus:outline-none focus:border-accent resize-none"
+                            className="w-full bg-surface border border-border rounded-lg p-2 text-xs text-slate-100 focus:outline-none focus:border-accent resize-none"
                           />
                         </div>
                       </div>
@@ -881,7 +881,7 @@ export default function AdminToursPage() {
 
               {/* Section 4: SEO Meta & Visibility */}
               <div className="space-y-4">
-                <h4 className="text-xs font-extrabold text-accent uppercase tracking-widest font-mono border-b border-white/5 pb-2">
+                <h4 className="text-xs font-extrabold text-accent uppercase tracking-widest font-mono border-b border-border pb-2">
                   4. SEO Meta & Publishing Controls
                 </h4>
 
@@ -894,7 +894,7 @@ export default function AdminToursPage() {
                       placeholder="Best 5-Day Golden Triangle Tour Package"
                       value={formData.seoTitle}
                       onChange={(e) => setFormData({ ...formData, seoTitle: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                      className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                     />
                   </div>
 
@@ -905,7 +905,7 @@ export default function AdminToursPage() {
                       placeholder="golden triangle, agra tour, jaipur travel"
                       value={formData.seoKeywords}
                       onChange={(e) => setFormData({ ...formData, seoKeywords: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                      className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                     />
                   </div>
                 </div>
@@ -918,21 +918,21 @@ export default function AdminToursPage() {
                     placeholder="Book 5-day Golden Triangle package with private cab, hotel stays, and sightseeing."
                     value={formData.seoDescription}
                     onChange={(e) => setFormData({ ...formData, seoDescription: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent resize-none"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent resize-none"
                   />
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-slate-950/60 p-4 rounded-xl border border-white/10">
+                <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-background/60 p-4 rounded-xl border border-border">
                   <div className="flex items-center gap-3">
                     <label className="text-xs font-bold text-slate-300">Status:</label>
                     <select
                       value={formData.status}
                       onChange={(e) => setFormData({ ...formData, status: e.target.value as TourStatus })}
-                      className="bg-slate-900 border border-white/10 rounded-lg py-1.5 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                      className="bg-surface border border-border rounded-lg py-1.5 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
                     >
-                      <option value="PUBLISHED" className="bg-slate-900 text-emerald-400">PUBLISHED / LIVE</option>
-                      <option value="DRAFT" className="bg-slate-900 text-yellow-400">DRAFT</option>
-                      <option value="ARCHIVED" className="bg-slate-900 text-slate-400">ARCHIVED</option>
+                      <option value="PUBLISHED" className="bg-surface text-emerald-400">PUBLISHED / LIVE</option>
+                      <option value="DRAFT" className="bg-surface text-yellow-400">DRAFT</option>
+                      <option value="ARCHIVED" className="bg-surface text-slate-400">ARCHIVED</option>
                     </select>
                   </div>
 
@@ -941,7 +941,7 @@ export default function AdminToursPage() {
                       type="checkbox"
                       checked={formData.isFeatured}
                       onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
-                      className="w-4 h-4 rounded text-accent focus:ring-0 bg-slate-900 border-white/20"
+                      className="w-4 h-4 rounded text-accent focus:ring-0 bg-surface border-white/20"
                     />
                     <span className="flex items-center gap-1">
                       <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
@@ -952,7 +952,7 @@ export default function AdminToursPage() {
               </div>
 
               {/* Submit Controls */}
-              <div className="flex gap-3 pt-4 border-t border-white/5">
+              <div className="flex gap-3 pt-4 border-t border-border">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
@@ -978,3 +978,4 @@ export default function AdminToursPage() {
     </div>
   );
 }
+

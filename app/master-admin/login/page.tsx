@@ -252,7 +252,7 @@ export default function MasterAdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center p-4 relative overflow-hidden font-sans selection:bg-amber-500 selection:text-slate-950">
+    <div className="min-h-screen bg-background flex flex-col justify-center items-center p-4 relative overflow-hidden font-sans selection:bg-amber-500 selection:text-slate-950">
       {/* 1. Framer Interactive Repulsion Dot-Grid Canvas */}
       <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-auto" />
 
@@ -262,7 +262,7 @@ export default function MasterAdminLoginPage() {
       <div className="w-full max-w-md relative z-10 space-y-6">
         {/* Clean Untampered Brand Logo */}
         <div className="text-center space-y-3">
-          <div className="inline-flex items-center justify-center p-4 bg-slate-900/90 border border-amber-500/30 rounded-3xl shadow-2xl backdrop-blur-xl">
+          <div className="inline-flex items-center justify-center p-4 bg-surface/90 border border-amber-500/30 rounded-3xl shadow-2xl backdrop-blur-xl">
             <img
               src="/images/logo.png"
               alt="TEMP TRAVEL"
@@ -285,11 +285,11 @@ export default function MasterAdminLoginPage() {
         </div>
 
         {/* Auth Form Card */}
-        <div className="bg-slate-900/90 backdrop-blur-2xl border border-amber-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden">
+        <div className="bg-surface/90 backdrop-blur-2xl border border-amber-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden">
           <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600" />
 
           {/* Mode Tab Switcher */}
-          <div className="flex bg-slate-950 p-1 rounded-xl border border-white/10">
+          <div className="flex bg-background p-1 rounded-xl border border-border">
             <button
               onClick={() => { setMode("login"); setError(""); setSuccessMsg(""); }}
               className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${mode === "login" ? "bg-amber-500 text-slate-950 font-black shadow-md" : "text-slate-400 hover:text-white"
@@ -332,7 +332,7 @@ export default function MasterAdminLoginPage() {
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
                       placeholder="super@temptravels.com"
-                      className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 pl-11 pr-4 text-sm text-slate-100 placeholder:text-slate-700 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all"
+                      className="w-full bg-background/50 border border-slate-800 rounded-xl py-3 pl-11 pr-4 text-sm text-slate-100 placeholder:text-slate-700 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all"
                     />
                   </div>
                 </div>
@@ -350,7 +350,7 @@ export default function MasterAdminLoginPage() {
                       value={form.password}
                       onChange={(e) => setForm({ ...form, password: e.target.value })}
                       placeholder="••••••••••••"
-                      className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 pl-11 pr-11 text-sm text-slate-100 placeholder:text-slate-700 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all font-mono"
+                      className="w-full bg-background/50 border border-slate-800 rounded-xl py-3 pl-11 pr-11 text-sm text-slate-100 placeholder:text-slate-700 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all font-mono"
                     />
                     <button
                       type="button"
@@ -410,7 +410,7 @@ export default function MasterAdminLoginPage() {
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
                       placeholder="super@temptravels.com"
-                      className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 pl-11 pr-4 text-sm text-slate-100 placeholder:text-slate-700 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all"
+                      className="w-full bg-background/50 border border-slate-800 rounded-xl py-3 pl-11 pr-4 text-sm text-slate-100 placeholder:text-slate-700 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all"
                     />
                   </div>
                 </div>
@@ -449,7 +449,7 @@ export default function MasterAdminLoginPage() {
                   placeholder="e.g. Navneet Kumar"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:border-amber-400"
+                  className="w-full bg-background border border-border rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:border-amber-400"
                 />
               </div>
 
@@ -461,7 +461,7 @@ export default function MasterAdminLoginPage() {
                   placeholder="name@temptravels.com"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:border-amber-400"
+                  className="w-full bg-background border border-border rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:border-amber-400"
                 />
               </div>
 
@@ -470,7 +470,7 @@ export default function MasterAdminLoginPage() {
                 <select
                   value={form.role}
                   onChange={(e) => setForm({ ...form, role: e.target.value })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:border-amber-400"
+                  className="w-full bg-background border border-border rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:border-amber-400"
                 >
                   <option value="SUPER_ADMIN">SUPER_ADMIN (Full HQ Control)</option>
                   <option value="OPERATIONS_DISPATCH">OPERATIONS_DISPATCH</option>
@@ -502,3 +502,4 @@ export default function MasterAdminLoginPage() {
     </div>
   );
 }
+

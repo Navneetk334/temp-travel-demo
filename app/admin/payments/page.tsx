@@ -194,10 +194,10 @@ export default function AdminPaymentsPage() {
   };
 
   return (
-    <div className="bg-slate-950 min-h-screen text-slate-100 p-6 sm:p-8 space-y-8">
+    <div className="bg-background min-h-screen text-slate-100 p-6 sm:p-8 space-y-8">
       
       {/* Title Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/5 pb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border pb-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-50 tracking-tight flex items-center gap-2.5">
             <CreditCard className="w-8 h-8 text-amber-400" />
@@ -219,7 +219,7 @@ export default function AdminPaymentsPage() {
 
       {/* Daily Cash Collection Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-slate-900/80 border border-white/5 p-4 rounded-xl space-y-1">
+        <div className="bg-surface/80 border border-border p-4 rounded-xl space-y-1">
           <div className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
             <IndianRupee className="w-4 h-4 text-amber-400" />
             <span>Total Cash Collected</span>
@@ -228,7 +228,7 @@ export default function AdminPaymentsPage() {
           <div className="text-[10px] text-slate-500">Gross trip cash received today</div>
         </div>
 
-        <div className="bg-slate-900/80 border border-emerald-500/20 p-4 rounded-xl space-y-1">
+        <div className="bg-surface/80 border border-emerald-500/20 p-4 rounded-xl space-y-1">
           <div className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4" />
             <span>Handed Over to Office</span>
@@ -237,7 +237,7 @@ export default function AdminPaymentsPage() {
           <div className="text-[10px] text-emerald-500/70">Verified in office cash drawer</div>
         </div>
 
-        <div className="bg-slate-900/80 border border-amber-500/20 p-4 rounded-xl space-y-1">
+        <div className="bg-surface/80 border border-amber-500/20 p-4 rounded-xl space-y-1">
           <div className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
             <Clock className="w-4 h-4" />
             <span>Pending Driver Handover</span>
@@ -246,7 +246,7 @@ export default function AdminPaymentsPage() {
           <div className="text-[10px] text-amber-500/70">Cash currently held by chauffeurs</div>
         </div>
 
-        <div className="bg-slate-900/80 border border-blue-500/20 p-4 rounded-xl space-y-1">
+        <div className="bg-surface/80 border border-blue-500/20 p-4 rounded-xl space-y-1">
           <div className="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-2">
             <UserCheck className="w-4 h-4" />
             <span>Active Cash Chauffeurs</span>
@@ -257,7 +257,7 @@ export default function AdminPaymentsPage() {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex border-b border-white/5 gap-4">
+      <div className="flex border-b border-border gap-4">
         <button
           onClick={() => setActiveTab("ledger")}
           className={`pb-3 text-xs font-extrabold uppercase tracking-wider border-b-2 transition-all ${
@@ -279,7 +279,7 @@ export default function AdminPaymentsPage() {
       {activeTab === "ledger" && (
         <div className="space-y-4">
           {/* Toolbar: Search, Filters & Bulk Actions */}
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-slate-900/60 p-4 rounded-xl border border-white/5">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-surface/60 p-4 rounded-xl border border-border">
             <div className="relative w-full md:w-80">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
@@ -287,7 +287,7 @@ export default function AdminPaymentsPage() {
                 placeholder="Search booking #, driver, or receipt..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-slate-950 border border-white/10 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-400"
+                className="w-full bg-background border border-border rounded-lg pl-9 pr-4 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-400"
               />
             </div>
 
@@ -295,7 +295,7 @@ export default function AdminPaymentsPage() {
               <select
                 value={filterMode}
                 onChange={(e) => setFilterMode(e.target.value)}
-                className="bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-amber-400"
+                className="bg-background border border-border rounded-lg px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-amber-400"
               >
                 <option value="ALL">All Payment Modes</option>
                 <option value="CASH">Cash Only</option>
@@ -305,7 +305,7 @@ export default function AdminPaymentsPage() {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-amber-400"
+                className="bg-background border border-border rounded-lg px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-amber-400"
               >
                 <option value="ALL">All Handover Statuses</option>
                 <option value="HANDED_OVER_TO_OFFICE">Handed Over to Office</option>
@@ -324,10 +324,10 @@ export default function AdminPaymentsPage() {
           </div>
 
           {/* Cash Ledger Master Table */}
-          <div className="bg-slate-900/40 rounded-xl border border-white/5 overflow-x-auto shadow-xl">
+          <div className="bg-surface/40 rounded-xl border border-border overflow-x-auto shadow-xl">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-900 border-b border-white/5 text-slate-400 font-bold uppercase tracking-wider">
+                <tr className="bg-surface border-b border-border text-slate-400 font-bold uppercase tracking-wider">
                   <th className="p-4 w-10 text-center">
                     <input
                       type="checkbox"
@@ -405,7 +405,7 @@ export default function AdminPaymentsPage() {
                       <td className="p-4 text-center">
                         <button
                           onClick={() => setReceiptRecord(r)}
-                          className="inline-flex items-center gap-1 bg-white/5 hover:bg-amber-400 hover:text-slate-950 text-slate-200 font-bold px-3 py-1.5 rounded-lg text-[10px] tracking-wider uppercase transition-all border border-white/10"
+                          className="inline-flex items-center gap-1 bg-white/5 hover:bg-amber-400 hover:text-slate-950 text-slate-200 font-bold px-3 py-1.5 rounded-lg text-[10px] tracking-wider uppercase transition-all border border-border"
                         >
                           <Printer className="w-3.5 h-3.5" />
                           <span>Issue Receipt</span>
@@ -421,10 +421,10 @@ export default function AdminPaymentsPage() {
       )}
 
       {activeTab === "driver_balances" && (
-        <div className="bg-slate-900/40 rounded-xl border border-white/5 overflow-hidden shadow-xl">
+        <div className="bg-surface/40 rounded-xl border border-border overflow-hidden shadow-xl">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-slate-900 border-b border-white/5 text-slate-400 font-bold uppercase tracking-wider">
+              <tr className="bg-surface border-b border-border text-slate-400 font-bold uppercase tracking-wider">
                 <th className="p-4">Chauffeur Name</th>
                 <th className="p-4 text-center">Completed Trips</th>
                 <th className="p-4 text-right">Total Cash Collected</th>
@@ -469,7 +469,7 @@ export default function AdminPaymentsPage() {
       {isLogModalOpen && (
         <Portal>
           <div className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 sm:p-8 max-w-lg w-full space-y-6 shadow-2xl relative">
+            <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8 max-w-lg w-full space-y-6 shadow-2xl relative">
               <button
                 onClick={() => setIsLogModalOpen(false)}
                 className="absolute top-4 right-4 text-slate-400 hover:text-white p-1"
@@ -495,7 +495,7 @@ export default function AdminPaymentsPage() {
                       placeholder="e.g. TT-DEL-9842"
                       value={logForm.bookingNumber}
                       onChange={(e) => setLogForm({ ...logForm, bookingNumber: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 focus:border-amber-400"
+                      className="w-full bg-background border border-border rounded-lg p-2.5 text-slate-100 focus:border-amber-400"
                     />
                   </div>
                   <div>
@@ -505,7 +505,7 @@ export default function AdminPaymentsPage() {
                       placeholder="e.g. Amit Sharma"
                       value={logForm.customerName}
                       onChange={(e) => setLogForm({ ...logForm, customerName: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 focus:border-amber-400"
+                      className="w-full bg-background border border-border rounded-lg p-2.5 text-slate-100 focus:border-amber-400"
                     />
                   </div>
                 </div>
@@ -518,7 +518,7 @@ export default function AdminPaymentsPage() {
                       required
                       value={logForm.driverName}
                       onChange={(e) => setLogForm({ ...logForm, driverName: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 focus:border-amber-400"
+                      className="w-full bg-background border border-border rounded-lg p-2.5 text-slate-100 focus:border-amber-400"
                     />
                   </div>
                   <div>
@@ -529,7 +529,7 @@ export default function AdminPaymentsPage() {
                       placeholder="e.g. 3500"
                       value={logForm.amount}
                       onChange={(e) => setLogForm({ ...logForm, amount: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 font-bold text-amber-400 focus:border-amber-400"
+                      className="w-full bg-background border border-border rounded-lg p-2.5 text-slate-100 font-bold text-amber-400 focus:border-amber-400"
                     />
                   </div>
                 </div>
@@ -539,7 +539,7 @@ export default function AdminPaymentsPage() {
                   <select
                     value={logForm.status}
                     onChange={(e) => setLogForm({ ...logForm, status: e.target.value as any })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 focus:border-amber-400"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-slate-100 focus:border-amber-400"
                   >
                     <option value="HANDED_OVER_TO_OFFICE">Handed Over to Office Drawer (Received)</option>
                     <option value="PENDING_HANDOVER">Pending Handover (With Chauffeur)</option>
@@ -552,7 +552,7 @@ export default function AdminPaymentsPage() {
                     rows={2}
                     value={logForm.remarks}
                     onChange={(e) => setLogForm({ ...logForm, remarks: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-slate-100 focus:border-amber-400"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-slate-100 focus:border-amber-400"
                   />
                 </div>
 
@@ -581,7 +581,7 @@ export default function AdminPaymentsPage() {
       {receiptRecord && (
         <Portal>
           <div className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-white/10 rounded-2xl p-8 max-w-xl w-full space-y-6 shadow-2xl relative">
+            <div className="bg-surface border border-border rounded-2xl p-8 max-w-xl w-full space-y-6 shadow-2xl relative">
               <button
                 onClick={() => setReceiptRecord(null)}
                 className="absolute top-4 right-4 text-slate-400 hover:text-white p-1"
@@ -590,8 +590,8 @@ export default function AdminPaymentsPage() {
               </button>
 
               {/* Printable Receipt Card */}
-              <div id="printable-receipt" className="bg-slate-950 p-6 rounded-xl border border-white/10 space-y-6 text-slate-100">
-                <div className="flex justify-between items-start border-b border-white/10 pb-4">
+              <div id="printable-receipt" className="bg-background p-6 rounded-xl border border-border space-y-6 text-slate-100">
+                <div className="flex justify-between items-start border-b border-border pb-4">
                   <div>
                     <h2 className="text-lg font-black text-slate-50 uppercase tracking-tight">TEMP TRAVEL CAR RENTALS PVT LTD</h2>
                     <p className="text-[10px] text-slate-400">Plot No. 183, Kh No. 16/2, Qutub Vihar PH-I, New Delhi - 110071</p>
@@ -622,7 +622,7 @@ export default function AdminPaymentsPage() {
                   </div>
                 </div>
 
-                <div className="bg-slate-900 p-4 rounded-lg border border-white/5 flex justify-between items-center">
+                <div className="bg-surface p-4 rounded-lg border border-border flex justify-between items-center">
                   <span className="text-xs font-extrabold uppercase text-slate-300">Total Cash Payment Received:</span>
                   <span className="text-2xl font-black text-amber-400">₹{receiptRecord.amount.toLocaleString()}</span>
                 </div>
@@ -649,3 +649,4 @@ export default function AdminPaymentsPage() {
     </div>
   );
 }
+

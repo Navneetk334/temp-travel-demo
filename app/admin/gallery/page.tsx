@@ -276,10 +276,10 @@ export default function AdminGalleryPage() {
   ];
 
   return (
-    <div className="bg-slate-950 min-h-screen text-slate-100 p-6 sm:p-8 space-y-8">
+    <div className="bg-background min-h-screen text-slate-100 p-6 sm:p-8 space-y-8">
       
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-6 gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-border pb-6 gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-50 tracking-tight flex items-center gap-2.5">
             <ImageIcon className="w-8 h-8 text-accent" />
@@ -299,7 +299,7 @@ export default function AdminGalleryPage() {
       </div>
 
       {/* Filter & Toolbar */}
-      <div className="glassmorphism p-6 rounded-xl border border-white/5 flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="glassmorphism p-6 rounded-xl border border-border flex flex-col md:flex-row gap-4 items-center justify-between">
         
         {/* Search */}
         <div className="relative w-full md:w-80">
@@ -309,7 +309,7 @@ export default function AdminGalleryPage() {
             placeholder="Search titles, locations, tags..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-            className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all"
+            className="w-full bg-background/60 border border-border rounded-lg py-2 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all"
           />
         </div>
 
@@ -318,10 +318,10 @@ export default function AdminGalleryPage() {
           <select
             value={categoryFilter}
             onChange={(e) => { setCategoryFilter(e.target.value); setCurrentPage(1); }}
-            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent capitalize"
+            className="bg-background/60 border border-border rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent capitalize"
           >
             {categoryOptions.map((c) => (
-              <option key={c.value} value={c.value} className="bg-slate-900">{c.label}</option>
+              <option key={c.value} value={c.value} className="bg-surface">{c.label}</option>
             ))}
           </select>
         </div>
@@ -351,7 +351,7 @@ export default function AdminGalleryPage() {
       {loading ? (
         <div className="text-center py-20 text-slate-400 text-xs">Loading media journal database...</div>
       ) : mediaList.length === 0 ? (
-        <div className="glassmorphism p-12 rounded-2xl border border-white/5 text-center space-y-4">
+        <div className="glassmorphism p-12 rounded-2xl border border-border text-center space-y-4">
           <ImageIcon className="w-12 h-12 text-slate-600 mx-auto" />
           <h3 className="text-lg font-bold text-slate-300">No Gallery Items Found</h3>
           <p className="text-xs text-slate-500 max-w-sm mx-auto">
@@ -363,24 +363,24 @@ export default function AdminGalleryPage() {
           {mediaList.map((item, idx) => (
             <div 
               key={item.id}
-              className={`bg-slate-900/60 border rounded-2xl overflow-hidden flex flex-col justify-between transition-all group hover:border-white/20 relative ${
-                item.isFeatured ? "border-accent/40 bg-accent/5 shadow-xl" : "border-white/5"
+              className={`bg-surface/60 border rounded-2xl overflow-hidden flex flex-col justify-between transition-all group hover:border-white/20 relative ${
+                item.isFeatured ? "border-accent/40 bg-accent/5 shadow-xl" : "border-border"
               } ${selectedIds.includes(item.id) ? "ring-2 ring-amber-400" : ""}`}
             >
               {/* Checkbox & S. No. Overlay */}
-              <div className="absolute top-3 left-3 z-20 flex items-center gap-2 bg-slate-950/80 p-1.5 rounded-lg border border-white/10 backdrop-blur-md">
+              <div className="absolute top-3 left-3 z-20 flex items-center gap-2 bg-background/80 p-1.5 rounded-lg border border-border backdrop-blur-md">
                 <input
                   type="checkbox"
                   checked={selectedIds.includes(item.id)}
                   onChange={() => handleSelectOne(item.id)}
-                  className="w-4 h-4 rounded text-amber-500 bg-slate-950 border-white/20 focus:ring-0 cursor-pointer"
+                  className="w-4 h-4 rounded text-amber-500 bg-background border-white/20 focus:ring-0 cursor-pointer"
                 />
                 <span className="text-[10px] font-mono font-bold text-slate-300">
                   #{(currentPage - 1) * pageSize + idx + 1}
                 </span>
               </div>
               {/* Media Preview Box */}
-              <div className="relative h-48 bg-slate-950 overflow-hidden group">
+              <div className="relative h-48 bg-background overflow-hidden group">
                 <img
                   src={item.imageUrl}
                   alt={item.altText || item.title || "Gallery image"}
@@ -389,7 +389,7 @@ export default function AdminGalleryPage() {
                 
                 {/* Badges Overlay */}
                 <div className="absolute top-3 left-3 flex flex-col gap-1 z-10">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-950/80 text-accent border border-white/10 backdrop-blur-md">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-background/80 text-accent border border-border backdrop-blur-md">
                     {item.category || "fleet"}
                   </span>
                   {item.isFeatured && (
@@ -412,10 +412,10 @@ export default function AdminGalleryPage() {
                 </div>
 
                 {/* Quick Action Overlay */}
-                <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
                   <button
                     onClick={() => setLightboxImage(item)}
-                    className="p-2 bg-slate-900 text-slate-100 rounded-full border border-white/20 hover:bg-slate-800 transition-colors"
+                    className="p-2 bg-surface text-slate-100 rounded-full border border-white/20 hover:bg-slate-800 transition-colors"
                     title="Zoom Preview"
                   >
                     <ZoomIn className="w-4 h-4" />
@@ -450,7 +450,7 @@ export default function AdminGalleryPage() {
                   )}
                 </div>
 
-                <div className="flex items-center justify-between text-[11px] text-slate-400 border-t border-white/5 pt-2 font-mono">
+                <div className="flex items-center justify-between text-[11px] text-slate-400 border-t border-border pt-2 font-mono">
                   <div className="flex items-center gap-1">
                     <MapPin className="w-3 h-3 text-accent" />
                     <span>{item.location || "India"}</span>
@@ -476,7 +476,7 @@ export default function AdminGalleryPage() {
       )}
 
       {/* Pagination Controls */}
-      <div className="glassmorphism p-4 rounded-xl border border-white/5 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-4">
+      <div className="glassmorphism p-4 rounded-xl border border-border flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-4">
         <div>
           Showing <span className="font-bold text-slate-200">{mediaList.length}</span> of <span className="font-bold text-slate-200">{totalCount}</span> gallery media items
         </div>
@@ -487,7 +487,7 @@ export default function AdminGalleryPage() {
             <select
               value={pageSize}
               onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
-              className="bg-slate-950 border border-white/10 rounded px-2 py-1 text-slate-200 focus:outline-none"
+              className="bg-background border border-border rounded px-2 py-1 text-slate-200 focus:outline-none"
             >
               <option value="12">12</option>
               <option value="24">24</option>
@@ -499,7 +499,7 @@ export default function AdminGalleryPage() {
             <button
               disabled={currentPage === 1}
               onClick={() => setCurrentPage(currentPage - 1)}
-              className="p-1 bg-slate-950 border border-white/10 rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
+              className="p-1 bg-background border border-border rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -507,7 +507,7 @@ export default function AdminGalleryPage() {
             <button
               disabled={currentPage >= totalPages}
               onClick={() => setCurrentPage(currentPage + 1)}
-              className="p-1 bg-slate-950 border border-white/10 rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
+              className="p-1 bg-background border border-border rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -519,9 +519,9 @@ export default function AdminGalleryPage() {
       {isModalOpen && (
         <Portal>
           <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-white/10 rounded-2xl max-w-xl w-full p-6 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-thin">
+            <div className="bg-surface border border-border rounded-2xl max-w-xl w-full p-6 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-thin">
               
-              <div className="flex justify-between items-center border-b border-white/5 pb-4">
+              <div className="flex justify-between items-center border-b border-border pb-4">
                 <div>
                   <h3 className="text-lg font-extrabold text-slate-50 flex items-center gap-2">
                     <ImageIcon className="w-5 h-5 text-accent" />
@@ -562,7 +562,7 @@ export default function AdminGalleryPage() {
                       placeholder="e.g. Executive Commute"
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent font-semibold"
+                      className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent font-semibold"
                     />
                   </div>
 
@@ -571,16 +571,16 @@ export default function AdminGalleryPage() {
                     <select
                       value={formData.category}
                       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent font-bold"
+                      className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent font-bold"
                     >
-                      <option value="fleet" className="bg-slate-900">Fleet Vehicles</option>
-                      <option value="corporate" className="bg-slate-900">Corporate Mobility</option>
-                      <option value="airport transfer" className="bg-slate-900">Airport Transfer</option>
-                      <option value="outstation" className="bg-slate-900">Outstation</option>
-                      <option value="tours" className="bg-slate-900">Tours</option>
-                      <option value="destinations" className="bg-slate-900">Destinations</option>
-                      <option value="events" className="bg-slate-900">Events</option>
-                      <option value="lifestyle" className="bg-slate-900">Lifestyle</option>
+                      <option value="fleet" className="bg-surface">Fleet Vehicles</option>
+                      <option value="corporate" className="bg-surface">Corporate Mobility</option>
+                      <option value="airport transfer" className="bg-surface">Airport Transfer</option>
+                      <option value="outstation" className="bg-surface">Outstation</option>
+                      <option value="tours" className="bg-surface">Tours</option>
+                      <option value="destinations" className="bg-surface">Destinations</option>
+                      <option value="events" className="bg-surface">Events</option>
+                      <option value="lifestyle" className="bg-surface">Lifestyle</option>
                     </select>
                   </div>
                 </div>
@@ -593,7 +593,7 @@ export default function AdminGalleryPage() {
                       placeholder="e.g. Delhi NCR or Jaipur"
                       value={formData.location}
                       onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                      className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                     />
                   </div>
 
@@ -604,7 +604,7 @@ export default function AdminGalleryPage() {
                       placeholder="e.g. 2026"
                       value={formData.year}
                       onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                      className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                     />
                   </div>
 
@@ -615,7 +615,7 @@ export default function AdminGalleryPage() {
                       min={0}
                       value={formData.sortOrder}
                       onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value, 10) || 0 })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
+                      className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
                     />
                   </div>
                 </div>
@@ -627,17 +627,17 @@ export default function AdminGalleryPage() {
                     placeholder="A visual snapshot of our executive corporate cab fleet in motion..."
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-white/5 pt-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-border pt-3">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={formData.isFeatured}
                       onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
-                      className="w-4 h-4 rounded text-accent focus:ring-accent bg-slate-950 border-white/10"
+                      className="w-4 h-4 rounded text-accent focus:ring-accent bg-background border-border"
                     />
                     <span className="font-bold text-slate-200">Featured Item (Prioritize on Public Gallery)</span>
                   </label>
@@ -647,13 +647,13 @@ export default function AdminGalleryPage() {
                       type="checkbox"
                       checked={formData.isActive}
                       onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                      className="w-4 h-4 rounded text-accent focus:ring-accent bg-slate-950 border-white/10"
+                      className="w-4 h-4 rounded text-accent focus:ring-accent bg-background border-border"
                     />
                     <span className="font-bold text-slate-200">Active (Visible on Public /gallery)</span>
                   </label>
                 </div>
 
-                <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
+                <div className="flex justify-end gap-3 pt-4 border-t border-border">
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
@@ -680,10 +680,10 @@ export default function AdminGalleryPage() {
       {lightboxImage && (
         <Portal>
           <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[99999] flex items-center justify-center p-4">
-            <div className="relative max-w-4xl w-full bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row">
+            <div className="relative max-w-4xl w-full bg-surface border border-border rounded-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row">
               <button
                 onClick={() => setLightboxImage(null)}
-                className="absolute top-4 right-4 p-2 bg-slate-950/80 text-white rounded-full hover:bg-slate-800 z-10"
+                className="absolute top-4 right-4 p-2 bg-background/80 text-white rounded-full hover:bg-slate-800 z-10"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -696,7 +696,7 @@ export default function AdminGalleryPage() {
                 />
               </div>
 
-              <div className="md:w-1/3 p-6 space-y-4 flex flex-col justify-between bg-slate-900 border-l border-white/5">
+              <div className="md:w-1/3 p-6 space-y-4 flex flex-col justify-between bg-surface border-l border-border">
                 <div className="space-y-3">
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-accent/20 text-accent border border-accent/30 inline-block">
                     {lightboxImage.category}
@@ -706,7 +706,7 @@ export default function AdminGalleryPage() {
                     <p className="text-xs text-slate-300 leading-relaxed">{lightboxImage.description}</p>
                   )}
                   
-                  <div className="space-y-1.5 text-xs text-slate-400 font-mono border-t border-white/5 pt-3">
+                  <div className="space-y-1.5 text-xs text-slate-400 font-mono border-t border-border pt-3">
                     {lightboxImage.location && (
                       <div className="flex items-center gap-2">
                         <MapPin className="w-3.5 h-3.5 text-accent" />
@@ -722,7 +722,7 @@ export default function AdminGalleryPage() {
                   </div>
                 </div>
 
-                <div className="text-[10px] text-slate-500 font-mono border-t border-white/5 pt-3">
+                <div className="text-[10px] text-slate-500 font-mono border-t border-border pt-3">
                   ID: {lightboxImage.id}
                 </div>
               </div>
@@ -734,3 +734,4 @@ export default function AdminGalleryPage() {
     </div>
   );
 }
+

@@ -250,7 +250,7 @@ export default function MasterOfficeStaffPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-white/10 pb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-border pb-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-black text-slate-50 tracking-tight flex items-center gap-2">
             <Users className="w-6 h-6 text-amber-400" />
@@ -282,7 +282,7 @@ export default function MasterOfficeStaffPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setSelectedIds([])}
-              className="px-3 py-1.5 bg-slate-950 text-slate-400 hover:text-white rounded-lg text-xs font-bold"
+              className="px-3 py-1.5 bg-background text-slate-400 hover:text-white rounded-lg text-xs font-bold"
             >
               Clear Selection
             </button>
@@ -305,7 +305,7 @@ export default function MasterOfficeStaffPage() {
       )}
 
       {/* Search & Filter Toolbar */}
-      <div className="bg-slate-900/60 p-4 rounded-xl border border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="bg-surface/60 p-4 rounded-xl border border-border flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="relative flex-1 w-full">
           <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
@@ -313,14 +313,14 @@ export default function MasterOfficeStaffPage() {
             placeholder="Search staff by name, phone, email, or designation..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-slate-950 border border-white/10 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
+            className="w-full bg-background border border-border rounded-lg pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
           />
         </div>
       </div>
 
       {/* Office Staff Cards Grid */}
       {loading && staffList.length === 0 ? (
-        <div className="bg-slate-900/60 border border-white/10 rounded-3xl p-16 text-center space-y-4">
+        <div className="bg-surface/60 border border-border rounded-3xl p-16 text-center space-y-4">
           <RefreshCw className="w-10 h-10 text-amber-400 mx-auto animate-spin" />
           <div className="space-y-1">
             <h3 className="text-base font-bold text-slate-100">Loading Office Staff Directory...</h3>
@@ -328,7 +328,7 @@ export default function MasterOfficeStaffPage() {
           </div>
         </div>
       ) : filteredStaff.length === 0 ? (
-        <div className="bg-slate-900/60 border border-white/10 rounded-3xl p-12 text-center space-y-4">
+        <div className="bg-surface/60 border border-border rounded-3xl p-12 text-center space-y-4">
           <Users className="w-12 h-12 text-amber-400 mx-auto opacity-80" />
           <div className="space-y-1">
             <h3 className="text-xl font-bold text-slate-100">No Office Staff Found</h3>
@@ -351,7 +351,7 @@ export default function MasterOfficeStaffPage() {
             return (
               <div
                 key={stf.id}
-                className={`bg-slate-900/80 backdrop-blur-xl border rounded-2xl p-6 shadow-xl space-y-4 transition-all flex flex-col justify-between relative ${isSelected ? "border-amber-400 bg-amber-500/5 ring-1 ring-amber-400/40" : "border-white/10 hover:border-amber-500/40"
+                className={`bg-surface/80 backdrop-blur-xl border rounded-2xl p-6 shadow-xl space-y-4 transition-all flex flex-col justify-between relative ${isSelected ? "border-amber-400 bg-amber-500/5 ring-1 ring-amber-400/40" : "border-border hover:border-amber-500/40"
                   }`}
               >
                 <div className="space-y-4">
@@ -387,7 +387,7 @@ export default function MasterOfficeStaffPage() {
                     )}
                   </div>
 
-                  <div className="space-y-2 bg-slate-950 p-3.5 rounded-xl border border-white/5 text-xs font-mono">
+                  <div className="space-y-2 bg-background p-3.5 rounded-xl border border-border text-xs font-mono">
                     <div className="flex justify-between">
                       <span className="text-slate-400 font-sans">Mobile:</span>
                       <span className="text-slate-200 font-bold">+91-{stf.phone}</span>
@@ -412,7 +412,7 @@ export default function MasterOfficeStaffPage() {
                 </div>
 
                 {/* Card Footer Actions */}
-                <div className="pt-3 border-t border-white/5 flex flex-col gap-3">
+                <div className="pt-3 border-t border-border flex flex-col gap-3">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-mono text-emerald-400 font-bold flex items-center gap-1">
                       <BadgeCheck className="w-3.5 h-3.5" /> Staff Active
@@ -424,14 +424,14 @@ export default function MasterOfficeStaffPage() {
                           setEditingStaff(stf);
                           setShowPermissionsModal(true);
                         }}
-                        className="p-1.5 bg-slate-950 border border-white/10 hover:border-amber-400 rounded-lg text-slate-400 hover:text-amber-400 transition-all cursor-pointer"
+                        className="p-1.5 bg-background border border-border hover:border-amber-400 rounded-lg text-slate-400 hover:text-amber-400 transition-all cursor-pointer"
                         title="Manage Permissions"
                       >
                         <ShieldCheck className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => openEditModal(stf)}
-                        className="p-1.5 bg-slate-950 border border-white/10 hover:border-amber-400 rounded-lg text-slate-400 hover:text-amber-400 transition-all cursor-pointer"
+                        className="p-1.5 bg-background border border-border hover:border-amber-400 rounded-lg text-slate-400 hover:text-amber-400 transition-all cursor-pointer"
                         title="Edit Staff Credentials"
                       >
                         <Edit2 className="w-4 h-4" />
@@ -439,7 +439,7 @@ export default function MasterOfficeStaffPage() {
                       <button
                         onClick={() => handleDeleteStaff(stf)}
                         disabled={deletingId === stf.id}
-                        className="p-1.5 bg-slate-950 border border-white/10 hover:border-rose-400 rounded-lg text-slate-400 hover:text-rose-400 transition-all cursor-pointer disabled:opacity-50"
+                        className="p-1.5 bg-background border border-border hover:border-rose-400 rounded-lg text-slate-400 hover:text-rose-400 transition-all cursor-pointer disabled:opacity-50"
                         title="Delete Staff Record"
                       >
                         {deletingId === stf.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
@@ -520,7 +520,7 @@ export default function MasterOfficeStaffPage() {
       {showAddModal && (
         <Portal>
           <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-            <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-[95vw] md:w-[85vw] max-w-6xl shadow-2xl space-y-6 relative text-slate-100 max-h-[95vh] overflow-y-auto">
+            <div className="bg-surface border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-[95vw] md:w-[85vw] max-w-6xl shadow-2xl space-y-6 relative text-slate-100 max-h-[95vh] overflow-y-auto">
               <button
                 onClick={() => setShowAddModal(false)}
                 className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
@@ -528,7 +528,7 @@ export default function MasterOfficeStaffPage() {
                 <X className="w-5 h-5" />
               </button>
 
-              <div className="space-y-1 border-b border-white/10 pb-3">
+              <div className="space-y-1 border-b border-border pb-3">
                 <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">
                   {editingStaff ? "Edit Office Staff Profile" : "New Office Staff Onboarding"}
                 </span>
@@ -546,13 +546,13 @@ export default function MasterOfficeStaffPage() {
                 className="space-y-6 text-xs"
               >
                 {/* Photo Upload with Live Preview */}
-                <div className="space-y-2 bg-slate-950 p-4 rounded-2xl border border-white/5">
+                <div className="space-y-2 bg-background p-4 rounded-2xl border border-border">
                   <label className="text-slate-300 font-bold block">Staff Photo Upload from Device (with Live Preview)</label>
                   <div className="flex items-center gap-4">
                     {formData.photoUrl ? (
                       <img src={formData.photoUrl} alt="Preview" className="w-16 h-16 rounded-2xl object-cover border-2 border-amber-400" />
                     ) : (
-                      <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-dashed border-white/20 flex items-center justify-center text-slate-500 font-bold text-xs">
+                      <div className="w-16 h-16 rounded-2xl bg-surface border border-dashed border-white/20 flex items-center justify-center text-slate-500 font-bold text-xs">
                         No Photo
                       </div>
                     )}
@@ -569,7 +569,7 @@ export default function MasterOfficeStaffPage() {
                           reader.readAsDataURL(file);
                         }
                       }}
-                      className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
+                      className="w-full bg-surface border border-border rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                     />
                   </div>
                 </div>
@@ -583,7 +583,7 @@ export default function MasterOfficeStaffPage() {
                       required
                       readOnly
                       value={formData.employeeId}
-                      className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-3.5 py-2.5 text-amber-400 focus:outline-none font-mono cursor-not-allowed"
+                      className="w-full bg-background/50 border border-border rounded-xl px-3.5 py-2.5 text-amber-400 focus:outline-none font-mono cursor-not-allowed"
                     />
                   </div>
 
@@ -595,7 +595,7 @@ export default function MasterOfficeStaffPage() {
                       placeholder="e.g. Navneet Kumar"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
+                      className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
                     />
                   </div>
 
@@ -605,7 +605,7 @@ export default function MasterOfficeStaffPage() {
                       required
                       value={formData.role}
                       onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400"
+                      className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400"
                     >
                       <option value="">-- Please Select --</option>
                       <option value="MANAGER">Manager</option>
@@ -620,7 +620,7 @@ export default function MasterOfficeStaffPage() {
                       required
                       value={formData.departmentId || ""}
                       onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-bold"
+                      className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-bold"
                     >
                       <option value="">-- Please Select --</option>
                       {departments.map((dept: any) => (
@@ -645,7 +645,7 @@ export default function MasterOfficeStaffPage() {
                       required
                       value={formData.dob}
                       onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                     />
                   </div>
 
@@ -662,7 +662,7 @@ export default function MasterOfficeStaffPage() {
                       title="Please enter a valid 10-digit mobile number"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                      className="w-full bg-background border border-border rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                     />
                   </div>
 
@@ -677,7 +677,7 @@ export default function MasterOfficeStaffPage() {
                         placeholder="staff@temptravels.com"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="peer w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 focus:invalid:border-rose-500 focus:invalid:ring-1 focus:invalid:ring-rose-500 font-mono"
+                        className="peer w-full bg-background border border-border rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 focus:invalid:border-rose-500 focus:invalid:ring-1 focus:invalid:ring-rose-500 font-mono"
                       />
                       <p className="mt-1 hidden text-rose-500 text-[10px] peer-focus:peer-invalid:block font-bold">Please enter a valid email address with @</p>
                     </div>
@@ -685,7 +685,7 @@ export default function MasterOfficeStaffPage() {
                 </div>
 
                 {/* KYC Documents Section */}
-                <div className="space-y-3 pt-3 border-t border-white/10">
+                <div className="space-y-3 pt-3 border-t border-border">
                   <h4 className="text-amber-400 font-extrabold uppercase text-[11px] tracking-wider flex items-center gap-1.5">
                     <ShieldCheck className="w-4 h-4" /> KYC Document Numbers & Vault Uploads
                   </h4>
@@ -706,7 +706,7 @@ export default function MasterOfficeStaffPage() {
                           val = val.replace(/(\d{4})/g, '$1 ').trim();
                           setFormData({ ...formData, aadhaarNumber: val.slice(0, 14) });
                         }}
-                        className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                        className="w-full bg-background border border-border rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                       />
                     </div>
 
@@ -716,7 +716,7 @@ export default function MasterOfficeStaffPage() {
                         type="file"
                         accept=".pdf,image/*"
                         onChange={(e) => setFormData({ ...formData, aadhaarDocName: e.target.files?.[0]?.name || "" })}
-                        className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
+                        className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                       />
                     </div>
 
@@ -740,7 +740,7 @@ export default function MasterOfficeStaffPage() {
                           }
                           setFormData({ ...formData, panNumber: formatted.slice(0, 10) });
                         }}
-                        className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono uppercase"
+                        className="w-full bg-background border border-border rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono uppercase"
                       />
                     </div>
 
@@ -750,7 +750,7 @@ export default function MasterOfficeStaffPage() {
                         type="file"
                         accept=".pdf,image/*"
                         onChange={(e) => setFormData({ ...formData, panDocName: e.target.files?.[0]?.name || "" })}
-                        className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
+                        className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                       />
                     </div>
                   </div>
@@ -761,13 +761,13 @@ export default function MasterOfficeStaffPage() {
                       type="file"
                       accept=".pdf,image/*"
                       onChange={(e) => setFormData({ ...formData, contractDocName: e.target.files?.[0]?.name || "" })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                     />
                   </div>
                 </div>
 
                 {/* Banking Details */}
-                <div className="space-y-3 pt-3 border-t border-white/10">
+                <div className="space-y-3 pt-3 border-t border-border">
                   <h4 className="text-amber-400 font-extrabold uppercase text-[11px] tracking-wider flex items-center gap-1.5">
                     <Landmark className="w-4 h-4" /> Banking Salary Settlement Account
                   </h4>
@@ -781,7 +781,7 @@ export default function MasterOfficeStaffPage() {
                         placeholder="e.g. HDFC Bank"
                         value={formData.bankName}
                         onChange={(e) => setFormData({ ...formData, bankName: e.target.value.replace(/[^A-Za-z\s]/g, '') })}
-                        className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
+                        className="w-full bg-background border border-border rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
                       />
                     </div>
 
@@ -793,7 +793,7 @@ export default function MasterOfficeStaffPage() {
                         placeholder="Name as per bank records"
                         value={formData.accountHolderName}
                         onChange={(e) => setFormData({ ...formData, accountHolderName: e.target.value.replace(/[^A-Za-z\s]/g, '') })}
-                        className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
+                        className="w-full bg-background border border-border rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
                       />
                     </div>
                   </div>
@@ -807,7 +807,7 @@ export default function MasterOfficeStaffPage() {
                         placeholder="Account number"
                         value={formData.accountNumber}
                         onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value.replace(/\D/g, '') })}
-                        className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                        className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                       />
                     </div>
 
@@ -819,10 +819,10 @@ export default function MasterOfficeStaffPage() {
                         placeholder="Repeat account number"
                         value={formData.confirmAccountNumber}
                         onChange={(e) => setFormData({ ...formData, confirmAccountNumber: e.target.value.replace(/\D/g, '') })}
-                        className={`w-full bg-slate-950 border rounded-xl px-3 py-2 text-slate-100 focus:outline-none font-mono ${
+                        className={`w-full bg-background border rounded-xl px-3 py-2 text-slate-100 focus:outline-none font-mono ${
                           formData.confirmAccountNumber && formData.accountNumber !== formData.confirmAccountNumber
                             ? 'border-rose-500 focus:border-rose-500 ring-1 ring-rose-500'
-                            : 'border-white/10 focus:border-amber-400'
+                            : 'border-border focus:border-amber-400'
                         }`}
                       />
                       {formData.confirmAccountNumber && formData.accountNumber !== formData.confirmAccountNumber && (
@@ -850,17 +850,17 @@ export default function MasterOfficeStaffPage() {
                           }
                           setFormData({ ...formData, ifscCode: formatted.slice(0, 11) });
                         }}
-                        className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono uppercase"
+                        className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono uppercase"
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-white/10 flex justify-end gap-3">
+                <div className="pt-4 border-t border-border flex justify-end gap-3">
                   <button
                     type="button"
                     onClick={() => setShowAddModal(false)}
-                    className="px-5 py-2.5 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs font-bold"
+                    className="px-5 py-2.5 bg-background text-slate-400 hover:text-white rounded-xl text-xs font-bold"
                   >
                     Cancel
                   </button>
@@ -881,3 +881,4 @@ export default function MasterOfficeStaffPage() {
     </div>
   );
 }
+

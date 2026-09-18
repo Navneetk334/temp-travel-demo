@@ -58,7 +58,7 @@ export default function GalleryTwo() {
   }, []);
 
   return (
-    <div ref={containerRef} className="bg-slate-950 text-slate-100 overflow-x-hidden">
+    <div ref={containerRef} className="bg-background text-slate-100 overflow-x-hidden">
       <div className="h-[80vh] flex flex-col items-center justify-center text-center px-4 relative z-10">
         <h1 className="text-4xl md:text-6xl font-black tracking-tight mb-6 text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600">
           Gallery Prototype 2
@@ -72,7 +72,7 @@ export default function GalleryTwo() {
         </div>
       </div>
 
-      <div ref={scrollWrapperRef} className="h-screen w-[600vw] flex flex-nowrap bg-slate-900 border-y border-white/5 shadow-[inset_0_0_100px_rgba(0,0,0,0.8)]">
+      <div ref={scrollWrapperRef} className="h-screen w-[600vw] flex flex-nowrap bg-surface border-y border-border shadow-[inset_0_0_100px_rgba(0,0,0,0.8)]">
         {galleryImages.map((img, i) => (
           <div key={img.id} className="horizontal-panel w-screen h-screen flex items-center justify-center p-8 sm:p-20 relative overflow-hidden">
             {/* Background number */}
@@ -80,7 +80,7 @@ export default function GalleryTwo() {
               0{i + 1}
             </div>
             
-            <div className="relative w-full max-w-5xl aspect-video overflow-hidden rounded-3xl border border-white/10 shadow-2xl z-10 group">
+            <div className="relative w-full max-w-5xl aspect-video overflow-hidden rounded-3xl border border-border shadow-2xl z-10 group">
               <img 
                 src={img.src} 
                 alt={img.title}
@@ -105,3 +105,4 @@ export default function GalleryTwo() {
     </div>
   );
 }
+

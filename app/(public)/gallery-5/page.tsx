@@ -57,7 +57,7 @@ export default function GalleryFive() {
   return (
     <div 
       ref={containerRef}
-      className="relative min-h-screen bg-slate-950 overflow-hidden cursor-crosshair"
+      className="relative min-h-screen bg-background overflow-hidden cursor-crosshair"
       onMouseMove={handleMouseMove}
       onTouchMove={(e) => {
         // support touch trails for mobile testing
@@ -84,7 +84,7 @@ export default function GalleryFive() {
             animate={{ opacity: 1, scale: 1, rotate: Math.random() * 20 - 10 }}
             exit={{ opacity: 0, scale: 0.8, filter: "blur(10px)" }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="absolute z-10 pointer-events-none overflow-hidden rounded-xl shadow-2xl border border-white/5"
+            className="absolute z-10 pointer-events-none overflow-hidden rounded-xl shadow-2xl border border-border"
             style={{
               left: img.x,
               top: img.y,
@@ -105,3 +105,4 @@ export default function GalleryFive() {
     </div>
   );
 }
+

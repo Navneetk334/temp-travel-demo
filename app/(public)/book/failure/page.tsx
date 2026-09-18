@@ -4,7 +4,7 @@ import { AlertCircle, RefreshCw, Phone, Mail } from "lucide-react";
 
 export default function PaymentFailurePage() {
   return (
-    <div className="bg-slate-950 min-h-[80vh] text-slate-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="bg-background min-h-[80vh] text-slate-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-xl w-full glassmorphism rounded-2xl border border-red-500/20 shadow-2xl p-8 space-y-6 text-center">
         
         {/* Banner icon */}
@@ -22,7 +22,7 @@ export default function PaymentFailurePage() {
         </div>
 
         {/* Possible reasons */}
-        <div className="bg-slate-950/60 p-5 border border-white/5 rounded-xl text-left space-y-2.5 text-xs text-slate-300">
+        <div className="bg-background/60 p-5 border border-border rounded-xl text-left space-y-2.5 text-xs text-slate-300">
           <div className="font-bold text-slate-100 uppercase tracking-wider text-[10px]">Common Reasons:</div>
           <ul className="list-disc pl-4 space-y-1 text-slate-400">
             <li>User aborted checkout before entering credentials.</li>
@@ -37,7 +37,7 @@ export default function PaymentFailurePage() {
         </p>
 
         {/* Support contacts */}
-        <div className="flex justify-center gap-6 text-xs text-slate-400 border-t border-white/5 pt-5">
+        <div className="flex justify-center gap-6 text-xs text-slate-400 border-t border-border pt-5">
           <a href="tel:+917011729639" className="flex items-center gap-1 hover:text-accent transition-colors">
             <Phone className="w-4 h-4 text-accent" />
             <span>+91 70117 29639</span>
@@ -59,7 +59,7 @@ export default function PaymentFailurePage() {
           </Link>
           <Link
             href="/"
-            className="bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold py-2.5 px-6 rounded-lg text-xs tracking-wider uppercase transition-all border border-white/10"
+            className="bg-surface hover:bg-slate-800 text-slate-300 font-bold py-2.5 px-6 rounded-lg text-xs tracking-wider uppercase transition-all border border-border"
           >
             Go to Homepage
           </Link>
@@ -69,3 +69,4 @@ export default function PaymentFailurePage() {
     </div>
   );
 }
+

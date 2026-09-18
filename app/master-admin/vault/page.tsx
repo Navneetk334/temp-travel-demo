@@ -132,7 +132,7 @@ export default function MasterDocumentVaultPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 bg-slate-900 border border-white/10 p-1.5 rounded-2xl">
+        <div className="flex items-center gap-2 bg-surface border border-border p-1.5 rounded-2xl">
           <button
             onClick={() => { setActiveRoot("VEHICLES"); setSelectedSubFolder(null); }}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
@@ -166,8 +166,8 @@ export default function MasterDocumentVaultPage() {
       {/* Explorer Workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Side Sub-Folder Directory List */}
-        <div className="lg:col-span-4 bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-5 space-y-4 shadow-xl">
-          <div className="flex items-center justify-between border-b border-white/10 pb-3">
+        <div className="lg:col-span-4 bg-surface/80 backdrop-blur-xl border border-border rounded-2xl p-5 space-y-4 shadow-xl">
+          <div className="flex items-center justify-between border-b border-border pb-3">
             <span className="text-xs font-black uppercase text-amber-400 tracking-wider flex items-center gap-1.5">
               <Folder className="w-4 h-4" /> Root Directory: {activeRoot}
             </span>
@@ -186,7 +186,7 @@ export default function MasterDocumentVaultPage() {
                   className={`w-full flex items-center justify-between p-3 rounded-xl border text-left text-xs transition-all cursor-pointer ${
                     isSelected
                       ? "bg-amber-500/15 border-amber-400 text-slate-50 font-extrabold shadow-lg"
-                      : "bg-slate-950 border-white/5 text-slate-300 hover:border-white/20"
+                      : "bg-background border-border text-slate-300 hover:border-white/20"
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
@@ -210,10 +210,10 @@ export default function MasterDocumentVaultPage() {
         </div>
 
         {/* Right Side Documents View Inside Folder */}
-        <div className="lg:col-span-8 bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 space-y-6 shadow-xl">
+        <div className="lg:col-span-8 bg-surface/80 backdrop-blur-xl border border-border rounded-2xl p-6 space-y-6 shadow-xl">
           {activeFolder ? (
             <div className="space-y-6">
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center justify-between border-b border-border pb-4">
                 <div>
                   <div className="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-widest">
                     {activeRoot} &gt; {activeFolder.name}
@@ -234,7 +234,7 @@ export default function MasterDocumentVaultPage() {
                 {activeFolder.docs.map((doc: any, idx: number) => (
                   <div
                     key={idx}
-                    className="bg-slate-950 p-4 rounded-xl border border-white/5 hover:border-amber-400/40 transition-all space-y-3 relative group"
+                    className="bg-background p-4 rounded-xl border border-border hover:border-amber-400/40 transition-all space-y-3 relative group"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-2.5">
@@ -273,3 +273,4 @@ export default function MasterDocumentVaultPage() {
     </div>
   );
 }
+

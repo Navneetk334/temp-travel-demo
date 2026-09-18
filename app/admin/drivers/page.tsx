@@ -304,9 +304,9 @@ export default function AdminDriversPage() {
   };
 
   return (
-    <div className="p-6 md:p-8 space-y-8 bg-slate-950 text-slate-100 min-h-screen">
+    <div className="p-6 md:p-8 space-y-8 bg-background text-slate-100 min-h-screen">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/5 pb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border pb-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-50 tracking-tight flex items-center gap-2.5">
             <UserCheck className="w-7 h-7 text-amber-400" />
@@ -317,7 +317,7 @@ export default function AdminDriversPage() {
       </div>
 
       {/* Search Filter Bar */}
-      <div className="bg-slate-900/60 p-4 rounded-xl border border-white/5 flex items-center gap-4">
+      <div className="bg-surface/60 p-4 rounded-xl border border-border flex items-center gap-4">
         <div className="relative flex-1">
           <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
@@ -325,7 +325,7 @@ export default function AdminDriversPage() {
             placeholder="Search driver by name, phone, email, Aadhaar, PAN, or License No..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-slate-950 border border-white/10 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
+            className="w-full bg-background border border-border rounded-lg pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
           />
         </div>
       </div>
@@ -350,20 +350,20 @@ export default function AdminDriversPage() {
       )}
 
       {/* Drivers Table */}
-      <div className="bg-slate-900/60 rounded-xl border border-white/5 overflow-hidden">
+      <div className="bg-surface/60 rounded-xl border border-border overflow-hidden">
         {loading ? (
           <div className="text-center py-16 text-slate-400 text-xs">Loading chauffeurs directory...</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-900 border-b border-white/5 text-slate-400 font-semibold uppercase tracking-wider">
+                <tr className="bg-surface border-b border-border text-slate-400 font-semibold uppercase tracking-wider">
                   <th className="p-4 w-10 text-center">
                     <input
                       type="checkbox"
                       checked={drivers.length > 0 && selectedIds.length === drivers.length}
                       onChange={handleSelectAll}
-                      className="w-4 h-4 rounded text-amber-500 bg-slate-950 border-white/20 focus:ring-0 cursor-pointer"
+                      className="w-4 h-4 rounded text-amber-500 bg-background border-white/20 focus:ring-0 cursor-pointer"
                     />
                   </th>
                   <th className="p-4 w-12 text-center">S. No.</th>
@@ -391,7 +391,7 @@ export default function AdminDriversPage() {
                           type="checkbox"
                           checked={selectedIds.includes(d.id)}
                           onChange={() => handleSelectOne(d.id)}
-                          className="w-4 h-4 rounded text-amber-500 bg-slate-950 border-white/20 focus:ring-0 cursor-pointer"
+                          className="w-4 h-4 rounded text-amber-500 bg-background border-white/20 focus:ring-0 cursor-pointer"
                         />
                       </td>
                       <td className="p-4 text-center font-mono font-bold text-slate-400">
@@ -471,7 +471,7 @@ export default function AdminDriversPage() {
                       {/* Assigned Vehicle */}
                       <td className="p-4">
                         {d.vehicle ? (
-                          <div className="bg-slate-950 px-2.5 py-1.5 rounded-lg border border-white/10 inline-block space-y-0.5">
+                          <div className="bg-background px-2.5 py-1.5 rounded-lg border border-border inline-block space-y-0.5">
                             <div className="font-bold text-slate-100 flex items-center gap-1 text-xs">
                               <Car className="w-3.5 h-3.5 text-amber-400" />
                               <span>{d.vehicle.make} {d.vehicle.model}</span>
@@ -513,8 +513,8 @@ export default function AdminDriversPage() {
       {isModalOpen && (
         <Portal>
           <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-white/10 rounded-2xl max-w-3xl w-full p-6 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-thin">
-            <div className="flex justify-between items-center border-b border-white/5 pb-4">
+          <div className="bg-surface border border-border rounded-2xl max-w-3xl w-full p-6 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-thin">
+            <div className="flex justify-between items-center border-b border-border pb-4">
               <div>
                 <h3 className="text-lg font-bold text-slate-50">
                   {editingDriver ? "Edit Chauffeur Credentials" : "Register New Chauffeur Profile"}
@@ -555,7 +555,7 @@ export default function AdminDriversPage() {
                     placeholder="e.g. Ramesh Sharma"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
                   />
                 </div>
 
@@ -567,7 +567,7 @@ export default function AdminDriversPage() {
                     placeholder="e.g. +91 9876543210"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-amber-400"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-amber-400"
                   />
                 </div>
 
@@ -579,7 +579,7 @@ export default function AdminDriversPage() {
                     placeholder="e.g. ramesh@temptravels.com"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
                   />
                 </div>
               </div>
@@ -593,7 +593,7 @@ export default function AdminDriversPage() {
                     placeholder="e.g. MH0120201234567"
                     value={formData.licenseNumber}
                     onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value.toUpperCase() })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono font-bold focus:outline-none focus:border-amber-400"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 font-mono font-bold focus:outline-none focus:border-amber-400"
                   />
                 </div>
 
@@ -605,7 +605,7 @@ export default function AdminDriversPage() {
                     placeholder="e.g. 1234 5678 9012"
                     value={formData.aadhaarNumber}
                     onChange={(e) => setFormData({ ...formData, aadhaarNumber: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-amber-400"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-amber-400"
                   />
                 </div>
 
@@ -617,7 +617,7 @@ export default function AdminDriversPage() {
                     placeholder="e.g. ABCDE1234F"
                     value={formData.panNumber}
                     onChange={(e) => setFormData({ ...formData, panNumber: e.target.value.toUpperCase() })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono font-bold focus:outline-none focus:border-amber-400"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 font-mono font-bold focus:outline-none focus:border-amber-400"
                   />
                 </div>
               </div>
@@ -630,7 +630,7 @@ export default function AdminDriversPage() {
                     type="date"
                     value={formData.dob}
                     onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-amber-400"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-amber-400"
                   />
                 </div>
 
@@ -640,7 +640,7 @@ export default function AdminDriversPage() {
                     type="date"
                     value={formData.dateOfJoining}
                     onChange={(e) => setFormData({ ...formData, dateOfJoining: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-amber-400"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-amber-400"
                   />
                 </div>
 
@@ -649,10 +649,10 @@ export default function AdminDriversPage() {
                   <select
                     value={formData.isActive ? "true" : "false"}
                     onChange={(e) => setFormData({ ...formData, isActive: e.target.value === "true" })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
                   >
-                    <option value="true" className="bg-slate-900 text-emerald-400">ACTIVE (Eligible for Cabs)</option>
-                    <option value="false" className="bg-slate-900 text-rose-400">INACTIVE (Suspended)</option>
+                    <option value="true" className="bg-surface text-emerald-400">ACTIVE (Eligible for Cabs)</option>
+                    <option value="false" className="bg-surface text-rose-400">INACTIVE (Suspended)</option>
                   </select>
                 </div>
               </div>
@@ -668,11 +668,11 @@ export default function AdminDriversPage() {
                   placeholder={editingDriver ? "••••••••" : "Driver Login Password"}
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                  className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                 />
               </div>
 
-              <div className="flex gap-3 pt-4 border-t border-white/5">
+              <div className="flex gap-3 pt-4 border-t border-border">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
@@ -696,3 +696,4 @@ export default function AdminDriversPage() {
     </div>
   );
 }
+

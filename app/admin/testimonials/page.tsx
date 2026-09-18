@@ -232,10 +232,10 @@ export default function AdminTestimonialsPage() {
   };
 
   return (
-    <div className="bg-slate-950 min-h-screen text-slate-100 p-8 space-y-8">
+    <div className="bg-background min-h-screen text-slate-100 p-8 space-y-8">
       
       {/* Title Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/5 pb-6 gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-border pb-6 gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-50 tracking-tight flex items-center gap-2.5">
             <MessageSquare className="w-8 h-8 text-accent" />
@@ -259,7 +259,7 @@ export default function AdminTestimonialsPage() {
         <div 
           onClick={() => { setStatusFilter(""); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "" ? "border-accent bg-accent/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "" ? "border-accent bg-accent/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Total Reviews</div>
@@ -269,7 +269,7 @@ export default function AdminTestimonialsPage() {
         <div 
           onClick={() => { setStatusFilter("APPROVED"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "APPROVED" ? "border-emerald-400 bg-emerald-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "APPROVED" ? "border-emerald-400 bg-emerald-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-emerald-400 uppercase font-bold tracking-wider">APPROVED</div>
@@ -279,7 +279,7 @@ export default function AdminTestimonialsPage() {
         <div 
           onClick={() => { setStatusFilter("PENDING"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "PENDING" ? "border-yellow-400 bg-yellow-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "PENDING" ? "border-yellow-400 bg-yellow-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-yellow-400 uppercase font-bold tracking-wider">PENDING REVIEW</div>
@@ -289,7 +289,7 @@ export default function AdminTestimonialsPage() {
         <div 
           onClick={() => { setStatusFilter("REJECTED"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "REJECTED" ? "border-rose-400 bg-rose-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "REJECTED" ? "border-rose-400 bg-rose-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-rose-400 uppercase font-bold tracking-wider">REJECTED</div>
@@ -299,7 +299,7 @@ export default function AdminTestimonialsPage() {
         <div 
           onClick={() => { setStatusFilter("FEATURED"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "FEATURED" ? "border-amber-400 bg-amber-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "FEATURED" ? "border-amber-400 bg-amber-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-amber-400 uppercase font-bold tracking-wider flex items-center gap-1">
@@ -311,7 +311,7 @@ export default function AdminTestimonialsPage() {
       </div>
 
       {/* Filter Toolbar */}
-      <div className="glassmorphism p-6 rounded-xl border border-white/5 flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="glassmorphism p-6 rounded-xl border border-border flex flex-col md:flex-row gap-4 items-center justify-between">
         
         {/* Search */}
         <div className="relative w-full md:w-80">
@@ -321,7 +321,7 @@ export default function AdminTestimonialsPage() {
             placeholder="Search author, company, content..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-            className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all"
+            className="w-full bg-background/60 border border-border rounded-lg py-2 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all"
           />
         </div>
 
@@ -330,21 +330,21 @@ export default function AdminTestimonialsPage() {
           <select
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+            className="bg-background/60 border border-border rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
           >
-            <option value="" className="bg-slate-900">All Review Statuses</option>
-            <option value="APPROVED" className="bg-slate-900 text-emerald-400">APPROVED</option>
-            <option value="PENDING" className="bg-slate-900 text-yellow-400">PENDING</option>
-            <option value="REJECTED" className="bg-slate-900 text-rose-400">REJECTED</option>
+            <option value="" className="bg-surface">All Review Statuses</option>
+            <option value="APPROVED" className="bg-surface text-emerald-400">APPROVED</option>
+            <option value="PENDING" className="bg-surface text-yellow-400">PENDING</option>
+            <option value="REJECTED" className="bg-surface text-rose-400">REJECTED</option>
           </select>
 
           <select
             value={sortBy}
             onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }}
-            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+            className="bg-background/60 border border-border rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
           >
-            <option value="createdAt" className="bg-slate-900">Sort by Date</option>
-            <option value="rating" className="bg-slate-900">Sort by Rating</option>
+            <option value="createdAt" className="bg-surface">Sort by Date</option>
+            <option value="rating" className="bg-surface">Sort by Rating</option>
           </select>
         </div>
 
@@ -354,7 +354,7 @@ export default function AdminTestimonialsPage() {
       {loading ? (
         <div className="text-center py-20 text-slate-400 text-xs">Loading customer reviews...</div>
       ) : testimonials.length === 0 ? (
-        <div className="glassmorphism p-16 text-center rounded-xl border border-white/5 text-slate-500 italic text-xs">
+        <div className="glassmorphism p-16 text-center rounded-xl border border-border text-slate-500 italic text-xs">
           No customer testimonials found matching selected criteria.
         </div>
       ) : (
@@ -363,7 +363,7 @@ export default function AdminTestimonialsPage() {
             {testimonials.map((t) => (
               <div 
                 key={t.id} 
-                className="bg-slate-900 border border-white/5 p-6 rounded-xl space-y-4 hover:border-accent/40 transition-all flex flex-col justify-between"
+                className="bg-surface border border-border p-6 rounded-xl space-y-4 hover:border-accent/40 transition-all flex flex-col justify-between"
               >
                 
                 <div className="space-y-3">
@@ -384,7 +384,7 @@ export default function AdminTestimonialsPage() {
                       className={`flex items-center gap-1 text-[9px] font-bold py-0.5 px-2 rounded-full border transition-colors ${
                         t.isFeatured
                           ? "bg-amber-500/10 text-amber-400 border-amber-500/30 font-black"
-                          : "bg-slate-950 text-slate-500 border-white/5 hover:text-slate-300"
+                          : "bg-background text-slate-500 border-border hover:text-slate-300"
                       }`}
                     >
                       <Award className="w-3 h-3" />
@@ -396,16 +396,16 @@ export default function AdminTestimonialsPage() {
                   <p className="text-slate-200 text-xs italic leading-relaxed font-serif">"{t.content}"</p>
                   
                   {/* Author details */}
-                  <div className="pt-3 border-t border-white/5 flex items-center gap-3">
+                  <div className="pt-3 border-t border-border flex items-center gap-3">
                     {t.avatarUrl ? (
                       <img 
                         src={t.avatarUrl} 
                         alt={t.authorName} 
-                        className="w-8 h-8 rounded-full object-cover border border-white/10"
+                        className="w-8 h-8 rounded-full object-cover border border-border"
                         onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
                       />
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-slate-950 border border-white/10 flex items-center justify-center text-slate-400 font-bold text-xs">
+                      <div className="w-8 h-8 rounded-full bg-background border border-border flex items-center justify-center text-slate-400 font-bold text-xs">
                         {t.authorName.charAt(0)}
                       </div>
                     )}
@@ -419,7 +419,7 @@ export default function AdminTestimonialsPage() {
                 </div>
 
                 {/* Status and Action Buttons */}
-                <div className="flex justify-between items-center pt-4 border-t border-white/5">
+                <div className="flex justify-between items-center pt-4 border-t border-border">
                   <span className={`text-[9px] font-black py-0.5 px-2.5 rounded-full border uppercase ${
                     t.status === "APPROVED"
                       ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
@@ -433,28 +433,28 @@ export default function AdminTestimonialsPage() {
                   <div className="flex gap-1.5">
                     <button
                       onClick={() => openModal(t)}
-                      className="p-1.5 bg-slate-950 border border-white/5 rounded-lg text-slate-400 hover:text-accent transition-colors"
+                      className="p-1.5 bg-background border border-border rounded-lg text-slate-400 hover:text-accent transition-colors"
                       title="Edit Review"
                     >
                       <Edit className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleStatusChange(t.id, "APPROVED")}
-                      className="p-1.5 bg-slate-950 border border-white/5 rounded-lg text-slate-400 hover:text-emerald-400 transition-colors"
+                      className="p-1.5 bg-background border border-border rounded-lg text-slate-400 hover:text-emerald-400 transition-colors"
                       title="Approve Testimonial"
                     >
                       <CheckCircle2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleStatusChange(t.id, "REJECTED")}
-                      className="p-1.5 bg-slate-950 border border-white/5 rounded-lg text-slate-400 hover:text-rose-400 transition-colors"
+                      className="p-1.5 bg-background border border-border rounded-lg text-slate-400 hover:text-rose-400 transition-colors"
                       title="Reject Testimonial"
                     >
                       <XCircle className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(t.id)}
-                      className="p-1.5 bg-slate-950 border border-white/5 rounded-lg text-slate-400 hover:text-rose-400 transition-colors"
+                      className="p-1.5 bg-background border border-border rounded-lg text-slate-400 hover:text-rose-400 transition-colors"
                       title="Delete Testimonial"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -467,7 +467,7 @@ export default function AdminTestimonialsPage() {
           </div>
 
           {/* Pagination Bar */}
-          <div className="p-4 bg-slate-900/60 rounded-xl border border-white/5 flex items-center justify-between text-xs text-slate-400">
+          <div className="p-4 bg-surface/60 rounded-xl border border-border flex items-center justify-between text-xs text-slate-400">
             <div>
               Showing <span className="font-bold text-slate-200">{totalCount > 0 ? (currentPage - 1) * pageSize + 1 : 0}</span> to <span className="font-bold text-slate-200">{Math.min(currentPage * pageSize, totalCount)}</span> of <span className="font-bold text-slate-200">{totalCount}</span> reviews
             </div>
@@ -478,7 +478,7 @@ export default function AdminTestimonialsPage() {
                 <select
                   value={pageSize}
                   onChange={(e) => { setPageSize(parseInt(e.target.value)); setCurrentPage(1); }}
-                  className="bg-slate-950 border border-white/10 rounded px-2 py-1 text-slate-200"
+                  className="bg-background border border-border rounded px-2 py-1 text-slate-200"
                 >
                   <option value="5">5</option>
                   <option value="10">10</option>
@@ -491,7 +491,7 @@ export default function AdminTestimonialsPage() {
                 <button
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage(currentPage - 1)}
-                  className="p-1 bg-slate-950 border border-white/10 rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
+                  className="p-1 bg-background border border-border rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -499,7 +499,7 @@ export default function AdminTestimonialsPage() {
                 <button
                   disabled={currentPage >= totalPages}
                   onClick={() => setCurrentPage(currentPage + 1)}
-                  className="p-1 bg-slate-950 border border-white/10 rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
+                  className="p-1 bg-background border border-border rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -513,9 +513,9 @@ export default function AdminTestimonialsPage() {
       {isModalOpen && (
         <Portal>
           <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-white/10 rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-2xl">
+          <div className="bg-surface border border-border rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-2xl">
             
-            <div className="flex justify-between items-center border-b border-white/5 pb-4">
+            <div className="flex justify-between items-center border-b border-border pb-4">
               <div>
                 <h3 className="text-lg font-bold text-slate-50">
                   {editingItem ? "Edit Customer Review" : "Add Customer Testimonial"}
@@ -544,7 +544,7 @@ export default function AdminTestimonialsPage() {
                     placeholder="e.g. Ramesh K."
                     value={formData.authorName}
                     onChange={(e) => setFormData({ ...formData, authorName: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                   />
                 </div>
 
@@ -555,7 +555,7 @@ export default function AdminTestimonialsPage() {
                     placeholder="e.g. Travel Manager / Tourist"
                     value={formData.authorRole}
                     onChange={(e) => setFormData({ ...formData, authorRole: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                   />
                 </div>
               </div>
@@ -567,7 +567,7 @@ export default function AdminTestimonialsPage() {
                   placeholder="e.g. TCS Mumbai or Pune"
                   value={formData.companyName}
                   onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                  className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                 />
               </div>
 
@@ -579,7 +579,7 @@ export default function AdminTestimonialsPage() {
                   placeholder="Customer feedback and review text..."
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent resize-none"
+                  className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent resize-none"
                 />
               </div>
 
@@ -589,7 +589,7 @@ export default function AdminTestimonialsPage() {
                   <select
                     value={formData.rating}
                     onChange={(e) => setFormData({ ...formData, rating: parseInt(e.target.value, 10) || 5 })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                   >
                     <option value="5">5 Stars (Excellent)</option>
                     <option value="4">4 Stars (Very Good)</option>
@@ -604,11 +604,11 @@ export default function AdminTestimonialsPage() {
                   <select
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value as TestimonialStatus })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                   >
-                    <option value="APPROVED" className="bg-slate-900 text-emerald-400">APPROVED</option>
-                    <option value="PENDING" className="bg-slate-900 text-yellow-400">PENDING</option>
-                    <option value="REJECTED" className="bg-slate-900 text-rose-400">REJECTED</option>
+                    <option value="APPROVED" className="bg-surface text-emerald-400">APPROVED</option>
+                    <option value="PENDING" className="bg-surface text-yellow-400">PENDING</option>
+                    <option value="REJECTED" className="bg-surface text-rose-400">REJECTED</option>
                   </select>
                 </div>
               </div>
@@ -620,7 +620,7 @@ export default function AdminTestimonialsPage() {
                   placeholder="https://images.unsplash.com/photo-..."
                   value={formData.avatarUrl}
                   onChange={(e) => setFormData({ ...formData, avatarUrl: e.target.value })}
-                  className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
+                  className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
                 />
               </div>
 
@@ -630,7 +630,7 @@ export default function AdminTestimonialsPage() {
                     type="checkbox"
                     checked={formData.isFeatured}
                     onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
-                    className="w-4 h-4 rounded text-accent focus:ring-0 bg-slate-950 border-white/20"
+                    className="w-4 h-4 rounded text-accent focus:ring-0 bg-background border-white/20"
                   />
                   <span className="flex items-center gap-1">
                     <Award className="w-3.5 h-3.5 text-amber-400" />
@@ -639,7 +639,7 @@ export default function AdminTestimonialsPage() {
                 </label>
               </div>
 
-              <div className="flex gap-3 pt-4 border-t border-white/5">
+              <div className="flex gap-3 pt-4 border-t border-border">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
@@ -665,3 +665,4 @@ export default function AdminTestimonialsPage() {
     </div>
   );
 }
+

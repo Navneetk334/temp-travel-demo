@@ -221,7 +221,7 @@ export default function MasterBlogCMSPage() {
         <div className="flex items-center gap-2">
           <Link
             href="/master-admin/blog/categories"
-            className="flex items-center gap-1.5 bg-slate-900 border border-white/10 hover:border-amber-400/40 text-slate-300 px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
+            className="flex items-center gap-1.5 bg-surface border border-border hover:border-amber-400/40 text-slate-300 px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
           >
             <Tag className="w-3.5 h-3.5 text-amber-400" />
             <span>Blog Categories</span>
@@ -238,7 +238,7 @@ export default function MasterBlogCMSPage() {
 
       {/* SEO Content Performance Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-amber-500/30 rounded-2xl p-6 shadow-xl">
+        <div className="bg-surface/80 backdrop-blur-xl border border-amber-500/30 rounded-2xl p-6 shadow-xl">
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs text-slate-400 font-bold uppercase">Published SEO Articles</span>
             <FileText className="w-5 h-5 text-amber-400" />
@@ -247,7 +247,7 @@ export default function MasterBlogCMSPage() {
           <div className="text-[11px] text-emerald-400 mt-1">100% Schema.org BlogPosting Indexed</div>
         </div>
 
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl">
+        <div className="bg-surface/80 backdrop-blur-xl border border-border rounded-2xl p-6 shadow-xl">
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs text-slate-400 font-bold uppercase">Organic Search Focus</span>
             <Globe className="w-5 h-5 text-amber-400" />
@@ -256,7 +256,7 @@ export default function MasterBlogCMSPage() {
           <div className="text-[11px] text-slate-400 mt-1">Delhi, Mumbai, Goa, Bangalore, Pune</div>
         </div>
 
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl">
+        <div className="bg-surface/80 backdrop-blur-xl border border-border rounded-2xl p-6 shadow-xl">
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs text-slate-400 font-bold uppercase">Active Categories</span>
             <Tag className="w-5 h-5 text-amber-400" />
@@ -267,8 +267,8 @@ export default function MasterBlogCMSPage() {
       </div>
 
       {/* Articles Management Table */}
-      <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl space-y-4">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-4 border-b border-white/10">
+      <div className="bg-surface/80 backdrop-blur-xl border border-border rounded-2xl p-6 shadow-xl space-y-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-4 border-b border-border">
           <div className="relative w-full sm:w-80">
             <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
@@ -276,7 +276,7 @@ export default function MasterBlogCMSPage() {
               placeholder="Search articles by title, keywords or category..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-slate-950 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
+              className="w-full bg-background border border-border rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
             />
           </div>
         </div>
@@ -294,13 +294,13 @@ export default function MasterBlogCMSPage() {
             <div className="flex items-center gap-2 flex-wrap">
               <button
                 onClick={() => handleBulkStatusChange("PUBLISHED")}
-                className="bg-slate-950 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                className="bg-background hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer"
               >
                 Publish All
               </button>
               <button
                 onClick={() => handleBulkStatusChange("DRAFT")}
-                className="bg-slate-950 hover:bg-white/10 text-slate-300 border border-white/10 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                className="bg-background hover:bg-white/10 text-slate-300 border border-border px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer"
               >
                 Set to Draft
               </button>
@@ -322,14 +322,14 @@ export default function MasterBlogCMSPage() {
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-950 text-slate-400 font-extrabold uppercase text-[10px] tracking-wider border-b border-white/10">
+            <thead className="bg-background text-slate-400 font-extrabold uppercase text-[10px] tracking-wider border-b border-border">
               <tr>
                 <th className="py-3 px-3 w-10 text-center">
                   <input
                     type="checkbox"
                     checked={filteredArticles.length > 0 && selectedIds.length === filteredArticles.length}
                     onChange={handleSelectAll}
-                    className="w-4 h-4 rounded border-white/20 bg-slate-900 text-amber-500 focus:ring-amber-400 cursor-pointer accent-amber-500"
+                    className="w-4 h-4 rounded border-white/20 bg-surface text-amber-500 focus:ring-amber-400 cursor-pointer accent-amber-500"
                     title="Select All Blogs"
                   />
                 </th>
@@ -355,7 +355,7 @@ export default function MasterBlogCMSPage() {
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => handleToggleSelect(art.id)}
-                        className="w-4 h-4 rounded border-white/20 bg-slate-900 text-amber-500 focus:ring-amber-400 cursor-pointer accent-amber-500"
+                        className="w-4 h-4 rounded border-white/20 bg-surface text-amber-500 focus:ring-amber-400 cursor-pointer accent-amber-500"
                       />
                     </td>
                     <td className="py-4 px-4">
@@ -375,7 +375,7 @@ export default function MasterBlogCMSPage() {
                         className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase border cursor-pointer ${
                           art.status === "PUBLISHED"
                             ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                            : "bg-slate-950 text-slate-400 border-white/10"
+                            : "bg-background text-slate-400 border-border"
                         }`}
                       >
                         {art.status}
@@ -385,14 +385,14 @@ export default function MasterBlogCMSPage() {
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => openEditModal(art)}
-                          className="inline-flex items-center gap-1 bg-slate-950 text-slate-300 hover:text-white border border-white/10 hover:border-amber-400/40 px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all cursor-pointer shadow-sm"
+                          className="inline-flex items-center gap-1 bg-background text-slate-300 hover:text-white border border-border hover:border-amber-400/40 px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all cursor-pointer shadow-sm"
                         >
                           <Edit2 className="w-3 h-3 text-amber-400" />
                           <span>Edit</span>
                         </button>
                         <button
                           onClick={() => setSelectedArticle(art)}
-                          className="inline-flex items-center gap-1 bg-slate-950 text-slate-300 hover:text-white border border-white/10 px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all cursor-pointer shadow-sm"
+                          className="inline-flex items-center gap-1 bg-background text-slate-300 hover:text-white border border-border px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all cursor-pointer shadow-sm"
                         >
                           <Eye className="w-3 h-3 text-amber-400" />
                           <span>Read</span>
@@ -408,7 +408,7 @@ export default function MasterBlogCMSPage() {
                         </a>
                         <button
                           onClick={() => handleDeleteArticle(art.id)}
-                          className="inline-flex items-center p-1.5 bg-slate-950 text-slate-400 hover:text-rose-400 border border-white/10 hover:border-rose-400/40 rounded-lg text-[10px] font-bold transition-all cursor-pointer shadow-sm"
+                          className="inline-flex items-center p-1.5 bg-background text-slate-400 hover:text-rose-400 border border-border hover:border-rose-400/40 rounded-lg text-[10px] font-bold transition-all cursor-pointer shadow-sm"
                           title="Delete Article"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -427,7 +427,7 @@ export default function MasterBlogCMSPage() {
       {showAddModal && (
         <Portal>
           <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-            <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-2xl shadow-2xl space-y-4 relative text-slate-100 max-h-[90vh] overflow-y-auto">
+            <div className="bg-surface border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-2xl shadow-2xl space-y-4 relative text-slate-100 max-h-[90vh] overflow-y-auto">
               <button
                 onClick={() => setShowAddModal(false)}
                 className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
@@ -435,7 +435,7 @@ export default function MasterBlogCMSPage() {
                 <X className="w-5 h-5" />
               </button>
 
-              <div className="space-y-1 border-b border-white/10 pb-3">
+              <div className="space-y-1 border-b border-border pb-3">
                 <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">
                   {editingArticle ? "Update Existing Post" : "Master Content Engine"}
                 </span>
@@ -453,7 +453,7 @@ export default function MasterBlogCMSPage() {
                     placeholder="e.g. Complete Guide to Renting Innova Crysta for Mumbai to Goa Outstation"
                     value={newArticle.title}
                     onChange={(e) => setNewArticle({ ...newArticle, title: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
+                    className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
                   />
                 </div>
 
@@ -463,7 +463,7 @@ export default function MasterBlogCMSPage() {
                     <select
                       value={newArticle.category}
                       onChange={(e) => setNewArticle({ ...newArticle, category: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
                     >
                       {categories.map((cat) => (
                         <option key={cat} value={cat}>
@@ -481,7 +481,7 @@ export default function MasterBlogCMSPage() {
                       placeholder="e.g. Innova Crysta Rental, Mumbai Goa Cab"
                       value={newArticle.seoKeywords}
                       onChange={(e) => setNewArticle({ ...newArticle, seoKeywords: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                      className="w-full bg-background border border-border rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                     />
                   </div>
                 </div>
@@ -494,7 +494,7 @@ export default function MasterBlogCMSPage() {
                     placeholder="Write complete blog content with headings, travel tips, and call-to-actions..."
                     value={newArticle.content}
                     onChange={(e) => setNewArticle({ ...newArticle, content: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-sans leading-relaxed"
+                    className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-sans leading-relaxed"
                   />
                 </div>
 
@@ -516,15 +516,15 @@ export default function MasterBlogCMSPage() {
                         reader.readAsDataURL(file);
                       }
                     }}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-300 text-xs file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950"
+                    className="w-full bg-background border border-border rounded-xl px-3.5 py-2 text-slate-300 text-xs file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950"
                   />
                 </div>
 
-                <div className="pt-3 border-t border-white/10 flex justify-end gap-3">
+                <div className="pt-3 border-t border-border flex justify-end gap-3">
                   <button
                     type="button"
                     onClick={() => setShowAddModal(false)}
-                    className="px-5 py-2.5 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs font-bold cursor-pointer"
+                    className="px-5 py-2.5 bg-background text-slate-400 hover:text-white rounded-xl text-xs font-bold cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -545,7 +545,7 @@ export default function MasterBlogCMSPage() {
       {selectedArticle && (
         <Portal>
           <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-            <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
+            <div className="bg-surface border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
               <button
                 onClick={() => setSelectedArticle(null)}
                 className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"
@@ -558,10 +558,10 @@ export default function MasterBlogCMSPage() {
                 <h3 className="text-xl font-bold text-slate-50">{selectedArticle.title}</h3>
               </div>
 
-              <div className="space-y-2 bg-slate-950 p-4 rounded-xl border border-white/10 text-xs">
+              <div className="space-y-2 bg-background p-4 rounded-xl border border-border text-xs">
                 <div className="font-mono text-amber-400 font-bold">Category: {selectedArticle.category}</div>
                 <div className="font-mono text-slate-300">Keywords: {selectedArticle.seoKeywords}</div>
-                <p className="text-slate-300 leading-relaxed font-sans pt-2 border-t border-white/5">{selectedArticle.content}</p>
+                <p className="text-slate-300 leading-relaxed font-sans pt-2 border-t border-border">{selectedArticle.content}</p>
               </div>
 
               <div className="pt-2 flex justify-end">
@@ -579,3 +579,4 @@ export default function MasterBlogCMSPage() {
     </div>
   );
 }
+

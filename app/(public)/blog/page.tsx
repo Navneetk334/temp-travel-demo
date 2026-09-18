@@ -100,7 +100,7 @@ export default async function BlogIndexPage({ searchParams }: PageProps) {
   ];
 
   return (
-    <div className="w-full bg-slate-950 text-slate-100 min-h-screen">
+    <div className="w-full bg-background text-slate-100 min-h-screen">
       {/* Breadcrumbs */}
       <Breadcrumbs items={breadcrumbsList} />
 
@@ -117,3 +117,4 @@ export default async function BlogIndexPage({ searchParams }: PageProps) {
     </div>
   );
 }
+

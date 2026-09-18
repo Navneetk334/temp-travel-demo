@@ -253,9 +253,9 @@ export default function AdminContactLeadsPage() {
   };
 
   return (
-    <div className="bg-slate-950 min-h-screen text-slate-100 p-8 space-y-8">
+    <div className="bg-background min-h-screen text-slate-100 p-8 space-y-8">
       {/* Title Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/5 pb-6 gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-border pb-6 gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-50 tracking-tight flex items-center gap-2.5">
             <Mail className="w-8 h-8 text-accent" />
@@ -267,7 +267,7 @@ export default function AdminContactLeadsPage() {
         </div>
         <button
           onClick={handleExport}
-          className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold py-2.5 px-6 rounded-lg text-xs tracking-wider uppercase transition-all border border-white/10 shadow-lg"
+          className="flex items-center gap-1.5 bg-surface hover:bg-slate-800 text-slate-300 font-bold py-2.5 px-6 rounded-lg text-xs tracking-wider uppercase transition-all border border-border shadow-lg"
         >
           <Download className="w-4 h-4 text-accent" />
           <span>Export CSV Report</span>
@@ -279,7 +279,7 @@ export default function AdminContactLeadsPage() {
         <div 
           onClick={() => { setStatusFilter(""); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "" ? "border-accent bg-accent/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "" ? "border-accent bg-accent/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Total Messages</div>
@@ -289,7 +289,7 @@ export default function AdminContactLeadsPage() {
         <div 
           onClick={() => { setStatusFilter("NEW"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "NEW" ? "border-yellow-400 bg-yellow-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "NEW" ? "border-yellow-400 bg-yellow-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-yellow-400 uppercase font-bold tracking-wider">NEW</div>
@@ -299,7 +299,7 @@ export default function AdminContactLeadsPage() {
         <div 
           onClick={() => { setStatusFilter("READ"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "READ" ? "border-cyan-400 bg-cyan-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "READ" ? "border-cyan-400 bg-cyan-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-cyan-400 uppercase font-bold tracking-wider">READ</div>
@@ -309,7 +309,7 @@ export default function AdminContactLeadsPage() {
         <div 
           onClick={() => { setStatusFilter("CONTACTED"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "CONTACTED" ? "border-blue-400 bg-blue-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "CONTACTED" ? "border-blue-400 bg-blue-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-blue-400 uppercase font-bold tracking-wider">REPLIED</div>
@@ -319,7 +319,7 @@ export default function AdminContactLeadsPage() {
         <div 
           onClick={() => { setStatusFilter("QUALIFIED"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "QUALIFIED" ? "border-emerald-400 bg-emerald-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "QUALIFIED" ? "border-emerald-400 bg-emerald-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-emerald-400 uppercase font-bold tracking-wider">QUALIFIED</div>
@@ -329,7 +329,7 @@ export default function AdminContactLeadsPage() {
         <div 
           onClick={() => { setStatusFilter("LOST"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "LOST" ? "border-rose-400 bg-rose-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "LOST" ? "border-rose-400 bg-rose-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-rose-400 uppercase font-bold tracking-wider">LOST</div>
@@ -339,7 +339,7 @@ export default function AdminContactLeadsPage() {
         <div 
           onClick={() => { setStatusFilter("ARCHIVED"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "ARCHIVED" ? "border-slate-400 bg-slate-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "ARCHIVED" ? "border-slate-400 bg-slate-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">ARCHIVED</div>
@@ -348,7 +348,7 @@ export default function AdminContactLeadsPage() {
       </div>
 
       {/* Filter & Control Toolbar */}
-      <div className="glassmorphism p-6 rounded-xl border border-white/5 flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="glassmorphism p-6 rounded-xl border border-border flex flex-col md:flex-row gap-4 items-center justify-between">
         
         {/* Search */}
         <div className="relative w-full md:w-72">
@@ -358,7 +358,7 @@ export default function AdminContactLeadsPage() {
             placeholder="Search sender, email, subject..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-            className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all"
+            className="w-full bg-background/60 border border-border rounded-lg py-2 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all"
           />
         </div>
 
@@ -368,31 +368,31 @@ export default function AdminContactLeadsPage() {
           <select
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+            className="bg-background/60 border border-border rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
           >
-            <option value="" className="bg-slate-900">All Message Statuses</option>
-            <option value="NEW" className="bg-slate-900 text-yellow-400">NEW</option>
-            <option value="READ" className="bg-slate-900 text-cyan-400">READ</option>
-            <option value="CONTACTED" className="bg-slate-900 text-blue-400">CONTACTED (REPLIED)</option>
-            <option value="QUALIFIED" className="bg-slate-900 text-emerald-400">QUALIFIED</option>
-            <option value="LOST" className="bg-slate-900 text-rose-400">LOST</option>
-            <option value="ARCHIVED" className="bg-slate-900 text-slate-400">ARCHIVED</option>
+            <option value="" className="bg-surface">All Message Statuses</option>
+            <option value="NEW" className="bg-surface text-yellow-400">NEW</option>
+            <option value="READ" className="bg-surface text-cyan-400">READ</option>
+            <option value="CONTACTED" className="bg-surface text-blue-400">CONTACTED (REPLIED)</option>
+            <option value="QUALIFIED" className="bg-surface text-emerald-400">QUALIFIED</option>
+            <option value="LOST" className="bg-surface text-rose-400">LOST</option>
+            <option value="ARCHIVED" className="bg-surface text-slate-400">ARCHIVED</option>
           </select>
 
           {/* Sort By */}
           <select
             value={sortBy}
             onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }}
-            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+            className="bg-background/60 border border-border rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
           >
-            <option value="createdAt" className="bg-slate-900">Sort by Date</option>
-            <option value="name" className="bg-slate-900">Sort by Sender Name</option>
+            <option value="createdAt" className="bg-surface">Sort by Date</option>
+            <option value="name" className="bg-surface">Sort by Sender Name</option>
           </select>
 
           {/* Sort Order */}
           <button
             onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs font-semibold text-slate-300 hover:text-slate-100 transition-colors"
+            className="bg-background/60 border border-border rounded-lg py-2 px-3 text-xs font-semibold text-slate-300 hover:text-slate-100 transition-colors"
           >
             {sortOrder === "desc" ? "↓ Newest" : "↑ Oldest"}
           </button>
@@ -404,7 +404,7 @@ export default function AdminContactLeadsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* Messages Table */}
-        <div className="lg:col-span-7 glassmorphism rounded-xl border border-white/5 overflow-hidden flex flex-col space-y-2 p-2 sm:p-0">
+        <div className="lg:col-span-7 glassmorphism rounded-xl border border-border overflow-hidden flex flex-col space-y-2 p-2 sm:p-0">
           {/* Bulk Action Header Bar */}
           {selectedIds.length > 0 && (
             <div className="bg-amber-500/10 border-b border-amber-500/20 p-3 flex items-center justify-between text-xs">
@@ -428,13 +428,13 @@ export default function AdminContactLeadsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="bg-slate-900 border-b border-white/5 text-slate-400 font-semibold uppercase tracking-wider">
+                    <tr className="bg-surface border-b border-border text-slate-400 font-semibold uppercase tracking-wider">
                       <th className="p-4 w-10 text-center" onClick={(e) => e.stopPropagation()}>
                         <input
                           type="checkbox"
                           checked={leads.length > 0 && selectedIds.length === leads.length}
                           onChange={handleSelectAll}
-                          className="w-4 h-4 rounded text-amber-500 bg-slate-950 border-white/20 focus:ring-0 cursor-pointer"
+                          className="w-4 h-4 rounded text-amber-500 bg-background border-white/20 focus:ring-0 cursor-pointer"
                         />
                       </th>
                       <th className="p-4 w-12 text-center">S. No.</th>
@@ -464,7 +464,7 @@ export default function AdminContactLeadsPage() {
                               type="checkbox"
                               checked={selectedIds.includes(lead.id)}
                               onChange={() => handleSelectOne(lead.id)}
-                              className="w-4 h-4 rounded text-amber-500 bg-slate-950 border-white/20 focus:ring-0 cursor-pointer"
+                              className="w-4 h-4 rounded text-amber-500 bg-background border-white/20 focus:ring-0 cursor-pointer"
                             />
                           </td>
                           <td className="p-4 text-center font-mono font-bold text-slate-400">
@@ -498,7 +498,7 @@ export default function AdminContactLeadsPage() {
                               <button
                                 onClick={() => handleStatusChange(lead.id, "READ")}
                                 title="Mark as Read"
-                                className="inline-flex p-1.5 bg-slate-900 border border-white/5 rounded-lg text-slate-400 hover:text-cyan-400 transition-colors"
+                                className="inline-flex p-1.5 bg-surface border border-border rounded-lg text-slate-400 hover:text-cyan-400 transition-colors"
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
@@ -506,21 +506,21 @@ export default function AdminContactLeadsPage() {
                             <button
                               onClick={() => handleStatusChange(lead.id, "CONTACTED")}
                               title="Mark as Replied"
-                              className="inline-flex p-1.5 bg-slate-900 border border-white/5 rounded-lg text-slate-400 hover:text-blue-400 transition-colors"
+                              className="inline-flex p-1.5 bg-surface border border-border rounded-lg text-slate-400 hover:text-blue-400 transition-colors"
                             >
                               <MessageCircle className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleStatusChange(lead.id, "ARCHIVED")}
                               title="Archive Message"
-                              className="inline-flex p-1.5 bg-slate-900 border border-white/5 rounded-lg text-slate-400 hover:text-accent transition-colors"
+                              className="inline-flex p-1.5 bg-surface border border-border rounded-lg text-slate-400 hover:text-accent transition-colors"
                             >
                               <Archive className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleDelete(lead.id)}
                               title="Delete Message"
-                              className="inline-flex p-1.5 bg-slate-900 border border-white/5 rounded-lg text-slate-400 hover:text-red-400 transition-colors"
+                              className="inline-flex p-1.5 bg-surface border border-border rounded-lg text-slate-400 hover:text-red-400 transition-colors"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -533,7 +533,7 @@ export default function AdminContactLeadsPage() {
               </div>
 
               {/* Pagination Bar */}
-              <div className="p-4 bg-slate-900/60 border-t border-white/5 flex items-center justify-between text-xs text-slate-400">
+              <div className="p-4 bg-surface/60 border-t border-border flex items-center justify-between text-xs text-slate-400">
                 <div>
                   Showing <span className="font-bold text-slate-200">{totalCount > 0 ? (currentPage - 1) * pageSize + 1 : 0}</span> to <span className="font-bold text-slate-200">{Math.min(currentPage * pageSize, totalCount)}</span> of <span className="font-bold text-slate-200">{totalCount}</span> messages
                 </div>
@@ -544,7 +544,7 @@ export default function AdminContactLeadsPage() {
                     <select
                       value={pageSize}
                       onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
-                      className="bg-slate-950 border border-white/10 rounded px-2 py-1 text-slate-200 focus:outline-none"
+                      className="bg-background border border-border rounded px-2 py-1 text-slate-200 focus:outline-none"
                     >
                       <option value="5">5</option>
                       <option value="10">10</option>
@@ -557,7 +557,7 @@ export default function AdminContactLeadsPage() {
                     <button
                       disabled={currentPage === 1}
                       onClick={() => setCurrentPage(currentPage - 1)}
-                      className="p-1 bg-slate-950 border border-white/10 rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
+                      className="p-1 bg-background border border-border rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </button>
@@ -565,7 +565,7 @@ export default function AdminContactLeadsPage() {
                     <button
                       disabled={currentPage >= totalPages}
                       onClick={() => setCurrentPage(currentPage + 1)}
-                      className="p-1 bg-slate-950 border border-white/10 rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
+                      className="p-1 bg-background border border-border rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
                     >
                       <ChevronRight className="w-4 h-4" />
                     </button>
@@ -579,10 +579,10 @@ export default function AdminContactLeadsPage() {
         {/* Message Inspection Dashboard Panel */}
         <div className="lg:col-span-5">
           {activeLead ? (
-            <div className="bg-slate-900 border border-white/5 p-6 rounded-2xl space-y-6 glassmorphism">
+            <div className="bg-surface border border-border p-6 rounded-2xl space-y-6 glassmorphism">
               
               {/* Header */}
-              <div className="flex justify-between items-start border-b border-white/5 pb-4">
+              <div className="flex justify-between items-start border-b border-border pb-4">
                 <div>
                   <span className="text-[9px] font-extrabold text-accent uppercase tracking-widest block font-mono">Message Inspection</span>
                   <h3 className="text-xl font-extrabold text-slate-50 mt-0.5">{activeLead.name}</h3>
@@ -612,7 +612,7 @@ export default function AdminContactLeadsPage() {
                     className={`py-2 px-2 rounded-lg text-[10px] font-extrabold tracking-wider border flex items-center justify-center gap-1 transition-all ${
                       activeLead.status === "READ"
                         ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40 font-black"
-                        : "bg-slate-950/60 text-slate-400 border-white/10 hover:border-cyan-500/40 hover:text-cyan-300"
+                        : "bg-background/60 text-slate-400 border-border hover:border-cyan-500/40 hover:text-cyan-300"
                     }`}
                   >
                     <Eye className="w-3.5 h-3.5" />
@@ -625,7 +625,7 @@ export default function AdminContactLeadsPage() {
                     className={`py-2 px-2 rounded-lg text-[10px] font-extrabold tracking-wider border flex items-center justify-center gap-1 transition-all ${
                       activeLead.status === "CONTACTED"
                         ? "bg-blue-500/20 text-blue-300 border-blue-500/40 font-black"
-                        : "bg-slate-950/60 text-slate-400 border-white/10 hover:border-blue-500/40 hover:text-blue-300"
+                        : "bg-background/60 text-slate-400 border-border hover:border-blue-500/40 hover:text-blue-300"
                     }`}
                   >
                     <MessageCircle className="w-3.5 h-3.5" />
@@ -638,7 +638,7 @@ export default function AdminContactLeadsPage() {
                     className={`py-2 px-2 rounded-lg text-[10px] font-extrabold tracking-wider border flex items-center justify-center gap-1 transition-all ${
                       activeLead.status === "ARCHIVED"
                         ? "bg-slate-500/20 text-slate-300 border-slate-500/40 font-black"
-                        : "bg-slate-950/60 text-slate-400 border-white/10 hover:border-slate-500/40 hover:text-slate-300"
+                        : "bg-background/60 text-slate-400 border-border hover:border-slate-500/40 hover:text-slate-300"
                     }`}
                   >
                     <Archive className="w-3.5 h-3.5" />
@@ -648,24 +648,24 @@ export default function AdminContactLeadsPage() {
               </div>
 
               {/* Sender Details */}
-              <div className="space-y-3 border-t border-white/5 pt-4 text-xs text-slate-300">
-                <div className="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-lg border border-white/5">
+              <div className="space-y-3 border-t border-border pt-4 text-xs text-slate-300">
+                <div className="flex justify-between items-center bg-background/40 p-2.5 rounded-lg border border-border">
                   <span className="text-slate-400">Email Address:</span>
                   <a href={`mailto:${activeLead.email}`} className="font-mono font-bold text-accent hover:underline">{activeLead.email}</a>
                 </div>
                 {activeLead.phone && (
-                  <div className="flex justify-between items-center bg-slate-950/40 p-2.5 rounded-lg border border-white/5">
+                  <div className="flex justify-between items-center bg-background/40 p-2.5 rounded-lg border border-border">
                     <span className="text-slate-400">Phone Number:</span>
                     <a href={`tel:${activeLead.phone}`} className="font-mono font-bold text-slate-100 hover:underline">{activeLead.phone}</a>
                   </div>
                 )}
-                <div className="bg-slate-950/40 p-3 rounded-lg border border-white/5 space-y-1">
+                <div className="bg-background/40 p-3 rounded-lg border border-border space-y-1">
                   <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Subject</div>
                   <div className="text-slate-100 font-bold text-sm">{activeLead.subject || "No Subject Specified"}</div>
                 </div>
 
                 {/* Message Body */}
-                <div className="bg-slate-950/80 p-4 rounded-xl border border-white/10 space-y-2">
+                <div className="bg-background/80 p-4 rounded-xl border border-border space-y-2">
                   <div className="text-[10px] text-accent font-mono font-bold uppercase tracking-wider flex items-center justify-between">
                     <span>Message Body</span>
                     <span>{activeLead.message.length} chars</span>
@@ -690,7 +690,7 @@ export default function AdminContactLeadsPage() {
 
             </div>
           ) : (
-            <div className="bg-slate-900/40 border border-white/5 p-12 rounded-2xl text-center text-slate-500 text-xs italic space-y-2">
+            <div className="bg-surface/40 border border-border p-12 rounded-2xl text-center text-slate-500 text-xs italic space-y-2">
               <AlertCircle className="w-8 h-8 mx-auto text-slate-600 animate-pulse" />
               <p>Select a contact message from the table to read full content, mark read/replied, and manage status.</p>
             </div>
@@ -713,3 +713,4 @@ export default function AdminContactLeadsPage() {
     </div>
   );
 }
+

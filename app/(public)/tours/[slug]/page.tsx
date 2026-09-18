@@ -82,7 +82,7 @@ export default async function TourDetailsPage({ params }: PageProps) {
   };
 
   return (
-    <div className="bg-slate-950 min-h-screen text-slate-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="bg-background min-h-screen text-slate-100 py-12 px-4 sm:px-6 lg:px-8">
       <JsonLd data={productSchema} />
 
       <div className="max-w-7xl mx-auto space-y-12">
@@ -94,20 +94,20 @@ export default async function TourDetailsPage({ params }: PageProps) {
         </div>
 
         {/* Title & Price Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-6 border-b border-white/5">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-6 border-b border-border">
           <div className="space-y-2">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-50 tracking-tight leading-tight">
               {tour.title}
             </h1>
             <div className="flex items-center gap-4 text-xs font-bold text-slate-400 uppercase tracking-wider">
-              <span className="bg-white/5 py-1 px-3 rounded-full text-accent border border-white/10">{tour.category.name}</span>
+              <span className="bg-white/5 py-1 px-3 rounded-full text-accent border border-border">{tour.category.name}</span>
               <span className="flex items-center gap-1">
                 <Calendar className="w-4 h-4 text-accent" />
                 <span>{tour.durationDays} Days / {tour.durationNights} Nights</span>
               </span>
             </div>
           </div>
-          <div className="bg-slate-900 border border-white/5 p-4 rounded-xl text-right">
+          <div className="bg-surface border border-border p-4 rounded-xl text-right">
             <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Base Package Price</div>
             <div className="text-3xl font-extrabold text-slate-50 mt-1">
               ₹{Number(tour.basePrice).toLocaleString("en-IN")}
@@ -119,7 +119,7 @@ export default async function TourDetailsPage({ params }: PageProps) {
         {/* Gallery Grid */}
         {tour.images && tour.images.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[300px] md:h-[450px]">
-            <div className="md:col-span-2 relative bg-slate-900 rounded-xl overflow-hidden border border-white/5">
+            <div className="md:col-span-2 relative bg-surface rounded-xl overflow-hidden border border-border">
               <img
                 src={tour.images[0]}
                 alt={`${tour.title} primary`}
@@ -128,7 +128,7 @@ export default async function TourDetailsPage({ params }: PageProps) {
             </div>
             <div className="grid grid-rows-2 gap-6">
               {(tour.images || []).slice(1, 3).map((img: string, idx: number) => (
-                <div key={idx} className="relative bg-slate-900 rounded-xl overflow-hidden border border-white/5">
+                <div key={idx} className="relative bg-surface rounded-xl overflow-hidden border border-border">
                   <img
                     src={img}
                     alt={`${tour.title} detail ${idx + 1}`}
@@ -148,7 +148,7 @@ export default async function TourDetailsPage({ params }: PageProps) {
             
             {/* Description */}
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-slate-50 border-b border-white/5 pb-2">Overview</h2>
+              <h2 className="text-2xl font-bold text-slate-50 border-b border-border pb-2">Overview</h2>
               <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-line">
                 {tour.description}
               </p>
@@ -157,7 +157,7 @@ export default async function TourDetailsPage({ params }: PageProps) {
             {/* Itinerary */}
             {itinerary.length > 0 && (
               <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-slate-50 border-b border-white/5 pb-2">Day-by-Day Itinerary</h2>
+                <h2 className="text-2xl font-bold text-slate-50 border-b border-border pb-2">Day-by-Day Itinerary</h2>
                 <div className="space-y-6">
                   {itinerary.map((day) => (
                     <div key={day.day} className="flex gap-6 items-start">
@@ -178,7 +178,7 @@ export default async function TourDetailsPage({ params }: PageProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Inclusions */}
               <div className="space-y-4">
-                <h3 className="text-lg font-bold text-slate-50 flex items-center gap-2 border-b border-white/5 pb-2">
+                <h3 className="text-lg font-bold text-slate-50 flex items-center gap-2 border-b border-border pb-2">
                   <CheckCircle2 className="w-5 h-5 text-green-400" />
                   <span>Inclusions</span>
                 </h3>
@@ -194,7 +194,7 @@ export default async function TourDetailsPage({ params }: PageProps) {
 
               {/* Exclusions */}
               <div className="space-y-4">
-                <h3 className="text-lg font-bold text-slate-50 flex items-center gap-2 border-b border-white/5 pb-2">
+                <h3 className="text-lg font-bold text-slate-50 flex items-center gap-2 border-b border-border pb-2">
                   <XCircle className="w-5 h-5 text-destructive" />
                   <span>Exclusions</span>
                 </h3>
@@ -213,7 +213,7 @@ export default async function TourDetailsPage({ params }: PageProps) {
 
           {/* Sidebar Booking Form */}
           <div className="lg:col-span-4 scroll-mt-24">
-            <div className="bg-slate-900 border border-white/5 p-6 rounded-2xl space-y-6 sticky top-24 glassmorphism">
+            <div className="bg-surface border border-border p-6 rounded-2xl space-y-6 sticky top-24 glassmorphism">
               <div className="space-y-1">
                 <h3 className="text-xl font-bold text-slate-50">Inquire Tour Booking</h3>
                 <p className="text-xs text-slate-400">Fill in details and our tour coordinators will contact you.</p>
@@ -221,7 +221,7 @@ export default async function TourDetailsPage({ params }: PageProps) {
 
               <TourInquiryForm tourId={tour.id} />
 
-              <div className="flex gap-2.5 text-[10px] text-slate-400 items-start border-t border-white/5 pt-4">
+              <div className="flex gap-2.5 text-[10px] text-slate-400 items-start border-t border-border pt-4">
                 <ShieldCheck className="w-4 h-4 text-accent shrink-0" />
                 <span>By submitting, you agree to connect with our verified coordinators. No pre-payments required at this stage.</span>
               </div>

@@ -168,9 +168,9 @@ export default function ServicesPage() {
     <>
       <JsonLd data={serviceSchema} />
 
-      <div className="bg-slate-950 text-slate-100 min-h-screen">
+      <div className="bg-background text-slate-100 min-h-screen">
         {/* Combined Page Header & Breadcrumbs Section */}
-        <section className="relative bg-slate-950 overflow-hidden border-b border-white/5 pb-16">
+        <section className="relative bg-background overflow-hidden border-b border-border pb-16">
           <div className="absolute inset-0 bg-gradient-to-b from-amber-500/10 via-slate-950 to-slate-950 pointer-events-none" />
           
           <div className="relative z-10">
@@ -199,7 +199,7 @@ export default function ServicesPage() {
             return (
               <div
                 key={item.id}
-                className={`group bg-slate-900/60 backdrop-blur-xl border rounded-3xl p-6 transition-all duration-500 shadow-2xl relative overflow-hidden flex flex-col justify-between h-full hover:-translate-y-2.5 ${item.accentBorder}`}
+                className={`group bg-surface/60 backdrop-blur-xl border rounded-3xl p-6 transition-all duration-500 shadow-2xl relative overflow-hidden flex flex-col justify-between h-full hover:-translate-y-2.5 ${item.accentBorder}`}
               >
                 {/* Radial Accent Glow */}
                 <div className={`absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl ${item.accentGlow} rounded-full blur-3xl pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity duration-500`} />
@@ -208,7 +208,7 @@ export default function ServicesPage() {
                   <div>
                     {/* Header Badge */}
                     <div className="flex justify-between items-center mb-3">
-                      <div className="p-2.5 rounded-xl bg-slate-950 border border-white/10 text-amber-400 group-hover:border-amber-400/40 transition-colors">
+                      <div className="p-2.5 rounded-xl bg-background border border-border text-amber-400 group-hover:border-amber-400/40 transition-colors">
                         <Icon className="w-5 h-5" />
                       </div>
                       <span className="text-[9px] font-black uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full">
@@ -217,7 +217,7 @@ export default function ServicesPage() {
                     </div>
 
                     {/* Service Image Banner */}
-                    <div className="relative h-44 w-full rounded-2xl overflow-hidden border border-white/10 my-3">
+                    <div className="relative h-44 w-full rounded-2xl overflow-hidden border border-border my-3">
                       <Image
                         src={item.image}
                         alt={item.title}
@@ -239,10 +239,10 @@ export default function ServicesPage() {
                   </div>
 
                   {/* Always-Visible Specifications & Inclusions List */}
-                  <div className="space-y-2 pt-3 border-t border-white/10 my-2">
+                  <div className="space-y-2 pt-3 border-t border-border my-2">
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Included Specs</span>
                     {item.features.map((feat, fIdx) => (
-                      <div key={fIdx} className="flex items-center gap-2 text-[11px] text-slate-200 bg-slate-950/90 p-2.5 rounded-lg border border-white/5 group-hover:border-white/10 transition-colors">
+                      <div key={fIdx} className="flex items-center gap-2 text-[11px] text-slate-200 bg-background/90 p-2.5 rounded-lg border border-border group-hover:border-border transition-colors">
                         <CheckCircle2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                         <span>{feat}</span>
                       </div>
@@ -254,7 +254,7 @@ export default function ServicesPage() {
                 <div className="pt-4 relative z-10">
                   <Link
                     href={item.ctaLink}
-                    className="flex items-center justify-between w-full bg-slate-950 hover:bg-amber-400 hover:text-slate-950 border border-white/10 px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 group/btn shadow-lg"
+                    className="flex items-center justify-between w-full bg-background hover:bg-amber-400 hover:text-slate-950 border border-border px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 group/btn shadow-lg"
                   >
                     <span>{item.ctaText}</span>
                     <ArrowUpRight className="w-4 h-4 text-amber-400 group-hover/btn:text-slate-950 transition-colors" />
@@ -268,3 +268,4 @@ export default function ServicesPage() {
     </>
   );
 }
+

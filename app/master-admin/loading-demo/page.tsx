@@ -22,7 +22,7 @@ export default function LoadingDemoPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
         {/* Style 1: Classic Spinner */}
-        <div className="bg-slate-900 border border-white/10 p-6 rounded-2xl flex flex-col gap-4">
+        <div className="bg-surface border border-border p-6 rounded-2xl flex flex-col gap-4">
           <h2 className="text-amber-400 font-bold">1. Classic Spinner (Lucide)</h2>
           <p className="text-sm text-slate-400">Replaces icon with a spinning loader and disables button.</p>
           <button 
@@ -36,7 +36,7 @@ export default function LoadingDemoPage() {
         </div>
 
         {/* Style 2: Bouncing Dots */}
-        <div className="bg-slate-900 border border-white/10 p-6 rounded-2xl flex flex-col gap-4">
+        <div className="bg-surface border border-border p-6 rounded-2xl flex flex-col gap-4">
           <h2 className="text-amber-400 font-bold">2. Bouncing Dots</h2>
           <p className="text-sm text-slate-400">Shows animated dots indicating background processing.</p>
           <button 
@@ -46,16 +46,16 @@ export default function LoadingDemoPage() {
           >
             {activeLoader === 2 ? (
               <div className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-slate-900 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
-                <div className="w-2 h-2 bg-slate-900 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
-                <div className="w-2 h-2 bg-slate-900 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
+                <div className="w-2 h-2 bg-surface rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
+                <div className="w-2 h-2 bg-surface rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
+                <div className="w-2 h-2 bg-surface rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
               </div>
             ) : "Submit Data"}
           </button>
         </div>
 
         {/* Style 3: Gradient Ring Spinner */}
-        <div className="bg-slate-900 border border-white/10 p-6 rounded-2xl flex flex-col gap-4">
+        <div className="bg-surface border border-border p-6 rounded-2xl flex flex-col gap-4">
           <h2 className="text-amber-400 font-bold">3. Gradient Ring Spinner</h2>
           <p className="text-sm text-slate-400">A custom CSS spinning ring that looks premium.</p>
           <button 
@@ -71,7 +71,7 @@ export default function LoadingDemoPage() {
         </div>
 
         {/* Style 4: Skeleton / Pulse Text */}
-        <div className="bg-slate-900 border border-white/10 p-6 rounded-2xl flex flex-col gap-4">
+        <div className="bg-surface border border-border p-6 rounded-2xl flex flex-col gap-4">
           <h2 className="text-amber-400 font-bold">4. Pulse Text Effect</h2>
           <p className="text-sm text-slate-400">Simple pulsing text without moving icons.</p>
           <button 
@@ -88,7 +88,7 @@ export default function LoadingDemoPage() {
         </div>
 
         {/* Style 5: Full Button Shimmer */}
-        <div className="bg-slate-900 border border-white/10 p-6 rounded-2xl flex flex-col gap-4">
+        <div className="bg-surface border border-border p-6 rounded-2xl flex flex-col gap-4">
           <h2 className="text-amber-400 font-bold">5. Progress / Shimmer</h2>
           <p className="text-sm text-slate-400">Creates a moving gradient over the button.</p>
           <button 
@@ -117,3 +117,4 @@ export default function LoadingDemoPage() {
     </div>
   );
 }
+

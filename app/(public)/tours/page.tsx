@@ -68,7 +68,7 @@ export default async function ToursPage({ searchParams }: PageProps) {
   }
 
   return (
-    <div className="bg-slate-950 min-h-screen text-slate-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="bg-background min-h-screen text-slate-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-12">
         {/* Header */}
         <div className="text-center space-y-4">
@@ -81,7 +81,7 @@ export default async function ToursPage({ searchParams }: PageProps) {
         </div>
 
         {/* Search & Filter Controls */}
-        <div className="glassmorphism p-6 rounded-xl border border-white/5 flex flex-col md:flex-row gap-6 items-center justify-between">
+        <div className="glassmorphism p-6 rounded-xl border border-border flex flex-col md:flex-row gap-6 items-center justify-between">
           {/* Category Badges */}
           <div className="flex flex-wrap gap-2 items-center w-full md:w-auto">
             <Link
@@ -89,7 +89,7 @@ export default async function ToursPage({ searchParams }: PageProps) {
               className={`py-1.5 px-4 rounded-full text-xs font-semibold uppercase tracking-wider transition-all border ${
                 !categorySlug
                   ? "bg-primary text-primary-foreground border-accent"
-                  : "bg-white/5 text-slate-300 border-white/10 hover:border-slate-400"
+                  : "bg-white/5 text-slate-300 border-border hover:border-slate-400"
               }`}
             >
               All Packages
@@ -101,7 +101,7 @@ export default async function ToursPage({ searchParams }: PageProps) {
                 className={`py-1.5 px-4 rounded-full text-xs font-semibold uppercase tracking-wider transition-all border ${
                   categorySlug === c.slug
                     ? "bg-primary text-primary-foreground border-accent"
-                    : "bg-white/5 text-slate-300 border-white/10 hover:border-slate-400"
+                    : "bg-white/5 text-slate-300 border-border hover:border-slate-400"
                 }`}
               >
                 {c.name}
@@ -118,14 +118,14 @@ export default async function ToursPage({ searchParams }: PageProps) {
               name="search"
               placeholder="Search tours..."
               defaultValue={search}
-              className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+              className="w-full bg-background/50 border border-border rounded-lg py-2 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
             />
           </form>
         </div>
 
         {/* Packages Grid */}
         {tours.length === 0 ? (
-          <div className="text-center py-20 bg-slate-900/40 border border-white/5 rounded-xl space-y-4">
+          <div className="text-center py-20 bg-surface/40 border border-border rounded-xl space-y-4">
             <Compass className="w-12 h-12 text-slate-500 mx-auto" />
             <h2 className="text-xl font-bold text-slate-300">No Packages Found</h2>
             <p className="text-slate-500 text-sm">Try modifying your search keywords or categories.</p>
@@ -135,10 +135,10 @@ export default async function ToursPage({ searchParams }: PageProps) {
             {tours.map((tour) => (
               <div
                 key={tour.id}
-                className="bg-slate-900/40 border border-white/5 rounded-xl overflow-hidden shadow-lg hover:border-primary/45 transition-all group flex flex-col justify-between"
+                className="bg-surface/40 border border-border rounded-xl overflow-hidden shadow-lg hover:border-primary/45 transition-all group flex flex-col justify-between"
               >
                 {/* Visual Cover image fallback to index 0 */}
-                <div className="relative h-48 bg-slate-950">
+                <div className="relative h-48 bg-background">
                   {tour.images && tour.images[0] ? (
                     <img
                       src={tour.images[0]}
@@ -150,7 +150,7 @@ export default async function ToursPage({ searchParams }: PageProps) {
                       <Compass className="w-8 h-8" />
                     </div>
                   )}
-                  <div className="absolute top-4 left-4 bg-slate-950/80 border border-white/10 py-1 px-3 rounded-full text-[10px] font-bold text-accent uppercase tracking-widest">
+                  <div className="absolute top-4 left-4 bg-background/80 border border-border py-1 px-3 rounded-full text-[10px] font-bold text-accent uppercase tracking-widest">
                     {tour.category.name}
                   </div>
                 </div>
@@ -174,7 +174,7 @@ export default async function ToursPage({ searchParams }: PageProps) {
                     </p>
                   </div>
 
-                  <div className="pt-4 border-t border-white/5 flex items-center justify-between mt-auto">
+                  <div className="pt-4 border-t border-border flex items-center justify-between mt-auto">
                     <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">GST extra</span>
                     <Link
                       href={`/tours/${tour.slug}`}
@@ -193,3 +193,4 @@ export default async function ToursPage({ searchParams }: PageProps) {
     </div>
   );
 }
+

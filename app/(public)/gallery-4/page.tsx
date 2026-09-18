@@ -51,7 +51,7 @@ export default function GalleryFour() {
           return (
             <motion.div
               key={img.id}
-              className="absolute group cursor-grab active:cursor-grabbing rounded-xl overflow-hidden shadow-2xl border border-white/10"
+              className="absolute group cursor-grab active:cursor-grabbing rounded-xl overflow-hidden shadow-2xl border border-border"
               style={{
                 width: img.width,
                 height: img.height,
@@ -97,7 +97,7 @@ export default function GalleryFour() {
           onClick={() => setSelectedImage(null)}
         >
           <button 
-            className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors border border-white/10 z-10"
+            className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors border border-border z-10"
             onClick={(e) => {
               e.stopPropagation();
               setSelectedImage(null);
@@ -110,7 +110,7 @@ export default function GalleryFour() {
             initial={{ scale: 0.8, y: 50 }}
             animate={{ scale: 1, y: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="relative w-full max-w-5xl aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-2xl" 
+            className="relative w-full max-w-5xl aspect-video rounded-3xl overflow-hidden border border-border shadow-2xl" 
             onClick={(e) => e.stopPropagation()}
           >
             <img 
@@ -127,3 +127,4 @@ export default function GalleryFour() {
     </div>
   );
 }
+

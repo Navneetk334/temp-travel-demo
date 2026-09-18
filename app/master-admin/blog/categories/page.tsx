@@ -201,7 +201,7 @@ export default function MasterBlogCategoriesPage() {
         <div className="flex items-center gap-2">
           <Link
             href="/master-admin/blog"
-            className="flex items-center gap-1.5 bg-slate-900 border border-white/10 hover:border-amber-400/40 text-slate-300 px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
+            className="flex items-center gap-1.5 bg-surface border border-border hover:border-amber-400/40 text-slate-300 px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
           >
             <FileText className="w-3.5 h-3.5 text-amber-400" />
             <span>View All Blogs</span>
@@ -217,7 +217,7 @@ export default function MasterBlogCategoriesPage() {
       </div>
 
       {/* Search Toolbar & Select All */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-2xl border border-white/10">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-surface/60 p-4 rounded-2xl border border-border">
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
@@ -225,14 +225,14 @@ export default function MasterBlogCategoriesPage() {
             placeholder="Search category name, slug or description..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-slate-950 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
+            className="w-full bg-background border border-border rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
           />
         </div>
 
         <div className="flex items-center gap-2">
           <button
             onClick={handleSelectAll}
-            className="px-3 py-1.5 bg-slate-950 hover:bg-white/10 border border-white/10 text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer"
+            className="px-3 py-1.5 bg-background hover:bg-white/10 border border-border text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer"
           >
             {selectedIds.length === filtered.length && filtered.length > 0 ? "Deselect All" : "Select All Categories"}
           </button>
@@ -273,8 +273,8 @@ export default function MasterBlogCategoriesPage() {
           return (
             <div
               key={cat.id}
-              className={`bg-slate-900/80 backdrop-blur-xl border rounded-2xl p-5 shadow-xl space-y-3 transition-all flex flex-col justify-between ${
-                isSelected ? "border-amber-400 bg-amber-500/5 ring-1 ring-amber-400/40" : "border-white/10 hover:border-amber-500/40"
+              className={`bg-surface/80 backdrop-blur-xl border rounded-2xl p-5 shadow-xl space-y-3 transition-all flex flex-col justify-between ${
+                isSelected ? "border-amber-400 bg-amber-500/5 ring-1 ring-amber-400/40" : "border-border hover:border-amber-500/40"
               }`}
             >
               <div className="space-y-2">
@@ -284,7 +284,7 @@ export default function MasterBlogCategoriesPage() {
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => handleToggleSelect(cat.id)}
-                      className="w-4 h-4 rounded border-white/20 bg-slate-900 text-amber-500 focus:ring-amber-400 cursor-pointer accent-amber-500"
+                      className="w-4 h-4 rounded border-white/20 bg-surface text-amber-500 focus:ring-amber-400 cursor-pointer accent-amber-500"
                     />
                     <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
                       <Tag className="w-4 h-4" />
@@ -294,7 +294,7 @@ export default function MasterBlogCategoriesPage() {
                       <span className="text-[10px] font-mono text-amber-400">/{cat.slug}</span>
                     </div>
                   </div>
-                  <span className="text-[10px] font-bold text-slate-400 bg-slate-950 border border-white/10 px-2 py-0.5 rounded-full font-mono">
+                  <span className="text-[10px] font-bold text-slate-400 bg-background border border-border px-2 py-0.5 rounded-full font-mono">
                     {cat.articleCount ?? 0} Posts
                   </span>
                 </div>
@@ -304,19 +304,19 @@ export default function MasterBlogCategoriesPage() {
                 </p>
               </div>
 
-              <div className="pt-3 border-t border-white/5 flex items-center justify-between">
+              <div className="pt-3 border-t border-border flex items-center justify-between">
                 <span className="text-[10px] font-mono text-slate-500">Created: {cat.createdAt}</span>
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => openEditModal(cat)}
-                    className="p-1.5 bg-slate-950 text-slate-300 hover:text-white border border-white/10 hover:border-amber-400/40 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                    className="p-1.5 bg-background text-slate-300 hover:text-white border border-border hover:border-amber-400/40 rounded-lg text-xs font-bold transition-all cursor-pointer"
                     title="Edit Category"
                   >
                     <Edit2 className="w-3.5 h-3.5 text-amber-400" />
                   </button>
                   <button
                     onClick={() => handleDeleteCategory(cat.id)}
-                    className="p-1.5 bg-slate-950 text-slate-400 hover:text-rose-400 border border-white/10 hover:border-rose-400/40 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                    className="p-1.5 bg-background text-slate-400 hover:text-rose-400 border border-border hover:border-rose-400/40 rounded-lg text-xs font-bold transition-all cursor-pointer"
                     title="Delete Category"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -332,7 +332,7 @@ export default function MasterBlogCategoriesPage() {
       {showModal && (
         <Portal>
           <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-            <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
+            <div className="bg-surface border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
               <button
                 onClick={() => setShowModal(false)}
                 className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
@@ -340,7 +340,7 @@ export default function MasterBlogCategoriesPage() {
                 <X className="w-5 h-5" />
               </button>
 
-              <div className="space-y-1 border-b border-white/10 pb-3">
+              <div className="space-y-1 border-b border-border pb-3">
                 <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">
                   {editingCategory ? "Update Category" : "New Taxonomy"}
                 </span>
@@ -362,7 +362,7 @@ export default function MasterBlogCategoriesPage() {
                       const autoSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
                       setFormData({ ...formData, name, slug: editingCategory ? formData.slug : autoSlug });
                     }}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
+                    className="w-full bg-background border border-border rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
                   />
                 </div>
 
@@ -374,7 +374,7 @@ export default function MasterBlogCategoriesPage() {
                     placeholder="e.g. wedding-car-rentals"
                     value={formData.slug}
                     onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                    className="w-full bg-background border border-border rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                   />
                 </div>
 
@@ -385,15 +385,15 @@ export default function MasterBlogCategoriesPage() {
                     placeholder="Brief description of the articles and topics covered under this category..."
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-sans"
+                    className="w-full bg-background border border-border rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-sans"
                   />
                 </div>
 
-                <div className="pt-3 border-t border-white/10 flex justify-end gap-3">
+                <div className="pt-3 border-t border-border flex justify-end gap-3">
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="px-5 py-2 bg-slate-950 text-slate-400 hover:text-white rounded-xl text-xs font-bold cursor-pointer"
+                    className="px-5 py-2 bg-background text-slate-400 hover:text-white rounded-xl text-xs font-bold cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -412,3 +412,4 @@ export default function MasterBlogCategoriesPage() {
     </div>
   );
 }
+

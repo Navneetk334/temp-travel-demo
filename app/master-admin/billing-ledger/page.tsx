@@ -63,25 +63,25 @@ export default async function BillingLedgerPage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-slate-900 border border-white/5 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+        <div className="bg-surface border border-border rounded-2xl p-5 shadow-lg relative overflow-hidden">
           <div className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Total Revenue</div>
           <div className="text-3xl font-black text-emerald-400">₹{totalRevenue.toLocaleString()}</div>
         </div>
-        <div className="bg-slate-900 border border-white/5 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+        <div className="bg-surface border border-border rounded-2xl p-5 shadow-lg relative overflow-hidden">
           <div className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Total Bookings</div>
           <div className="text-3xl font-black text-amber-400">{bookings.length}</div>
         </div>
-        <div className="bg-slate-900 border border-white/5 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+        <div className="bg-surface border border-border rounded-2xl p-5 shadow-lg relative overflow-hidden">
           <div className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Pending Payments</div>
           <div className="text-3xl font-black text-rose-400">{pendingPayments}</div>
         </div>
       </div>
 
       {/* Ledger Table */}
-      <div className="bg-slate-900/80 backdrop-blur-xl border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
+      <div className="bg-surface/80 backdrop-blur-xl border border-border rounded-2xl overflow-hidden shadow-2xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-slate-950/50 text-xs uppercase font-black text-slate-400 tracking-wider">
+            <thead className="bg-background/50 text-xs uppercase font-black text-slate-400 tracking-wider">
               <tr>
                 <th className="px-6 py-4">Booking ID</th>
                 <th className="px-6 py-4">Customer</th>
@@ -141,3 +141,4 @@ export default async function BillingLedgerPage() {
     </div>
   );
 }
+

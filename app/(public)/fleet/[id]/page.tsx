@@ -28,7 +28,7 @@ export default async function VehicleDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="bg-slate-950 min-h-screen text-slate-100 pt-32 sm:pt-36 lg:pt-40 pb-16 px-4 sm:px-6 lg:px-8">
+    <div className="bg-background min-h-screen text-slate-100 pt-32 sm:pt-36 lg:pt-40 pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-12">
         {/* Breadcrumbs */}
         <div className="text-xs font-semibold text-slate-400 uppercase tracking-widest flex gap-2">
@@ -38,13 +38,13 @@ export default async function VehicleDetailPage({ params }: PageProps) {
         </div>
 
         {/* Title and Badge Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-6 border-b border-white/5">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-6 border-b border-border">
           <div className="space-y-2">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-50 tracking-tight leading-tight">
               {vehicle.make} {vehicle.model}
             </h1>
             <div className="flex items-center gap-4 text-xs font-bold text-slate-400 uppercase tracking-wider">
-              <span className="bg-white/5 py-1 px-3 rounded-full text-accent border border-white/10">{vehicle.category.name}</span>
+              <span className="bg-white/5 py-1 px-3 rounded-full text-accent border border-border">{vehicle.category.name}</span>
               <span className="flex items-center gap-1">
                 <Users className="w-4 h-4 text-accent" />
                 <span>{vehicle.capacity} Seater Capacity</span>
@@ -52,7 +52,7 @@ export default async function VehicleDetailPage({ params }: PageProps) {
             </div>
           </div>
 
-          <div className="bg-slate-900 border border-white/5 p-4 rounded-xl">
+          <div className="bg-surface border border-border p-4 rounded-xl">
             <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Estimated Base Rate</div>
             <div className="text-2xl font-extrabold text-slate-50 mt-1">
               ₹{Number(vehicle.category.baseKmsRate)}/km
@@ -67,7 +67,7 @@ export default async function VehicleDetailPage({ params }: PageProps) {
           {/* Vehicle Specifications */}
           <div className="lg:col-span-8 space-y-12">
             {/* Image display - Render uploaded vehicle image first! */}
-            <div className="relative h-[300px] md:h-[450px] bg-slate-900 rounded-xl overflow-hidden border border-white/5">
+            <div className="relative h-[300px] md:h-[450px] bg-surface rounded-xl overflow-hidden border border-border">
               <img
                 src={vehicle.imageUrl || vehicle.category.imageUrl || "/images/fleet-suv.png"}
                 alt={`${vehicle.make} ${vehicle.model} showcase`}
@@ -77,17 +77,17 @@ export default async function VehicleDetailPage({ params }: PageProps) {
 
             {/* Specifications Cards */}
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-slate-50 border-b border-white/5 pb-2">Vehicle Specifications</h2>
+              <h2 className="text-2xl font-bold text-slate-50 border-b border-border pb-2">Vehicle Specifications</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-slate-900/60 p-4 border border-white/5 rounded-xl space-y-1">
+                <div className="bg-surface/60 p-4 border border-border rounded-xl space-y-1">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Local Package Base</span>
                   <span className="font-bold text-slate-200 text-sm">8 Hrs / 80 Kms</span>
                 </div>
-                <div className="bg-slate-900/60 p-4 border border-white/5 rounded-xl space-y-1">
+                <div className="bg-surface/60 p-4 border border-border rounded-xl space-y-1">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Extra Hour Surcharge</span>
                   <span className="font-bold text-slate-200 text-sm">₹{Number((vehicle as any).extraHrRate ?? vehicle.category.extraHrRate)} / Hr</span>
                 </div>
-                <div className="bg-slate-900/60 p-4 border border-white/5 rounded-xl space-y-1">
+                <div className="bg-surface/60 p-4 border border-border rounded-xl space-y-1">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Extra Distance Surcharge</span>
                   <span className="font-bold text-slate-200 text-sm">₹{Number((vehicle as any).extraKmRate ?? vehicle.category.extraKmRate)} / Km</span>
                 </div>
@@ -96,7 +96,7 @@ export default async function VehicleDetailPage({ params }: PageProps) {
 
             {/* Driver Details */}
             {vehicle.driver && (
-              <div className="bg-white/5 border border-white/5 p-6 rounded-xl space-y-4">
+              <div className="bg-white/5 border border-border p-6 rounded-xl space-y-4">
                 <h3 className="font-bold text-slate-100 text-md flex items-center gap-2">
                   <ShieldCheck className="w-5 h-5 text-green-400" />
                   <span>Vetted Chauffeur Allocated</span>

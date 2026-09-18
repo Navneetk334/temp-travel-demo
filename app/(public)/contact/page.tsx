@@ -61,7 +61,7 @@ export default function ContactPage() {
           </div>
 
           <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 text-center space-y-6 relative z-10 pt-4">
-            <span className="text-xs font-bold text-accent uppercase tracking-widest bg-white/5 border border-white/10 px-3 py-1 rounded-full">
+            <span className="text-xs font-bold text-accent uppercase tracking-widest bg-white/5 border border-border px-3 py-1 rounded-full">
               Get In Touch
             </span>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900">
@@ -192,7 +192,7 @@ export default function ContactPage() {
             </div>
 
             {/* Real Interactive Google Maps Container */}
-            <div className="relative bg-slate-50 border border-white/10 rounded-2xl h-[420px] overflow-hidden shadow-2xl group">
+            <div className="relative bg-slate-50 border border-border rounded-2xl h-[420px] overflow-hidden shadow-2xl group">
               {/* Real Google Maps Embed Iframe */}
               <iframe
                 title="TEMP TRAVEL CAR RENTALS PVT LTD - Google Maps Location"
@@ -233,3 +233,4 @@ export default function ContactPage() {
     </>
   );
 }
+

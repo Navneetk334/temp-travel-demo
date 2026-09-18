@@ -98,11 +98,11 @@ export default function AdminLayout({
   );
 
   return (
-    <div className="min-h-screen bg-slate-950 flex">
+    <div className="min-h-screen bg-background flex">
       {/* 1. Sidebar Panel for Desktop (Fixed) */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-slate-900 border-r border-white/5 z-40 shrink-0">
+      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-surface border-r border-border z-40 shrink-0">
         {/* Brand identity */}
-        <div className="h-20 px-4 border-b border-white/5 flex items-center justify-center text-center">
+        <div className="h-20 px-4 border-b border-border flex items-center justify-center text-center">
           <Link href="/admin" className="inline-flex items-center justify-center" title="Admin Home">
             <img
               src="/images/logo.png"
@@ -137,7 +137,7 @@ export default function AdminLayout({
         </nav>
 
         {/* User profile & logout */}
-        <div className="p-4 border-t border-white/5 flex items-center justify-between">
+        <div className="p-4 border-t border-border flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-accent/20 border border-accent/40 flex items-center justify-center text-accent font-bold text-xs">
               {adminSession.name.charAt(0)}
@@ -161,7 +161,7 @@ export default function AdminLayout({
       <div className="flex-1 flex flex-col min-w-0 lg:pl-64 overflow-x-hidden min-h-screen">
 
         {/* Header toolbar */}
-        <header className="h-20 bg-slate-900 border-b border-white/5 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-30">
+        <header className="h-20 bg-surface border-b border-border flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-30">
           <button
             onClick={() => setMobileOpen(true)}
             className="lg:hidden p-2 text-slate-400 hover:text-slate-200"
@@ -176,13 +176,13 @@ export default function AdminLayout({
 
           {/* Controls */}
           <div className="flex items-center gap-4 ml-auto">
-            <button className="relative p-2 bg-slate-950 border border-white/5 rounded-lg text-slate-400 hover:text-slate-200">
+            <button className="relative p-2 bg-background border border-border rounded-lg text-slate-400 hover:text-slate-200">
               <Bell className="w-4.5 h-4.5" />
               <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-accent rounded-full animate-ping" />
             </button>
             <div className="h-6 w-px bg-white/5" />
             <div className="flex items-center gap-2.5 text-xs">
-              <div className="w-7 h-7 bg-white/5 rounded-lg flex items-center justify-center text-accent border border-white/5 font-bold">
+              <div className="w-7 h-7 bg-white/5 rounded-lg flex items-center justify-center text-accent border border-border font-bold">
                 {adminSession.role.charAt(0)}
               </div>
               <div className="hidden sm:block text-slate-300 font-bold">{adminSession.name}</div>
@@ -199,10 +199,10 @@ export default function AdminLayout({
       {/* Mobile Drawer Slide-out */}
       {mobileOpen && (
         <div className="fixed inset-0 z-[9999] flex lg:hidden bg-black/60 backdrop-blur-sm">
-          <div className="bg-slate-900 w-64 p-6 relative flex flex-col justify-between h-full border-r border-white/10">
+          <div className="bg-surface w-64 p-6 relative flex flex-col justify-between h-full border-r border-border">
             <button
               onClick={() => setMobileOpen(false)}
-              className="absolute top-6 right-6 p-1 bg-slate-950 border border-white/5 rounded-lg text-slate-400"
+              className="absolute top-6 right-6 p-1 bg-background border border-border rounded-lg text-slate-400"
             >
               <X className="w-4 h-4" />
             </button>
@@ -238,7 +238,7 @@ export default function AdminLayout({
               </nav>
             </div>
 
-            <div className="flex items-center justify-between border-t border-white/5 pt-4 text-xs mt-auto">
+            <div className="flex items-center justify-between border-t border-border pt-4 text-xs mt-auto">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-accent font-bold">
                   {adminSession.name.charAt(0)}
@@ -255,3 +255,4 @@ export default function AdminLayout({
     </div>
   );
 }
+

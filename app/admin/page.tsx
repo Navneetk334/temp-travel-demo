@@ -261,9 +261,9 @@ export default async function AdminDashboardPage() {
   ];
 
   return (
-    <div className="bg-slate-950 min-h-screen text-slate-100 p-8 space-y-8">
+    <div className="bg-background min-h-screen text-slate-100 p-8 space-y-8">
       {/* Title Header */}
-      <div className="flex justify-between items-center border-b border-white/5 pb-6">
+      <div className="flex justify-between items-center border-b border-border pb-6">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-50 tracking-tight">
             Dashboard Overview
@@ -280,14 +280,14 @@ export default async function AdminDashboardPage() {
             <Link 
               key={i} 
               href={c.href}
-              className="glassmorphism p-4 rounded-xl border border-white/5 space-y-2 shadow-md flex justify-between items-start hover:border-primary/40 transition-all block group"
+              className="glassmorphism p-4 rounded-xl border border-border space-y-2 shadow-md flex justify-between items-start hover:border-primary/40 transition-all block group"
             >
               <div className="space-y-1">
                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">{c.title}</span>
                 <div className="text-lg font-extrabold text-slate-50 group-hover:text-accent transition-colors">{c.value}</div>
                 <div className="text-[9px] text-slate-500 font-semibold truncate">{c.change}</div>
               </div>
-              <div className={`p-2 bg-white/5 border border-white/5 rounded-lg shrink-0 ${c.color}`}>
+              <div className={`p-2 bg-white/5 border border-border rounded-lg shrink-0 ${c.color}`}>
                 <Icon className="w-4 h-4" />
               </div>
             </Link>
@@ -305,7 +305,7 @@ export default async function AdminDashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* Recent Bookings Dispatch Table */}
-        <div className="lg:col-span-8 glassmorphism p-6 rounded-xl border border-white/5 space-y-4 overflow-hidden">
+        <div className="lg:col-span-8 glassmorphism p-6 rounded-xl border border-border space-y-4 overflow-hidden">
           <div className="flex justify-between items-center">
             <h2 className="text-lg font-bold text-slate-50">Recent Ride Dispatches</h2>
             <Link 
@@ -319,7 +319,7 @@ export default async function AdminDashboardPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-900 border-b border-white/5 text-slate-400 font-semibold uppercase tracking-wider">
+                <tr className="bg-surface border-b border-border text-slate-400 font-semibold uppercase tracking-wider">
                   <th className="p-3">Booking ID</th>
                   <th className="p-3">Customer</th>
                   <th className="p-3">Category</th>
@@ -368,13 +368,13 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* Recent Submissions Widget */}
-        <div className="lg:col-span-4 glassmorphism p-6 rounded-xl border border-white/5 space-y-4">
+        <div className="lg:col-span-4 glassmorphism p-6 rounded-xl border border-border space-y-4">
           <h2 className="text-lg font-bold text-slate-50">Recent Pipeline Submissions</h2>
           <div className="space-y-3">
             
             {/* Pickup & Drop Leads Group */}
             {recentPickupDropLeads.map((lead) => (
-              <div key={lead.id} className="bg-slate-950/45 p-3 rounded-lg border border-white/5 text-xs space-y-1 hover:border-yellow-500/20 transition-all">
+              <div key={lead.id} className="bg-background/45 p-3 rounded-lg border border-border text-xs space-y-1 hover:border-yellow-500/20 transition-all">
                 <div className="flex justify-between items-center">
                   <span className="font-extrabold text-yellow-400 uppercase tracking-widest text-[9px] flex items-center gap-1">
                     <Building2 className="w-3 h-3" />
@@ -389,7 +389,7 @@ export default async function AdminDashboardPage() {
 
             {/* Local Rental Leads Group */}
             {recentLocalLeads.map((lead) => (
-              <div key={lead.id} className="bg-slate-950/45 p-3 rounded-lg border border-white/5 text-xs space-y-1 hover:border-purple-500/20 transition-all">
+              <div key={lead.id} className="bg-background/45 p-3 rounded-lg border border-border text-xs space-y-1 hover:border-purple-500/20 transition-all">
                 <div className="flex justify-between items-center">
                   <span className="font-extrabold text-purple-400 uppercase tracking-widest text-[9px] flex items-center gap-1">
                     <Clock className="w-3 h-3" />
@@ -404,7 +404,7 @@ export default async function AdminDashboardPage() {
 
             {/* Outstation Leads Group */}
             {recentOutstationLeads.map((lead) => (
-              <div key={lead.id} className="bg-slate-950/45 p-3 rounded-lg border border-white/5 text-xs space-y-1 hover:border-cyan-500/20 transition-all">
+              <div key={lead.id} className="bg-background/45 p-3 rounded-lg border border-border text-xs space-y-1 hover:border-cyan-500/20 transition-all">
                 <div className="flex justify-between items-center">
                   <span className="font-extrabold text-cyan-400 uppercase tracking-widest text-[9px] flex items-center gap-1">
                     <Compass className="w-3 h-3" />
@@ -419,7 +419,7 @@ export default async function AdminDashboardPage() {
 
             {/* Corporate Inquiry Leads Group */}
             {recentCorporateInquiryLeads.map((lead) => (
-              <div key={lead.id} className="bg-slate-950/45 p-3 rounded-lg border border-white/5 text-xs space-y-1 hover:border-amber-500/20 transition-all">
+              <div key={lead.id} className="bg-background/45 p-3 rounded-lg border border-border text-xs space-y-1 hover:border-amber-500/20 transition-all">
                 <div className="flex justify-between items-center">
                   <span className="font-extrabold text-amber-400 uppercase tracking-widest text-[9px] flex items-center gap-1">
                     <Briefcase className="w-3 h-3" />
@@ -434,7 +434,7 @@ export default async function AdminDashboardPage() {
 
             {/* Contact Leads Group */}
             {recentContactLeads.map((lead) => (
-              <div key={lead.id} className="bg-slate-950/45 p-3 rounded-lg border border-white/5 text-xs space-y-1 hover:border-blue-500/20 transition-all">
+              <div key={lead.id} className="bg-background/45 p-3 rounded-lg border border-border text-xs space-y-1 hover:border-blue-500/20 transition-all">
                 <div className="flex justify-between items-center">
                   <span className="font-extrabold text-blue-400 uppercase tracking-widest text-[9px] flex items-center gap-1">
                     <Mail className="w-3 h-3" />
@@ -458,3 +458,4 @@ export default async function AdminDashboardPage() {
     </div>
   );
 }
+

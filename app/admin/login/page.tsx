@@ -69,7 +69,7 @@ function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md bg-slate-900 border border-white/10 rounded-2xl p-8 shadow-2xl space-y-6">
+    <div className="w-full max-w-md bg-surface border border-border rounded-2xl p-8 shadow-2xl space-y-6">
       {/* Brand Header */}
       <div className="text-center space-y-2">
         <img
@@ -113,7 +113,7 @@ function LoginForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@temptravels.com"
-                className="w-full bg-slate-950 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-colors"
+                className="w-full bg-background border border-border rounded-lg py-2.5 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-colors"
               />
             </div>
           </div>
@@ -134,7 +134,7 @@ function LoginForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-slate-950 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-colors"
+                  className="w-full bg-background border border-border rounded-lg py-2.5 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-colors"
                 />
               </div>
             </div>
@@ -168,7 +168,7 @@ function LoginForm() {
 
       {/* Footer Hint */}
       {!isForgotMode && !forgotSuccess && (
-        <div className="pt-4 border-t border-white/5 text-center text-[10px] text-slate-500">
+        <div className="pt-4 border-t border-border text-center text-[10px] text-slate-500">
           Super Admin Credentials: <span className="text-slate-400 font-mono">admin@temptravels.com</span> / <span className="text-slate-400 font-mono">admin123</span>
         </div>
       )}
@@ -178,7 +178,7 @@ function LoginForm() {
 
 export default function AdminLoginPage() {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center items-center p-4">
+    <div className="min-h-screen bg-background text-slate-100 flex flex-col justify-center items-center p-4">
       <Suspense fallback={
         <div className="text-slate-400 text-xs flex items-center gap-2">
           <Loader2 className="w-4 h-4 animate-spin" />
@@ -190,3 +190,4 @@ export default function AdminLoginPage() {
     </div>
   );
 }
+

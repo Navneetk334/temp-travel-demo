@@ -679,10 +679,10 @@ export default function AdminFleetPage() {
   };
 
   return (
-    <div className="bg-slate-950 min-h-screen text-slate-100 p-8 space-y-8">
+    <div className="bg-background min-h-screen text-slate-100 p-8 space-y-8">
       
       {/* Title Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/5 pb-6 gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-border pb-6 gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-50 tracking-tight flex items-center gap-2.5">
             <Car className="w-8 h-8 text-accent" />
@@ -699,7 +699,7 @@ export default function AdminFleetPage() {
         <div 
           onClick={() => { setStatusFilter(""); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "" ? "border-accent bg-accent/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "" ? "border-accent bg-accent/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Total Fleet Vehicles</div>
@@ -709,7 +709,7 @@ export default function AdminFleetPage() {
         <div 
           onClick={() => { setStatusFilter("AVAILABLE"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "AVAILABLE" ? "border-emerald-400 bg-emerald-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "AVAILABLE" ? "border-emerald-400 bg-emerald-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-emerald-400 uppercase font-bold tracking-wider">AVAILABLE</div>
@@ -719,7 +719,7 @@ export default function AdminFleetPage() {
         <div 
           onClick={() => { setStatusFilter("ON_TRIP"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "ON_TRIP" ? "border-blue-400 bg-blue-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "ON_TRIP" ? "border-blue-400 bg-blue-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-blue-400 uppercase font-bold tracking-wider">ON TRIP</div>
@@ -729,7 +729,7 @@ export default function AdminFleetPage() {
         <div 
           onClick={() => { setStatusFilter("MAINTENANCE"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "MAINTENANCE" ? "border-yellow-400 bg-yellow-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "MAINTENANCE" ? "border-yellow-400 bg-yellow-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-yellow-400 uppercase font-bold tracking-wider">MAINTENANCE</div>
@@ -739,7 +739,7 @@ export default function AdminFleetPage() {
         <div 
           onClick={() => { setStatusFilter("INACTIVE"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "INACTIVE" ? "border-rose-400 bg-rose-500/10" : "border-white/5 hover:border-white/20"
+            statusFilter === "INACTIVE" ? "border-rose-400 bg-rose-500/10" : "border-border hover:border-white/20"
           }`}
         >
           <div className="text-[10px] text-rose-400 uppercase font-bold tracking-wider">INACTIVE</div>
@@ -748,7 +748,7 @@ export default function AdminFleetPage() {
       </div>
 
       {/* Filter & Control Toolbar */}
-      <div className="glassmorphism p-6 rounded-xl border border-white/5 flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="glassmorphism p-6 rounded-xl border border-border flex flex-col md:flex-row gap-4 items-center justify-between">
         
         {/* Search */}
         <div className="relative w-full md:w-72">
@@ -758,7 +758,7 @@ export default function AdminFleetPage() {
             placeholder="Search model, make, reg number..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-            className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all"
+            className="w-full bg-background/60 border border-border rounded-lg py-2 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-all"
           />
         </div>
 
@@ -768,11 +768,11 @@ export default function AdminFleetPage() {
           <select
             value={categoryFilter}
             onChange={(e) => { setCategoryFilter(e.target.value); setCurrentPage(1); }}
-            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+            className="bg-background/60 border border-border rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
           >
-            <option value="" className="bg-slate-900">All Vehicle Categories</option>
+            <option value="" className="bg-surface">All Vehicle Categories</option>
             {categories.map((c) => (
-              <option key={c.id} value={c.id} className="bg-slate-900">{c.name}</option>
+              <option key={c.id} value={c.id} className="bg-surface">{c.name}</option>
             ))}
           </select>
 
@@ -780,38 +780,38 @@ export default function AdminFleetPage() {
           <select
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+            className="bg-background/60 border border-border rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
           >
-            <option value="" className="bg-slate-900">All Statuses</option>
-            <option value="AVAILABLE" className="bg-slate-900 text-emerald-400">AVAILABLE</option>
-            <option value="ON_TRIP" className="bg-slate-900 text-blue-400">ON TRIP</option>
-            <option value="MAINTENANCE" className="bg-slate-900 text-yellow-400">MAINTENANCE</option>
-            <option value="INACTIVE" className="bg-slate-900 text-rose-400">INACTIVE</option>
+            <option value="" className="bg-surface">All Statuses</option>
+            <option value="AVAILABLE" className="bg-surface text-emerald-400">AVAILABLE</option>
+            <option value="ON_TRIP" className="bg-surface text-blue-400">ON TRIP</option>
+            <option value="MAINTENANCE" className="bg-surface text-yellow-400">MAINTENANCE</option>
+            <option value="INACTIVE" className="bg-surface text-rose-400">INACTIVE</option>
           </select>
 
           {/* Fuel Type */}
           <select
             value={fuelTypeFilter}
             onChange={(e) => { setFuelTypeFilter(e.target.value); setCurrentPage(1); }}
-            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+            className="bg-background/60 border border-border rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
           >
-            <option value="" className="bg-slate-900">All Fuel Types</option>
-            <option value="DIESEL" className="bg-slate-900">Diesel</option>
-            <option value="PETROL" className="bg-slate-900">Petrol</option>
-            <option value="ELECTRIC" className="bg-slate-900">Electric</option>
-            <option value="CNG" className="bg-slate-900">CNG</option>
-            <option value="HYBRID" className="bg-slate-900">Hybrid</option>
+            <option value="" className="bg-surface">All Fuel Types</option>
+            <option value="DIESEL" className="bg-surface">Diesel</option>
+            <option value="PETROL" className="bg-surface">Petrol</option>
+            <option value="ELECTRIC" className="bg-surface">Electric</option>
+            <option value="CNG" className="bg-surface">CNG</option>
+            <option value="HYBRID" className="bg-surface">Hybrid</option>
           </select>
 
           {/* Transmission */}
           <select
             value={transmissionFilter}
             onChange={(e) => { setTransmissionFilter(e.target.value); setCurrentPage(1); }}
-            className="bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
+            className="bg-background/60 border border-border rounded-lg py-2 px-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
           >
-            <option value="" className="bg-slate-900">All Transmissions</option>
-            <option value="MANUAL" className="bg-slate-900">Manual</option>
-            <option value="AUTOMATIC" className="bg-slate-900">Automatic</option>
+            <option value="" className="bg-surface">All Transmissions</option>
+            <option value="MANUAL" className="bg-surface">Manual</option>
+            <option value="AUTOMATIC" className="bg-surface">Automatic</option>
           </select>
         </div>
 
@@ -837,7 +837,7 @@ export default function AdminFleetPage() {
       )}
 
       {/* Fleet Vehicles Table Grid */}
-      <div className="glassmorphism rounded-xl border border-white/5 overflow-hidden flex flex-col">
+      <div className="glassmorphism rounded-xl border border-border overflow-hidden flex flex-col">
         {loading ? (
           <div className="text-center py-16 text-slate-400 text-xs">Loading fleet vehicle database...</div>
         ) : (
@@ -845,13 +845,13 @@ export default function AdminFleetPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-slate-900 border-b border-white/5 text-slate-400 font-semibold uppercase tracking-wider">
+                  <tr className="bg-surface border-b border-border text-slate-400 font-semibold uppercase tracking-wider">
                     <th className="p-4 w-10 text-center">
                       <input
                         type="checkbox"
                         checked={vehicles.length > 0 && selectedIds.length === vehicles.length}
                         onChange={handleSelectAll}
-                        className="w-4 h-4 rounded text-amber-500 bg-slate-950 border-white/20 focus:ring-0 cursor-pointer"
+                        className="w-4 h-4 rounded text-amber-500 bg-background border-white/20 focus:ring-0 cursor-pointer"
                       />
                     </th>
                     <th className="p-4 w-12 text-center">S. No.</th>
@@ -877,7 +877,7 @@ export default function AdminFleetPage() {
                             type="checkbox"
                             checked={selectedIds.includes(v.id)}
                             onChange={() => handleSelectOne(v.id)}
-                            className="w-4 h-4 rounded text-amber-500 bg-slate-950 border-white/20 focus:ring-0 cursor-pointer"
+                            className="w-4 h-4 rounded text-amber-500 bg-background border-white/20 focus:ring-0 cursor-pointer"
                           />
                         </td>
                         <td className="p-4 text-center font-mono font-bold text-slate-400">
@@ -888,7 +888,7 @@ export default function AdminFleetPage() {
                             <img
                               src={v.imageUrl || "/images/hero-car.png"}
                               alt={v.model}
-                              className="w-12 h-9 object-cover rounded-lg border border-white/10 shrink-0 bg-slate-950"
+                              className="w-12 h-9 object-cover rounded-lg border border-border shrink-0 bg-background"
                               onError={(e) => {
                                 (e.target as HTMLElement).setAttribute("src", "/images/hero-car.png");
                               }}
@@ -954,7 +954,7 @@ export default function AdminFleetPage() {
             </div>
 
             {/* Pagination Bar */}
-            <div className="p-4 bg-slate-900/60 border-t border-white/5 flex items-center justify-between text-xs text-slate-400">
+            <div className="p-4 bg-surface/60 border-t border-border flex items-center justify-between text-xs text-slate-400">
               <div>
                 Showing <span className="font-bold text-slate-200">{totalCount > 0 ? (currentPage - 1) * pageSize + 1 : 0}</span> to <span className="font-bold text-slate-200">{Math.min(currentPage * pageSize, totalCount)}</span> of <span className="font-bold text-slate-200">{totalCount}</span> vehicles
               </div>
@@ -965,7 +965,7 @@ export default function AdminFleetPage() {
                   <select
                     value={pageSize}
                     onChange={(e) => { setPageSize(parseInt(e.target.value)); setCurrentPage(1); }}
-                    className="bg-slate-950 border border-white/10 rounded px-2 py-1 text-slate-200"
+                    className="bg-background border border-border rounded px-2 py-1 text-slate-200"
                   >
                     <option value="5">5</option>
                     <option value="10">10</option>
@@ -978,7 +978,7 @@ export default function AdminFleetPage() {
                   <button
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage(currentPage - 1)}
-                    className="p-1 bg-slate-950 border border-white/10 rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
+                    className="p-1 bg-background border border-border rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
@@ -986,7 +986,7 @@ export default function AdminFleetPage() {
                   <button
                     disabled={currentPage >= totalPages}
                     onClick={() => setCurrentPage(currentPage + 1)}
-                    className="p-1 bg-slate-950 border border-white/10 rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
+                    className="p-1 bg-background border border-border rounded text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -1001,9 +1001,9 @@ export default function AdminFleetPage() {
       {isModalOpen && (
         <Portal>
           <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-white/10 rounded-2xl max-w-4xl lg:max-w-5xl w-full p-6 md:p-8 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-thin">
+          <div className="bg-surface border border-border rounded-2xl max-w-4xl lg:max-w-5xl w-full p-6 md:p-8 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-thin">
             
-            <div className="flex justify-between items-center border-b border-white/5 pb-4">
+            <div className="flex justify-between items-center border-b border-border pb-4">
               <div>
                 <h3 className="text-lg font-bold text-slate-50">
                   {editingVehicle ? "Edit Fleet Vehicle Specifications" : "Register New Fleet Vehicle"}
@@ -1037,7 +1037,7 @@ export default function AdminFleetPage() {
                     placeholder="e.g. Toyota, Mahindra, Force"
                     value={formData.make}
                     onChange={(e) => setFormData({ ...formData, make: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                   />
                 </div>
 
@@ -1049,7 +1049,7 @@ export default function AdminFleetPage() {
                     placeholder="e.g. Innova Crysta, Scorpio, Urbania"
                     value={formData.model}
                     onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                   />
                 </div>
 
@@ -1061,7 +1061,7 @@ export default function AdminFleetPage() {
                     placeholder="e.g. MH12PQ9999 or HR26AB1234"
                     value={formData.registrationNumber}
                     onChange={(e) => setFormData({ ...formData, registrationNumber: e.target.value.toUpperCase() })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono font-bold focus:outline-none focus:border-accent"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 font-mono font-bold focus:outline-none focus:border-accent"
                   />
                 </div>
               </div>
@@ -1077,11 +1077,11 @@ export default function AdminFleetPage() {
                       const newCatId = e.target.value;
                       setFormData({ ...formData, categoryId: newCatId, subCategory: "" });
                     }}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                   >
                     <option value="" disabled>-- Select Vehicle Category --</option>
                     {activeCategories.map((c) => (
-                      <option key={c.id} value={c.id} className="bg-slate-900">{c.name}</option>
+                      <option key={c.id} value={c.id} className="bg-surface">{c.name}</option>
                     ))}
                   </select>
                 </div>
@@ -1092,7 +1092,7 @@ export default function AdminFleetPage() {
                     required
                     value={formData.subCategory}
                     onChange={(e) => setFormData({ ...formData, subCategory: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                   >
                     <option value="" disabled>-- Select Vehicle Class --</option>
                     {(() => {
@@ -1102,30 +1102,30 @@ export default function AdminFleetPage() {
                       if (catName.includes("sedan")) {
                         return (
                           <>
-                            <option value="Compact" className="bg-slate-900">Compact (e.g. Swift Dzire, Aura, Amaze)</option>
-                            <option value="Executive" className="bg-slate-900">Executive (e.g. Honda City, Verna, Ciaz)</option>
-                            <option value="Premium Executive" className="bg-slate-900">Premium Executive (e.g. Camry, Superb)</option>
-                            <option value="Luxury" className="bg-slate-900">Luxury (e.g. E-Class, 5 Series, A6)</option>
+                            <option value="Compact" className="bg-surface">Compact (e.g. Swift Dzire, Aura, Amaze)</option>
+                            <option value="Executive" className="bg-surface">Executive (e.g. Honda City, Verna, Ciaz)</option>
+                            <option value="Premium Executive" className="bg-surface">Premium Executive (e.g. Camry, Superb)</option>
+                            <option value="Luxury" className="bg-surface">Luxury (e.g. E-Class, 5 Series, A6)</option>
                           </>
                         );
                       }
                       if (catName.includes("suv")) {
                         return (
                           <>
-                            <option value="Subcompact / Urban" className="bg-slate-900">Subcompact / Urban (e.g. Brezza, Nexon, Venue)</option>
-                            <option value="Mid-Premium" className="bg-slate-900">Mid-Premium (e.g. Creta, Seltos, Harrier)</option>
-                            <option value="Premium" className="bg-slate-900">Premium (e.g. Innova Crysta, XUV700, Safari)</option>
-                            <option value="Luxury" className="bg-slate-900">Luxury (e.g. Fortuner, GLE, X5)</option>
+                            <option value="Subcompact / Urban" className="bg-surface">Subcompact / Urban (e.g. Brezza, Nexon, Venue)</option>
+                            <option value="Mid-Premium" className="bg-surface">Mid-Premium (e.g. Creta, Seltos, Harrier)</option>
+                            <option value="Premium" className="bg-surface">Premium (e.g. Innova Crysta, XUV700, Safari)</option>
+                            <option value="Luxury" className="bg-surface">Luxury (e.g. Fortuner, GLE, X5)</option>
                           </>
                         );
                       }
                       return (
                         <>
-                          <option value="Compact" className="bg-slate-900">Compact</option>
-                          <option value="Standard" className="bg-slate-900">Standard</option>
-                          <option value="Executive" className="bg-slate-900">Executive</option>
-                          <option value="Premium" className="bg-slate-900">Premium</option>
-                          <option value="Luxury" className="bg-slate-900">Luxury</option>
+                          <option value="Compact" className="bg-surface">Compact</option>
+                          <option value="Standard" className="bg-surface">Standard</option>
+                          <option value="Executive" className="bg-surface">Executive</option>
+                          <option value="Premium" className="bg-surface">Premium</option>
+                          <option value="Luxury" className="bg-surface">Luxury</option>
                         </>
                       );
                     })()}
@@ -1140,7 +1140,7 @@ export default function AdminFleetPage() {
                     required
                     value={formData.capacity}
                     onChange={(e) => setFormData({ ...formData, capacity: parseInt(e.target.value, 10) || 1 })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                   />
                 </div>
               </div>
@@ -1152,13 +1152,13 @@ export default function AdminFleetPage() {
                   <select
                     value={formData.fuelType}
                     onChange={(e) => setFormData({ ...formData, fuelType: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                   >
-                    <option value="DIESEL" className="bg-slate-900">Diesel</option>
-                    <option value="PETROL" className="bg-slate-900">Petrol</option>
-                    <option value="ELECTRIC" className="bg-slate-900">Electric</option>
-                    <option value="CNG" className="bg-slate-900">CNG</option>
-                    <option value="HYBRID" className="bg-slate-900">Hybrid</option>
+                    <option value="DIESEL" className="bg-surface">Diesel</option>
+                    <option value="PETROL" className="bg-surface">Petrol</option>
+                    <option value="ELECTRIC" className="bg-surface">Electric</option>
+                    <option value="CNG" className="bg-surface">CNG</option>
+                    <option value="HYBRID" className="bg-surface">Hybrid</option>
                   </select>
                 </div>
 
@@ -1167,10 +1167,10 @@ export default function AdminFleetPage() {
                   <select
                     value={formData.transmission}
                     onChange={(e) => setFormData({ ...formData, transmission: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                   >
-                    <option value="MANUAL" className="bg-slate-900">Manual</option>
-                    <option value="AUTOMATIC" className="bg-slate-900">Automatic</option>
+                    <option value="MANUAL" className="bg-surface">Manual</option>
+                    <option value="AUTOMATIC" className="bg-surface">Automatic</option>
                   </select>
                 </div>
 
@@ -1179,12 +1179,12 @@ export default function AdminFleetPage() {
                   <select
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value as VehicleStatus })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                   >
-                    <option value="AVAILABLE" className="bg-slate-900 text-emerald-400">AVAILABLE</option>
-                    <option value="ON_TRIP" className="bg-slate-900 text-blue-400">ON TRIP</option>
-                    <option value="MAINTENANCE" className="bg-slate-900 text-yellow-400">MAINTENANCE</option>
-                    <option value="INACTIVE" className="bg-slate-900 text-rose-400">INACTIVE</option>
+                    <option value="AVAILABLE" className="bg-surface text-emerald-400">AVAILABLE</option>
+                    <option value="ON_TRIP" className="bg-surface text-blue-400">ON TRIP</option>
+                    <option value="MAINTENANCE" className="bg-surface text-yellow-400">MAINTENANCE</option>
+                    <option value="INACTIVE" className="bg-surface text-rose-400">INACTIVE</option>
                   </select>
                 </div>
               </div>
@@ -1201,7 +1201,7 @@ export default function AdminFleetPage() {
                     placeholder="e.g. 18.50"
                     value={formData.perKmRate}
                     onChange={(e) => setFormData({ ...formData, perKmRate: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
                   />
                 </div>
 
@@ -1213,7 +1213,7 @@ export default function AdminFleetPage() {
                     placeholder="e.g. 3500.00"
                     value={formData.baseDailyRate}
                     onChange={(e) => setFormData({ ...formData, baseDailyRate: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
                   />
                 </div>
 
@@ -1225,7 +1225,7 @@ export default function AdminFleetPage() {
                     placeholder="e.g. 15.00"
                     value={formData.extraKmRate}
                     onChange={(e) => setFormData({ ...formData, extraKmRate: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
                   />
                 </div>
               </div>
@@ -1240,7 +1240,7 @@ export default function AdminFleetPage() {
                     placeholder="e.g. 200.00"
                     value={formData.extraHourRate}
                     onChange={(e) => setFormData({ ...formData, extraHourRate: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-accent"
                   />
                 </div>
 
@@ -1249,11 +1249,11 @@ export default function AdminFleetPage() {
                   <select
                     value={formData.driverId}
                     onChange={(e) => setFormData({ ...formData, driverId: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-accent"
                   >
                     <option value="">No Driver Assigned</option>
                     {drivers.map((d) => (
-                      <option key={d.id} value={d.id} className="bg-slate-900">
+                      <option key={d.id} value={d.id} className="bg-surface">
                         {d.name} ({d.phone})
                       </option>
                     ))}
@@ -1270,7 +1270,7 @@ export default function AdminFleetPage() {
                 </div>
               </div>
 
-              <div className="flex gap-3 pt-4 border-t border-white/5">
+              <div className="flex gap-3 pt-4 border-t border-border">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
@@ -1296,3 +1296,4 @@ export default function AdminFleetPage() {
     </div>
   );
 }
+

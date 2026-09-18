@@ -88,7 +88,7 @@ export default async function CityPage({ params }: PageProps) {
       {/* Layout will inject Header here */}
 
       {/* Combined Hero Banner & Breadcrumbs Section */}
-      <section className="relative min-h-[75vh] flex flex-col justify-center items-center pb-20 px-4 md:px-8 bg-slate-950 overflow-hidden">
+      <section className="relative min-h-[75vh] flex flex-col justify-center items-center pb-20 px-4 md:px-8 bg-background overflow-hidden">
         <div className="w-full relative z-10">
           <Breadcrumbs items={breadcrumbsList} />
         </div>
@@ -106,7 +106,7 @@ export default async function CityPage({ params }: PageProps) {
 
         {/* Hero Content */}
         <div className="relative z-10 w-full max-w-7xl mx-auto text-center space-y-6 mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-semibold text-accent uppercase tracking-wider backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-border rounded-full text-xs font-semibold text-accent uppercase tracking-wider backdrop-blur-sm">
             <Award className="w-3.5 h-3.5" />
             <span>ISO 9001:2015 Premium Fleet in {details.formattedName}</span>
           </div>
@@ -127,7 +127,7 @@ export default async function CityPage({ params }: PageProps) {
       </section>
 
       {/* 4. Localized Corporate Transport Section */}
-      <section id="corporate" className="py-24 bg-slate-950 text-slate-100 px-4 sm:px-6 lg:px-8 border-t border-white/5">
+      <section id="corporate" className="py-24 bg-background text-slate-100 px-4 sm:px-6 lg:px-8 border-t border-border">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
           <div className="lg:col-span-7 space-y-6">
             <div className="inline-flex items-center gap-1 text-xs font-bold text-accent uppercase tracking-wider">
@@ -163,7 +163,7 @@ export default async function CityPage({ params }: PageProps) {
             </div>
           </div>
 
-          <div className="lg:col-span-5 bg-slate-900/40 border border-white/5 rounded-2xl p-6 space-y-6 relative overflow-hidden glassmorphism">
+          <div className="lg:col-span-5 bg-surface/40 border border-border rounded-2xl p-6 space-y-6 relative overflow-hidden glassmorphism">
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
             <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-accent" />
@@ -171,7 +171,7 @@ export default async function CityPage({ params }: PageProps) {
             </h3>
             <div className="space-y-4">
               {details.localQuotes.map((quote, i) => (
-                <div key={i} className="flex gap-3 items-start text-xs text-slate-300 border-b border-white/5 pb-3 last:border-b-0 last:pb-0">
+                <div key={i} className="flex gap-3 items-start text-xs text-slate-300 border-b border-border pb-3 last:border-b-0 last:pb-0">
                   <ShieldCheck className="w-4 h-4 text-accent shrink-0 mt-0.5" />
                   <span>{quote}</span>
                 </div>
@@ -182,7 +182,7 @@ export default async function CityPage({ params }: PageProps) {
       </section>
 
       {/* 5. Operational Hubs Section */}
-      <section id="operational-hubs" className="py-20 bg-slate-900/40 px-4 sm:px-6 lg:px-8 border-t border-white/5">
+      <section id="operational-hubs" className="py-20 bg-surface/40 px-4 sm:px-6 lg:px-8 border-t border-border">
         <div className="max-w-7xl mx-auto space-y-12 text-center">
           <div className="space-y-4">
             <span className="text-xs font-bold text-accent uppercase tracking-wider block">Coverage Scope</span>
@@ -198,7 +198,7 @@ export default async function CityPage({ params }: PageProps) {
             {details.corporateHubs.map((hub, idx) => (
               <div 
                 key={idx} 
-                className="bg-slate-950/80 border border-white/5 py-4 px-6 rounded-xl flex flex-col items-center justify-center gap-2 hover:border-accent/40 transition-colors"
+                className="bg-background/80 border border-border py-4 px-6 rounded-xl flex flex-col items-center justify-center gap-2 hover:border-accent/40 transition-colors"
               >
                 <MapPin className="w-5 h-5 text-accent" />
                 <span className="text-xs font-bold text-slate-200 text-center">{hub}</span>
@@ -206,7 +206,7 @@ export default async function CityPage({ params }: PageProps) {
             ))}
           </div>
 
-          <div className="bg-slate-950/50 border border-white/5 rounded-xl p-4 inline-flex items-center gap-2 text-xs text-slate-400">
+          <div className="bg-background/50 border border-border rounded-xl p-4 inline-flex items-center gap-2 text-xs text-slate-400">
             <Clock className="w-4 h-4 text-accent" />
             <span>Dedicated airport transfers to and from <strong>{details.airport}</strong> are available 24/7.</span>
           </div>
@@ -214,7 +214,7 @@ export default async function CityPage({ params }: PageProps) {
       </section>
 
       {/* 6. Fleet Showcase Section */}
-      <section id="fleet" className="py-24 bg-slate-950 px-4 sm:px-6 lg:px-8 border-t border-white/5">
+      <section id="fleet" className="py-24 bg-background px-4 sm:px-6 lg:px-8 border-t border-border">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
           <div className="lg:col-span-5 space-y-6">
             <span className="text-xs font-bold text-accent uppercase tracking-wider block">Fleet Vehicle Range</span>
@@ -231,7 +231,7 @@ export default async function CityPage({ params }: PageProps) {
                 { name: "Luxury SUVs", desc: "Toyota Fortuner" },
                 { name: "Tempo Travellers", desc: "13 to 26 Seaters" }
               ].map((f, i) => (
-                <div key={i} className="bg-white/5 border border-white/5 p-4 rounded-xl">
+                <div key={i} className="bg-white/5 border border-border p-4 rounded-xl">
                   <div className="font-bold text-slate-100 text-sm">{f.name}</div>
                   <div className="text-xs text-slate-400 mt-1">{f.desc}</div>
                 </div>
@@ -239,7 +239,7 @@ export default async function CityPage({ params }: PageProps) {
             </div>
           </div>
 
-          <div className="lg:col-span-7 relative bg-slate-900 border border-white/5 rounded-2xl overflow-hidden shadow-2xl h-[300px] md:h-[400px]">
+          <div className="lg:col-span-7 relative bg-surface border border-border rounded-2xl overflow-hidden shadow-2xl h-[300px] md:h-[400px]">
             <Image 
               src="/images/fleet-suv.png"
               alt={`Executive SUV fleet in ${details.formattedName}`}
@@ -256,7 +256,7 @@ export default async function CityPage({ params }: PageProps) {
       </section>
 
       {/* 7. FAQs Section with Schema Markup support */}
-      <section id="faqs" className="py-24 bg-slate-900/40 px-4 sm:px-6 lg:px-8 border-t border-white/5">
+      <section id="faqs" className="py-24 bg-surface/40 px-4 sm:px-6 lg:px-8 border-t border-border">
         <div className="max-w-4xl mx-auto space-y-12">
           <div className="text-center space-y-4">
             <span className="text-xs font-bold text-accent uppercase tracking-wider block">Information Center</span>
@@ -269,7 +269,7 @@ export default async function CityPage({ params }: PageProps) {
             {details.faqs.map((faq, idx) => (
               <div 
                 key={idx} 
-                className="bg-slate-950/80 border border-white/5 p-6 rounded-xl space-y-2 hover:border-primary/20 transition-all"
+                className="bg-background/80 border border-border p-6 rounded-xl space-y-2 hover:border-primary/20 transition-all"
               >
                 <h3 className="text-base font-bold text-slate-100 flex items-start gap-2.5">
                   <HelpCircle className="w-5 h-5 text-accent shrink-0 mt-0.5" />
@@ -285,7 +285,7 @@ export default async function CityPage({ params }: PageProps) {
       </section>
 
       {/* 8. Localized Contact CTA & Footer */}
-      <section id="contact" className="py-24 bg-slate-950 text-slate-100 px-4 sm:px-6 lg:px-8 border-t border-white/5">
+      <section id="contact" className="py-24 bg-background text-slate-100 px-4 sm:px-6 lg:px-8 border-t border-border">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16">
           
           {/* Contact Details */}

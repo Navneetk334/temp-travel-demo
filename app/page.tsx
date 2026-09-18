@@ -291,15 +291,15 @@ export default function Homepage() {
 
           {/* Quick Metrics Pills */}
           <div className="flex flex-wrap justify-center items-center gap-6 pt-2 text-xs font-semibold text-muted-foreground">
-            <div className="flex items-center gap-2 bg-surface/80 px-4 py-2 rounded-lg border border-white/10">
+            <div className="flex items-center gap-2 bg-surface/80 px-4 py-2 rounded-lg border border-border">
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               <span>500K+ Completed Rides</span>
             </div>
-            <div className="flex items-center gap-2 bg-surface/80 px-4 py-2 rounded-lg border border-white/10">
+            <div className="flex items-center gap-2 bg-surface/80 px-4 py-2 rounded-lg border border-border">
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               <span>99.8% On-Time SLA Guarantee</span>
             </div>
-            <div className="flex items-center gap-2 bg-surface/80 px-4 py-2 rounded-lg border border-white/10">
+            <div className="flex items-center gap-2 bg-surface/80 px-4 py-2 rounded-lg border border-border">
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               <span>Pan-India Metropolitan Coverage</span>
             </div>
@@ -319,7 +319,7 @@ export default function Homepage() {
       </section>
 
       {/* Floating High-Contrast Stats Banner */}
-      <section className="relative z-20 py-12 bg-surface/90 border-y border-white/10 backdrop-blur-xl">
+      <section className="relative z-20 py-12 bg-surface/90 border-y border-border backdrop-blur-xl">
         <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {[
             { metric: "90,000+", label: "Verified Passengers Transported" },
@@ -336,7 +336,7 @@ export default function Homepage() {
       </section>
 
       {/* Premium Corporate Logistics Section */}
-      <section id="corporate" className="py-24 bg-background text-foreground px-4 sm:px-6 lg:px-8 border-b border-white/5">
+      <section id="corporate" className="py-24 bg-background text-foreground px-4 sm:px-6 lg:px-8 border-b border-border">
         <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
           <div className="lg:col-span-6 space-y-6">
             <div className="inline-flex items-center gap-2 text-xs font-bold text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-md border border-amber-500/20 uppercase tracking-wider">
@@ -359,7 +359,7 @@ export default function Homepage() {
                 { title: "Standardized Billing", desc: "Instant transparent invoices with full GST compliance." },
                 { title: "Chauffeur Auditing", desc: "Rigorous background checks & etiquette training." }
               ].map((feat, i) => (
-                <div key={i} className="p-4 bg-surface/60 border border-white/10 rounded-xl space-y-1 hover:border-amber-400/40 transition-colors">
+                <div key={i} className="p-4 bg-surface/60 border border-border rounded-xl space-y-1 hover:border-amber-400/40 transition-colors">
                   <div className="font-bold text-foreground text-sm flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
                     <span>{feat.title}</span>
@@ -378,9 +378,9 @@ export default function Homepage() {
           </div>
 
           {/* Interactive Corporate Live Dashboard Card */}
-          <div className="lg:col-span-6 bg-gradient-to-b from-slate-900 to-slate-950 border border-white/10 rounded-2xl p-6 md:p-8 space-y-6 relative overflow-hidden shadow-2xl">
+          <div className="lg:col-span-6 bg-gradient-to-b from-slate-900 to-slate-950 border border-border rounded-2xl p-6 md:p-8 space-y-6 relative overflow-hidden shadow-2xl">
             <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="flex justify-between items-center border-b border-white/10 pb-4">
+            <div className="flex justify-between items-center border-b border-border pb-4">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-emerald-400 rounded-full animate-ping" />
                 <span className="text-sm font-bold text-foreground">Live SPOC Command Dashboard</span>
@@ -394,7 +394,7 @@ export default function Homepage() {
                 { route: "Route 04 (Gurugram CyberHub)", driver: "Sunil Verma (Swift Dzire)", status: "BOARDING COMPLETE", time: "18:45 PM" },
                 { route: "Route 12 (Bengaluru Whitefield)", driver: "Pravin Patil (Ertiga)", status: "DISPATCHED", time: "19:00 PM" }
               ].map((log, index) => (
-                <div key={index} className="p-3 bg-background/80 border border-white/5 rounded-lg space-y-1">
+                <div key={index} className="p-3 bg-background/80 border border-border rounded-lg space-y-1">
                   <div className="flex justify-between font-bold text-foreground">
                     <span>{log.route}</span>
                     <span className="text-emerald-400">{log.status}</span>
@@ -417,7 +417,7 @@ export default function Homepage() {
 
 
       {/* Fleet Showcase Interactive Section */}
-      <section id="fleet" className="py-24 bg-surface/60 px-4 sm:px-6 lg:px-8 border-b border-white/5">
+      <section id="fleet" className="py-24 bg-surface/60 px-4 sm:px-6 lg:px-8 border-b border-border">
         <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 space-y-12">
           <div className="text-center space-y-4">
             <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">Our Luxury & Commercial Fleet</span>
@@ -431,14 +431,14 @@ export default function Homepage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {vehiclesLoading ? (
               [...Array(3)].map((_, i) => (
-                <div key={i} className="bg-background border border-white/10 rounded-2xl overflow-hidden shadow-xl animate-pulse flex flex-col h-80">
+                <div key={i} className="bg-background border border-border rounded-2xl overflow-hidden shadow-xl animate-pulse flex flex-col h-80">
                   <div className="h-48 bg-surface/80 w-full" />
                   <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
                     <div className="space-y-2">
                       <div className="h-5 bg-surface rounded w-3/4" />
                       <div className="h-4 bg-surface/60 rounded w-1/2" />
                     </div>
-                    <div className="pt-4 border-t border-white/5 flex justify-between items-center">
+                    <div className="pt-4 border-t border-border flex justify-between items-center">
                       <div className="h-6 bg-surface rounded w-1/3" />
                       <div className="h-8 bg-surface rounded w-1/4" />
                     </div>
@@ -447,7 +447,7 @@ export default function Homepage() {
               ))
             ) : (
               featuredVehicles.map((vehicle, idx) => (
-                <div key={vehicle.id || idx} className="bg-background border border-white/10 rounded-2xl overflow-hidden hover:border-amber-400/50 transition-all duration-300 group shadow-xl flex flex-col">
+                <div key={vehicle.id || idx} className="bg-background border border-border rounded-2xl overflow-hidden hover:border-amber-400/50 transition-all duration-300 group shadow-xl flex flex-col">
                   <div className="relative h-48 bg-surface overflow-hidden">
                     <Image
                       src={vehicle.img}
@@ -455,7 +455,7 @@ export default function Homepage() {
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    <div className="absolute top-3 right-3 bg-background/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-[10px] font-bold text-amber-400">
+                    <div className="absolute top-3 right-3 bg-background/80 backdrop-blur-md px-3 py-1 rounded-full border border-border text-[10px] font-bold text-amber-400">
                       {vehicle.category}
                     </div>
                   </div>
@@ -475,14 +475,14 @@ export default function Homepage() {
                       </div>
                     </div>
 
-                    <div className="pt-4 border-t border-white/10 flex items-center justify-between">
+                    <div className="pt-4 border-t border-border flex items-center justify-between">
                       <div>
                         <span className="text-[10px] text-muted-foreground block uppercase font-bold">Base Tariff</span>
                         <span className="text-base font-black text-amber-400">{vehicle.rate}</span>
                       </div>
                       <a
                         href="#book-widget"
-                        className="inline-flex items-center gap-1 text-xs font-extrabold text-foreground bg-white/5 hover:bg-amber-500 hover:text-slate-950 px-4 py-2 rounded-lg transition-all border border-white/10"
+                        className="inline-flex items-center gap-1 text-xs font-extrabold text-foreground bg-white/5 hover:bg-amber-500 hover:text-slate-950 px-4 py-2 rounded-lg transition-all border border-border"
                       >
                         <span>Book Now</span>
                         <ChevronRight className="w-3.5 h-3.5" />
@@ -508,8 +508,8 @@ export default function Homepage() {
       </section>
 
       {/* Safety & Quality Guarantee Banner */}
-      <section className="py-20 bg-background px-4 sm:px-6 lg:px-8 border-b border-white/5">
-        <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 bg-gradient-to-r from-slate-900 via-slate-900/90 to-slate-950 border border-white/10 rounded-3xl p-8 md:p-12 relative overflow-hidden">
+      <section className="py-20 bg-background px-4 sm:px-6 lg:px-8 border-b border-border">
+        <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 bg-gradient-to-r from-slate-900 via-slate-900/90 to-slate-950 border border-border rounded-3xl p-8 md:p-12 relative overflow-hidden">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
             <div className="space-y-3">
               <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center">
@@ -545,10 +545,10 @@ export default function Homepage() {
       </section>
 
       {/* Google Business Profile Verified Reviews Section */}
-      <section className="py-24 bg-surface/40 px-4 sm:px-6 lg:px-8 border-b border-white/5">
+      <section className="py-24 bg-surface/40 px-4 sm:px-6 lg:px-8 border-b border-border">
         <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 space-y-16">
           <div className="text-center space-y-4">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-foreground backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/5 border border-border rounded-full text-xs font-bold text-foreground backdrop-blur-md">
               <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -564,7 +564,7 @@ export default function Homepage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {googleData.reviews.slice(0, 3).map((t, idx) => (
-              <div key={t.id || idx} className="bg-background/90 border border-white/10 p-6 rounded-2xl space-y-4 hover:border-amber-400/40 transition-all shadow-xl flex flex-col justify-between">
+              <div key={t.id || idx} className="bg-background/90 border border-border p-6 rounded-2xl space-y-4 hover:border-amber-400/40 transition-all shadow-xl flex flex-col justify-between">
                 <div className="space-y-3">
                   <div className="flex justify-between items-start">
                     <div className="flex gap-1">
@@ -572,14 +572,14 @@ export default function Homepage() {
                         <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
                       ))}
                     </div>
-                    <span className="text-[10px] font-bold text-muted-foreground bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
+                    <span className="text-[10px] font-bold text-muted-foreground bg-white/5 px-2.5 py-1 rounded-full border border-border">
                       {t.relativeTime}
                     </span>
                   </div>
                   <p className="text-muted-foreground text-xs sm:text-sm italic leading-relaxed">"{t.text}"</p>
                 </div>
 
-                <div className="border-t border-white/10 pt-4 flex items-center justify-between gap-3">
+                <div className="border-t border-border pt-4 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2.5 min-w-0 flex-1">
                     {t.authorPhoto ? (
                       <img
@@ -629,7 +629,7 @@ export default function Homepage() {
       </section>
 
       {/* FAQ Accordion Section */}
-      <section className="py-24 bg-surface/40 px-4 sm:px-6 lg:px-8 border-b border-white/5">
+      <section className="py-24 bg-surface/40 px-4 sm:px-6 lg:px-8 border-b border-border">
         <div className="max-w-[1500px] mx-auto px-4 sm:px-8 lg:px-12 space-y-12">
           <div className="text-center space-y-4">
             <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">Frequently Asked Questions</span>
@@ -640,7 +640,7 @@ export default function Homepage() {
             {faqs.map((faq, idx) => (
               <div
                 key={idx}
-                className="bg-background border border-white/10 rounded-2xl overflow-hidden transition-all"
+                className="bg-background border border-border rounded-2xl overflow-hidden transition-all"
               >
                 <button
                   type="button"
@@ -651,7 +651,7 @@ export default function Homepage() {
                   <ChevronDown className={`w-5 h-5 text-amber-400 transition-transform duration-300 ${openFaq === idx ? "rotate-180" : ""}`} />
                 </button>
                 {openFaq === idx && (
-                  <div className="px-6 pb-6 text-sm text-muted-foreground leading-relaxed border-t border-white/5 pt-4">
+                  <div className="px-6 pb-6 text-sm text-muted-foreground leading-relaxed border-t border-border pt-4">
                     {faq.a}
                   </div>
                 )}
@@ -662,7 +662,7 @@ export default function Homepage() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-20 bg-background text-foreground px-4 sm:px-6 lg:px-8 border-t border-white/5">
+      <section id="contact" className="py-20 bg-background text-foreground px-4 sm:px-6 lg:px-8 border-t border-border">
         <div className="max-w-[1500px] mx-auto px-4 sm:px-8 lg:px-12 space-y-8 text-center">
           <div className="space-y-3">
             <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">Get In Touch</span>
@@ -675,7 +675,7 @@ export default function Homepage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
-            <div className="bg-surface/60 border border-white/10 p-6 rounded-2xl space-y-3 flex flex-col items-center text-center">
+            <div className="bg-surface/60 border border-border p-6 rounded-2xl space-y-3 flex flex-col items-center text-center">
               <div className="bg-white/5 p-3 rounded-xl text-amber-400">
                 <Phone className="w-6 h-6" />
               </div>
@@ -683,7 +683,7 @@ export default function Homepage() {
               <a href="tel:+917011729639" className="text-foreground font-bold hover:underline text-base">+91 70117 29639</a>
             </div>
 
-            <div className="bg-surface/60 border border-white/10 p-6 rounded-2xl space-y-3 flex flex-col items-center text-center">
+            <div className="bg-surface/60 border border-border p-6 rounded-2xl space-y-3 flex flex-col items-center text-center">
               <div className="bg-white/5 p-3 rounded-xl text-amber-400">
                 <Mail className="w-6 h-6" />
               </div>
@@ -691,7 +691,7 @@ export default function Homepage() {
               <a href="mailto:sales@temptravel.co.in" className="text-foreground font-bold hover:underline text-base">sales@temptravel.co.in</a>
             </div>
 
-            <div className="bg-surface/60 border border-white/10 p-6 rounded-2xl space-y-3 flex flex-col items-center text-center">
+            <div className="bg-surface/60 border border-border p-6 rounded-2xl space-y-3 flex flex-col items-center text-center">
               <div className="bg-white/5 p-3 rounded-xl text-amber-400">
                 <MapPin className="w-6 h-6" />
               </div>
@@ -709,4 +709,5 @@ export default function Homepage() {
     </div>
   );
 }
+
 

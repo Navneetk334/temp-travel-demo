@@ -66,7 +66,7 @@ function FleetContent() {
   });
 
   return (
-    <div className="bg-slate-950 min-h-screen text-slate-100 pt-32 sm:pt-36 lg:pt-40 pb-20 px-4 sm:px-8 lg:px-12 xl:px-16">
+    <div className="bg-background min-h-screen text-slate-100 pt-32 sm:pt-36 lg:pt-40 pb-20 px-4 sm:px-8 lg:px-12 xl:px-16">
       <div className="max-w-[1750px] mx-auto space-y-12">
         {/* Header Title */}
         <div className="text-center space-y-4 max-w-3xl mx-auto">
@@ -96,7 +96,7 @@ function FleetContent() {
                 onClick={() => setSelectedCategory(tab.value)}
                 className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${isActive
                   ? "bg-amber-400 text-slate-950 shadow-lg shadow-amber-400/20"
-                  : "bg-slate-900 border border-white/10 text-slate-400 hover:text-white hover:border-amber-500/30"
+                  : "bg-surface border border-border text-slate-400 hover:text-white hover:border-amber-500/30"
                   }`}
               >
                 {tab.label}
@@ -115,7 +115,7 @@ function FleetContent() {
           </div>
         ) : filteredVehicles.length === 0 ? (
           /* Empty State */
-          <div className="bg-slate-900/60 border border-white/10 rounded-3xl p-12 text-center max-w-xl mx-auto space-y-4">
+          <div className="bg-surface/60 border border-border rounded-3xl p-12 text-center max-w-xl mx-auto space-y-4">
             <Car className="w-12 h-12 text-amber-400/50 mx-auto" />
             <h3 className="text-lg font-bold text-slate-200">No Vehicles Found</h3>
             <p className="text-xs text-slate-400">
@@ -138,7 +138,7 @@ function FleetContent() {
             {filteredVehicles.map((v) => (
               <div
                 key={v.id}
-                className="bg-slate-900/90 border border-white/10 hover:border-amber-500/40 rounded-3xl p-6 shadow-2xl flex flex-col justify-between transition-all group relative overflow-hidden"
+                className="bg-surface/90 border border-border hover:border-amber-500/40 rounded-3xl p-6 shadow-2xl flex flex-col justify-between transition-all group relative overflow-hidden"
               >
                 {/* Featured Badge */}
                 {v.isFeatured && (
@@ -156,7 +156,7 @@ function FleetContent() {
                   </div>
 
                   {/* Vehicle Image Banner */}
-                  <div className="relative h-44 bg-slate-950 rounded-2xl overflow-hidden border border-white/5">
+                  <div className="relative h-44 bg-background rounded-2xl overflow-hidden border border-border">
                     <img
                       src={v.imageUrl || "/images/hero-car.png"}
                       alt={`${v.make} ${v.model}`}
@@ -179,7 +179,7 @@ function FleetContent() {
                   </div>
 
                   {/* Specs Matrix */}
-                  <div className="bg-slate-950 p-4 rounded-2xl border border-white/5 space-y-2 text-xs font-mono">
+                  <div className="bg-background p-4 rounded-2xl border border-border space-y-2 text-xs font-mono">
                     <div className="flex justify-between text-slate-300">
                       <span className="text-slate-400 font-sans flex items-center gap-1.5">
                         <Users className="w-3.5 h-3.5 text-amber-400" /> Seating:
@@ -209,7 +209,7 @@ function FleetContent() {
                   </div>
                 </div>
 
-                <div className="pt-6 border-t border-white/10 flex items-center justify-between mt-6">
+                <div className="pt-6 border-t border-border flex items-center justify-between mt-6">
                   <button
                     type="button"
                     onClick={() => setSelectedBookingVehicle(v)}
@@ -237,8 +237,9 @@ function FleetContent() {
 
 export default function FleetPage() {
   return (
-    <Suspense fallback={<div className="bg-slate-950 min-h-screen text-slate-100 pt-32 text-center text-xs">Loading Fleet Showcase...</div>}>
+    <Suspense fallback={<div className="bg-background min-h-screen text-slate-100 pt-32 text-center text-xs">Loading Fleet Showcase...</div>}>
       <FleetContent />
     </Suspense>
   );
 }
+

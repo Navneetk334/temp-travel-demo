@@ -160,7 +160,7 @@ export default function MasterSettingsVaultPage() {
       </div>
 
       {/* 3 Main Navigation Tabs */}
-      <div className="flex items-center gap-3 bg-slate-900/80 p-2 rounded-2xl border border-white/10 w-fit">
+      <div className="flex items-center gap-3 bg-surface/80 p-2 rounded-2xl border border-border w-fit">
         <button
           onClick={() => setActiveTab("global")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
@@ -200,8 +200,8 @@ export default function MasterSettingsVaultPage() {
 
       {/* TAB 1: Global Site & Admin Settings */}
       {activeTab === "global" && (
-        <form onSubmit={handleGlobalSettingsSave} className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl space-y-6">
-          <div className="flex justify-between items-center border-b border-white/10 pb-4">
+        <form onSubmit={handleGlobalSettingsSave} className="bg-surface/80 backdrop-blur-xl border border-border rounded-2xl p-6 shadow-2xl space-y-6">
+          <div className="flex justify-between items-center border-b border-border pb-4">
             <h3 className="text-lg font-bold text-slate-50">Global Business & Tariff Parameters</h3>
             {saveSuccess && (
               <span className="flex items-center gap-1 text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
@@ -218,7 +218,7 @@ export default function MasterSettingsVaultPage() {
                 required
                 value={globalSettings.companyName}
                 onChange={(e) => setGlobalSettings({ ...globalSettings, companyName: e.target.value })}
-                className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
+                className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
               />
             </div>
 
@@ -229,7 +229,7 @@ export default function MasterSettingsVaultPage() {
                 required
                 value={globalSettings.contactEmail}
                 onChange={(e) => setGlobalSettings({ ...globalSettings, contactEmail: e.target.value })}
-                className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
+                className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
               />
             </div>
 
@@ -240,7 +240,7 @@ export default function MasterSettingsVaultPage() {
                 required
                 value={globalSettings.contactPhone}
                 onChange={(e) => setGlobalSettings({ ...globalSettings, contactPhone: e.target.value })}
-                className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
+                className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
               />
             </div>
 
@@ -250,7 +250,7 @@ export default function MasterSettingsVaultPage() {
                 type="text"
                 value={globalSettings.gstinNumber}
                 onChange={(e) => setGlobalSettings({ ...globalSettings, gstinNumber: e.target.value })}
-                className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-amber-400 font-mono focus:outline-none focus:border-amber-400"
+                className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-amber-400 font-mono focus:outline-none focus:border-amber-400"
               />
             </div>
 
@@ -260,7 +260,7 @@ export default function MasterSettingsVaultPage() {
                 type="text"
                 value={globalSettings.defaultSedanKmRate}
                 onChange={(e) => setGlobalSettings({ ...globalSettings, defaultSedanKmRate: e.target.value })}
-                className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
+                className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
               />
             </div>
 
@@ -270,12 +270,12 @@ export default function MasterSettingsVaultPage() {
                 type="text"
                 value={globalSettings.defaultSuvKmRate}
                 onChange={(e) => setGlobalSettings({ ...globalSettings, defaultSuvKmRate: e.target.value })}
-                className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
+                className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
               />
             </div>
           </div>
 
-          <div className="pt-4 border-t border-white/10 flex justify-end">
+          <div className="pt-4 border-t border-border flex justify-end">
             <button
               type="submit"
               className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-lg shadow-amber-500/20"
@@ -289,8 +289,8 @@ export default function MasterSettingsVaultPage() {
 
       {/* TAB 2: Master Users & RBAC Roles */}
       {activeTab === "users" && (
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl space-y-6">
-          <div className="flex justify-between items-center border-b border-white/10 pb-4">
+        <div className="bg-surface/80 backdrop-blur-xl border border-border rounded-2xl p-6 shadow-2xl space-y-6">
+          <div className="flex justify-between items-center border-b border-border pb-4">
             <div>
               <h3 className="text-lg font-bold text-slate-50">Master Admin User Accounts & Access Roles</h3>
               <p className="text-xs text-slate-400">Manage administrative permissions across Web, Cash Admin, and Master HQ.</p>
@@ -306,7 +306,7 @@ export default function MasterSettingsVaultPage() {
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-950 text-slate-400 font-extrabold uppercase text-[10px] tracking-wider border-b border-white/10">
+              <thead className="bg-background text-slate-400 font-extrabold uppercase text-[10px] tracking-wider border-b border-border">
                 <tr>
                   <th className="py-3 px-4">User Name</th>
                   <th className="py-3 px-4">Email Address</th>
@@ -341,8 +341,8 @@ export default function MasterSettingsVaultPage() {
 
       {/* TAB 3: Secure Document Vault */}
       {activeTab === "vault" && (
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl space-y-6">
-          <div className="flex justify-between items-center border-b border-white/10 pb-4">
+        <div className="bg-surface/80 backdrop-blur-xl border border-border rounded-2xl p-6 shadow-2xl space-y-6">
+          <div className="flex justify-between items-center border-b border-border pb-4">
             <div>
               <h3 className="text-lg font-bold text-slate-50">Encrypted Compliance Document Vault</h3>
               <p className="text-xs text-slate-400">Store and track commercial RCs, Insurance, Driver Licenses, and PCC certificates.</p>
@@ -358,7 +358,7 @@ export default function MasterSettingsVaultPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {vaultDocs.map((doc) => (
-              <div key={doc.id} className="bg-slate-950 p-5 rounded-2xl border border-white/10 space-y-3">
+              <div key={doc.id} className="bg-background p-5 rounded-2xl border border-border space-y-3">
                 <div className="flex justify-between items-start">
                   <span className="text-[10px] font-mono uppercase tracking-widest text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
                     {doc.category}
@@ -380,7 +380,7 @@ export default function MasterSettingsVaultPage() {
       {showAddUserModal && (
         <Portal>
           <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-            <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
+            <div className="bg-surface border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
               <button onClick={() => setShowAddUserModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white">
                 <X className="w-5 h-5" />
               </button>
@@ -394,7 +394,7 @@ export default function MasterSettingsVaultPage() {
                     placeholder="e.g. Navneet Kumar"
                     value={newUser.name}
                     onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100"
+                    className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100"
                   />
                 </div>
                 <div className="space-y-1">
@@ -405,7 +405,7 @@ export default function MasterSettingsVaultPage() {
                     placeholder="user@temptravels.com"
                     value={newUser.email}
                     onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100"
+                    className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100"
                   />
                 </div>
                 <div className="space-y-1">
@@ -413,7 +413,7 @@ export default function MasterSettingsVaultPage() {
                   <select
                     value={newUser.role}
                     onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100"
+                    className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100"
                   >
                     <option value="SUPER_ADMIN">SUPER_ADMIN (Full HQ Access)</option>
                     <option value="OPERATIONS_DISPATCH">OPERATIONS_DISPATCH</option>
@@ -422,7 +422,7 @@ export default function MasterSettingsVaultPage() {
                   </select>
                 </div>
                 <div className="pt-2 flex justify-end gap-3">
-                  <button type="button" onClick={() => setShowAddUserModal(false)} className="px-4 py-2 bg-slate-950 text-slate-400 rounded-xl">Cancel</button>
+                  <button type="button" onClick={() => setShowAddUserModal(false)} className="px-4 py-2 bg-background text-slate-400 rounded-xl">Cancel</button>
                   <button type="submit" className="px-5 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl uppercase">Create Account</button>
                 </div>
               </form>
@@ -435,7 +435,7 @@ export default function MasterSettingsVaultPage() {
       {showAddDocModal && (
         <Portal>
           <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-            <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
+            <div className="bg-surface border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
               <button onClick={() => setShowAddDocModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white">
                 <X className="w-5 h-5" />
               </button>
@@ -449,7 +449,7 @@ export default function MasterSettingsVaultPage() {
                     placeholder="e.g. Commercial Permit - Ertiga"
                     value={newDoc.title}
                     onChange={(e) => setNewDoc({ ...newDoc, title: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100"
+                    className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -458,7 +458,7 @@ export default function MasterSettingsVaultPage() {
                     <select
                       value={newDoc.category}
                       onChange={(e) => setNewDoc({ ...newDoc, category: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100"
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100"
                     >
                       <option value="VEHICLE">VEHICLE</option>
                       <option value="DRIVER">DRIVER</option>
@@ -473,12 +473,12 @@ export default function MasterSettingsVaultPage() {
                       placeholder="MH-02-2025"
                       value={newDoc.refNumber}
                       onChange={(e) => setNewDoc({ ...newDoc, refNumber: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-slate-100"
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100"
                     />
                   </div>
                 </div>
                 <div className="pt-2 flex justify-end gap-3">
-                  <button type="button" onClick={() => setShowAddDocModal(false)} className="px-4 py-2 bg-slate-950 text-slate-400 rounded-xl">Cancel</button>
+                  <button type="button" onClick={() => setShowAddDocModal(false)} className="px-4 py-2 bg-background text-slate-400 rounded-xl">Cancel</button>
                   <button type="submit" className="px-5 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl uppercase">Save Document</button>
                 </div>
               </form>
@@ -489,3 +489,4 @@ export default function MasterSettingsVaultPage() {
     </div>
   );
 }
+

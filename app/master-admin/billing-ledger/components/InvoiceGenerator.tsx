@@ -157,3 +157,4 @@ export default function InvoiceGenerator({ booking }: { booking: any }) {
     </>
   );
 }
+

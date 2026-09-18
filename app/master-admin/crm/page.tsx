@@ -557,7 +557,7 @@ export default function MasterOmnichannelCRMPage() {
           <button
             onClick={fetchLeads}
             disabled={loading}
-            className="flex items-center gap-1.5 bg-slate-900 border border-white/10 hover:border-amber-400/40 text-slate-300 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer"
+            className="flex items-center gap-1.5 bg-surface border border-border hover:border-amber-400/40 text-slate-300 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 text-amber-400 ${loading ? "animate-spin" : ""}`} />
             <span>Refresh Pipeline</span>
@@ -587,12 +587,12 @@ export default function MasterOmnichannelCRMPage() {
               className={`p-3 rounded-2xl border transition-all text-left flex flex-col justify-between cursor-pointer ${
                 isActive
                   ? "bg-amber-500/10 border-amber-500 text-amber-400 shadow-lg shadow-amber-500/10"
-                  : "bg-slate-900/60 border-white/10 text-slate-400 hover:text-slate-200 hover:border-white/20"
+                  : "bg-surface/60 border-border text-slate-400 hover:text-slate-200 hover:border-white/20"
               }`}
             >
               <div className="flex items-center justify-between">
                 <Icon className="w-4 h-4" />
-                <span className="text-[10px] font-mono font-bold bg-slate-950 px-1.5 py-0.5 rounded border border-white/10">
+                <span className="text-[10px] font-mono font-bold bg-background px-1.5 py-0.5 rounded border border-border">
                   {tab.count}
                 </span>
               </div>
@@ -603,9 +603,9 @@ export default function MasterOmnichannelCRMPage() {
       </div>
 
       {/* Main CRM Table Container */}
-      <div className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-2xl space-y-4">
+      <div className="bg-surface/80 backdrop-blur-xl border border-border rounded-2xl p-5 shadow-2xl space-y-4">
         {/* Search & Status Toolbar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-4 border-b border-white/10">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-4 border-b border-border">
           <div className="relative w-full sm:w-80">
             <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
@@ -613,7 +613,7 @@ export default function MasterOmnichannelCRMPage() {
               placeholder="Filter leads by customer, phone, PNR or route..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-slate-950 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
+              className="w-full bg-background border border-border rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
             />
           </div>
 
@@ -627,7 +627,7 @@ export default function MasterOmnichannelCRMPage() {
                 className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase transition-all cursor-pointer ${
                   statusFilter === st
                     ? "bg-amber-500 text-slate-950 font-black"
-                    : "bg-slate-950 text-slate-400 hover:text-white"
+                    : "bg-background text-slate-400 hover:text-white"
                 }`}
               >
                 {st}
@@ -654,7 +654,7 @@ export default function MasterOmnichannelCRMPage() {
                     e.target.value = "";
                   }
                 }}
-                className="bg-slate-950 border border-amber-500/30 text-amber-400 text-xs font-bold rounded-lg px-2 py-1 focus:outline-none cursor-pointer"
+                className="bg-background border border-amber-500/30 text-amber-400 text-xs font-bold rounded-lg px-2 py-1 focus:outline-none cursor-pointer"
                 defaultValue=""
               >
                 <option value="" disabled>Change Status...</option>
@@ -667,7 +667,7 @@ export default function MasterOmnichannelCRMPage() {
 
               <button
                 onClick={exportSelectedCSV}
-                className="flex items-center gap-1 bg-slate-950 hover:bg-slate-800 border border-white/10 text-slate-300 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                className="flex items-center gap-1 bg-background hover:bg-slate-800 border border-border text-slate-300 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer"
               >
                 <Download className="w-3 h-3 text-amber-400" />
                 <span>Export</span>
@@ -686,14 +686,14 @@ export default function MasterOmnichannelCRMPage() {
         {/* Lead Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-950 text-slate-400 font-extrabold uppercase text-[10px] tracking-wider border-b border-white/10">
+            <thead className="bg-background text-slate-400 font-extrabold uppercase text-[10px] tracking-wider border-b border-border">
               <tr>
                 <th className="py-3 px-3 w-10 text-center">
                   <input
                     type="checkbox"
                     checked={displayLeads.length > 0 && selectedLeadIds.length === displayLeads.length}
                     onChange={handleSelectAll}
-                    className="w-4 h-4 rounded border-white/20 bg-slate-900 text-amber-500 focus:ring-amber-400 cursor-pointer accent-amber-500"
+                    className="w-4 h-4 rounded border-white/20 bg-surface text-amber-500 focus:ring-amber-400 cursor-pointer accent-amber-500"
                     title="Select All Leads"
                   />
                 </th>
@@ -720,7 +720,7 @@ export default function MasterOmnichannelCRMPage() {
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => handleToggleSelect(lead.id)}
-                          className="w-4 h-4 rounded border-white/20 bg-slate-900 text-amber-500 focus:ring-amber-400 cursor-pointer accent-amber-500"
+                          className="w-4 h-4 rounded border-white/20 bg-surface text-amber-500 focus:ring-amber-400 cursor-pointer accent-amber-500"
                         />
                       </td>
                       <td className="py-4 px-4 font-semibold text-slate-100">
@@ -756,7 +756,7 @@ export default function MasterOmnichannelCRMPage() {
                           className={`border rounded-lg px-2.5 py-1 text-[11px] font-bold focus:outline-none cursor-pointer ${
                             lead.status === "CONVERTED"
                               ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30 font-black"
-                              : "bg-slate-950 text-amber-400 border-white/10"
+                              : "bg-background text-amber-400 border-border"
                           }`}
                         >
                           <option value="NEW">NEW</option>
@@ -778,14 +778,14 @@ export default function MasterOmnichannelCRMPage() {
                           </button>
                           <button
                             onClick={() => setSelectedLead(lead)}
-                            className="inline-flex items-center gap-1 bg-slate-950 hover:bg-slate-800 text-slate-300 hover:text-white border border-white/10 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer"
+                            className="inline-flex items-center gap-1 bg-background hover:bg-slate-800 text-slate-300 hover:text-white border border-border px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer"
                           >
                             <Eye className="w-3.5 h-3.5 text-amber-400" />
                             <span>Inspect</span>
                           </button>
                           <a
                             href={`tel:${lead.phone}`}
-                            className="inline-flex items-center gap-1 bg-slate-950 hover:bg-white/10 text-slate-300 border border-white/10 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all"
+                            className="inline-flex items-center gap-1 bg-background hover:bg-white/10 text-slate-300 border border-border px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all"
                           >
                             <PhoneCall className="w-3.5 h-3.5 text-emerald-400" />
                           </a>
@@ -810,7 +810,7 @@ export default function MasterOmnichannelCRMPage() {
       {dispatchModalLead && (
         <Portal>
           <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-          <div className="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 sm:p-8 w-full max-w-2xl shadow-2xl space-y-6 relative text-slate-100 max-h-[90vh] overflow-y-auto">
+          <div className="bg-surface border border-amber-500/40 rounded-3xl p-6 sm:p-8 w-full max-w-2xl shadow-2xl space-y-6 relative text-slate-100 max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setDispatchModalLead(null)}
               className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
@@ -818,12 +818,12 @@ export default function MasterOmnichannelCRMPage() {
               <X className="w-5 h-5" />
             </button>
 
-            <div className="space-y-1 border-b border-white/10 pb-4">
+            <div className="space-y-1 border-b border-border pb-4">
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">
                   Live Dispatch Control Desk
                 </span>
-                <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded border border-white/10 font-bold">
+                <span className="text-[10px] font-mono text-slate-400 bg-background px-2 py-0.5 rounded border border-border font-bold">
                   {dispatchModalLead.bookingRef}
                 </span>
               </div>
@@ -837,7 +837,7 @@ export default function MasterOmnichannelCRMPage() {
 
             <form onSubmit={handleConfirmDispatch} className="space-y-5">
               {/* Customer Lead Summary */}
-              <div className="bg-slate-950 p-4 rounded-2xl border border-white/10 space-y-3">
+              <div className="bg-background p-4 rounded-2xl border border-border space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                   <div>
                     <span className="text-[10px] text-slate-400 block uppercase font-bold">Customer</span>
@@ -859,7 +859,7 @@ export default function MasterOmnichannelCRMPage() {
                   const req = extractLeadVehicleRequirements(dispatchModalLead);
                   if (req.isVehiclePreSelected) {
                     return (
-                      <div className="pt-2 border-t border-white/5 flex flex-wrap items-center gap-2 text-xs">
+                      <div className="pt-2 border-t border-border flex flex-wrap items-center gap-2 text-xs">
                         <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider flex items-center gap-1">
                           <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                           <span>Customer Selected Vehicle:</span>
@@ -887,7 +887,7 @@ export default function MasterOmnichannelCRMPage() {
               </div>
 
               {/* Assignment Controls: Vehicle Filter (Category & Class) & Chauffeur */}
-              <div className="space-y-3 bg-slate-950/60 p-4 rounded-2xl border border-white/5">
+              <div className="space-y-3 bg-background/60 p-4 rounded-2xl border border-border">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                   <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
                     <Filter className="w-4 h-4 text-amber-400" />
@@ -916,7 +916,7 @@ export default function MasterOmnichannelCRMPage() {
                           className={`py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer border ${
                             categoryFilter.toUpperCase() === cat.toUpperCase()
                               ? "bg-amber-500 text-slate-950 border-amber-400 font-black shadow-md shadow-amber-500/10"
-                              : "bg-slate-900 text-slate-400 border-white/10 hover:text-slate-200"
+                              : "bg-surface text-slate-400 border-border hover:text-slate-200"
                           }`}
                         >
                           {cat}
@@ -932,7 +932,7 @@ export default function MasterOmnichannelCRMPage() {
                     <select
                       value={classFilter}
                       onChange={(e) => setClassFilter(e.target.value)}
-                      className="w-full bg-slate-900 border border-white/10 rounded-lg p-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400 cursor-pointer"
+                      className="w-full bg-surface border border-border rounded-lg p-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400 cursor-pointer"
                     >
                       <option value="ALL">All Vehicle Classes</option>
                       {availableClassOptions.map((cls) => (
@@ -945,7 +945,7 @@ export default function MasterOmnichannelCRMPage() {
                 </div>
 
                 {/* Vehicle & Chauffeur Dropdowns */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-white/5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-border">
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
                       <Car className="w-4 h-4 text-amber-400" />
@@ -955,11 +955,11 @@ export default function MasterOmnichannelCRMPage() {
                       value={dispatchForm.vehicleId}
                       onChange={(e) => setDispatchForm({ ...dispatchForm, vehicleId: e.target.value })}
                       required
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-mono cursor-pointer"
+                      className="w-full bg-background border border-border rounded-xl p-3 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-mono cursor-pointer"
                     >
                       <option value="" disabled>- Select Fleet Vehicle -</option>
                       {filteredVehicles.map((veh) => (
-                        <option key={veh.id} value={veh.id} className="bg-slate-900">
+                        <option key={veh.id} value={veh.id} className="bg-surface">
                           {veh.make} {veh.model} ({veh.registrationNumber}) • {veh.categoryName || "Sedan"} - {veh.vehicleClass || "Executive"}
                         </option>
                       ))}
@@ -975,11 +975,11 @@ export default function MasterOmnichannelCRMPage() {
                       value={dispatchForm.driverId}
                       onChange={(e) => setDispatchForm({ ...dispatchForm, driverId: e.target.value })}
                       required
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-mono cursor-pointer"
+                      className="w-full bg-background border border-border rounded-xl p-3 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-mono cursor-pointer"
                     >
                       <option value="" disabled>- Select Assigned Chauffeur -</option>
                       {availableDrivers.map((drv) => (
-                        <option key={drv.id} value={drv.id} className="bg-slate-900">
+                        <option key={drv.id} value={drv.id} className="bg-surface">
                           {drv.name} (+91 {drv.phone})
                         </option>
                       ))}
@@ -999,7 +999,7 @@ export default function MasterOmnichannelCRMPage() {
                       required
                       value={dispatchForm.fare}
                       onChange={(e) => setDispatchForm({ ...dispatchForm, fare: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl pl-8 pr-3 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-mono font-bold"
+                      className="w-full bg-background border border-border rounded-xl pl-8 pr-3 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-mono font-bold"
                     />
                   </div>
                 </div>
@@ -1012,7 +1012,7 @@ export default function MasterOmnichannelCRMPage() {
                       type="number"
                       value={dispatchForm.advance}
                       onChange={(e) => setDispatchForm({ ...dispatchForm, advance: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl pl-8 pr-3 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                      className="w-full bg-background border border-border rounded-xl pl-8 pr-3 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                     />
                   </div>
                 </div>
@@ -1022,7 +1022,7 @@ export default function MasterOmnichannelCRMPage() {
                   <select
                     value={dispatchForm.paymentMode}
                     onChange={(e) => setDispatchForm({ ...dispatchForm, paymentMode: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400 cursor-pointer"
+                    className="w-full bg-background border border-border rounded-xl p-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400 cursor-pointer"
                   >
                     <option value="Cash Collection">Driver Cash Collection</option>
                     <option value="UPI / QR Code">UPI / QR Code Scan</option>
@@ -1068,15 +1068,15 @@ export default function MasterOmnichannelCRMPage() {
                   value={dispatchForm.notes}
                   onChange={(e) => setDispatchForm({ ...dispatchForm, notes: e.target.value })}
                   placeholder="e.g. Flight AI-802 arrival at Pillar 4; provide water bottles & newspaper."
-                  className="w-full bg-slate-950 border border-white/10 rounded-xl p-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400 resize-none"
+                  className="w-full bg-background border border-border rounded-xl p-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400 resize-none"
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-3 border-t border-white/10">
+              <div className="flex justify-end gap-3 pt-3 border-t border-border">
                 <button
                   type="button"
                   onClick={() => setDispatchModalLead(null)}
-                  className="px-4 py-2 bg-slate-950 border border-white/10 text-slate-400 hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
+                  className="px-4 py-2 bg-background border border-border text-slate-400 hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -1098,7 +1098,7 @@ export default function MasterOmnichannelCRMPage() {
       {dispatchedSuccess && (
         <Portal>
           <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-            <div className="bg-slate-900 border border-emerald-500/40 rounded-3xl p-6 sm:p-8 w-full max-w-xl shadow-2xl space-y-6 relative text-slate-100">
+            <div className="bg-surface border border-emerald-500/40 rounded-3xl p-6 sm:p-8 w-full max-w-xl shadow-2xl space-y-6 relative text-slate-100">
               <button
                 onClick={() => setDispatchedSuccess(null)}
                 className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
@@ -1117,8 +1117,8 @@ export default function MasterOmnichannelCRMPage() {
               </div>
 
               {/* Official Booking PNR Ticket Banner */}
-              <div className="bg-slate-950 p-5 rounded-2xl border border-amber-500/30 space-y-3">
-                <div className="flex justify-between items-center border-b border-white/10 pb-3">
+              <div className="bg-background p-5 rounded-2xl border border-amber-500/30 space-y-3">
+                <div className="flex justify-between items-center border-b border-border pb-3">
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Official Booking PNR</span>
                   <span className="text-xl font-black font-mono text-amber-400">{dispatchedSuccess.bookingRef}</span>
                 </div>
@@ -1181,7 +1181,7 @@ export default function MasterOmnichannelCRMPage() {
       {selectedLead && (
         <Portal>
           <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-            <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
+            <div className="bg-surface border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
               <button
                 onClick={() => setSelectedLead(null)}
                 className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"
@@ -1192,14 +1192,14 @@ export default function MasterOmnichannelCRMPage() {
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">Lead Record Dossier</span>
-                  <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded border border-white/10 font-bold">
+                  <span className="text-[10px] font-mono text-slate-400 bg-background px-2 py-0.5 rounded border border-border font-bold">
                     {selectedLead.bookingRef}
                   </span>
                 </div>
                 <h3 className="text-xl font-bold text-slate-50">{selectedLead.customerName}</h3>
               </div>
 
-              <div className="space-y-2 bg-slate-950 p-4 rounded-xl border border-white/10 text-xs font-mono">
+              <div className="space-y-2 bg-background p-4 rounded-xl border border-border text-xs font-mono">
                 <div>Phone: <strong className="text-slate-200">{selectedLead.phone}</strong></div>
                 <div>Email: <strong className="text-slate-200">{selectedLead.email}</strong></div>
                 <div>Trip Type: <strong className="text-amber-400">{selectedLead.tripType}</strong></div>
@@ -1241,7 +1241,7 @@ export default function MasterOmnichannelCRMPage() {
 
                 <button
                   onClick={() => setSelectedLead(null)}
-                  className="px-4 py-2 bg-slate-950 hover:bg-white/10 border border-white/10 text-slate-300 font-bold rounded-xl text-xs cursor-pointer"
+                  className="px-4 py-2 bg-background hover:bg-white/10 border border-border text-slate-300 font-bold rounded-xl text-xs cursor-pointer"
                 >
                   Close
                 </button>
@@ -1253,3 +1253,4 @@ export default function MasterOmnichannelCRMPage() {
     </div>
   );
 }
+
