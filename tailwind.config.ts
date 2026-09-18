@@ -19,19 +19,6 @@ const config: Config = {
     },
     extend: {
       colors: {
-        slate: {
-          50: '#EDF0FF',
-          100: '#DAE1FC',
-          200: '#C7D2F8',
-          300: '#B4C3F5',
-          400: '#A1B5F2',
-          500: '#8EA6EE',
-          600: '#7B97EB',
-          700: '#6988E8',
-          800: '#567AE5',
-          900: '#436BE1',
-          950: '#305CDE',
-        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

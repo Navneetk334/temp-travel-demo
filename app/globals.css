@@ -4,72 +4,72 @@
 
 @layer base {
   :root {
-    /* Bright Royal Blue & Gold Theme */
-    --background: 225 74% 53%; /* Royal Blue #305CDE */
-    --foreground: 0 0% 100%; /* White text */
+    /* Premium Dark Theme Variables by Default */
+    --background: 224 71% 4%;
+    --foreground: 213 31% 91%;
 
-    --card: 225 72% 57%; /* Slightly lighter blue for cards */
-    --card-foreground: 0 0% 100%;
+    --card: 222 47% 6%;
+    --card-foreground: 213 31% 91%;
 
-    --popover: 225 72% 57%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 222 47% 4%;
+    --popover-foreground: 213 31% 91%;
 
-    --primary: 48 97% 48%; /* Gold #EFBF04 */
-    --primary-foreground: 225 74% 20%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 225 70% 61%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 222 47% 12%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 225 70% 61%;
-    --muted-foreground: 225 20% 90%;
+    --muted: 222 47% 12%;
+    --muted-foreground: 215.4 16.3% 56.9%;
 
-    --accent: 48 97% 48%; /* Gold #EFBF04 */
-    --accent-foreground: 225 74% 20%;
+    --accent: 48 96% 48%; /* Premium Amber/Gold */
+    --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 225 70% 65%;
-    --input: 225 70% 61%;
-    --ring: 48 97% 48%;
+    --border: 222 47% 12%;
+    --input: 222 47% 12%;
+    --ring: 217.2 91.2% 59.8%;
 
     --radius: 0.75rem;
 
     /* Semantic Design Tokens */
-    --surface: 225 74% 48%; /* Slightly darker blue */
+    --surface: 222 47% 8%;
   }
 
   .dark {
-    /* Bright Royal Blue & Gold Theme */
-    --background: 225 74% 53%; /* Royal Blue #305CDE */
-    --foreground: 0 0% 100%; /* White text */
+    /* Duplicate variables for fallback when class is explicitly targeted */
+    --background: 224 71% 4%;
+    --foreground: 213 31% 91%;
 
-    --card: 225 72% 57%; /* Slightly lighter blue for cards */
-    --card-foreground: 0 0% 100%;
+    --card: 222 47% 6%;
+    --card-foreground: 213 31% 91%;
 
-    --popover: 225 72% 57%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 222 47% 4%;
+    --popover-foreground: 213 31% 91%;
 
-    --primary: 48 97% 48%; /* Gold #EFBF04 */
-    --primary-foreground: 225 74% 20%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 225 70% 61%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 222 47% 12%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 225 70% 61%;
-    --muted-foreground: 225 20% 90%;
+    --muted: 222 47% 12%;
+    --muted-foreground: 215.4 16.3% 56.9%;
 
-    --accent: 48 97% 48%; /* Gold #EFBF04 */
-    --accent-foreground: 225 74% 20%;
+    --accent: 48 96% 48%;
+    --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 225 70% 65%;
-    --input: 225 70% 61%;
-    --ring: 48 97% 48%;
+    --border: 222 47% 12%;
+    --input: 222 47% 12%;
+    --ring: 217.2 91.2% 59.8%;
 
-    --surface: 225 74% 48%; /* Slightly darker blue */
+    --surface: 222 47% 8%;
   }
 }
 
@@ -139,7 +139,7 @@
 }
 
 .gradient-bg {
-  background: linear-gradient(135deg, hsl(48, 97%, 48%) 0%, hsl(225, 74%, 53%) 100%);
+  background: linear-gradient(135deg, hsl(217.2, 91.2%, 59.8%) 0%, hsl(222.2, 84%, 4.9%) 100%);
 }
 
 /* Completely Hide Native Browser Black Calendar & Clock Picker Indicators across Chrome/Edge/Brave/Safari */
