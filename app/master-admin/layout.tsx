@@ -28,7 +28,8 @@ import {
   Briefcase,
   ShieldAlert,
   Calendar,
-  Tag
+  Tag,
+  Image as ImageIcon
 } from "lucide-react";
 
 // Age & Birthday Calculation Helper
@@ -244,6 +245,7 @@ export default function MasterAdminLayout({
     { name: "Dispatch Radar", href: "/master-admin/dispatch-radar", icon: Radio },
     { name: "Omnichannel CRM", href: "/master-admin/crm", icon: Users },
     { name: "Fleet Vehicles", href: "/master-admin/fleet-roster", icon: Car },
+    { name: "Gallery Media", href: "/master-admin/gallery", icon: ImageIcon },
     { name: "Driver Roster", href: "/master-admin/drivers", icon: UserCheck },
     { name: "Office Staff", href: "/master-admin/office-staff", icon: Briefcase },
     { name: "Billing & Ledger", href: "/master-admin/billing-ledger", icon: CreditCard },
