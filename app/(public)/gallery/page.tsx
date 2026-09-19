@@ -316,8 +316,8 @@ export default function PublicGalleryPage() {
             }))}
             activeIndex={activeCardIndex}
             onChangeIndex={setActiveCardIndex}
-            onSelectPhoto={(photo) => setLightboxIndex(items.findIndex(i => i.id === photo.id))}
-            onInspect={(photo) => setLightboxIndex(items.findIndex(i => i.id === photo.id))}
+            onSelectPhoto={(_, index) => setLightboxIndex(index)}
+            onInspect={(_, index) => setLightboxIndex(index)}
           />
         </div>
       )}

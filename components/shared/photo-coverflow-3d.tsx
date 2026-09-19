@@ -28,8 +28,8 @@ interface PhotoCoverflow3DProps {
   photos: PhotoItem[];
   activeIndex: number;
   onChangeIndex: (index: number) => void;
-  onSelectPhoto: (photo: PhotoItem) => void;
-  onInspect: (photo: PhotoItem) => void;
+  onSelectPhoto: (photo: PhotoItem, index: number) => void;
+  onInspect: (photo: PhotoItem, index: number) => void;
 }
 
 export default function PhotoCoverflow3D({
@@ -194,7 +194,6 @@ export default function PhotoCoverflow3D({
           // offset > 0 (right side) needs negative rotation to point left edge away from camera
           const rotateY = offset === 0 ? 0 : offset > 0 ? Math.max(-48, offset * -48) : Math.min(48, offset * -48);
           const scale = Math.max(0, 1 - absOffset * 0.12);
-          const opacity = Math.max(0.2, 1 - absOffset * 0.22);
           const zIndex = 50 - Math.round(absOffset * 10);
 
           return (
@@ -208,13 +207,12 @@ export default function PhotoCoverflow3D({
                   onChangeIndex(Math.round(nextIdx));
                 }
                 galleryAudio.playCameraShutter();
-                onSelectPhoto(photo);
+                onSelectPhoto(photo, index);
               }}
               className="absolute w-[260px] sm:w-[340px] h-[340px] sm:h-[420px] cursor-pointer group"
               style={{
                 transformStyle: 'preserve-3d',
                 transform: `translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
-                opacity,
                 zIndex,
               }}
             >
@@ -245,7 +243,7 @@ export default function PhotoCoverflow3D({
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onInspect(photo);
+                        onInspect(photo, index);
                       }}
                       className="absolute top-2.5 right-2.5 p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white backdrop-blur-md border border-slate-600 shadow-lg transition-colors z-10"
                       title="Inspect in Full Lightbox"
