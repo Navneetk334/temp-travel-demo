@@ -199,17 +199,7 @@ export default function PhotoCoverflow3D({
           return (
             <div
               key={photo.id}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (!isCenter) {
-                  targetScrollRef.current += offset;
-                  const nextIdx = ((targetScrollRef.current % photos.length) + photos.length) % photos.length;
-                  onChangeIndex(Math.round(nextIdx));
-                }
-                galleryAudio.playCameraShutter();
-                onSelectPhoto(photo, index);
-              }}
-              className="absolute w-[260px] sm:w-[340px] h-[340px] sm:h-[420px] cursor-pointer group"
+              className="absolute w-[260px] sm:w-[340px] h-[340px] sm:h-[420px] group"
               style={{
                 transformStyle: 'preserve-3d',
                 transform: `translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
@@ -224,6 +214,14 @@ export default function PhotoCoverflow3D({
                     src={photo.imageUrl}
                     alt={photo.title}
                     referrerPolicy="no-referrer"
+                    draggable={false}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 relative z-20"
+                  />
+
+                  {/* Invisible Click Overlay to prevent native image drag interference */}
+                  <button
+                    type="button"
+                    className="absolute inset-0 z-30 w-full h-full cursor-pointer focus:outline-none"
                     onClick={(e) => {
                       e.stopPropagation();
                       if (!isCenter) {
@@ -234,7 +232,7 @@ export default function PhotoCoverflow3D({
                       galleryAudio.playCameraShutter();
                       onSelectPhoto(photo, index);
                     }}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-pointer relative z-20"
+                    aria-label={`View ${photo.title} in Lightbox`}
                   />
 
                   {/* Specular lighting gradient */}

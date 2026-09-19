@@ -336,7 +336,7 @@ export default function PublicGalleryPage() {
               {/* Close Button */}
               <button
                 onClick={() => setLightboxIndex(null)}
-                className="absolute top-4 right-4 p-2.5 bg-white/80 text-slate-200 hover:text-white rounded-full border border-slate-200 z-30 transition-all"
+                className="absolute top-4 right-4 p-2.5 bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 rounded-full border border-slate-700 z-30 transition-all shadow-xl"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -344,13 +344,13 @@ export default function PublicGalleryPage() {
               {/* Prev / Next Overlay Buttons */}
               <button
                 onClick={() => setLightboxIndex((prev) => (prev !== null ? (prev - 1 + items.length) % items.length : null))}
-                className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/80 text-slate-200 hover:text-accent rounded-full border border-slate-200 z-30 transition-all"
+                className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-slate-900/90 text-slate-300 hover:text-accent hover:bg-slate-800 rounded-full border border-slate-700 z-30 transition-all shadow-xl"
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
               <button
                 onClick={() => setLightboxIndex((prev) => (prev !== null ? (prev + 1) % items.length : null))}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/80 text-slate-200 hover:text-accent rounded-full border border-slate-200 z-30 transition-all"
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-slate-900/90 text-slate-300 hover:text-accent hover:bg-slate-800 rounded-full border border-slate-700 z-30 transition-all shadow-xl"
               >
                 <ChevronRight className="w-6 h-6" />
               </button>
