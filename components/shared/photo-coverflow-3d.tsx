@@ -176,7 +176,7 @@ export default function PhotoCoverflow3D({
 
       {/* 3D Cards Stage */}
       <div
-        className="relative w-full max-w-[1400px] h-[360px] sm:h-[420px] flex items-center justify-center"
+        className="relative w-full h-[360px] sm:h-[420px] flex items-center justify-center"
         style={{
           transformStyle: 'preserve-3d',
         }}
@@ -197,7 +197,7 @@ export default function PhotoCoverflow3D({
           if (absOffset > 6) return null;
 
           // 3D Mathematical Transform coordinates
-          const translateX = offset * (typeof window !== 'undefined' && window.innerWidth < 640 ? 110 : 250);
+          const translateX = offset * (typeof window !== 'undefined' && window.innerWidth < 640 ? 130 : 360);
           const translateZ = -absOffset * 160;
           // offset > 0 (right side) needs negative rotation to point left edge away from camera
           const rotateY = offset === 0 ? 0 : offset > 0 ? Math.max(-48, offset * -48) : Math.min(48, offset * -48);
