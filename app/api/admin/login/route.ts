@@ -38,8 +38,9 @@ export async function POST(req: NextRequest) {
           };
         }
       }
-    } catch (dbErr) {
+    } catch (dbErr: any) {
       console.warn("Database connection notice during admin login:", dbErr);
+      return NextResponse.json({ error: "DB Error: " + (dbErr.message || String(dbErr)) }, { status: 500 });
     }
 
     // 2. Demo logins have been removed to enforce real authentication
