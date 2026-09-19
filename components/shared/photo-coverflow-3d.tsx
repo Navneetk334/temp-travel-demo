@@ -230,10 +230,26 @@ export default function PhotoCoverflow3D({
                   <button
                     type="button"
                     className="absolute inset-0 z-[100] w-full h-full cursor-pointer focus:outline-none"
-                    onClick={(e) => {
+                    onPointerDown={(e) => {
+                      e.currentTarget.dataset.downX = e.clientX.toString();
+                      e.currentTarget.dataset.downY = e.clientY.toString();
+                      e.currentTarget.dataset.time = Date.now().toString();
+                    }}
+                    onPointerUp={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      onSelectPhoto(photo, index);
+                      
+                      const downX = parseFloat(e.currentTarget.dataset.downX || "0");
+                      const downY = parseFloat(e.currentTarget.dataset.downY || "0");
+                      const time = parseInt(e.currentTarget.dataset.time || "0", 10);
+                      
+                      const distance = Math.sqrt(Math.pow(e.clientX - downX, 2) + Math.pow(e.clientY - downY, 2));
+                      const duration = Date.now() - time;
+                      
+                      // If pointer moved less than 15 pixels and held for less than 500ms, it's a valid click
+                      if (distance < 15 && duration < 500) {
+                        onSelectPhoto(photo, index);
+                      }
                     }}
                     aria-label={`View ${photo.title} in Lightbox`}
                   />
