@@ -224,7 +224,17 @@ export default function PhotoCoverflow3D({
                     src={photo.imageUrl}
                     alt={photo.title}
                     referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!isCenter) {
+                        targetScrollRef.current += offset;
+                        const nextIdx = ((targetScrollRef.current % photos.length) + photos.length) % photos.length;
+                        onChangeIndex(Math.round(nextIdx));
+                      }
+                      galleryAudio.playCameraShutter();
+                      onSelectPhoto(photo, index);
+                    }}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-pointer relative z-20"
                   />
 
                   {/* Specular lighting gradient */}
