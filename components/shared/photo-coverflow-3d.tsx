@@ -65,11 +65,19 @@ export default function PhotoCoverflow3D({
   // The Physics Lerp Loop
   useEffect(() => {
     const updateMotion = () => {
-      // Lerp current scroll towards target scroll
-      currentScrollRef.current += (targetScrollRef.current - currentScrollRef.current) * 0.08;
+      const diff = targetScrollRef.current - currentScrollRef.current;
       
-      // Force re-render with new floating offset
-      setRenderTick((prev) => prev + 1);
+      // If we are far enough, smoothly interpolate
+      if (Math.abs(diff) > 0.001) {
+        currentScrollRef.current += diff * 0.08;
+        setRenderTick((prev) => prev + 1);
+      } 
+      // If we are extremely close, snap to exact target and STOP rendering
+      else if (currentScrollRef.current !== targetScrollRef.current) {
+        currentScrollRef.current = targetScrollRef.current;
+        setRenderTick((prev) => prev + 1);
+      }
+      
       animationFrameRef.current = requestAnimationFrame(updateMotion);
     };
     animationFrameRef.current = requestAnimationFrame(updateMotion);
