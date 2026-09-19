@@ -178,10 +178,8 @@ export default function MasterGalleryPage() {
 
   const handleDelete = async (id: string) => {
     const confirmed = await showConfirm(
-      "Delete Media",
       "Are you sure you want to permanently delete this item?",
-      "Delete",
-      "Cancel"
+      "Delete Media"
     );
     if (!confirmed) return;
 
