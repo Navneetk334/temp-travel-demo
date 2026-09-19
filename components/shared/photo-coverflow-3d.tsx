@@ -221,7 +221,7 @@ export default function PhotoCoverflow3D({
               }}
             >
               {/* The Physical 3D Framed Photograph */}
-              <div className="relative w-full h-full rounded-2xl p-3 sm:p-4 bg-slate-900/80 border border-slate-700/80 shadow-[0_25px_60px_rgba(0,0,0,0.9)] backdrop-blur-xl flex flex-col justify-between overflow-hidden">
+              <div className="relative w-full h-full rounded-2xl p-3 sm:p-4 bg-slate-900 border border-slate-700/80 shadow-[0_25px_60px_rgba(0,0,0,0.9)] flex flex-col justify-between overflow-hidden">
                 {/* Image Frame */}
                 <div className="relative w-full h-[230px] sm:h-[280px] rounded-xl overflow-hidden bg-slate-950 border border-slate-800">
                   <img
