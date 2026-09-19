@@ -254,9 +254,8 @@ export default function PublicGalleryPage() {
 
 
 
-      {/* MINIMAL CATEGORY FILTER RIBBON (TOP BAR) */}
       <div className="relative z-40 px-6 sm:px-12 flex justify-center pointer-events-auto mt-4 mb-8">
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1 text-[11px] font-mono bg-white/80 p-1.5 rounded-full border border-slate-200 backdrop-blur-md">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1 text-[11px] font-mono bg-[#0f172a]/90 p-1.5 rounded-full border border-slate-800 backdrop-blur-md">
           {CATEGORIES.map((cat) => {
             const isActive = activeCategory === cat.value;
             return (
@@ -266,7 +265,7 @@ export default function PublicGalleryPage() {
                 className={`px-3.5 py-1.5 rounded-full font-bold uppercase tracking-wider transition-all duration-300 whitespace-nowrap ${
                   isActive
                     ? "bg-accent text-slate-950 shadow-md font-extrabold"
-                    : "text-slate-500 hover:text-white"
+                    : "text-slate-400 hover:text-white"
                 }`}
               >
                 {cat.label}
