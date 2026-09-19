@@ -247,8 +247,6 @@ export default function PhotoCoverflow3D({
                       </span>
                     </div>
                   )}
-
-                  )}
                 </div>
 
                 {/* Card Title & Specs */}
