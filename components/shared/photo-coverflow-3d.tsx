@@ -202,15 +202,13 @@ export default function PhotoCoverflow3D({
               key={photo.id}
               onClick={(e) => {
                 e.stopPropagation();
-                if (isCenter) {
-                  galleryAudio.playCameraShutter();
-                  onSelectPhoto(photo);
-                } else {
+                if (!isCenter) {
                   targetScrollRef.current += offset;
                   const nextIdx = ((targetScrollRef.current % photos.length) + photos.length) % photos.length;
                   onChangeIndex(Math.round(nextIdx));
-                  galleryAudio.playInteractionPing(460);
                 }
+                galleryAudio.playCameraShutter();
+                onSelectPhoto(photo);
               }}
               className="absolute w-[260px] sm:w-[340px] h-[340px] sm:h-[420px] cursor-pointer group"
               style={{
