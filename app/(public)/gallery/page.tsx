@@ -384,13 +384,13 @@ export default function PublicGalleryPage() {
                   </h3>
 
                   {lightboxItem.description && (
-                    <p className="text-xs text-slate-700 leading-relaxed font-sans">
+                    <p className="text-sm text-slate-300 leading-relaxed font-sans">
                       {lightboxItem.description}
                     </p>
                   )}
 
                   {lightboxItem.caption && (
-                    <div className="p-3 bg-white/60 border border-border rounded-xl text-xs text-slate-500 italic">
+                    <div className="p-3 bg-slate-800/50 border border-slate-700 rounded-xl text-xs text-slate-400 italic">
                       &ldquo;{lightboxItem.caption}&rdquo;
                     </div>
                   )}
