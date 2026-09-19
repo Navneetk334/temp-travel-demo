@@ -42,6 +42,7 @@ export default function MasterGalleryPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const { showAlert, showConfirm } = useDialog();
@@ -148,6 +149,9 @@ export default function MasterGalleryPage() {
       showAlert("An image is required.", "error");
       return;
     }
+    
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
     const payload = {
       ...formData,
@@ -173,6 +177,8 @@ export default function MasterGalleryPage() {
     } catch (error) {
       console.error(error);
       showAlert("Error saving media item.", "error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -187,7 +193,10 @@ export default function MasterGalleryPage() {
       const res = await fetch(`/api/gallery/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete");
       showAlert("Media deleted successfully.", "success");
-      loadGallery();
+      setItems(prev => prev.filter(item => item.id !== id));
+      if (selectedIds.includes(id)) {
+        setSelectedIds(prev => prev.filter(selectedId => selectedId !== id));
+      }
     } catch (e) {
       showAlert("Error deleting media.", "error");
     }
@@ -576,10 +585,17 @@ export default function MasterGalleryPage() {
                   </button>
                   <button
                     type="submit"
-                    className="px-8 py-2.5 text-sm font-black uppercase tracking-wider text-slate-950 bg-accent hover:bg-yellow-500 rounded-xl transition-all shadow-lg shadow-accent/20 flex items-center gap-2"
+                    disabled={isSubmitting}
+                    className="px-8 py-2.5 text-sm font-black uppercase tracking-wider text-slate-950 bg-accent hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all shadow-lg shadow-accent/20 flex items-center gap-2"
                   >
-                    {editingItem ? <CheckCircle2 className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                    {editingItem ? "Save Changes" : "Upload Media"}
+                    {isSubmitting ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : editingItem ? (
+                      <CheckCircle2 className="w-4 h-4" />
+                    ) : (
+                      <Plus className="w-4 h-4" />
+                    )}
+                    {isSubmitting ? "Processing..." : editingItem ? "Save Changes" : "Upload Media"}
                   </button>
                 </div>
               </form>
