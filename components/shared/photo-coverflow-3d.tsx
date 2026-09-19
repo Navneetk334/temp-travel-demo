@@ -218,20 +218,13 @@ export default function PhotoCoverflow3D({
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 relative z-20"
                   />
 
-                  {/* Invisible Click Overlay to prevent native image drag interference */}
+                  {/* Invisible Click Overlay to guarantee lightbox opening */}
                   <button
                     type="button"
-                    className="absolute inset-0 z-30 w-full h-full cursor-pointer focus:outline-none"
-                    onPointerUp={(e) => {
+                    className="absolute inset-0 z-[100] w-full h-full cursor-pointer focus:outline-none"
+                    onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
-                      if (Math.abs(dragDistance.current) > 5) return; // Prevent click if dragging
-                      
-                      if (!isCenter) {
-                        targetScrollRef.current += offset;
-                        const nextIdx = ((targetScrollRef.current % photos.length) + photos.length) % photos.length;
-                        onChangeIndex(Math.round(nextIdx));
-                      }
-                      galleryAudio.playCameraShutter();
                       onSelectPhoto(photo, index);
                     }}
                     aria-label={`View ${photo.title} in Lightbox`}
