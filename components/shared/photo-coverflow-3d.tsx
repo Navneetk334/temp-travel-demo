@@ -222,8 +222,10 @@ export default function PhotoCoverflow3D({
                   <button
                     type="button"
                     className="absolute inset-0 z-30 w-full h-full cursor-pointer focus:outline-none"
-                    onClick={(e) => {
+                    onPointerUp={(e) => {
                       e.stopPropagation();
+                      if (Math.abs(dragDistance.current) > 5) return; // Prevent click if dragging
+                      
                       if (!isCenter) {
                         targetScrollRef.current += offset;
                         const nextIdx = ((targetScrollRef.current % photos.length) + photos.length) % photos.length;
@@ -246,18 +248,6 @@ export default function PhotoCoverflow3D({
                     </div>
                   )}
 
-                  {isCenter && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onInspect(photo, index);
-                      }}
-                      className="absolute top-2.5 right-2.5 p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white backdrop-blur-md border border-slate-600 shadow-lg transition-colors z-10"
-                      title="Inspect in Full Lightbox"
-                    >
-                      <Maximize2 className="w-3.5 h-3.5" />
-                    </button>
                   )}
                 </div>
 
