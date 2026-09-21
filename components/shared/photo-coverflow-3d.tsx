@@ -52,6 +52,8 @@ export default function PhotoCoverflow3D({
   const currentScrollRef = useRef(activeIndex);
   const targetScrollRef = useRef(activeIndex);
   const animationFrameRef = useRef<number>(0);
+  const dragStartTime = useRef<number>(0);
+  const dragStartScroll = useRef<number>(0);
   const [, setRenderTick] = useState(0);
 
   // Sync external activeIndex changes to targetScroll
@@ -119,6 +121,8 @@ export default function PhotoCoverflow3D({
     isDraggingRef.current = true;
     dragStartX.current = e.clientX;
     dragDistance.current = 0;
+    dragStartTime.current = Date.now();
+    dragStartScroll.current = currentScrollRef.current;
     pointerDownTarget.current = e.target as HTMLElement;
   };
 
