@@ -158,12 +158,8 @@ export default function ContactPage() {
                 </div>
                 <div className="space-y-1.5 pl-11 text-sm text-slate-400">
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Cab & Fleet Service:</span>
-                    <span className="font-semibold text-emerald-400">24/7 Available</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Airport Transfer:</span>
-                    <span className="font-semibold text-emerald-400">24/7 Available</span>
+                    <span className="text-slate-400">All Services:</span>
+                    <span className="font-semibold text-emerald-400">24/7 X 365 Days Available</span>
                   </div>
                 </div>
               </div>
