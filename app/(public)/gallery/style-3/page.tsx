@@ -14,13 +14,13 @@ const CATEGORIES = [
 ];
 
 export default function GalleryStyle() {
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("all");
-  const [lightboxIndex, setLightboxIndex] = useState(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
 
-  const fetchGallery = async (category) => {
+  const fetchGallery = async (category: string) => {
     setLoading(true);
     try {
       const res = await fetch(`/api/gallery?category=${encodeURIComponent(category)}&sortBy=featured&limit=50`);
