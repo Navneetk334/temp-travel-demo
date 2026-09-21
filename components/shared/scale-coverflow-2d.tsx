@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { PhotoItem } from "@/components/shared/photo-coverflow-3d";
+
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Props {
-  photos: PhotoItem[];
+  photos: any[];
   activeIndex: number;
   onChangeIndex: (index: number) => void;
-  onSelectPhoto: (photo: PhotoItem, index: number) => void;
+  onSelectPhoto: (photo: any, index: number) => void;
 }
 
 export default function ScaleCoverflow2D({

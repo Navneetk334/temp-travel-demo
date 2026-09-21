@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { PhotoItem } from "@/components/shared/photo-coverflow-3d";
+
 
 interface Props {
-  photos: PhotoItem[];
-  onSelectPhoto: (photo: PhotoItem, index: number) => void;
+  photos: any[];
+  onSelectPhoto: (photo: any, index: number) => void;
 }
 
 export default function HeroCrossfade({

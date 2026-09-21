@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useRef, useState, useEffect } from "react";
-import { PhotoItem } from "@/components/shared/photo-coverflow-3d";
+
 
 interface Props {
-  photos: PhotoItem[];
+  photos: any[];
   activeIndex: number;
   onChangeIndex: (index: number) => void;
-  onSelectPhoto: (photo: PhotoItem, index: number) => void;
+  onSelectPhoto: (photo: any, index: number) => void;
 }
 
 export default function CinematicHorizontalSnap({
