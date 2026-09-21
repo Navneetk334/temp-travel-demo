@@ -234,22 +234,15 @@ export default function PhotoCoverflow3D({
                   <button
                     type="button"
                     className="absolute inset-0 z-[100] w-full h-full cursor-pointer focus:outline-none"
-                    onPointerDown={(e) => {
-                      pointerTracker.current = {
-                        x: e.clientX,
-                        y: e.clientY,
-                        time: Date.now()
-                      };
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (Math.abs(dragDistance.current) < 15) {
+                        onSelectPhoto(photo, index);
+                      }
                     }}
-                    onPointerUp={(e) => {
-                      // Do NOT stop propagation, let the container handle the global pointer up to reset drag state
-                      const { x, y, time } = pointerTracker.current;
-                      
-                      const distance = Math.sqrt(Math.pow(e.clientX - x, 2) + Math.pow(e.clientY - y, 2));
-                      const duration = Date.now() - time;
-                      
-                      // Forgiving thresholds: less than 40px movement and under 1 second means a click!
-                      if (distance < 40 && duration < 1000) {
+                    onPointerUpCapture={(e) => {
+                      // If the global carousel drag distance is tiny, it was a click, not a swipe!
+                      if (Math.abs(dragDistance.current) < 15) {
                         onSelectPhoto(photo, index);
                       }
                     }}
