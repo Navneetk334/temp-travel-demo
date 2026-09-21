@@ -235,7 +235,6 @@ export default function PhotoCoverflow3D({
                     type="button"
                     className="absolute inset-0 z-[100] w-full h-full cursor-pointer focus:outline-none"
                     onPointerDown={(e) => {
-                      e.currentTarget.setPointerCapture(e.pointerId);
                       pointerTracker.current = {
                         x: e.clientX,
                         y: e.clientY,
@@ -243,17 +242,14 @@ export default function PhotoCoverflow3D({
                       };
                     }}
                     onPointerUp={(e) => {
-                      e.currentTarget.releasePointerCapture(e.pointerId);
-                      e.preventDefault();
-                      e.stopPropagation();
-                      
+                      // Do NOT stop propagation, let the container handle the global pointer up to reset drag state
                       const { x, y, time } = pointerTracker.current;
                       
                       const distance = Math.sqrt(Math.pow(e.clientX - x, 2) + Math.pow(e.clientY - y, 2));
                       const duration = Date.now() - time;
                       
-                      // If pointer moved less than 15 pixels and held for less than 500ms, it's a valid click
-                      if (distance < 15 && duration < 500) {
+                      // Forgiving thresholds: less than 40px movement and under 1 second means a click!
+                      if (distance < 40 && duration < 1000) {
                         onSelectPhoto(photo, index);
                       }
                     }}
