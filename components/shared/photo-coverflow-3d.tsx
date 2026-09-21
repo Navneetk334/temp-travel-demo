@@ -123,12 +123,12 @@ export default function PhotoCoverflow3D({
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDragging) return;
+    if (!isDraggingRef.current) return;
     dragDistance.current = e.clientX - dragStartX.current;
   };
 
   const handlePointerUp = () => {
-    if (!isDragging) return;
+    if (!isDraggingRef.current) return;
     setIsDragging(false);
     isDraggingRef.current = false;
     
