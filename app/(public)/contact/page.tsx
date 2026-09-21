@@ -157,8 +157,7 @@ export default function ContactPage() {
                   <h3 className="font-bold text-slate-50 text-base">Our Service Hours</h3>
                 </div>
                 <div className="space-y-1.5 pl-11 text-sm text-slate-400">
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">All Services:</span>
+                  <div className="flex justify-start">
                     <span className="font-semibold text-emerald-400">24/7 X 365 Days Available</span>
                   </div>
                 </div>
