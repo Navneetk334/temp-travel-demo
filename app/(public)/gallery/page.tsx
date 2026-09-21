@@ -134,16 +134,7 @@ export default function PublicGalleryPage() {
     return () => window.removeEventListener("wheel", handleGlobalWheel);
   }, [lightboxIndex, items.length]);
 
-  // Smooth Autoplay for the 3D Coverflow
-  useEffect(() => {
-    if (loading || items.length === 0 || lightboxIndex !== null) return;
-    
-    const autoplayInterval = setInterval(() => {
-      setActiveCardIndex((prev) => (prev + 1) % items.length);
-    }, 4000); // Slow, smooth progression every 4 seconds
-
-    return () => clearInterval(autoplayInterval);
-  }, [loading, items.length, lightboxIndex]);
+  // Smooth Autoplay is now handled continuously in PhotoCoverflow3D
 
   // Mouse Drag Handlers
   const handleMouseDown = (e: React.MouseEvent) => {

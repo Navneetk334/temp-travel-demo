@@ -20,8 +20,8 @@ export interface PhotoItem {
 
 // Mock audio synthesizer to prevent crashes
 const galleryAudio = {
-  playInteractionPing: (freq: number) => {},
-  playCameraShutter: () => {},
+  playInteractionPing: (freq: number) => { },
+  playCameraShutter: () => { },
 };
 
 interface PhotoCoverflow3DProps {
@@ -43,6 +43,8 @@ export default function PhotoCoverflow3D({
   const [isDragging, setIsDragging] = useState(false);
   const dragStartX = useRef(0);
   const dragDistance = useRef(0);
+  const isDraggingRef = useRef(false);
+  const isHoveredRef = useRef(false);
 
   const activePhoto = photos[activeIndex] || photos[0];
 
@@ -58,21 +60,32 @@ export default function PhotoCoverflow3D({
     let diff = (activeIndex - (targetScrollRef.current % total)) % total;
     if (diff > total / 2) diff -= total;
     if (diff < -total / 2) diff += total;
-    
+
     targetScrollRef.current += diff;
   }, [activeIndex, photos.length]);
 
   // The Physics Lerp Loop
   useEffect(() => {
-    const updateMotion = () => {
+    let lastTime = performance.now();
+    
+    const updateMotion = (time: number) => {
+      const deltaMs = time - lastTime;
+      lastTime = time;
+
+      // Continuous smooth video-like auto-scrolling
+      if (!isDraggingRef.current && !isHoveredRef.current) {
+        // Adjust speed here (e.g. 0.0006 per millisecond = ~1 card every ~1.6 seconds)
+        targetScrollRef.current += 0.0006 * deltaMs;
+      }
+
       const diff = targetScrollRef.current - currentScrollRef.current;
       
-      // If we are far enough, smoothly interpolate
-      if (Math.abs(diff) > 0.001) {
+      // If we are far enough or constantly moving, smoothly interpolate
+      if (Math.abs(diff) > 0.001 || (!isDraggingRef.current && !isHoveredRef.current)) {
         currentScrollRef.current += diff * 0.08;
         setRenderTick((prev) => prev + 1);
       } 
-      // If we are extremely close, snap to exact target and STOP rendering
+      // If we are extremely close and stopped, snap to exact target and STOP rendering
       else if (currentScrollRef.current !== targetScrollRef.current) {
         currentScrollRef.current = targetScrollRef.current;
         setRenderTick((prev) => prev + 1);
@@ -102,6 +115,7 @@ export default function PhotoCoverflow3D({
   // Drag handling for fluid swiping in 3D
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
+    isDraggingRef.current = true;
     dragStartX.current = e.clientX;
     dragDistance.current = 0;
   };
@@ -114,6 +128,7 @@ export default function PhotoCoverflow3D({
   const handleMouseUp = () => {
     if (!isDragging) return;
     setIsDragging(false);
+    isDraggingRef.current = false;
     if (dragDistance.current < -60) {
       handleNext();
     } else if (dragDistance.current > 60) {
@@ -122,6 +137,7 @@ export default function PhotoCoverflow3D({
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    isDraggingRef.current = true;
     dragStartX.current = e.touches[0].clientX;
     dragDistance.current = 0;
   };
@@ -131,6 +147,7 @@ export default function PhotoCoverflow3D({
   };
 
   const handleTouchEnd = () => {
+    isDraggingRef.current = false;
     if (dragDistance.current < -50) {
       handleNext();
     } else if (dragDistance.current > 50) {
@@ -155,7 +172,13 @@ export default function PhotoCoverflow3D({
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
+      onMouseLeave={() => {
+        isHoveredRef.current = false;
+        handleMouseUp();
+      }}
+      onMouseEnter={() => {
+        isHoveredRef.current = true;
+      }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -238,14 +261,14 @@ export default function PhotoCoverflow3D({
                     onPointerUp={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      
+
                       const downX = parseFloat(e.currentTarget.dataset.downX || "0");
                       const downY = parseFloat(e.currentTarget.dataset.downY || "0");
                       const time = parseInt(e.currentTarget.dataset.time || "0", 10);
-                      
+
                       const distance = Math.sqrt(Math.pow(e.clientX - downX, 2) + Math.pow(e.clientY - downY, 2));
                       const duration = Date.now() - time;
-                      
+
                       // If pointer moved less than 15 pixels and held for less than 500ms, it's a valid click
                       if (distance < 15 && duration < 500) {
                         onSelectPhoto(photo, index);
