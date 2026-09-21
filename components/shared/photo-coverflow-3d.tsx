@@ -45,6 +45,7 @@ export default function PhotoCoverflow3D({
   const dragDistance = useRef(0);
   const isDraggingRef = useRef(false);
   const isHoveredRef = useRef(false);
+  const pointerTracker = useRef({ x: 0, y: 0, time: 0 });
 
   const activePhoto = photos[activeIndex] || photos[0];
 
@@ -112,41 +113,22 @@ export default function PhotoCoverflow3D({
     galleryAudio.playInteractionPing(520);
   }, [photos.length, onChangeIndex]);
 
-  // Drag handling for fluid swiping in 3D
-  const handleMouseDown = (e: React.MouseEvent) => {
+  // Unified Pointer Drag handling for fluid swiping in 3D
+  const handlePointerDown = (e: React.PointerEvent) => {
     setIsDragging(true);
     isDraggingRef.current = true;
     dragStartX.current = e.clientX;
     dragDistance.current = 0;
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDragging) return;
     dragDistance.current = e.clientX - dragStartX.current;
   };
 
-  const handleMouseUp = () => {
+  const handlePointerUp = () => {
     if (!isDragging) return;
     setIsDragging(false);
-    isDraggingRef.current = false;
-    if (dragDistance.current < -60) {
-      handleNext();
-    } else if (dragDistance.current > 60) {
-      handlePrev();
-    }
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    isDraggingRef.current = true;
-    dragStartX.current = e.touches[0].clientX;
-    dragDistance.current = 0;
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    dragDistance.current = e.touches[0].clientX - dragStartX.current;
-  };
-
-  const handleTouchEnd = () => {
     isDraggingRef.current = false;
     if (dragDistance.current < -50) {
       handleNext();
@@ -169,22 +151,21 @@ export default function PhotoCoverflow3D({
   return (
     <div
       ref={containerRef}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={() => {
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      onPointerLeave={() => {
         isHoveredRef.current = false;
-        handleMouseUp();
+        handlePointerUp();
       }}
-      onMouseEnter={() => {
+      onPointerEnter={() => {
         isHoveredRef.current = true;
       }}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
       className="relative w-full h-[540px] sm:h-[600px] flex flex-col items-center justify-center overflow-hidden select-none cursor-grab active:cursor-grabbing bg-transparent"
       style={{
         perspective: '1200px',
+        touchAction: 'none', // Prevent native scrolling while dragging carousel
       }}
     >
       {/* 3D Atmosphere Stage Background Lighting */}
@@ -254,21 +235,23 @@ export default function PhotoCoverflow3D({
                     type="button"
                     className="absolute inset-0 z-[100] w-full h-full cursor-pointer focus:outline-none"
                     onPointerDown={(e) => {
-                      e.currentTarget.dataset.downX = e.clientX.toString();
-                      e.currentTarget.dataset.downY = e.clientY.toString();
-                      e.currentTarget.dataset.time = Date.now().toString();
+                      e.currentTarget.setPointerCapture(e.pointerId);
+                      pointerTracker.current = {
+                        x: e.clientX,
+                        y: e.clientY,
+                        time: Date.now()
+                      };
                     }}
                     onPointerUp={(e) => {
+                      e.currentTarget.releasePointerCapture(e.pointerId);
                       e.preventDefault();
                       e.stopPropagation();
-
-                      const downX = parseFloat(e.currentTarget.dataset.downX || "0");
-                      const downY = parseFloat(e.currentTarget.dataset.downY || "0");
-                      const time = parseInt(e.currentTarget.dataset.time || "0", 10);
-
-                      const distance = Math.sqrt(Math.pow(e.clientX - downX, 2) + Math.pow(e.clientY - downY, 2));
+                      
+                      const { x, y, time } = pointerTracker.current;
+                      
+                      const distance = Math.sqrt(Math.pow(e.clientX - x, 2) + Math.pow(e.clientY - y, 2));
                       const duration = Date.now() - time;
-
+                      
                       // If pointer moved less than 15 pixels and held for less than 500ms, it's a valid click
                       if (distance < 15 && duration < 500) {
                         onSelectPhoto(photo, index);
