@@ -45,7 +45,7 @@ export default function PhotoCoverflow3D({
   const dragDistance = useRef(0);
   const isDraggingRef = useRef(false);
   const isHoveredRef = useRef(false);
-  const pointerTracker = useRef({ x: 0, y: 0, time: 0 });
+  const pointerDownTarget = useRef<HTMLElement | null>(null);
 
   const activePhoto = photos[activeIndex] || photos[0];
 
@@ -113,12 +113,13 @@ export default function PhotoCoverflow3D({
     galleryAudio.playInteractionPing(520);
   }, [photos.length, onChangeIndex]);
 
-  // Unified Pointer Drag handling for fluid swiping in 3D
+  // Unified Pointer Drag & Click handling for fluid swiping in 3D
   const handlePointerDown = (e: React.PointerEvent) => {
     setIsDragging(true);
     isDraggingRef.current = true;
     dragStartX.current = e.clientX;
     dragDistance.current = 0;
+    pointerDownTarget.current = e.target as HTMLElement;
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -130,11 +131,27 @@ export default function PhotoCoverflow3D({
     if (!isDragging) return;
     setIsDragging(false);
     isDraggingRef.current = false;
+    
+    // Swipe detection
     if (dragDistance.current < -50) {
       handleNext();
     } else if (dragDistance.current > 50) {
       handlePrev();
+    } else if (Math.abs(dragDistance.current) < 15) {
+      // Tap detection: If they didn't swipe, it's a click!
+      if (pointerDownTarget.current) {
+        const card = pointerDownTarget.current.closest('[data-photo-index]');
+        if (card) {
+          const idxStr = card.getAttribute('data-photo-index');
+          if (idxStr !== null) {
+            const idx = parseInt(idxStr, 10);
+            onSelectPhoto(photos[idx], idx);
+          }
+        }
+      }
     }
+    
+    pointerDownTarget.current = null;
   };
 
   // Keyboard navigation
@@ -233,19 +250,8 @@ export default function PhotoCoverflow3D({
                   {/* Invisible Click Overlay to guarantee lightbox opening */}
                   <button
                     type="button"
+                    data-photo-index={index}
                     className="absolute inset-0 z-[100] w-full h-full cursor-pointer focus:outline-none"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (Math.abs(dragDistance.current) < 15) {
-                        onSelectPhoto(photo, index);
-                      }
-                    }}
-                    onPointerUpCapture={(e) => {
-                      // If the global carousel drag distance is tiny, it was a click, not a swipe!
-                      if (Math.abs(dragDistance.current) < 15) {
-                        onSelectPhoto(photo, index);
-                      }
-                    }}
                     aria-label={`View ${photo.title} in Lightbox`}
                   />
 
