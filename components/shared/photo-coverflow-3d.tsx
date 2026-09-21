@@ -127,7 +127,7 @@ export default function PhotoCoverflow3D({
     dragDistance.current = e.clientX - dragStartX.current;
   };
 
-  const handlePointerUp = () => {
+  const handlePointerUp = (e: React.PointerEvent) => {
     if (!isDraggingRef.current) return;
     setIsDragging(false);
     isDraggingRef.current = false;
@@ -137,15 +137,26 @@ export default function PhotoCoverflow3D({
       handleNext();
     } else if (dragDistance.current > 50) {
       handlePrev();
-    } else if (Math.abs(dragDistance.current) < 15) {
-      // Tap detection: If they didn't swipe, it's a click!
-      if (pointerDownTarget.current) {
-        const card = pointerDownTarget.current.closest('[data-photo-index]');
-        if (card) {
-          const idxStr = card.getAttribute('data-photo-index');
-          if (idxStr !== null) {
-            const idx = parseInt(idxStr, 10);
-            onSelectPhoto(photos[idx], idx);
+    } else {
+      // Check if it was a quick TAP (not a drag)
+      if (Date.now() - dragStartTime.current < 200 && Math.abs(currentScrollRef.current - dragStartScroll.current) < 0.1) {
+        // It's a tap! Bypass 3D CSS by calculating tap coordinates on the 2D overlay
+        if (containerRef.current) {
+          const rect = containerRef.current.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const width = rect.width;
+          
+          if (x < width * 0.3) {
+            // Clicked left side -> Scroll left
+            handlePrev();
+          } else if (x > width * 0.7) {
+            // Clicked right side -> Scroll right
+            handleNext();
+          } else {
+            // Clicked center -> Open Lightbox for current center card
+            const centerIndex = Math.round(currentScrollRef.current);
+            const normalizedIndex = ((centerIndex % photos.length) + photos.length) % photos.length;
+            onSelectPhoto(photos[normalizedIndex], normalizedIndex);
           }
         }
       }
@@ -168,23 +179,26 @@ export default function PhotoCoverflow3D({
   return (
     <div
       ref={containerRef}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerUp}
-      onPointerLeave={() => {
-        isHoveredRef.current = false;
-        handlePointerUp();
-      }}
-      onPointerEnter={() => {
-        isHoveredRef.current = true;
-      }}
-      className="relative w-full h-[540px] sm:h-[600px] flex flex-col items-center justify-center overflow-hidden select-none cursor-grab active:cursor-grabbing bg-transparent"
+      className="relative w-full h-[540px] sm:h-[600px] flex flex-col items-center justify-center overflow-hidden select-none bg-transparent"
       style={{
         perspective: '1200px',
-        touchAction: 'none', // Prevent native scrolling while dragging carousel
       }}
     >
+      {/* 2D INTERACTION OVERLAY - Intercepts all clicks & drags cleanly, bypassing 3D transform bugs */}
+      <div 
+         className="absolute inset-0 z-[100] cursor-grab active:cursor-grabbing touch-none"
+         onPointerDown={handlePointerDown}
+         onPointerMove={handlePointerMove}
+         onPointerUp={handlePointerUp}
+         onPointerCancel={handlePointerUp}
+         onPointerLeave={(e) => {
+           isHoveredRef.current = false;
+           handlePointerUp(e);
+         }}
+         onPointerEnter={() => {
+           isHoveredRef.current = true;
+         }}
+      />
       {/* 3D Atmosphere Stage Background Lighting */}
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
         <div
