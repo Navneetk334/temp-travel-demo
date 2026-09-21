@@ -93,10 +93,6 @@ export default function ContactPage() {
                     <span className="text-slate-400">Corporate & Sales Desk:</span>
                     <a href="tel:+917011729639" className="font-bold hover:text-accent transition-colors">+91 70117 29639</a>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-400">Technical Support:</span>
-                    <a href="tel:+917011729639" className="font-bold hover:text-accent transition-colors">+91 70117 29639</a>
-                  </div>
                 </div>
               </div>
 
@@ -132,13 +128,13 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              {/* Business Hours Card */}
+              {/* Office Hours Card */}
               <div className="glassmorphism p-6 rounded-xl border border-border space-y-3">
                 <div className="flex items-center gap-3">
                   <div className="bg-primary/10 border border-primary/20 p-2.5 rounded-lg text-accent">
                     <Clock className="w-5 h-5" />
                   </div>
-                  <h3 className="font-bold text-slate-50 text-base">Business Hours</h3>
+                  <h3 className="font-bold text-slate-50 text-base">Office Hours</h3>
                 </div>
                 <div className="space-y-1.5 pl-11 text-sm text-slate-400">
                   <div className="flex justify-between">
@@ -148,6 +144,26 @@ export default function ContactPage() {
                   <div className="flex justify-between">
                     <span className="text-slate-400">Sunday:</span>
                     <span className="font-semibold text-slate-400">Closed</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Service Hours Card */}
+              <div className="glassmorphism p-6 rounded-xl border border-border space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="bg-primary/10 border border-primary/20 p-2.5 rounded-lg text-accent">
+                    <Clock className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-bold text-slate-50 text-base">Our Service Hours</h3>
+                </div>
+                <div className="space-y-1.5 pl-11 text-sm text-slate-400">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Cab & Fleet Service:</span>
+                    <span className="font-semibold text-emerald-400">24/7 Available</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Airport Transfer:</span>
+                    <span className="font-semibold text-emerald-400">24/7 Available</span>
                   </div>
                 </div>
               </div>
