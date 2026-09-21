@@ -65,8 +65,6 @@ export default function GalleryStyle() {
         ) : (
           <HeroCrossfade
             photos={items}
-            activeIndex={activeCardIndex}
-            onChangeIndex={setActiveCardIndex}
             onSelectPhoto={(_, index) => setLightboxIndex(index)}
           />
         )}

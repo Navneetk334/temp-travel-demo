@@ -65,8 +65,6 @@ export default function GalleryStyle() {
         ) : (
           <FocusExpansionCarousel
             photos={items}
-            activeIndex={activeCardIndex}
-            onChangeIndex={setActiveCardIndex}
             onSelectPhoto={(_, index) => setLightboxIndex(index)}
           />
         )}
