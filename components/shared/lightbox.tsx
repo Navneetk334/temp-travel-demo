@@ -3,11 +3,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Portal } from "@radix-ui/react-portal";
 import { X, ChevronLeft, ChevronRight, Sparkles, MapPin, Calendar, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { PhotoItem } from "@/components/shared/photo-coverflow-3d";
+
 
 interface LightboxProps {
-  lightboxItem: PhotoItem | null;
-  items: PhotoItem[];
+  lightboxItem: any | null;
+  items: any[];
   setLightboxIndex: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
