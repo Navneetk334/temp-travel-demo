@@ -149,16 +149,16 @@ export default function ContactPage() {
               </div>
 
               {/* Service Hours Card */}
-              <div className="glassmorphism p-6 rounded-xl border border-border space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="bg-primary/10 border border-primary/20 p-2.5 rounded-lg text-accent">
-                    <Clock className="w-5 h-5" />
+              <div className="glassmorphism p-6 rounded-xl border border-border">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-primary/10 border border-primary/20 p-2.5 rounded-lg text-accent">
+                      <Clock className="w-5 h-5" />
+                    </div>
+                    <h3 className="font-bold text-slate-50 text-base">Our Service Hours</h3>
                   </div>
-                  <h3 className="font-bold text-slate-50 text-base">Our Service Hours</h3>
-                </div>
-                <div className="space-y-1.5 pl-11 text-sm text-slate-400">
-                  <div className="flex justify-start">
-                    <span className="font-semibold text-emerald-400">24/7 X 365 Days Available</span>
+                  <div className="sm:pl-0 pl-11">
+                    <span className="font-bold text-emerald-400 text-sm tracking-wide bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-lg inline-block">24/7 X 365 Days Available</span>
                   </div>
                 </div>
               </div>
