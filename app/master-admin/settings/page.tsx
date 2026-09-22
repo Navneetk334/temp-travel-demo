@@ -55,12 +55,7 @@ export default function MasterSettingsVaultPage() {
 
   // Secure Document Vault State
   const [showAddDocModal, setShowAddDocModal] = useState(false);
-  const [vaultDocs, setVaultDocs] = useState([
-    { id: "doc-1", title: "Certificate of Incorporation", category: "COMPANY", refNumber: "U63090DL2019PTC345678", expiryDate: "N/A", status: "VALID" },
-    { id: "doc-2", title: "GST Registration Certificate", category: "TAX & AUDIT", refNumber: "27AABCU9603R1ZM", expiryDate: "N/A", status: "VALID" },
-    { id: "doc-3", title: "ISO 9001:2015 Quality Management Certificate", category: "COMPLIANCE", refNumber: "ISO-9001-2024", expiryDate: "2027-09-30", status: "VALID" },
-    { id: "doc-4", title: "All India Tourist Transport Operator Permit", category: "COMPLIANCE", refNumber: "AITP-990022", expiryDate: "2028-03-31", status: "VALID" },
-  ]);
+  const [vaultDocs, setVaultDocs] = useState<any[]>([]);
 
   const [newDoc, setNewDoc] = useState({
     title: "",
@@ -354,8 +349,13 @@ export default function MasterSettingsVaultPage() {
               <span>Upload Document</span>
             </button>
           </div>
-
+          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {vaultDocs.length === 0 && (
+              <div className="col-span-full py-12 text-center border-2 border-dashed border-border rounded-2xl">
+                <p className="text-slate-400 text-sm">No company documents uploaded yet.</p>
+              </div>
+            )}
             {vaultDocs.map((doc) => (
               <div key={doc.id} className="bg-background p-5 rounded-2xl border border-border space-y-3">
                 <div className="flex justify-between items-start">
