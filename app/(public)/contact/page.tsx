@@ -3,14 +3,14 @@ import { getSEOMetadata } from "@/lib/seo";
 import Breadcrumbs from "@/components/shared/breadcrumbs";
 import { JsonLd } from "@/components/shared/json-ld";
 import ContactForm from "@/components/shared/contact-form";
-import { 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Clock, 
-  ShieldAlert, 
-  Map, 
-  ExternalLink 
+import {
+  Phone,
+  Mail,
+  MapPin,
+  Clock,
+  ShieldAlert,
+  Map,
+  ExternalLink
 } from "lucide-react";
 
 export const metadata = getSEOMetadata({
@@ -55,7 +55,7 @@ export default function ContactPage() {
         {/* Combined Page Header & Breadcrumbs Section */}
         <section className="relative bg-background overflow-hidden border-b border-border pb-20">
           <div className="absolute inset-0 bg-gradient-to-b from-blue-900/10 via-slate-950 to-slate-950 pointer-events-none" />
-          
+
           <div className="relative z-10">
             <Breadcrumbs items={breadcrumbsList} />
           </div>
@@ -76,10 +76,10 @@ export default function ContactPage() {
         {/* Form and Info Columns */}
         <section className="py-20 bg-background">
           <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-            
+
             {/* Contact Information Column */}
             <div className="lg:col-span-5 space-y-6">
-              
+
               {/* Phone Numbers Card */}
               <div className="glassmorphism p-6 rounded-xl border border-border space-y-3">
                 <div className="flex items-center gap-3">
