@@ -56,11 +56,10 @@ export default function MasterSettingsVaultPage() {
   // Secure Document Vault State
   const [showAddDocModal, setShowAddDocModal] = useState(false);
   const [vaultDocs, setVaultDocs] = useState([
-    { id: "doc-1", title: "Commercial Registration Certificate (RC) - Swift Dzire", category: "VEHICLE", refNumber: "MH 02 CZ 4421", expiryDate: "2029-03-15", status: "VALID" },
-    { id: "doc-2", title: "Comprehensive Commercial Insurance Policy - Innova Crysta", category: "VEHICLE", refNumber: "POL-9988112", expiryDate: "2027-01-10", status: "VALID" },
-    { id: "doc-3", title: "Commercial Driving License - Chauffeur Rajesh Kumar", category: "DRIVER", refNumber: "MH-0220190045123", expiryDate: "2029-08-15", status: "VALID" },
-    { id: "doc-[#4]", title: "Police Clearance Background Certificate - Suresh Patil", category: "DRIVER", refNumber: "PCC-2024-8812", expiryDate: "2026-12-31", status: "VALID" },
-    { id: "doc-5", title: "ISO 9001:2015 Quality Management Certificate", category: "COMPANY", refNumber: "ISO-9001-2024", expiryDate: "2027-09-30", status: "VALID" },
+    { id: "doc-1", title: "Certificate of Incorporation", category: "COMPANY", refNumber: "U63090DL2019PTC345678", expiryDate: "N/A", status: "VALID" },
+    { id: "doc-2", title: "GST Registration Certificate", category: "TAX & AUDIT", refNumber: "27AABCU9603R1ZM", expiryDate: "N/A", status: "VALID" },
+    { id: "doc-3", title: "ISO 9001:2015 Quality Management Certificate", category: "COMPLIANCE", refNumber: "ISO-9001-2024", expiryDate: "2027-09-30", status: "VALID" },
+    { id: "doc-4", title: "All India Tourist Transport Operator Permit", category: "COMPLIANCE", refNumber: "AITP-990022", expiryDate: "2028-03-31", status: "VALID" },
   ]);
 
   const [newDoc, setNewDoc] = useState({
