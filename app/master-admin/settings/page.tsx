@@ -194,7 +194,7 @@ export default function MasterSettingsVaultPage() {
           }`}
         >
           <FileCheck className="w-4 h-4" />
-          <span>Document Vault ({vaultDocs.length})</span>
+          <span>Company Documents ({vaultDocs.length})</span>
         </button>
       </div>
 
@@ -339,13 +339,13 @@ export default function MasterSettingsVaultPage() {
         </div>
       )}
 
-      {/* TAB 3: Secure Document Vault */}
+      {/* TAB 3: Company Documents */}
       {activeTab === "vault" && (
         <div className="bg-surface/80 backdrop-blur-xl border border-border rounded-2xl p-6 shadow-2xl space-y-6">
           <div className="flex justify-between items-center border-b border-border pb-4">
             <div>
-              <h3 className="text-lg font-bold text-slate-50">Encrypted Compliance Document Vault</h3>
-              <p className="text-xs text-slate-400">Store and track commercial RCs, Insurance, Driver Licenses, and PCC certificates.</p>
+              <h3 className="text-lg font-bold text-slate-50">Company Documents</h3>
+              <p className="text-xs text-slate-400">Store and track company-level compliance certificates, incorporation documents, and ISO files.</p>
             </div>
             <button
               onClick={() => setShowAddDocModal(true)}
@@ -439,19 +439,30 @@ export default function MasterSettingsVaultPage() {
               <button onClick={() => setShowAddDocModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white">
                 <X className="w-5 h-5" />
               </button>
-              <h3 className="text-xl font-bold text-slate-50">Upload Document to Vault</h3>
+              <h3 className="text-xl font-bold text-slate-50">Upload Company Document</h3>
               <form onSubmit={handleAddDocSubmit} className="space-y-4 text-xs">
                 <div className="space-y-1">
                   <label className="text-slate-400 font-bold">Document Title *</label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Commercial Permit - Ertiga"
+                    placeholder="e.g. ISO 9001 Certificate"
                     value={newDoc.title}
                     onChange={(e) => setNewDoc({ ...newDoc, title: e.target.value })}
                     className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100"
                   />
                 </div>
+                
+                <div className="space-y-1">
+                  <label className="text-slate-400 font-bold">Upload File *</label>
+                  <input
+                    type="file"
+                    required
+                    accept=".pdf,.png,.jpg,.jpeg"
+                    className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:bg-amber-500/10 file:text-amber-400 hover:file:bg-amber-500/20"
+                  />
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-slate-400 font-bold">Category</label>
@@ -460,17 +471,17 @@ export default function MasterSettingsVaultPage() {
                       onChange={(e) => setNewDoc({ ...newDoc, category: e.target.value })}
                       className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100"
                     >
-                      <option value="VEHICLE">VEHICLE</option>
-                      <option value="DRIVER">DRIVER</option>
-                      <option value="EMPLOYEE">EMPLOYEE</option>
                       <option value="COMPANY">COMPANY</option>
+                      <option value="COMPLIANCE">COMPLIANCE</option>
+                      <option value="TAX">TAX & AUDIT</option>
+                      <option value="OTHER">OTHER</option>
                     </select>
                   </div>
                   <div className="space-y-1">
                     <label className="text-slate-400 font-bold">Reference / Policy #</label>
                     <input
                       type="text"
-                      placeholder="MH-02-2025"
+                      placeholder="ISO-2025"
                       value={newDoc.refNumber}
                       onChange={(e) => setNewDoc({ ...newDoc, refNumber: e.target.value })}
                       className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100"
