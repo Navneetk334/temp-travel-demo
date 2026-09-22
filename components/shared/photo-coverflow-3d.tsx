@@ -70,7 +70,7 @@ export default function PhotoCoverflow3D({
   // The Physics Lerp Loop
   useEffect(() => {
     let lastTime = performance.now();
-    
+
     const updateMotion = (time: number) => {
       const deltaMs = time - lastTime;
       lastTime = time;
@@ -82,18 +82,18 @@ export default function PhotoCoverflow3D({
       }
 
       const diff = targetScrollRef.current - currentScrollRef.current;
-      
+
       // If we are far enough or constantly moving, smoothly interpolate
       if (Math.abs(diff) > 0.001 || (!isDraggingRef.current && !isHoveredRef.current)) {
         currentScrollRef.current += diff * 0.08;
         setRenderTick((prev) => prev + 1);
-      } 
+      }
       // If we are extremely close and stopped, snap to exact target and STOP rendering
       else if (currentScrollRef.current !== targetScrollRef.current) {
         currentScrollRef.current = targetScrollRef.current;
         setRenderTick((prev) => prev + 1);
       }
-      
+
       animationFrameRef.current = requestAnimationFrame(updateMotion);
     };
     animationFrameRef.current = requestAnimationFrame(updateMotion);
@@ -135,7 +135,7 @@ export default function PhotoCoverflow3D({
     if (!isDraggingRef.current) return;
     setIsDragging(false);
     isDraggingRef.current = false;
-    
+
     // Swipe detection
     if (dragDistance.current < -50) {
       handleNext();
@@ -149,7 +149,7 @@ export default function PhotoCoverflow3D({
           const rect = containerRef.current.getBoundingClientRect();
           const x = e.clientX - rect.left;
           const width = rect.width;
-          
+
           if (x < width * 0.3) {
             // Clicked left side -> Scroll left
             handlePrev();
@@ -165,7 +165,7 @@ export default function PhotoCoverflow3D({
         }
       }
     }
-    
+
     pointerDownTarget.current = null;
   };
 
@@ -189,19 +189,19 @@ export default function PhotoCoverflow3D({
       }}
     >
       {/* 2D INTERACTION OVERLAY - Intercepts all clicks & drags cleanly, bypassing 3D transform bugs */}
-      <div 
-         className="absolute inset-0 z-[100] cursor-grab active:cursor-grabbing touch-none"
-         onPointerDown={handlePointerDown}
-         onPointerMove={handlePointerMove}
-         onPointerUp={handlePointerUp}
-         onPointerCancel={handlePointerUp}
-         onPointerLeave={(e) => {
-           isHoveredRef.current = false;
-           handlePointerUp(e);
-         }}
-         onPointerEnter={() => {
-           isHoveredRef.current = true;
-         }}
+      <div
+        className="absolute inset-0 z-[100] cursor-grab active:cursor-grabbing touch-none"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        onPointerLeave={(e) => {
+          isHoveredRef.current = false;
+          handlePointerUp(e);
+        }}
+        onPointerEnter={() => {
+          isHoveredRef.current = true;
+        }}
       />
       {/* 3D Atmosphere Stage Background Lighting */}
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
