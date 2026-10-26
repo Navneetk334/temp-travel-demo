@@ -1077,7 +1077,7 @@ async function main() {
       key: "company_info",
       value: {
         overview: "TEMP TRAVEL CAR RENTALS PVT LTD is a premier corporate transit and leisure travel management company based in India. We operate premium corporate commuter systems, airport transfers, and customized tours.",
-        aboutUs: "Established in 2012, Temp Travel operates with a compliant fleet across major business metros. We prioritize passenger safety, transparent billing, and 24/7 support desks.",
+        aboutUs: "Established in 2023, Temp Travel operates with a compliant fleet across major business metros. We prioritize passenger safety, transparent billing, and 24/7 support desks.",
         mission: "To deliver safe, compliant, and cost-effective transportation logistics and leisure travel experiences.",
         vision: "To become India's primary choice for corporate employee transportation and customized leisure holiday packages.",
         values: ["Safety First", "Integrity & Transparency", "Customer Obsession", "Operational Excellence"],
