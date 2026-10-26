@@ -105,7 +105,7 @@ export default function Footer() {
             </li>
             <li className="flex gap-2 items-center">
               <Mail className="w-4 h-4 text-accent shrink-0" />
-              <a href="mailto:sales@temptravel.co.in" className="text-muted-foreground hover:underline">sales@temptravel.co.in</a>
+              <a href="mailto:sales@temptravel.in" className="text-muted-foreground hover:underline">sales@temptravel.in</a>
             </li>
           </ul>
         </div>

@@ -31,7 +31,7 @@ export default function ContactPage() {
       "name": "TEMP TRAVEL CAR RENTALS PVT LTD",
       "image": "https://temptravels.com/images/hero-cover.png",
       "telephone": "+91-7011729639",
-      "email": "sales@temptravel.co.in",
+      "email": "sales@temptravel.in",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "Plot No. 183, Kh No. 16/2, A-Block, Qutub Vihar PH-I",
@@ -111,7 +111,7 @@ export default function ContactPage() {
                 <div className="space-y-1.5 pl-11 text-sm text-slate-300">
                   <div className="flex justify-between items-center">
                     <span className="text-slate-400">Sales Support:</span>
-                    <a href="mailto:sales@temptravel.co.in" className="font-bold hover:text-accent transition-colors">sales@temptravel.co.in</a>
+                    <a href="mailto:sales@temptravel.in" className="font-bold hover:text-accent transition-colors">sales@temptravel.in</a>
                   </div>
                 </div>
               </div>

@@ -688,7 +688,7 @@ export default function Homepage() {
                 <Mail className="w-6 h-6" />
               </div>
               <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Email Sales</div>
-              <a href="mailto:sales@temptravel.co.in" className="text-foreground font-bold hover:underline text-base">sales@temptravel.co.in</a>
+              <a href="mailto:sales@temptravel.in" className="text-foreground font-bold hover:underline text-base">sales@temptravel.in</a>
             </div>
 
             <div className="bg-surface/60 border border-border p-6 rounded-2xl space-y-3 flex flex-col items-center text-center">
