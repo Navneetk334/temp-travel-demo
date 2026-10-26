@@ -11,19 +11,18 @@ import {
   ShieldCheck, 
   MapPin, 
   Award, 
-  Users, 
-  Briefcase,
-  ChevronRight,
   Globe,
   Star,
-  Cpu,
-  Zap,
-  CheckCircle2
+  Car,
+  Plane,
+  Compass,
+  ArrowRight,
+  PhoneCall
 } from "lucide-react";
 
 export const metadata = getSEOMetadata({
   title: "About Us - Corporate Transportation & Premium Tours",
-  description: "TEMP TRAVEL CAR RENTALS PVT LTD is India's leading corporate transit and leisure travel management partner. Read our journey, mission, vision, and core values.",
+  description: "TEMP TRAVEL CAR RENTALS PVT LTD is India's leading corporate transit and leisure travel management partner. Read our mission, vision, core values, and Pan-India coverage.",
   path: "/about",
 });
 
@@ -40,7 +39,7 @@ export default async function AboutPage() {
 
   const companyInfo = (setting?.value as any) || {
     overview: "TEMP TRAVEL CAR RENTALS PVT LTD is a premier corporate transit and leisure travel management company based in India. We operate premium corporate commuter systems, airport transfers, and customized tours.",
-    aboutUs: "Established in 2012, Temp Travel operates with a compliant fleet across major business metros. We prioritize passenger safety, transparent billing, and 24/7 support desks.",
+    aboutUs: "Established in 2012, Temp Travel operates with a compliant fleet across major business metros and nationwide corridors. We prioritize passenger safety, transparent billing, and 24/7 support desks.",
     mission: "To deliver safe, compliant, and cost-effective transportation logistics and leisure travel experiences.",
     vision: "To become India's primary choice for corporate employee transportation and customized leisure holiday packages.",
     values: [
@@ -51,7 +50,7 @@ export default async function AboutPage() {
       "Employee & Driver Empowerment"
     ],
     whyUs: ["ISO 9001:2015 Compliance", "Defensive Driver Vetting", "Automated Roster Routing", "24/7 Command Center Support"],
-    stats: { completedRides: "500K+", corporateContracts: "120+", hubs: "30+", rating: "4.9/5" },
+    stats: { completedRides: "500K+", corporateContracts: "120+", hubs: "Pan-India", rating: "4.9/5" },
     serviceAreas: ["Delhi NCR", "Mumbai Metro", "Pune City", "Bangalore Tech Hub", "Goa Coast", "Nashik Hub"],
   };
 
@@ -74,49 +73,27 @@ export default async function AboutPage() {
     { label: "About Us", path: "/about" },
   ];
 
-  const timelineMilestones = [
+  const panIndiaRegions = [
     {
-      year: "2012",
-      title: "Company Founding & Fleet Launch",
-      desc: "Started operations in New Delhi with a modest fleet of 5 premium sedans targeting executive airport transfers and local corporate rentals.",
-      metric: "5 Initial Vehicles",
-      icon: Building2,
+      zone: "North Zone",
+      states: "Delhi NCR, Punjab, Haryana, Rajasthan, UP & Uttarakhand",
+      cities: ["Delhi NCR", "Gurugram", "Noida", "Chandigarh", "Jaipur", "Lucknow", "Agra", "Dehradun", "Amritsar", "Varanasi"]
     },
     {
-      year: "2015",
-      title: "Enterprise B2B Expansion",
-      desc: "Contracted with top IT hubs in Gurgaon and Noida to deliver daily employee shuttle logistics with guaranteed zero-downtime SLAs.",
-      metric: "15+ B2B Contracts",
-      icon: Award,
+      zone: "West Zone",
+      states: "Maharashtra, Gujarat, Goa & MP Border",
+      cities: ["Mumbai Metro", "Pune City", "Ahmedabad", "Surat", "Vadodara", "Nashik Hub", "Goa Coast", "Nagpur", "Rajkot"]
     },
     {
-      year: "2018",
-      title: "Multi-City Metro Hubs",
-      desc: "Launched full regional operations in Mumbai Metro and Pune City, expanding commercial fleet size past 100+ commercial units.",
-      metric: "100+ Commercial Units",
-      icon: MapPin,
+      zone: "South Zone",
+      states: "Karnataka, Telangana, Tamil Nadu, Kerala & AP",
+      cities: ["Bangalore Tech Hub", "Hyderabad", "Chennai", "Kochi", "Coimbatore", "Mysuru", "Visakhapatnam", "Madurai"]
     },
     {
-      year: "2021",
-      title: "Smart Commute & Dispatch Engine",
-      desc: "Integrated real-time GPS fleet tracking, automated roster parsing, and digital billing ledgers into our client admin dispatch portal.",
-      metric: "100% Automated Roster",
-      icon: Cpu,
-    },
-    {
-      year: "2024",
-      title: "Pan-India Enterprise Reach",
-      desc: "Scaled active operations across 30+ regional hubs, serving 120+ active enterprise clients and 500K+ completed passenger rides.",
-      metric: "30+ Regional Hubs",
-      icon: Globe,
-    },
-    {
-      year: "2026",
-      title: "Carbon-Neutral EV Transit",
-      desc: "Commenced rapid rollout of commercial Electric Vehicles (EVs) and hybrid fleets for eco-friendly corporate employee commutes.",
-      metric: "Zero-Emission Fleet",
-      icon: Zap,
-    },
+      zone: "East & Central Zone",
+      states: "West Bengal, Odisha, Bihar, Jharkhand & Central India",
+      cities: ["Kolkata", "Bhubaneswar", "Indore", "Bhopal", "Patna", "Ranchi", "Raipur", "Guwahati", "Jamshedpur"]
+    }
   ];
 
   return (
@@ -158,8 +135,8 @@ export default async function AboutPage() {
                 <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold mt-1">Corporate Contracts</div>
               </div>
               <div className="glassmorphism p-6 rounded-xl border border-border text-center hover:border-primary/20 transition-all">
-                <div className="text-2xl sm:text-3xl font-extrabold text-accent">{companyInfo.stats.hubs || "30+"}</div>
-                <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold mt-1">Regional Hubs</div>
+                <div className="text-2xl sm:text-3xl font-extrabold text-accent">{companyInfo.stats.hubs || "Pan-India"}</div>
+                <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold mt-1">Pan-India Reach</div>
               </div>
               <div className="glassmorphism p-6 rounded-xl border border-border text-center hover:border-primary/20 transition-all">
                 <div className="text-2xl sm:text-3xl font-extrabold text-accent flex items-center justify-center gap-1">
@@ -191,7 +168,7 @@ export default async function AboutPage() {
             <div className="space-y-6 glassmorphism p-8 rounded-xl border border-border">
               <h2 className="text-2xl font-bold text-slate-50 flex items-center gap-2">
                 <Award className="w-6 h-6 text-accent" />
-                <span>Why Corporate Partners Choose Us</span>
+                <span>Why Choose Us</span>
               </h2>
               <ul className="space-y-4 text-sm">
                 {companyInfo.whyUs.map((item: string, idx: number) => (
@@ -234,92 +211,8 @@ export default async function AboutPage() {
           </div>
         </section>
 
-        {/* Style 1: Our Growth Journey (Alternating Glowing Timeline) */}
-        <section className="py-20 bg-background">
-          <div className="max-w-6xl mx-auto px-4 sm:px-8 lg:px-12 space-y-12">
-            <div className="text-center space-y-4 max-w-3xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-50 tracking-tight">Our Growth Journey</h2>
-              <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
-                How TEMP TRAVEL evolved from a local rental startup into India's leading ISO-compliant corporate transit & tour management partner.
-              </p>
-            </div>
-
-            {/* Vertical Alternating Zig-Zag Timeline */}
-            <div className="relative pt-8 pb-12">
-
-              {/* Central Glowing Vertical Line */}
-              <div className="absolute left-1/2 top-12 bottom-12 w-0.5 -translate-x-1/2 bg-gradient-to-b from-accent via-blue-500 to-emerald-400 hidden md:block opacity-40" />
-
-              <div className="space-y-12 relative">
-                {timelineMilestones.map((item, idx) => {
-                  const isEven = idx % 2 === 0;
-                  const Icon = item.icon;
-
-                  return (
-                    <div
-                      key={idx}
-                      className={`flex flex-col md:flex-row items-center ${
-                        isEven ? "md:flex-row-reverse" : ""
-                      }`}
-                    >
-                      {/* Left or Right Card Content */}
-                      <div className="w-full md:w-1/2 p-4">
-                        <div className="bg-surface/60 border border-border hover:border-accent/40 rounded-2xl p-6 sm:p-8 space-y-4 shadow-xl transition-all group glassmorphism hover:-translate-y-1">
-                          
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <div className="p-2.5 bg-accent/10 border border-accent/20 rounded-xl text-accent group-hover:scale-110 transition-transform">
-                                <Icon className="w-5 h-5" />
-                              </div>
-                              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                                Phase 0{idx + 1}
-                              </span>
-                            </div>
-                            <span className="text-2xl font-black font-mono text-accent">
-                              {item.year}
-                            </span>
-                          </div>
-
-                          <div className="space-y-2">
-                            <h3 className="text-xl font-bold text-slate-50 group-hover:text-amber-400 transition-colors">
-                              {item.title}
-                            </h3>
-                            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                              {item.desc}
-                            </p>
-                          </div>
-
-                          <div className="pt-3 border-t border-border flex items-center justify-between">
-                            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 py-1 px-3 rounded-full">
-                              <CheckCircle2 className="w-3.5 h-3.5" />
-                              <span>{item.metric}</span>
-                            </span>
-                            <span className="text-[10px] text-slate-500 font-mono">Verified Milestone</span>
-                          </div>
-
-                        </div>
-                      </div>
-
-                      {/* Central Node Badge */}
-                      <div className="relative z-10 my-4 md:my-0 flex items-center justify-center">
-                        <div className="w-12 h-12 rounded-full bg-background border-2 border-accent flex items-center justify-center font-mono font-bold text-xs text-accent shadow-lg shadow-amber-500/10 group-hover:scale-125 transition-transform">
-                          {item.year.slice(2)}
-                        </div>
-                      </div>
-
-                      {/* Spacer for opposite side */}
-                      <div className="w-full md:w-1/2 p-4 hidden md:block" />
-                    </div>
-                  );
-                })}
-              </div>
-
-            </div>
-          </div>
-        </section>
-
         {/* Core Values */}
-        <section className="py-16 bg-surface/30 border-t border-border">
+        <section className="py-16 bg-background">
           <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 space-y-12">
             <div className="text-center space-y-4">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-50">Our Core Values</h2>
@@ -360,31 +253,149 @@ export default async function AboutPage() {
           </div>
         </section>
 
-        {/* Service Coverage areas */}
-        <section className="py-16 bg-background">
-          <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 space-y-8">
-            <div className="text-center space-y-4">
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-50 flex items-center justify-center gap-2">
-                <Globe className="w-6 h-6 text-accent" />
-                <span>Service Coverage Areas</span>
+        {/* Pan-India Service Coverage Section */}
+        <section className="py-20 bg-surface/30 border-t border-border">
+          <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 space-y-12">
+            
+            {/* Header */}
+            <div className="text-center space-y-4 max-w-3xl mx-auto">
+              <span className="text-xs font-bold text-accent uppercase tracking-widest bg-accent/10 border border-accent/20 px-3 py-1 rounded-full inline-flex items-center gap-1.5">
+                <Globe className="w-3.5 h-3.5" />
+                <span>Nationwide Presence</span>
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-50 tracking-tight">
+                Pan-India Service Coverage
               </h2>
-              <p className="text-slate-400 max-w-2xl mx-auto text-sm">
-                Actively serving major business hubs and tourist corridors across India.
+              <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+                Operating seamlessly across all 28 States and 8 Union Territories. Whether you require corporate employee commuter shuttles, VIP airport transfers, or interstate tourist itineraries, TEMP TRAVEL delivers standardized excellence nationwide.
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-3 justify-center">
-              {companyInfo.serviceAreas.map((area: string, idx: number) => (
-                <div key={idx} className="glassmorphism py-2 px-5 rounded-full border border-border text-slate-300 text-xs font-semibold flex items-center gap-2 hover:border-primary/20 transition-all">
-                  <MapPin className="w-3.5 h-3.5 text-accent" />
-                  <span>{area}</span>
+            {/* 3 Core Mobility Verticals */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="glassmorphism p-6 sm:p-8 rounded-2xl border border-border hover:border-accent/40 transition-all space-y-4 group">
+                <div className="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent group-hover:scale-110 transition-transform">
+                  <Building2 className="w-6 h-6" />
                 </div>
-              ))}
+                <h3 className="text-xl font-bold text-slate-100 group-hover:text-amber-400 transition-colors">
+                  Metropolitan & Corporate Transit
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                  Dedicated corporate commuter fleets, shift rosters, and executive transit across Tier-1 IT & business capitals including Delhi NCR, Mumbai, Bengaluru, Hyderabad, and Pune.
+                </p>
+                <div className="flex flex-wrap gap-1.5 pt-2">
+                  <span className="text-[11px] font-semibold text-accent/90 bg-white/5 border border-border px-2.5 py-0.5 rounded-md">Automated Rosters</span>
+                  <span className="text-[11px] font-semibold text-accent/90 bg-white/5 border border-border px-2.5 py-0.5 rounded-md">Real-Time GPS</span>
+                  <span className="text-[11px] font-semibold text-accent/90 bg-white/5 border border-border px-2.5 py-0.5 rounded-md">Zero-Downtime SLA</span>
+                </div>
+              </div>
+
+              <div className="glassmorphism p-6 sm:p-8 rounded-2xl border border-border hover:border-accent/40 transition-all space-y-4 group">
+                <div className="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent group-hover:scale-110 transition-transform">
+                  <Car className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-100 group-hover:text-amber-400 transition-colors">
+                  Nationwide Outstation & Intercity
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                  Interstate road journeys, one-way drops, and multi-day bespoke holiday circuits across all state borders backed by all-India commercial permits and verified chauffeurs.
+                </p>
+                <div className="flex flex-wrap gap-1.5 pt-2">
+                  <span className="text-[11px] font-semibold text-accent/90 bg-white/5 border border-border px-2.5 py-0.5 rounded-md">All-India Tourist Permit</span>
+                  <span className="text-[11px] font-semibold text-accent/90 bg-white/5 border border-border px-2.5 py-0.5 rounded-md">Interstate Toll Clarity</span>
+                  <span className="text-[11px] font-semibold text-accent/90 bg-white/5 border border-border px-2.5 py-0.5 rounded-md">24/7 Roadside Assistance</span>
+                </div>
+              </div>
+
+              <div className="glassmorphism p-6 sm:p-8 rounded-2xl border border-border hover:border-accent/40 transition-all space-y-4 group">
+                <div className="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent group-hover:scale-110 transition-transform">
+                  <Plane className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-100 group-hover:text-amber-400 transition-colors">
+                  50+ Airport & Rail Terminal Desks
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                  Guaranteed on-time executive pickups and drops with real-time flight tracking, designated meeting spots, and corporate guest meet-and-greet services.
+                </p>
+                <div className="flex flex-wrap gap-1.5 pt-2">
+                  <span className="text-[11px] font-semibold text-accent/90 bg-white/5 border border-border px-2.5 py-0.5 rounded-md">Flight Tracking</span>
+                  <span className="text-[11px] font-semibold text-accent/90 bg-white/5 border border-border px-2.5 py-0.5 rounded-md">Meet & Greet</span>
+                  <span className="text-[11px] font-semibold text-accent/90 bg-white/5 border border-border px-2.5 py-0.5 rounded-md">Uniformed Chauffeurs</span>
+                </div>
+              </div>
             </div>
+
+            {/* Regional Zones Grid */}
+            <div className="space-y-6 pt-4">
+              <div className="text-center space-y-2">
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-100">
+                  Key Operational Zones & Regional Hubs
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto">
+                  Equipped with local dispatch centers, vetted driver networks, and 24/7 emergency support across every region.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {panIndiaRegions.map((region, idx) => (
+                  <div key={idx} className="glassmorphism p-6 rounded-2xl border border-border hover:border-accent/30 transition-all flex flex-col justify-between space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-accent shrink-0" />
+                        <h4 className="font-bold text-slate-100 text-base">{region.zone}</h4>
+                      </div>
+                      <p className="text-[11px] text-slate-400 font-medium">
+                        {region.states}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5 pt-2 border-t border-border/60">
+                      {region.cities.map((city, cIdx) => (
+                        <span 
+                          key={cIdx} 
+                          className="text-[11px] text-slate-300 bg-surface/80 border border-border/80 px-2.5 py-1 rounded-full font-medium hover:border-accent/40 transition-colors"
+                        >
+                          {city}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Nationwide CTA Card */}
+            <div className="glassmorphism p-8 rounded-2xl border border-border bg-gradient-to-r from-surface/80 via-surface/40 to-surface/80 flex flex-col lg:flex-row items-center justify-between gap-6">
+              <div className="space-y-2 text-center lg:text-left">
+                <h4 className="text-lg sm:text-xl font-bold text-slate-100 flex items-center justify-center lg:justify-start gap-2">
+                  <Compass className="w-5 h-5 text-accent" />
+                  <span>Custom Routes & Pan-India Corporate Requirements</span>
+                </h4>
+                <p className="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
+                  Need dedicated transit solutions in Tier-2/3 industrial clusters, specialized outstation travel, or nationwide corporate fleet deployments? Our 24/7 command center coordinates custom vehicles anywhere in India.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-3 shrink-0">
+                <Link
+                  href="/contact"
+                  className="px-5 py-2.5 rounded-xl bg-accent text-slate-950 font-bold text-xs sm:text-sm hover:brightness-110 transition-all shadow-lg flex items-center gap-2"
+                >
+                  <PhoneCall className="w-4 h-4" />
+                  <span>Contact 24/7 Operations</span>
+                </Link>
+                <Link
+                  href="/services"
+                  className="px-5 py-2.5 rounded-xl bg-white/5 border border-border text-slate-200 font-semibold text-xs sm:text-sm hover:bg-white/10 transition-all flex items-center gap-2"
+                >
+                  <span>Explore Services</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+
           </div>
         </section>
       </div>
     </>
   );
 }
-
