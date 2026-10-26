@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import { CITIES_DATA } from "@/lib/cities-data";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://temptravels.com";
+  const baseUrl = "https://temptravel.in";
 
   // Static routes
   const staticRoutes = [

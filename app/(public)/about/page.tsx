@@ -58,8 +58,8 @@ export default async function AboutPage() {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "TEMP TRAVEL CAR RENTALS PVT LTD",
-    "url": "https://temptravels.com",
-    "logo": "https://temptravels.com/images/logo.png",
+    "url": "https://temptravel.in",
+    "logo": "https://temptravel.in/images/logo.png",
     "contactPoint": {
       "@type": "ContactPoint",
       "telephone": "+91-7011729639",

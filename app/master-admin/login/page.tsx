@@ -331,7 +331,7 @@ export default function MasterAdminLoginPage() {
                       type="email"
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      placeholder="super@temptravels.com"
+                      placeholder="super@temptravel.in"
                       className="w-full bg-background/50 border border-slate-800 rounded-xl py-3 pl-11 pr-4 text-sm text-slate-100 placeholder:text-slate-700 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all"
                     />
                   </div>
@@ -409,7 +409,7 @@ export default function MasterAdminLoginPage() {
                       type="email"
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      placeholder="super@temptravels.com"
+                      placeholder="super@temptravel.in"
                       className="w-full bg-background/50 border border-slate-800 rounded-xl py-3 pl-11 pr-4 text-sm text-slate-100 placeholder:text-slate-700 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all"
                     />
                   </div>
@@ -458,7 +458,7 @@ export default function MasterAdminLoginPage() {
                 <input
                   type="email"
                   required
-                  placeholder="name@temptravels.com"
+                  placeholder="name@temptravel.in"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   className="w-full bg-background border border-border rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:border-amber-400"

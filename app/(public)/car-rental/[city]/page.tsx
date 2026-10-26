@@ -60,9 +60,9 @@ export default async function CityPage({ params }: PageProps) {
     "@context": "https://schema.org",
     "@type": "CarRental",
     "name": `TEMP TRAVEL CAR RENTALS - ${details.formattedName}`,
-    "image": "https://temptravels.com/images/hero-cover.png",
+    "image": "https://temptravel.in/images/hero-cover.png",
     "telephone": details.phone,
-    "url": `https://temptravels.com/car-rental/${details.name}`,
+    "url": `https://temptravel.in/car-rental/${details.name}`,
     "priceRange": "₹₹",
     "address": {
       "@type": "PostalAddress",
@@ -315,7 +315,7 @@ export default async function CityPage({ params }: PageProps) {
                 </div>
                 <div>
                   <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Email Sales</div>
-                  <a href="mailto:info@temptravels.com" className="text-slate-200 font-bold hover:underline">info@temptravels.com</a>
+                  <a href="mailto:info@temptravel.in" className="text-slate-200 font-bold hover:underline">info@temptravel.in</a>
                 </div>
               </div>
 

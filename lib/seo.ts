@@ -11,7 +11,7 @@ interface SEOMetadataProps {
 
 const DEFAULT_METADATA = {
   siteName: "Temp Travel Car Rentals",
-  baseUrl: "https://temptravels.com",
+  baseUrl: "https://temptravel.in",
   defaultImage: "/images/og-default.jpg",
   defaultKeywords: [
     "Corporate Cab Service Delhi",

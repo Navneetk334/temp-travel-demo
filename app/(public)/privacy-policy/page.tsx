@@ -63,7 +63,7 @@ export default function PrivacyPolicyPage() {
     {
       id: "contact",
       title: "Contact Information",
-      content: "For questions regarding this privacy policy or data compliance, please reach out to our privacy desk at compliance@temptravels.com or visit our Corporate Office at Flat No C-102, Shanti Vihar, Lokhandwala Complex, Kandivali East, Mumbai, MH, 400101."
+      content: "For questions regarding this privacy policy or data compliance, please reach out to our privacy desk at compliance@temptravel.in or visit our Corporate Office at Flat No C-102, Shanti Vihar, Lokhandwala Complex, Kandivali East, Mumbai, MH, 400101."
     }
   ];
 
@@ -132,7 +132,7 @@ export default function PrivacyPolicyPage() {
                 <p className="text-xs text-slate-400">Request account closures or export driver profile data logs.</p>
               </div>
               <a 
-                href="mailto:compliance@temptravels.com" 
+                href="mailto:compliance@temptravel.in" 
                 className="bg-surface border border-border hover:border-accent/40 text-slate-200 hover:text-accent font-bold py-2.5 px-5 rounded-lg text-xs flex items-center gap-1.5 transition-all uppercase tracking-wider shrink-0"
               >
                 <Mail className="w-4 h-4" />

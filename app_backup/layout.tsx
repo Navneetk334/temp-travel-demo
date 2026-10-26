@@ -14,14 +14,14 @@ export const metadata: Metadata = {
   },
   description:
     "TEMP TRAVEL CAR RENTALS PVT LTD provides premium Corporate Employee Transportation, Airport Transfers, Outstation Cabs, and custom tour packages.",
-  metadataBase: new URL("https://temptravels.com"),
+  metadataBase: new URL("https://temptravel.in"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
     locale: "en_IN",
-    url: "https://temptravels.com",
+    url: "https://temptravel.in",
     siteName: "Temp Travel",
     images: [
       {

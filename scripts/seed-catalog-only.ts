@@ -27,7 +27,7 @@ async function seedCatalogOnly() {
   const superAdmin = await prisma.admin.create({
     data: {
       name: "Navneet Kumar",
-      email: "admin@temptravels.com",
+      email: "admin@temptravel.in",
       passwordHash: "$2a$12$m.wWAx.WlIOJaTxyDRn0ku14SJkcJYFIcu4OH8Tno2sWbHBC6ak86", // admin123
       role: AdminRole.SUPER_ADMIN,
       isActive: true,
@@ -37,7 +37,7 @@ async function seedCatalogOnly() {
   await prisma.admin.create({
     data: {
       name: "Ramesh Sharma",
-      email: "ramesh@temptravels.com",
+      email: "ramesh@temptravel.in",
       passwordHash: "$2a$12$m.wWAx.WlIOJaTxyDRn0ku14SJkcJYFIcu4OH8Tno2sWbHBC6ak86",
       role: AdminRole.MANAGER,
       isActive: true,
@@ -51,7 +51,7 @@ async function seedCatalogOnly() {
     const d = await prisma.user.create({
       data: {
         name: driverNames[i],
-        email: `driver${i + 1}@temptravels.com`,
+        email: `driver${i + 1}@temptravel.in`,
         phone: `+91999999910${i}`,
         passwordHash: "$2a$12$m.wWAx.WlIOJaTxyDRn0ku14SJkcJYFIcu4OH8Tno2sWbHBC6ak86",
         role: UserRole.DRIVER,
@@ -319,7 +319,7 @@ async function seedCatalogOnly() {
       key: "general_config",
       value: {
         siteName: "Temp Travel Car Rentals Pvt Ltd",
-        contactEmail: "support@temptravels.com",
+        contactEmail: "support@temptravel.in",
         contactPhone: "+91 70117 29639",
         officeAddress: "Unit 402, Pinnacle Business Park, Hinjewadi Phase 1, Pune, Maharashtra 411057",
         supportHours: "24/7 Dispatch Control Room",

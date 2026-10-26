@@ -112,7 +112,7 @@ function LoginForm() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@temptravels.com"
+                placeholder="admin@temptravel.in"
                 className="w-full bg-background border border-border rounded-lg py-2.5 pl-10 pr-4 text-xs text-slate-100 focus:outline-none focus:border-accent transition-colors"
               />
             </div>
@@ -169,7 +169,7 @@ function LoginForm() {
       {/* Footer Hint */}
       {!isForgotMode && !forgotSuccess && (
         <div className="pt-4 border-t border-border text-center text-[10px] text-slate-500">
-          Super Admin Credentials: <span className="text-slate-400 font-mono">admin@temptravels.com</span> / <span className="text-slate-400 font-mono">admin123</span>
+          Super Admin Credentials: <span className="text-slate-400 font-mono">admin@temptravel.in</span> / <span className="text-slate-400 font-mono">admin123</span>
         </div>
       )}
     </div>

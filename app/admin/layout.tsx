@@ -49,7 +49,7 @@ export default function AdminLayout({
     role: string;
   }>({
     name: "Operations Dispatch Desk",
-    email: "admin@temptravels.com",
+    email: "admin@temptravel.in",
     role: "SUPER_ADMIN",
   });
 

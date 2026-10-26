@@ -447,7 +447,7 @@ export default function BlogForm({ initialData, isEdit = false }: BlogFormProps)
                 </button>
                 <button
                   type="button"
-                  onClick={() => insertFormatting('<a href="https://temptravels.com">', '</a>')}
+                  onClick={() => insertFormatting('<a href="https://temptravel.in">', '</a>')}
                   className="p-1.5 bg-slate-900 border border-white/5 hover:border-accent rounded text-slate-300 hover:text-white"
                   title="Insert Link"
                 >

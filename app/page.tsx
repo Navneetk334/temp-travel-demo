@@ -154,7 +154,7 @@ export default function Homepage() {
     "@context": "https://schema.org",
     "@type": "CarRental",
     "name": "TEMP TRAVEL CAR RENTALS PVT LTD",
-    "image": "https://temptravels.com/images/hero-cover.png",
+    "image": "https://temptravel.in/images/hero-cover.png",
     "address": {
       "@type": "PostalAddress",
       "streetAddress": "Flat No C-102, Shanti Vihar, Lokhandwala Complex",
@@ -163,7 +163,7 @@ export default function Homepage() {
       "postalCode": "400101",
       "addressCountry": "IN"
     },
-    "url": "https://temptravels.com",
+    "url": "https://temptravel.in",
     "telephone": "+91-7011729639",
     "priceRange": "₹₹",
     "areaServed": ["Mumbai", "Pune", "Nashik", "Goa", "Bangalore", "Delhi NCR"]

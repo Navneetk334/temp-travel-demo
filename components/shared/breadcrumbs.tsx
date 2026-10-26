@@ -13,7 +13,7 @@ interface BreadcrumbsProps {
 }
 
 export default function Breadcrumbs({ items }: BreadcrumbsProps) {
-  const baseUrl = "https://temptravels.com";
+  const baseUrl = "https://temptravel.in";
 
   // Build the schema object for BreadcrumbList
   const breadcrumbListSchema = {

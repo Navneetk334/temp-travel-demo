@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
       user = await prisma.user.findFirst({
         where: {
           OR: [
-            { email: customerEmail || "no-email@temptravels.com" },
+            { email: customerEmail || "no-email@temptravel.in" },
             { phone: customerPhone || "0000000000" }
           ]
         }
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
       user = await prisma.user.create({
         data: {
           name: customerName || "Unknown Customer",
-          email: customerEmail || `customer_${Date.now()}@temptravels.com`,
+          email: customerEmail || `customer_${Date.now()}@temptravel.in`,
           phone: customerPhone || `+910000000000`,
           passwordHash: "dispatch-generated",
           role: "CUSTOMER",

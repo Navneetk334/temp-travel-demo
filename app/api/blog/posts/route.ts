@@ -153,7 +153,7 @@ export async function POST(req: NextRequest) {
       const seedAdmin = await prisma.admin.create({
         data: {
           name: "Enterprise Publisher",
-          email: "publisher@temptravels.com",
+          email: "publisher@temptravel.in",
           passwordHash: "$2a$12$tD9Y59DqD784lXUvJ9L9XeR82R2gBfE8L9l6UeQ9qXbV8T9yT9nCq",
           role: "SUPER_ADMIN",
           isActive: true,

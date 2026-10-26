@@ -353,7 +353,7 @@ export default function MasterAdminDashboard() {
               <span className="text-xs font-bold text-slate-200">Public Web Portal</span>
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
             </div>
-            <div className="text-[11px] text-slate-400 font-mono">temptravels.com</div>
+            <div className="text-[11px] text-slate-400 font-mono">temptravel.in</div>
             <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Sync: Live WebSockets</div>
           </div>
 

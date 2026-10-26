@@ -26,7 +26,7 @@ export default function Homepage() {
     "@context": "https://schema.org",
     "@type": "CarRental",
     "name": "TEMP TRAVEL CAR RENTALS PVT LTD",
-    "image": "https://temptravels.com/images/hero-cover.png",
+    "image": "https://temptravel.in/images/hero-cover.png",
     "address": {
       "@type": "PostalAddress",
       "streetAddress": "Flat No C-102, Shanti Vihar, Lokhandwala Complex",
@@ -35,7 +35,7 @@ export default function Homepage() {
       "postalCode": "400101",
       "addressCountry": "IN"
     },
-    "url": "https://temptravels.com",
+    "url": "https://temptravel.in",
     "telephone": "+91-7011729639",
     "priceRange": "₹₹",
     "areaServed": ["Mumbai", "Pune", "Nashik", "Goa", "Bangalore"],
@@ -467,7 +467,7 @@ export default function Homepage() {
                 </div>
                 <div>
                   <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Email Sales</div>
-                  <a href="mailto:info@temptravels.com" className="text-slate-200 font-bold hover:underline">info@temptravels.com</a>
+                  <a href="mailto:info@temptravel.in" className="text-slate-200 font-bold hover:underline">info@temptravel.in</a>
                 </div>
               </div>
 

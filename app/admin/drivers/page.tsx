@@ -576,7 +576,7 @@ export default function AdminDriversPage() {
                   <input
                     type="email"
                     required
-                    placeholder="e.g. ramesh@temptravels.com"
+                    placeholder="e.g. ramesh@temptravel.in"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400"

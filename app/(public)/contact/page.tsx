@@ -25,11 +25,11 @@ export default function ContactPage() {
     "@type": "ContactPage",
     "name": "Contact TEMP TRAVEL",
     "description": "Contact information and general inquiry form for TEMP TRAVEL CAR RENTALS PVT LTD.",
-    "url": "https://temptravels.com/contact",
+    "url": "https://temptravel.in/contact",
     "mainEntity": {
       "@type": "LocalBusiness",
       "name": "TEMP TRAVEL CAR RENTALS PVT LTD",
-      "image": "https://temptravels.com/images/hero-cover.png",
+      "image": "https://temptravel.in/images/hero-cover.png",
       "telephone": "+91-7011729639",
       "email": "sales@temptravel.in",
       "address": {

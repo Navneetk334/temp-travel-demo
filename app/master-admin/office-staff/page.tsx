@@ -674,7 +674,7 @@ export default function MasterOfficeStaffPage() {
                       <input
                         type="email"
                         required
-                        placeholder="staff@temptravels.com"
+                        placeholder="staff@temptravel.in"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         className="peer w-full bg-background border border-border rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 focus:invalid:border-rose-500 focus:invalid:ring-1 focus:invalid:ring-rose-500 font-mono"

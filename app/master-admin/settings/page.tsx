@@ -27,7 +27,7 @@ export default function MasterSettingsVaultPage() {
   // Global Site Settings State
   const [globalSettings, setGlobalSettings] = useState({
     companyName: "TEMP TRAVEL CAR RENTALS PVT LTD",
-    contactEmail: "info@temptravels.com",
+    contactEmail: "info@temptravel.in",
     contactPhone: "+91-7011729639",
     supportAddress: "Flat No C-102, Shanti Vihar, Lokhandwala Complex, Mumbai - 400101",
     currencySymbol: "₹",
@@ -40,10 +40,10 @@ export default function MasterSettingsVaultPage() {
   // Master Users RBAC State
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [users, setUsers] = useState([
-    { id: "u-1", name: "Master Command Center", email: "master@temptravels.com", role: "SUPER_ADMIN", status: "ACTIVE" },
-    { id: "u-2", name: "Navneet Kumar", email: "admin@temptravels.com", role: "OPERATIONS_DISPATCH", status: "ACTIVE" },
-    { id: "u-3", name: "Accounts Team", email: "billing@temptravels.com", role: "ACCOUNTANT", status: "ACTIVE" },
-    { id: "u-4", name: "Cash Desk Operator", email: "cash@temptravels.com", role: "CASH_ADMIN", status: "ACTIVE" },
+    { id: "u-1", name: "Master Command Center", email: "master@temptravel.in", role: "SUPER_ADMIN", status: "ACTIVE" },
+    { id: "u-2", name: "Navneet Kumar", email: "admin@temptravel.in", role: "OPERATIONS_DISPATCH", status: "ACTIVE" },
+    { id: "u-3", name: "Accounts Team", email: "billing@temptravel.in", role: "ACCOUNTANT", status: "ACTIVE" },
+    { id: "u-4", name: "Cash Desk Operator", email: "cash@temptravel.in", role: "CASH_ADMIN", status: "ACTIVE" },
   ]);
 
   const [newUser, setNewUser] = useState({
@@ -401,7 +401,7 @@ export default function MasterSettingsVaultPage() {
                   <input
                     type="email"
                     required
-                    placeholder="user@temptravels.com"
+                    placeholder="user@temptravel.in"
                     value={newUser.email}
                     onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
                     className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100"

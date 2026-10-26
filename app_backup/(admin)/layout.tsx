@@ -40,7 +40,7 @@ export default function AdminLayout({
   // Mock Admin session (role can be SUPER_ADMIN, MANAGER, DISPATCHER)
   const adminSession = {
     name: "Navneet Kumar",
-    email: "admin@temptravels.com",
+    email: "admin@temptravel.in",
     role: "SUPER_ADMIN"
   };
 

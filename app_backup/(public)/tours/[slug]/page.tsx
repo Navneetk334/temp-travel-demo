@@ -64,7 +64,7 @@ export default async function TourDetailsPage({ params }: PageProps) {
       "seller": {
         "@type": "TravelAgency",
         "name": "TEMP TRAVEL CAR RENTALS PVT LTD",
-        "url": "https://temptravels.com"
+        "url": "https://temptravel.in"
       }
     }
   };

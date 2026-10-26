@@ -31,7 +31,7 @@ async function main() {
   const superAdmin = await prisma.admin.create({
     data: {
       name: "Navneet Kumar",
-      email: "admin@temptravels.com",
+      email: "admin@temptravel.in",
       passwordHash: "$2a$12$m.wWAx.WlIOJaTxyDRn0ku14SJkcJYFIcu4OH8Tno2sWbHBC6ak86", // admin123
       role: AdminRole.SUPER_ADMIN,
       isActive: true,
@@ -41,7 +41,7 @@ async function main() {
   const managerAdmin = await prisma.admin.create({
     data: {
       name: "Ramesh Sharma",
-      email: "ramesh@temptravels.com",
+      email: "ramesh@temptravel.in",
       passwordHash: "$2a$12$m.wWAx.WlIOJaTxyDRn0ku14SJkcJYFIcu4OH8Tno2sWbHBC6ak86",
       role: AdminRole.MANAGER,
       isActive: true,
@@ -53,7 +53,7 @@ async function main() {
   const driverNames = ["Rajesh Yadav", "Suresh Kumar", "Amit Singh", "Vijay Pal", "Vikram Rathore", "Karan Sharma", "Arjun Dev", "Harpreet Singh"];
   for (let i = 0; i < driverNames.length; i++) {
     const name = driverNames[i];
-    const email = `driver${i + 1}@temptravels.com`;
+    const email = `driver${i + 1}@temptravel.in`;
     const phone = `+91999999910${i}`;
     const user = await prisma.user.create({
       data: {

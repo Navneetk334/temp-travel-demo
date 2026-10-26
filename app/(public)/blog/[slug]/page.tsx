@@ -97,7 +97,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     "headline": post?.title || "Temp Travel Article",
-    "image": post?.featuredImage || post?.coverImage || "https://temptravels.com/images/hero-car.png",
+    "image": post?.featuredImage || post?.coverImage || "https://temptravel.in/images/hero-car.png",
     "datePublished": post?.publishedAt || post?.createdAt || "2026-08-20",
     "dateModified": post?.updatedAt || post?.createdAt || "2026-08-20",
     "author": {
@@ -109,13 +109,13 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       "name": "TEMP TRAVEL CAR RENTALS PVT LTD",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://temptravels.com/images/hero-car.png"
+        "url": "https://temptravel.in/images/hero-car.png"
       }
     },
     "description": post?.summary || "Travel log from Temp Travel",
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `https://temptravels.com/blog/${resolvedParams.slug}`
+      "@id": `https://temptravel.in/blog/${resolvedParams.slug}`
     }
   };
 

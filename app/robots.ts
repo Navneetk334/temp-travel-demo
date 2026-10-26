@@ -14,6 +14,6 @@ export default function robots(): MetadataRoute.Robots {
         "/forgot-password",
       ],
     },
-    sitemap: "https://temptravels.com/sitemap.xml",
+    sitemap: "https://temptravel.in/sitemap.xml",
   };
 }

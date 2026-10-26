@@ -53,7 +53,7 @@ export default function RefundPolicyPage() {
     {
       id: "contact-support",
       title: "Contact Support",
-      content: "For cancellation requests or status updates on refund transfers, contact our billing desk at billing@temptravels.com or call support at +91 70117 29639."
+      content: "For cancellation requests or status updates on refund transfers, contact our billing desk at billing@temptravel.in or call support at +91 70117 29639."
     }
   ];
 
@@ -122,7 +122,7 @@ export default function RefundPolicyPage() {
                 <p className="text-xs text-slate-400">Request cancel orders or trace Razorpay transaction ledgers.</p>
               </div>
               <a 
-                href="mailto:billing@temptravels.com" 
+                href="mailto:billing@temptravel.in" 
                 className="bg-surface border border-border hover:border-accent/40 text-slate-200 hover:text-accent font-bold py-2.5 px-5 rounded-lg text-xs flex items-center gap-1.5 transition-all uppercase tracking-wider shrink-0"
               >
                 <Mail className="w-4 h-4" />

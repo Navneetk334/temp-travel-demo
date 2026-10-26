@@ -58,7 +58,7 @@ export default function TermsAndConditionsPage() {
     {
       id: "intellectual-property",
       title: "Intellectual Property",
-      content: "All brand names, portal code bases, digital UI graphics, dynamic layouts, and copywriting content hosted on temptravels.com are owned by TEMP TRAVEL CAR RENTALS PVT LTD. Unauthorized scraping, copying, or replication is prohibited."
+      content: "All brand names, portal code bases, digital UI graphics, dynamic layouts, and copywriting content hosted on temptravel.in are owned by TEMP TRAVEL CAR RENTALS PVT LTD. Unauthorized scraping, copying, or replication is prohibited."
     },
     {
       id: "governing-law",
@@ -132,7 +132,7 @@ export default function TermsAndConditionsPage() {
                 <p className="text-xs text-slate-400">Discuss custom SLAs and liability extensions for enterprise B2B accounts.</p>
               </div>
               <a 
-                href="mailto:info@temptravels.com" 
+                href="mailto:info@temptravel.in" 
                 className="bg-surface border border-border hover:border-accent/40 text-slate-200 hover:text-accent font-bold py-2.5 px-5 rounded-lg text-xs flex items-center gap-1.5 transition-all uppercase tracking-wider shrink-0"
               >
                 <Mail className="w-4 h-4" />

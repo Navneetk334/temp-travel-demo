@@ -42,9 +42,9 @@ export default function PaymentFailurePage() {
             <Phone className="w-4 h-4 text-accent" />
             <span>+91 70117 29639</span>
           </a>
-          <a href="mailto:info@temptravels.com" className="flex items-center gap-1 hover:text-accent transition-colors">
+          <a href="mailto:info@temptravel.in" className="flex items-center gap-1 hover:text-accent transition-colors">
             <Mail className="w-4 h-4 text-accent" />
-            <span>info@temptravels.com</span>
+            <span>info@temptravel.in</span>
           </a>
         </div>
 

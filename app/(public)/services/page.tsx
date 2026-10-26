@@ -32,7 +32,7 @@ export default function ServicesPage() {
     "provider": {
       "@type": "LocalBusiness",
       "name": "TEMP TRAVEL CAR RENTALS PVT LTD",
-      "image": "https://temptravels.com/images/hero-cover.png",
+      "image": "https://temptravel.in/images/hero-cover.png",
       "telephone": "+91-7011729639",
       "address": {
         "@type": "PostalAddress",

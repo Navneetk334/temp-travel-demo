@@ -105,7 +105,7 @@ Perfect for quick day trips or overnight stays during monsoon and winter seasons
 
 Book your outstation ride with TEMP TRAVEL CAR RENTALS PVT LTD today for an unmatched chauffeur experience!`,
     author: "TEMP TRAVEL Editorial Team",
-    authorEmail: "editorial@temptravels.com",
+    authorEmail: "editorial@temptravel.in",
     date: "2026-08-20",
     createdAt: "2026-08-20T10:00:00.000Z",
     status: "PUBLISHED",
@@ -150,7 +150,7 @@ Corporate transit is no longer just about getting employees from Point A to Poin
 
 Partner with TEMP TRAVEL CAR RENTALS PVT LTD to transform your enterprise transportation ecosystem.`,
     author: "Navneet Kumar (Operations HQ)",
-    authorEmail: "operations@temptravels.com",
+    authorEmail: "operations@temptravel.in",
     date: "2026-08-18",
     createdAt: "2026-08-18T09:30:00.000Z",
     status: "PUBLISHED",
@@ -196,7 +196,7 @@ With TEMP TRAVEL's dedicated pre-booked airport chauffeur service, your driver w
 
 Travel in utmost peace and luxury with TEMP TRAVEL CAR RENTALS PVT LTD!`,
     author: "TEMP TRAVEL Editorial Team",
-    authorEmail: "editorial@temptravels.com",
+    authorEmail: "editorial@temptravel.in",
     date: "2026-08-15",
     createdAt: "2026-08-15T14:00:00.000Z",
     status: "PUBLISHED",

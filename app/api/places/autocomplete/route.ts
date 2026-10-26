@@ -89,7 +89,7 @@ export async function GET(request: Request) {
   try {
     const nomUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=in&limit=10&addressdetails=1&extratags=1`;
     const nomRes = await fetch(nomUrl, {
-      headers: { "User-Agent": "TempTravelCarRentals/1.0 (info@temptravels.com)" },
+      headers: { "User-Agent": "TempTravelCarRentals/1.0 (info@temptravel.in)" },
       cache: "no-store",
     });
     if (nomRes.ok) {
