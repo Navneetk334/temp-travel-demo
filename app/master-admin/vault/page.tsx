@@ -46,7 +46,7 @@ export default function MasterDocumentVaultPage() {
             { title: "Insurance Policy", ref: v.insuranceNumber || "POL-8829102", file: v.insuranceDocName || `insurance_${v.registrationNumber.replace(/\s+/g, "_")}.pdf`, exp: v.insuranceExpiry },
             { title: "Fitness Certificate", ref: "FIT-COMPLIANCE", file: v.fitnessDocName || "fitness_cert.pdf", exp: v.fitnessExpiry },
             { title: "All India Permit", ref: "AIP-NATIONAL", file: v.allIndiaPermitDocName || "all_india_permit.pdf", exp: v.allIndiaPermitExpiry || v.permitExpiry },
-            { title: "Yearly State Permit", ref: "PERMIT-ANNUAL", file: v.yearlyPermitDocName || "yearly_permit.pdf", exp: v.yearlyPermitExpiry },
+            { title: "Motor Vehicle Tax Receipt", ref: "MV-TAX", file: v.yearlyPermitDocName || "motor_vehicle_tax.pdf", exp: v.yearlyPermitExpiry },
             { title: "PUC Pollution Certificate", ref: "PUC-GREEN", file: v.pucDocName || "puc_certificate.pdf", exp: v.pucExpiry }
           ]
         }));

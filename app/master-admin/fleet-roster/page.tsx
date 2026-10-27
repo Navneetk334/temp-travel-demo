@@ -848,10 +848,10 @@ export default function MasterFleetRosterPage() {
                   </div>
                 </div>
 
-                {/* Yearly Permit & PUC */}
+                {/* Motor Vehicle Tax & PUC */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">18. Yearly Permit Expiry & Upload</label>
+                    <label className="text-slate-300 font-bold">18. Motor Vehicle Tax & Upload</label>
                     <div className="flex items-center gap-2">
                       <input
                         type="date"
