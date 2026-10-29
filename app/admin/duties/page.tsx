@@ -692,8 +692,9 @@ export default function AdminDutiesPage() {
             <input
               type="date"
               value={selectedDate}
+              onClick={(e) => e.currentTarget.showPicker?.()}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="bg-transparent text-slate-200 focus:outline-none cursor-pointer text-xs"
+              className="bg-transparent text-slate-200 focus:outline-none cursor-pointer text-xs [color-scheme:dark]"
             />
           </div>
 
@@ -1026,8 +1027,9 @@ export default function AdminDutiesPage() {
                         type="date"
                         required
                         value={formData.date}
+                        onClick={(e) => e.currentTarget.showPicker?.()}
                         onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                        className="w-full bg-background border border-border rounded-lg p-2.5 text-slate-100 focus:border-accent"
+                        className="w-full bg-background border border-border rounded-lg p-2.5 text-slate-100 focus:border-accent cursor-pointer [color-scheme:dark]"
                       />
                     </div>
                   </div>

@@ -629,8 +629,9 @@ export default function AdminDriversPage() {
                   <input
                     type="date"
                     value={formData.dob}
+                    onClick={(e) => e.currentTarget.showPicker?.()}
                     onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
-                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-amber-400"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-amber-400 cursor-pointer [color-scheme:dark]"
                   />
                 </div>
 
@@ -639,8 +640,9 @@ export default function AdminDriversPage() {
                   <input
                     type="date"
                     value={formData.dateOfJoining}
+                    onClick={(e) => e.currentTarget.showPicker?.()}
                     onChange={(e) => setFormData({ ...formData, dateOfJoining: e.target.value })}
-                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-amber-400"
+                    className="w-full bg-background border border-border rounded-lg p-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-amber-400 cursor-pointer [color-scheme:dark]"
                   />
                 </div>
 

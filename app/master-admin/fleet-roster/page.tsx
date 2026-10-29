@@ -26,7 +26,8 @@ import {
   Edit,
   Image as ImageIcon,
   AlertTriangle,
-  Settings2
+  Settings2,
+  Loader2
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 import { useDialog } from "@/app/components/DialogProvider";
@@ -44,6 +45,7 @@ export default function MasterFleetRosterPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const { showAlert, showConfirm } = useDialog();
@@ -194,54 +196,20 @@ export default function MasterFleetRosterPage() {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
 
-    let updatedList: any[] = [];
-    if (editingVehicle) {
-      updatedList = vehicles.map((v) => {
-        if (v.id === editingVehicle.id) {
-          return {
-            ...v,
-            make: formData.make,
-            model: formData.model,
-            categoryName: formData.categoryName,
-            vehicleClass: formData.vehicleClass,
-            registrationNumber: formData.registrationNumber,
-            transmission: formData.transmission,
-            fuelType: formData.fuelType,
-            capacity: parseInt(formData.capacity) || 4,
-            perKmRate: parseFloat(formData.perKmRate) || 14,
-            perHourRate: parseFloat(formData.perHourRate) || 150,
-            driverAllowance: parseFloat(formData.driverAllowance) || 500,
-            nightAllowance: parseFloat(formData.nightAllowance) || 300,
-            rcNumber: formData.rcNumber,
-            rcDocName: formData.rcDocName,
-            insuranceProvider: formData.insuranceProvider,
-            insuranceNumber: formData.insuranceNumber,
-            insuranceDocName: formData.insuranceDocName,
-            insuranceExpiry: formData.insuranceExpiry,
-            fitnessExpiry: formData.fitnessExpiry,
-            fitnessDocName: formData.fitnessDocName,
-            permitExpiry: formData.allIndiaPermitExpiry,
-            allIndiaPermitExpiry: formData.allIndiaPermitExpiry,
-            allIndiaPermitDocName: formData.allIndiaPermitDocName,
-            yearlyPermitExpiry: formData.yearlyPermitExpiry,
-            yearlyPermitDocName: formData.yearlyPermitDocName,
-            pucExpiry: formData.pucExpiry,
-            pucDocName: formData.pucDocName,
-            imageName: formData.imageName,
-            imageUrl: formData.imageUrl
-          };
-        }
-        return v;
-      });
-    } else {
-      const created = {
-        id: `v-${Date.now()}`,
+    setIsSubmitting(true);
+
+    try {
+      let updatedList: any[] = [];
+      let savedServerVehicle: any = null;
+
+      const vehiclePayload = {
         make: formData.make || "Commercial Make",
         model: formData.model || "Commercial Vehicle",
         categoryName: formData.categoryName,
         vehicleClass: formData.vehicleClass,
-        registrationNumber: formData.registrationNumber || `MH 04 XX ${Math.floor(1000 + Math.random() * 9000)}`,
+        registrationNumber: formData.registrationNumber ? formData.registrationNumber.trim().toUpperCase() : `MH 04 XX ${Math.floor(1000 + Math.random() * 9000)}`,
         transmission: formData.transmission,
         fuelType: formData.fuelType,
         capacity: parseInt(formData.capacity) || 4,
@@ -264,37 +232,82 @@ export default function MasterFleetRosterPage() {
         yearlyPermitDocName: formData.yearlyPermitDocName,
         pucExpiry: formData.pucExpiry,
         pucDocName: formData.pucDocName,
-        isAvailable: true,
-        permitStatus: "VALID",
         imageName: formData.imageName,
         imageUrl: formData.imageUrl
       };
-      updatedList = [created, ...vehicles];
-    }
 
-    setVehicles(updatedList);
-    localStorage.setItem("user_uploaded_fleet", JSON.stringify(updatedList));
-    localStorage.setItem("user_uploaded_fleet_vehicles", JSON.stringify(updatedList));
+      // 6-second timeout controller so API calls never hang indefinitely
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
 
-    try {
+      try {
+        if (editingVehicle) {
+          const res = await fetch(`/api/fleet/${editingVehicle.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(vehiclePayload),
+            signal: controller.signal
+          });
+          if (res.ok) {
+            const data = await res.json();
+            savedServerVehicle = data.vehicle;
+          }
+        } else {
+          const res = await fetch("/api/fleet", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(vehiclePayload),
+            signal: controller.signal
+          });
+          if (res.ok) {
+            const data = await res.json();
+            savedServerVehicle = data.vehicle;
+          }
+        }
+      } catch (apiErr) {
+        console.warn("API fleet sync warning (using client persistence):", apiErr);
+      } finally {
+        clearTimeout(timeoutId);
+      }
+
       if (editingVehicle) {
-        await fetch(`/api/fleet/${editingVehicle.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData)
+        updatedList = vehicles.map((v) => {
+          if (v.id === editingVehicle.id) {
+            return {
+              ...v,
+              ...vehiclePayload,
+              ...(savedServerVehicle || {})
+            };
+          }
+          return v;
         });
       } else {
-        await fetch("/api/fleet", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedList[0])
-        });
+        const created = {
+          id: savedServerVehicle?.id || `v-${Date.now()}`,
+          ...vehiclePayload,
+          ...(savedServerVehicle || {}),
+          isAvailable: true,
+          permitStatus: "VALID"
+        };
+        updatedList = [created, ...vehicles];
       }
-    } catch (err) {
-      console.error("Save vehicle API error:", err);
-    }
 
-    setShowModal(false);
+      setVehicles(updatedList);
+      try {
+        localStorage.setItem("user_uploaded_fleet", JSON.stringify(updatedList));
+        localStorage.setItem("user_uploaded_fleet_vehicles", JSON.stringify(updatedList));
+      } catch (storageErr) {
+        console.error("Local storage error:", storageErr);
+      }
+
+      setShowModal(false);
+      setEditingVehicle(null);
+    } catch (err: any) {
+      console.error("Save vehicle error:", err);
+      await showAlert(err.message || "An unexpected error occurred while saving the vehicle.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleDeleteVehicle = async (v: any) => {
@@ -803,8 +816,9 @@ export default function MasterFleetRosterPage() {
                     <input
                       type="date"
                       value={formData.insuranceExpiry}
+                      onClick={(e) => e.currentTarget.showPicker?.()}
                       onChange={(e) => setFormData({ ...formData, insuranceExpiry: e.target.value })}
-                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono cursor-pointer [color-scheme:dark]"
                     />
                   </div>
                 </div>
@@ -817,8 +831,9 @@ export default function MasterFleetRosterPage() {
                       <input
                         type="date"
                         value={formData.fitnessExpiry}
+                        onClick={(e) => e.currentTarget.showPicker?.()}
                         onChange={(e) => setFormData({ ...formData, fitnessExpiry: e.target.value })}
-                        className="w-1/2 bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                        className="w-1/2 bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono cursor-pointer [color-scheme:dark]"
                       />
                       <input
                         type="file"
@@ -835,8 +850,9 @@ export default function MasterFleetRosterPage() {
                       <input
                         type="date"
                         value={formData.allIndiaPermitExpiry}
+                        onClick={(e) => e.currentTarget.showPicker?.()}
                         onChange={(e) => setFormData({ ...formData, allIndiaPermitExpiry: e.target.value })}
-                        className="w-1/2 bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                        className="w-1/2 bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono cursor-pointer [color-scheme:dark]"
                       />
                       <input
                         type="file"
@@ -856,8 +872,9 @@ export default function MasterFleetRosterPage() {
                       <input
                         type="date"
                         value={formData.yearlyPermitExpiry}
+                        onClick={(e) => e.currentTarget.showPicker?.()}
                         onChange={(e) => setFormData({ ...formData, yearlyPermitExpiry: e.target.value })}
-                        className="w-1/2 bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                        className="w-1/2 bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono cursor-pointer [color-scheme:dark]"
                       />
                       <input
                         type="file"
@@ -874,8 +891,9 @@ export default function MasterFleetRosterPage() {
                       <input
                         type="date"
                         value={formData.pucExpiry}
+                        onClick={(e) => e.currentTarget.showPicker?.()}
                         onChange={(e) => setFormData({ ...formData, pucExpiry: e.target.value })}
-                        className="w-1/2 bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                        className="w-1/2 bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono cursor-pointer [color-scheme:dark]"
                       />
                       <input
                         type="file"
@@ -924,16 +942,27 @@ export default function MasterFleetRosterPage() {
               <div className="pt-4 border-t border-border flex justify-end gap-3">
                 <button
                   type="button"
+                  disabled={isSubmitting}
                   onClick={() => setShowModal(false)}
-                  className="px-5 py-2.5 bg-background text-slate-400 hover:text-white rounded-xl text-xs font-bold"
+                  className="px-5 py-2.5 bg-background text-slate-400 hover:text-white rounded-xl text-xs font-bold transition-opacity disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer"
+                  disabled={isSubmitting}
+                  className={`px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 cursor-pointer transition-all ${
+                    isSubmitting ? "opacity-75 cursor-not-allowed" : "hover:brightness-110 active:scale-95"
+                  }`}
                 >
-                  {editingVehicle ? "Update Vehicle Specs" : "Save Commercial Vehicle"}
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>{editingVehicle ? "Updating Vehicle..." : "Saving Commercial Vehicle..."}</span>
+                    </>
+                  ) : (
+                    <span>{editingVehicle ? "Update Vehicle Specs" : "Save Commercial Vehicle"}</span>
+                  )}
                 </button>
               </div>
             </form>

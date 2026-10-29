@@ -2004,8 +2004,9 @@ export default function BookingWidget() {
                     type="date"
                     required
                     value={tourData.date}
+                    onClick={(e) => e.currentTarget.showPicker?.()}
                     onChange={(e) => setTourData({ ...tourData, date: e.target.value })}
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all"
+                    className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all cursor-pointer [color-scheme:dark]"
                   />
                 </div>
               </div>

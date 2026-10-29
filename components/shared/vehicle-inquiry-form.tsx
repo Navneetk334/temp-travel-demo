@@ -230,6 +230,7 @@ export default function VehicleInquiryForm({
                   type="date"
                   required
                   value={formData.pickupDate}
+                  onClick={(e) => e.currentTarget.showPicker?.()}
                   onChange={(e) => setFormData({ ...formData, pickupDate: e.target.value })}
                   className="w-full h-full bg-slate-950/60 border border-white/10 rounded-lg py-2 pl-9 pr-2 text-xs text-slate-100 focus:outline-none focus:border-primary transition-all cursor-pointer [color-scheme:dark]"
                 />

@@ -165,8 +165,9 @@ export default function TourInquiryForm({ tourId }: TourInquiryFormProps) {
               required
               name="travelDate"
               value={formData.travelDate}
+              onClick={(e) => e.currentTarget.showPicker?.()}
               onChange={handleChange}
-              className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3.5 text-xs text-slate-100 focus:outline-none focus:border-primary transition-all"
+              className="w-full bg-slate-950/60 border border-white/10 rounded-lg py-2 px-3.5 text-xs text-slate-100 focus:outline-none focus:border-primary transition-all cursor-pointer [color-scheme:dark]"
             />
           </div>
           <div className="space-y-1">

@@ -656,8 +656,9 @@ export default function MasterDriversPage() {
                       type="date"
                       required
                       value={formData.dob}
+                      onClick={(e) => e.currentTarget.showPicker?.()}
                       onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
-                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono cursor-pointer [color-scheme:dark]"
                     />
                   </div>
 
@@ -776,8 +777,9 @@ export default function MasterDriversPage() {
                         type="date"
                         required
                         value={formData.licenseExpiry}
+                        onClick={(e) => e.currentTarget.showPicker?.()}
                         onChange={(e) => setFormData({ ...formData, licenseExpiry: e.target.value })}
-                        className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                        className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono cursor-pointer [color-scheme:dark]"
                       />
                     </div>
                   </div>

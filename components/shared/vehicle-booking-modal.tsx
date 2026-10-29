@@ -549,8 +549,9 @@ export default function VehicleBookingModal({
                     type="date"
                     required
                     value={formData.pickupDate}
+                    onClick={(e) => e.currentTarget.showPicker?.()}
                     onChange={(e) => setFormData({ ...formData, pickupDate: e.target.value })}
-                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl p-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-mono cursor-pointer [color-scheme:dark]"
                   />
                 </div>
 
@@ -599,8 +600,9 @@ export default function VehicleBookingModal({
                       type="date"
                       required
                       value={formData.returnDate}
+                      onClick={(e) => e.currentTarget.showPicker?.()}
                       onChange={(e) => setFormData({ ...formData, returnDate: e.target.value })}
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl p-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
+                      className="w-full bg-slate-950 border border-white/10 rounded-xl p-2.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-mono cursor-pointer [color-scheme:dark]"
                     />
                   </div>
                 ) : (
