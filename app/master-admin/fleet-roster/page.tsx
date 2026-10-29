@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 import { useDialog } from "@/app/components/DialogProvider";
+import { setVaultFile, getVehicleDocKey } from "@/lib/vaultStorage";
 
 // Category to Class Mapping Hierarchy
 const CLASS_OPTIONS: Record<string, string[]> = {
@@ -89,6 +90,8 @@ export default function MasterFleetRosterPage() {
     imageName: "",
     imageUrl: ""
   });
+
+  const [docFiles, setDocFiles] = useState<{ [key: string]: string }>({});
 
   const handleCategoryChange = (cat: string) => {
     const defaultClass = CLASS_OPTIONS[cat]?.[0] || "Executive";
@@ -194,6 +197,7 @@ export default function MasterFleetRosterPage() {
 
   const openAddModal = () => {
     setEditingVehicle(null);
+    setDocFiles({});
     setFormData({
       make: "",
       model: "",
@@ -229,6 +233,7 @@ export default function MasterFleetRosterPage() {
 
   const openEditModal = (v: any) => {
     setEditingVehicle(v);
+    setDocFiles({});
     setFormData({
       make: v.make || "",
       model: v.model || "",
@@ -272,12 +277,25 @@ export default function MasterFleetRosterPage() {
       let updatedList: any[] = [];
       let savedServerVehicle: any = null;
 
+      const regToUse = formData.registrationNumber ? formData.registrationNumber.trim().toUpperCase() : `MH 04 XX ${Math.floor(1000 + Math.random() * 9000)}`;
+
+      // Save uploaded document binaries to Document Vault Storage
+      for (const [docKey, dataUrl] of Object.entries(docFiles)) {
+        if (dataUrl) {
+          try {
+            await setVaultFile(getVehicleDocKey(regToUse, docKey), dataUrl);
+          } catch (storageErr) {
+            console.warn("Vault storage warning:", storageErr);
+          }
+        }
+      }
+
       const vehiclePayload = {
         make: formData.make || "Commercial Make",
         model: formData.model || "Commercial Vehicle",
         categoryName: formData.categoryName,
         vehicleClass: formData.vehicleClass,
-        registrationNumber: formData.registrationNumber ? formData.registrationNumber.trim().toUpperCase() : `MH 04 XX ${Math.floor(1000 + Math.random() * 9000)}`,
+        registrationNumber: regToUse,
         transmission: formData.transmission,
         fuelType: formData.fuelType,
         capacity: parseInt(formData.capacity) || 4,
@@ -845,7 +863,17 @@ export default function MasterFleetRosterPage() {
                     <input
                       type="file"
                       accept=".pdf,image/*"
-                      onChange={(e) => setFormData({ ...formData, rcDocName: e.target.files?.[0]?.name || "" })}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setFormData(prev => ({ ...prev, rcDocName: file.name }));
+                          const reader = new FileReader();
+                          reader.onload = (ev) => {
+                            setDocFiles(prev => ({ ...prev, rc: ev.target?.result as string }));
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
                       className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                     />
                   </div>
@@ -900,7 +928,17 @@ export default function MasterFleetRosterPage() {
                       <input
                         type="file"
                         accept=".pdf,image/*"
-                        onChange={(e) => setFormData({ ...formData, fitnessDocName: e.target.files?.[0]?.name || "" })}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setFormData(prev => ({ ...prev, fitnessDocName: file.name }));
+                            const reader = new FileReader();
+                            reader.onload = (ev) => {
+                              setDocFiles(prev => ({ ...prev, fitness: ev.target?.result as string }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
                         className="w-1/2 bg-background border border-border rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                       />
                     </div>
@@ -919,7 +957,17 @@ export default function MasterFleetRosterPage() {
                       <input
                         type="file"
                         accept=".pdf,image/*"
-                        onChange={(e) => setFormData({ ...formData, allIndiaPermitDocName: e.target.files?.[0]?.name || "" })}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setFormData(prev => ({ ...prev, allIndiaPermitDocName: file.name }));
+                            const reader = new FileReader();
+                            reader.onload = (ev) => {
+                              setDocFiles(prev => ({ ...prev, permit: ev.target?.result as string }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
                         className="w-1/2 bg-background border border-border rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                       />
                     </div>
@@ -941,7 +989,17 @@ export default function MasterFleetRosterPage() {
                       <input
                         type="file"
                         accept=".pdf,image/*"
-                        onChange={(e) => setFormData({ ...formData, yearlyPermitDocName: e.target.files?.[0]?.name || "" })}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setFormData(prev => ({ ...prev, yearlyPermitDocName: file.name }));
+                            const reader = new FileReader();
+                            reader.onload = (ev) => {
+                              setDocFiles(prev => ({ ...prev, mvtax: ev.target?.result as string }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
                         className="w-1/2 bg-background border border-border rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                       />
                     </div>
@@ -960,7 +1018,17 @@ export default function MasterFleetRosterPage() {
                       <input
                         type="file"
                         accept=".pdf,image/*"
-                        onChange={(e) => setFormData({ ...formData, pucDocName: e.target.files?.[0]?.name || "" })}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setFormData(prev => ({ ...prev, pucDocName: file.name }));
+                            const reader = new FileReader();
+                            reader.onload = (ev) => {
+                              setDocFiles(prev => ({ ...prev, puc: ev.target?.result as string }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
                         className="w-1/2 bg-background border border-border rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                       />
                     </div>
