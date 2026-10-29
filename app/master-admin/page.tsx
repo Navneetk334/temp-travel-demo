@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   IndianRupee,
@@ -26,32 +26,91 @@ import {
   Search
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
+import LocationInput from "@/components/shared/location-input";
+
+// Category to Class Mapping Hierarchy matching PRD & Fleet Specs
+const CLASS_OPTIONS: Record<string, string[]> = {
+  Sedan: ["Compact", "Executive", "Premium Executive", "Luxury"],
+  SUV: ["Subcompact/Urban", "Mid-Premium", "Premium", "Luxury"],
+};
+
+// Seeded Brand Model Catalog per Category & Class
+const MODEL_CATALOG: Record<string, Record<string, string[]>> = {
+  Sedan: {
+    Compact: [
+      "Maruti Suzuki Swift Dzire",
+      "Hyundai Aura",
+      "Honda Amaze",
+      "Tata Tigor"
+    ],
+    Executive: [
+      "Maruti Suzuki Ciaz",
+      "Honda City",
+      "Hyundai Verna",
+      "Skoda Slavia",
+      "Volkswagen Virtus"
+    ],
+    "Premium Executive": [
+      "Toyota Camry",
+      "Skoda Superb",
+      "Volkswagen Passat"
+    ],
+    Luxury: [
+      "Mercedes-Benz E-Class",
+      "BMW 5 Series",
+      "Audi A6",
+      "Jaguar XF"
+    ]
+  },
+  SUV: {
+    "Subcompact/Urban": [
+      "Hyundai Exter",
+      "Tata Nexon",
+      "Maruti Suzuki Brezza",
+      "Hyundai Venue",
+      "Kia Sonet"
+    ],
+    "Mid-Premium": [
+      "Hyundai Creta",
+      "Kia Seltos",
+      "Mahindra Scorpio-N",
+      "Tata Harrier",
+      "Maruti Suzuki Grand Vitara"
+    ],
+    Premium: [
+      "Toyota Innova Crysta",
+      "KIA Carens",
+      "Maruti Suzuki Ertiga",
+      "Toyota Rumion",
+      "Mahindra XUV700",
+      "Tata Safari",
+      "Toyota Innova Hycross",
+      "MG Hector Plus"
+    ],
+    Luxury: [
+      "Toyota Fortuner",
+      "Mercedes-Benz GLE",
+      "BMW X5",
+      "Audi Q7",
+      "Land Rover Defender"
+    ]
+  }
+};
 
 export default function MasterAdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [showDispatchModal, setShowDispatchModal] = useState(false);
   const [dispatchSuccess, setDispatchSuccess] = useState(false);
-  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
-
-  const popularLocations = [
-    "Chhatrapati Shivaji Maharaj Intl Airport (T2)",
-    "Chhatrapati Shivaji Maharaj Intl Airport (T1)",
-    "Bandra Kurla Complex (BKC), Mumbai",
-    "Lower Parel, Business District, Mumbai",
-    "Andheri East Station / Sahar Hub",
-    "Powai Hiranandani Estate, Mumbai",
-    "Thane West Station Square",
-    "Pune Junction Railway Station",
-    "Navi Mumbai Corporate Park"
-  ];
+  const [fleetList, setFleetList] = useState<any[]>([]);
 
   const [dispatchForm, setDispatchForm] = useState({
     customerName: "",
     phone: "",
-    vehicleCategory: "Pickup & Drop / Airport Transfer",
-    vehicleClass: "Sedan",
-    vehicleModel: "Maruti Suzuki Dzire",
+    vehicleCategory: "Sedan",
+    vehicleClass: "Executive",
+    vehicleModel: "Maruti Suzuki Ciaz",
     pickupLocation: "",
+    dropLocation: "",
   });
 
   const [stats, setStats] = useState({
@@ -109,6 +168,7 @@ export default function MasterAdminDashboard() {
         const list = Array.isArray(fleetData) ? fleetData : (fleetData.vehicles || []);
         if (list.length > 0) {
           setStats((prev) => ({ ...prev, fleetCount: list.length }));
+          setFleetList(list);
         }
       }
     } catch (e) {
@@ -119,19 +179,92 @@ export default function MasterAdminDashboard() {
   };
 
   useEffect(() => {
+    // 1. Initial local fleet loading
+    try {
+      const savedFleet = localStorage.getItem("user_uploaded_fleet_vehicles") || localStorage.getItem("user_uploaded_fleet");
+      if (savedFleet) {
+        const parsed = JSON.parse(savedFleet);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setFleetList(parsed);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
     handleSyncSystems();
   }, []);
 
+  // Category and Class selection handlers
+  const handleCategoryChange = (cat: string) => {
+    const defaultClass = CLASS_OPTIONS[cat]?.[0] || "Executive";
+    const modelsForClass = MODEL_CATALOG[cat]?.[defaultClass] || [];
+    setDispatchForm(prev => ({
+      ...prev,
+      vehicleCategory: cat,
+      vehicleClass: defaultClass,
+      vehicleModel: modelsForClass[0] || ""
+    }));
+  };
+
+  const handleClassChange = (cls: string) => {
+    const modelsForClass = MODEL_CATALOG[dispatchForm.vehicleCategory]?.[cls] || [];
+    setDispatchForm(prev => ({
+      ...prev,
+      vehicleClass: cls,
+      vehicleModel: modelsForClass[0] || ""
+    }));
+  };
+
+  // Dynamically compute available vehicle models for current category & class
+  const availableModels = useMemo(() => {
+    const cat = dispatchForm.vehicleCategory;
+    const cls = dispatchForm.vehicleClass;
+    const catalogList = (MODEL_CATALOG[cat] && MODEL_CATALOG[cat][cls]) ? MODEL_CATALOG[cat][cls] : [];
+
+    // Also include any models from the registered fleet matching this category and class
+    const fleetModels: string[] = [];
+    fleetList.forEach((v) => {
+      const vCat = (v.categoryName || v.category?.name || "").trim().toLowerCase();
+      const vCls = (v.vehicleClass || v.subCategory || "").trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+      const targetCat = cat.trim().toLowerCase();
+      const targetCls = cls.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+
+      if (vCat.includes(targetCat) || targetCat.includes(vCat)) {
+        if (!targetCls || vCls.includes(targetCls) || targetCls.includes(vCls)) {
+          const fullModel = `${v.make || ""} ${v.model || ""}`.trim();
+          if (fullModel && !fleetModels.includes(fullModel)) {
+            fleetModels.push(fullModel);
+          }
+        }
+      }
+    });
+
+    const combined = Array.from(new Set([...fleetModels, ...catalogList]));
+    return combined;
+  }, [dispatchForm.vehicleCategory, dispatchForm.vehicleClass, fleetList]);
+
+  // Keep selected vehicle model valid when availableModels change
+  useEffect(() => {
+    if (availableModels.length > 0 && !availableModels.includes(dispatchForm.vehicleModel)) {
+      setDispatchForm(prev => ({ ...prev, vehicleModel: availableModels[0] }));
+    }
+  }, [availableModels, dispatchForm.vehicleModel]);
+
   const handleQuickDispatchSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!dispatchForm.customerName || !dispatchForm.phone || !dispatchForm.pickupLocation) return;
+    if (!dispatchForm.customerName || !dispatchForm.phone || !dispatchForm.pickupLocation || !dispatchForm.dropLocation) {
+      return;
+    }
 
     const payload = {
       customerName: dispatchForm.customerName,
       phone: dispatchForm.phone,
-      tripType: dispatchForm.vehicleCategory,
+      tripType: `Quick Dispatch - ${dispatchForm.vehicleCategory} (${dispatchForm.vehicleClass})`,
       pickupLocation: dispatchForm.pickupLocation,
-      notes: `Dispatched from Master HQ: Class=${dispatchForm.vehicleClass}, Model=${dispatchForm.vehicleModel}`,
+      dropLocation: dispatchForm.dropLocation,
+      requirements: `Category: ${dispatchForm.vehicleCategory}, Class: ${dispatchForm.vehicleClass}, Model: ${dispatchForm.vehicleModel}. Pickup: ${dispatchForm.pickupLocation}, Drop: ${dispatchForm.dropLocation}.`,
+      notes: `Dispatched from Master HQ: Category=${dispatchForm.vehicleCategory}, Class=${dispatchForm.vehicleClass}, Model=${dispatchForm.vehicleModel}, Drop=${dispatchForm.dropLocation}`,
       status: "NEW",
     };
 
@@ -150,14 +283,18 @@ export default function MasterAdminDashboard() {
         driverName: "Assigned Chauffeur",
         phone: dispatchForm.phone,
         vehicleModel: dispatchForm.vehicleModel,
-        regNumber: "MH 02 CZ 9988",
+        vehicleCategory: dispatchForm.vehicleCategory,
+        vehicleClass: dispatchForm.vehicleClass,
+        regNumber: "COMMERCIAL-FLEET",
         currentLocation: dispatchForm.pickupLocation,
-        destination: "Destination Hub",
+        destination: dispatchForm.dropLocation,
         status: "ASSIGNED",
         speed: "0 km/h",
         eta: "10 Mins to Pickup",
-        tripType: dispatchForm.vehicleCategory,
-        customerName: dispatchForm.customerName
+        tripType: `${dispatchForm.vehicleCategory} • ${dispatchForm.vehicleClass}`,
+        customerName: dispatchForm.customerName,
+        pickupLocation: dispatchForm.pickupLocation,
+        dropLocation: dispatchForm.dropLocation
       });
       localStorage.setItem("master_dispatches", JSON.stringify(existing));
     } catch (err) {
@@ -169,7 +306,7 @@ export default function MasterAdminDashboard() {
       {
         id: String(Date.now()),
         time: "Just now",
-        text: `Dispatched ${dispatchForm.vehicleModel} (${dispatchForm.vehicleClass}) for passenger ${dispatchForm.customerName} at ${dispatchForm.pickupLocation}.`,
+        text: `Dispatched ${dispatchForm.vehicleModel} (${dispatchForm.vehicleCategory} - ${dispatchForm.vehicleClass}) for passenger ${dispatchForm.customerName} from ${dispatchForm.pickupLocation} to ${dispatchForm.dropLocation}.`,
         status: "DISPATCHED"
       },
       ...prev
@@ -181,10 +318,11 @@ export default function MasterAdminDashboard() {
       setDispatchForm({
         customerName: "",
         phone: "",
-        vehicleCategory: "Pickup & Drop / Airport Transfer",
-        vehicleClass: "Sedan",
-        vehicleModel: "Maruti Suzuki Dzire",
+        vehicleCategory: "Sedan",
+        vehicleClass: "Executive",
+        vehicleModel: "Maruti Suzuki Ciaz",
         pickupLocation: "",
+        dropLocation: "",
       });
       setStats(prev => ({ ...prev, activeRides: prev.activeRides + 1, totalLeads: prev.totalLeads + 1 }));
     }, 1500);
@@ -450,7 +588,7 @@ export default function MasterAdminDashboard() {
       {showDispatchModal && (
         <Portal>
           <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-          <div className="bg-surface border border-amber-500/40 rounded-3xl p-6 sm:p-8 w-full max-w-xl shadow-2xl space-y-6 relative text-slate-100 max-h-[90vh] overflow-y-auto">
+          <div className="bg-surface border border-amber-500/40 rounded-3xl p-6 sm:p-8 w-full max-w-2xl shadow-2xl space-y-6 relative text-slate-100 max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setShowDispatchModal(false)}
               className="absolute top-5 right-5 text-slate-400 hover:text-white"
@@ -505,100 +643,86 @@ export default function MasterAdminDashboard() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-slate-300 font-bold uppercase text-[10px]">Vehicle Category</label>
+                    <label className="text-slate-300 font-bold uppercase text-[10px]">Vehicle Category *</label>
                     <select
                       value={dispatchForm.vehicleCategory}
-                      onChange={(e) => setDispatchForm({ ...dispatchForm, vehicleCategory: e.target.value })}
-                      className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold"
+                      onChange={(e) => handleCategoryChange(e.target.value)}
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-bold text-amber-400 cursor-pointer"
                     >
-                      <option value="Pickup & Drop / Airport Transfer">Airport / Transfer</option>
-                      <option value="Local Rental">Local Rental (8h/80km)</option>
-                      <option value="Outstation Trip">Outstation Intercity</option>
-                      <option value="Corporate Transit">Corporate Transit</option>
+                      <option value="Sedan">Sedan</option>
+                      <option value="SUV">SUV</option>
                     </select>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-slate-300 font-bold uppercase text-[10px]">Vehicle Class</label>
+                    <label className="text-slate-300 font-bold uppercase text-[10px]">Vehicle Class *</label>
                     <select
                       value={dispatchForm.vehicleClass}
-                      onChange={(e) => setDispatchForm({ ...dispatchForm, vehicleClass: e.target.value })}
-                      className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold"
+                      onChange={(e) => handleClassChange(e.target.value)}
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold cursor-pointer"
                     >
-                      <option value="Sedan">Sedan (Dzire/City)</option>
-                      <option value="SUV">SUV (Innova/Crysta)</option>
-                      <option value="Luxury SUV">Luxury SUV (Fortuner)</option>
+                      {(CLASS_OPTIONS[dispatchForm.vehicleCategory] || []).map((cls) => (
+                        <option key={cls} value={cls}>
+                          {cls}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-slate-300 font-bold uppercase text-[10px]">Vehicle Model</label>
+                    <label className="text-slate-300 font-bold uppercase text-[10px]">Vehicle Model *</label>
                     <select
                       value={dispatchForm.vehicleModel}
                       onChange={(e) => setDispatchForm({ ...dispatchForm, vehicleModel: e.target.value })}
-                      className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold"
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold cursor-pointer"
                     >
-                      <option value="Maruti Suzuki Dzire">Maruti Swift Dzire</option>
-                      <option value="Honda City">Honda City</option>
-                      <option value="Toyota Innova Crysta">Toyota Innova Crysta</option>
-                      <option value="Toyota Fortuner 4x4">Toyota Fortuner 4x4</option>
+                      {availableModels.map((m) => (
+                        <option key={m} value={m}>
+                          {m}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
 
-                {/* Interactive Pickup Location Autocomplete Search */}
-                <div className="space-y-1.5 relative">
-                  <label className="text-slate-300 font-bold uppercase text-[10px]">
-                    Pickup Location (Web Booking Engine Search) *
-                  </label>
-                  <div className="relative">
-                    <MapPin className="w-4 h-4 text-amber-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
+                {/* Pickup Location & Drop Location with Address Search */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-slate-300 font-bold uppercase text-[10px]">
+                      Pickup Location (Address / Hub Search) *
+                    </label>
+                    <LocationInput
                       required
-                      placeholder="Type or select pickup hub..."
+                      placeholder="Search pickup address, airport, hub..."
                       value={dispatchForm.pickupLocation}
-                      onFocus={() => setShowLocationSuggestions(true)}
-                      onChange={(e) => {
-                        setDispatchForm({ ...dispatchForm, pickupLocation: e.target.value });
-                        setShowLocationSuggestions(true);
-                      }}
-                      className="w-full bg-background border border-border rounded-xl pl-9 pr-4 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold"
+                      onChange={(val) => setDispatchForm({ ...dispatchForm, pickupLocation: val })}
                     />
                   </div>
 
-                  {showLocationSuggestions && (
-                    <div className="absolute z-30 left-0 right-0 top-full mt-1 bg-background border border-amber-500/30 rounded-xl shadow-2xl overflow-hidden max-h-48 overflow-y-auto divide-y divide-white/5">
-                      {popularLocations
-                        .filter(loc => loc.toLowerCase().includes(dispatchForm.pickupLocation.toLowerCase()))
-                        .map((loc, idx) => (
-                          <div
-                            key={idx}
-                            onClick={() => {
-                              setDispatchForm({ ...dispatchForm, pickupLocation: loc });
-                              setShowLocationSuggestions(false);
-                            }}
-                            className="px-3.5 py-2.5 hover:bg-amber-500/10 text-slate-200 hover:text-amber-400 cursor-pointer flex items-center gap-2 font-medium"
-                          >
-                            <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                            <span>{loc}</span>
-                          </div>
-                        ))}
-                    </div>
-                  )}
+                  <div className="space-y-1.5">
+                    <label className="text-slate-300 font-bold uppercase text-[10px]">
+                      Drop Location (Address / Destination Search) *
+                    </label>
+                    <LocationInput
+                      required
+                      placeholder="Search drop location or destination..."
+                      value={dispatchForm.dropLocation}
+                      onChange={(val) => setDispatchForm({ ...dispatchForm, dropLocation: val })}
+                    />
+                  </div>
                 </div>
 
                 <div className="pt-4 flex justify-end gap-3 border-t border-border">
                   <button
                     type="button"
                     onClick={() => setShowDispatchModal(false)}
-                    className="px-5 py-2.5 bg-background text-slate-400 hover:text-white rounded-xl text-xs font-bold"
+                    className="px-5 py-2.5 bg-background text-slate-400 hover:text-white rounded-xl text-xs font-bold cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer"
+                    className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer hover:from-amber-400 hover:to-amber-500 transition-all"
                   >
                     Dispatch Now
                   </button>
