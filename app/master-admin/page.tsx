@@ -33,6 +33,7 @@ import {
 import Portal from "@/components/shared/portal";
 import LocationInput from "@/components/shared/location-input";
 import QuickDispatchAssignmentModal from "@/components/admin/quick-dispatch-assignment-modal";
+import { syncDispatchToLeads, removeDispatchFromLeads, syncExistingDispatchesToLeads } from "@/lib/lead-sync";
 
 // Trip Types matching the website's booking engine
 const TRIP_TYPES = [
@@ -254,6 +255,7 @@ export default function MasterAdminDashboard() {
     }
 
     handleSyncSystems();
+    syncExistingDispatchesToLeads();
   }, []);
 
   // Category and Class selection handlers
@@ -353,24 +355,9 @@ export default function MasterAdminDashboard() {
       createdAt: new Date().toISOString()
     };
 
-    const payload = {
-      customerName: dispatchForm.customerName,
-      phone: dispatchForm.phone,
-      tripType: `${dispatchForm.tripType} - ${dispatchForm.vehicleCategory} (${dispatchForm.vehicleClass})`,
-      pickupLocation: dispatchForm.pickupLocation,
-      dropLocation: dispatchForm.dropLocation,
-      requirements: `Trip: ${dispatchForm.tripType}. Category: ${dispatchForm.vehicleCategory}, Class: ${dispatchForm.vehicleClass}, Model: ${dispatchForm.vehicleModel}. Pickup: ${dispatchForm.pickupLocation}, Drop: ${dispatchForm.dropLocation}.${assignedVeh ? ` Assigned Vehicle: ${assignedVeh.registrationNumber}.` : ""}${assignedDrv ? ` Assigned Chauffeur: ${assignedDrv.name} (${assignedDrv.phone}).` : ""}`,
-      notes: `Dispatched from Master HQ: Trip=${dispatchForm.tripType}, Category=${dispatchForm.vehicleCategory}, Class=${dispatchForm.vehicleClass}, Model=${dispatchForm.vehicleModel}`,
-      status: "NEW",
-    };
-
     try {
-      // POST lead to database
-      await fetch("/api/rental/lead", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      // Sync dispatch into omnichannel CRM leads as per trip type and persist to DB
+      await syncDispatchToLeads(newDispatchItem);
 
       // Persist dispatch entry locally for live telematics
       const existing = JSON.parse(localStorage.getItem("master_dispatches") || "[]");
@@ -421,6 +408,7 @@ export default function MasterAdminDashboard() {
       setStats(s => ({ ...s, activeRides: activeCount }));
       return next;
     });
+    syncDispatchToLeads(updatedItem);
     setRecentLogs(prev => [
       {
         id: String(Date.now()),
@@ -433,13 +421,23 @@ export default function MasterAdminDashboard() {
   };
 
   const handleQuickStatusChange = (id: string, newStatus: string) => {
+    let updatedDispatch: any = null;
     setDispatches(prev => {
-      const next = prev.map(d => d.id === id ? { ...d, status: newStatus } : d);
+      const next = prev.map(d => {
+        if (d.id === id) {
+          updatedDispatch = { ...d, status: newStatus };
+          return updatedDispatch;
+        }
+        return d;
+      });
       localStorage.setItem("master_dispatches", JSON.stringify(next));
       const activeCount = next.filter((d: any) => d.status === "IN_TRANSIT" || d.status === "ASSIGNED").length;
       setStats(s => ({ ...s, activeRides: activeCount }));
       return next;
     });
+    if (updatedDispatch) {
+      syncDispatchToLeads(updatedDispatch);
+    }
   };
 
   const handleDeleteDispatch = (id: string) => {
@@ -451,6 +449,7 @@ export default function MasterAdminDashboard() {
       setStats(s => ({ ...s, activeRides: activeCount }));
       return next;
     });
+    removeDispatchFromLeads(id);
     setRecentLogs(prev => [
       {
         id: String(Date.now()),

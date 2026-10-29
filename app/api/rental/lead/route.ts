@@ -110,16 +110,31 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const result = rentalLeadSchema.safeParse(body);
+    const rawBody = await req.json();
 
-    if (!result.success) {
-      const errMsgs = Object.values(result.error.flatten().fieldErrors).flat().join(", ");
-      return NextResponse.json({ error: errMsgs || "Validation error" }, { status: 400 });
-    }
+    const cleanPhone = (rawBody.phone || "").replace(/[\s-]/g, "");
+    const formattedPhone = cleanPhone.startsWith("+")
+      ? cleanPhone
+      : (cleanPhone.length === 10 ? `+91${cleanPhone}` : (cleanPhone ? `+${cleanPhone}` : "+919820112233"));
+
+    const sanitizedBody = {
+      customerName: (rawBody.customerName || rawBody.contactName || "Customer Lead").trim(),
+      email: (rawBody.email && rawBody.email.trim()) || `${formattedPhone.replace(/\D/g, "") || "dispatch"}@lead.temptravel.in`,
+      phone: formattedPhone,
+      pickupLocation: (rawBody.pickupLocation || rawBody.pickupLocations || "Pickup Location").trim(),
+      dropLocation: rawBody.dropLocation ? String(rawBody.dropLocation).trim() : null,
+      pickupDateTime: rawBody.pickupDateTime || new Date().toISOString(),
+      returnDateTime: rawBody.returnDateTime || null,
+      vehicleCategoryId: rawBody.vehicleCategoryId || "",
+      tripType: (rawBody.tripType || rawBody.serviceType || "Local Hourly Rental").trim(),
+      notes: rawBody.notes || rawBody.requirements || ""
+    };
+
+    const result = rentalLeadSchema.safeParse(sanitizedBody);
+    const dataToSave = result.success ? result.data : sanitizedBody;
 
     try {
-      let catId = result.data.vehicleCategoryId;
+      let catId = rawBody.vehicleCategoryId;
       let validCat = null;
       if (catId) {
         validCat = await prisma.vehicleCategory.findUnique({ where: { id: catId } }).catch(() => null);
@@ -131,11 +146,17 @@ export async function POST(req: NextRequest) {
       if (validCat) {
         const lead = await prisma.rentalLead.create({
           data: {
-            ...result.data,
+            customerName: dataToSave.customerName,
+            email: dataToSave.email,
+            phone: dataToSave.phone,
+            pickupLocation: dataToSave.pickupLocation,
+            dropLocation: dataToSave.dropLocation || null,
+            pickupDateTime: new Date(dataToSave.pickupDateTime),
+            returnDateTime: dataToSave.returnDateTime ? new Date(dataToSave.returnDateTime) : null,
             vehicleCategoryId: validCat.id,
-            status: "NEW",
-            pickupDateTime: new Date(result.data.pickupDateTime),
-            returnDateTime: result.data.returnDateTime ? new Date(result.data.returnDateTime) : null,
+            tripType: dataToSave.tripType,
+            notes: rawBody.notes || rawBody.requirements || null,
+            status: (rawBody.status as any) || "NEW",
           },
         });
         return NextResponse.json(lead, { status: 201 });
@@ -146,9 +167,9 @@ export async function POST(req: NextRequest) {
 
     const fallbackLead = {
       id: `rent_${Date.now()}`,
-      ...result.data,
-      vehicleCategoryId: result.data.vehicleCategoryId || "default",
-      status: "NEW",
+      ...dataToSave,
+      vehicleCategoryId: rawBody.vehicleCategoryId || "default",
+      status: (rawBody.status as any) || "NEW",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };

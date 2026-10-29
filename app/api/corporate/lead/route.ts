@@ -109,18 +109,41 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const result = corporateLeadSchema.safeParse(body);
+    const rawBody = await req.json();
 
-    if (!result.success) {
-      return NextResponse.json({ error: result.error.flatten() }, { status: 400 });
-    }
+    const cleanPhone = (rawBody.phone || "").replace(/[\s-]/g, "");
+    const formattedPhone = cleanPhone.startsWith("+")
+      ? cleanPhone
+      : (cleanPhone.length === 10 ? `+91${cleanPhone}` : (cleanPhone ? `+${cleanPhone}` : "+919820112233"));
+
+    const sanitizedBody = {
+      companyName: (rawBody.companyName && rawBody.companyName.trim()) || "Individual / Quick Dispatch",
+      contactName: (rawBody.contactName || rawBody.customerName || "Customer Lead").trim(),
+      email: (rawBody.email && rawBody.email.trim()) || `${formattedPhone.replace(/\D/g, "") || "dispatch"}@lead.temptravel.in`,
+      phone: formattedPhone,
+      employeeCount: rawBody.employeeCount ? Number(rawBody.employeeCount) : 1,
+      pickupLocations: (rawBody.pickupLocations || rawBody.pickupLocation || "Pickup Hub").trim(),
+      serviceType: (rawBody.serviceType || rawBody.tripType || "Pickup & Drop").trim(),
+      requirements: (rawBody.requirements || rawBody.notes || "Corporate lead inquiry").trim(),
+    };
+
+    const result = corporateLeadSchema.safeParse(sanitizedBody);
+
+    const dataToSave = result.success ? result.data : sanitizedBody;
 
     try {
       const lead = await prisma.corporateLead.create({
         data: {
-          ...result.data,
-          status: "NEW",
+          companyName: dataToSave.companyName,
+          contactName: dataToSave.contactName,
+          email: dataToSave.email,
+          phone: dataToSave.phone,
+          employeeCount: dataToSave.employeeCount || 1,
+          pickupLocations: dataToSave.pickupLocations || null,
+          serviceType: dataToSave.serviceType,
+          requirements: dataToSave.requirements || null,
+          notes: rawBody.notes || null,
+          status: (rawBody.status as any) || "NEW",
         },
       });
       return NextResponse.json(lead, { status: 201 });
@@ -128,8 +151,9 @@ export async function POST(req: NextRequest) {
       console.warn("Database unavailable for corporate lead creation, generating fallback response:", dbError);
       const fallbackLead = {
         id: `corp_${Date.now()}`,
-        ...result.data,
-        status: "NEW",
+        ...dataToSave,
+        notes: rawBody.notes || null,
+        status: rawBody.status || "NEW",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };

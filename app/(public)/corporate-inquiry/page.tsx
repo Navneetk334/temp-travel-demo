@@ -112,6 +112,32 @@ export default function CorporateInquiryPage() {
       });
 
       if (res.ok) {
+        const resData = await res.json().catch(() => null);
+        try {
+          const leadRecord = {
+            id: resData?.id || `corp_${Date.now()}`,
+            bookingRef: `TT-${Date.now().toString().slice(-6)}`,
+            customerName: payload.contactName,
+            companyName: payload.companyName,
+            email: payload.email,
+            phone: payload.phone,
+            tripType: payload.serviceType,
+            pickupLocation: payload.pickupLocations || "Pickup Locations Detailed in Scope",
+            dropLocation: "Office Hub / Multiple Drop Points",
+            status: "NEW",
+            notes: payload.requirements,
+            date: new Date().toISOString().slice(0, 10),
+            createdAt: new Date().toISOString()
+          };
+          const existingLeads = localStorage.getItem("user_uploaded_crm_leads");
+          const list = existingLeads ? JSON.parse(existingLeads) : [];
+          list.unshift(leadRecord);
+          localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(list));
+          window.dispatchEvent(new Event("crm_leads_updated"));
+        } catch (e) {
+          console.error("Failed to sync corporate lead locally:", e);
+        }
+
         setSuccess(true);
         setFormData({
           companyName: "",

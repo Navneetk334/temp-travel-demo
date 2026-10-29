@@ -36,6 +36,7 @@ declare global {
 import Portal from "@/components/shared/portal";
 import LocationInput from "@/components/shared/location-input";
 import QuickDispatchAssignmentModal from "@/components/admin/quick-dispatch-assignment-modal";
+import { syncDispatchToLeads, removeDispatchFromLeads, syncExistingDispatchesToLeads } from "@/lib/lead-sync";
 
 const TRIP_TYPES = [
   "Airport Transfer / Pickup & Drop",
@@ -132,6 +133,8 @@ export default function MasterDispatchRadarPage() {
         }
       })
       .catch(e => console.error(e));
+
+    syncExistingDispatchesToLeads();
   }, []);
 
   const handleSaveRadarAssignment = (updatedItem: any) => {
@@ -140,6 +143,7 @@ export default function MasterDispatchRadarPage() {
       localStorage.setItem("master_dispatches", JSON.stringify(next));
       return next;
     });
+    syncDispatchToLeads(updatedItem);
   };
 
   const handleDeleteDispatch = (id: string) => {
@@ -149,6 +153,7 @@ export default function MasterDispatchRadarPage() {
       localStorage.setItem("master_dispatches", JSON.stringify(next));
       return next;
     });
+    removeDispatchFromLeads(id);
     if (selectedDriver?.id === id) {
       setSelectedDriver(null);
     }
@@ -267,6 +272,7 @@ export default function MasterDispatchRadarPage() {
     const updated = [newDuty, ...drivers];
     setDrivers(updated);
     localStorage.setItem("master_dispatches", JSON.stringify(updated));
+    syncDispatchToLeads(newDuty);
     setAssignSuccess(true);
     setTimeout(() => {
       setAssignSuccess(false);

@@ -34,6 +34,7 @@ import Portal from "@/components/shared/portal";
 import LocationInput from "@/components/shared/location-input";
 import { extractLeadVehicleRequirements } from "@/components/admin/lead-dispatch-modal";
 import { useDialog } from "@/app/components/DialogProvider";
+import { syncExistingDispatchesToLeads } from "@/lib/lead-sync";
 
 const SEDAN_CLASSES = ["Compact", "Executive", "Premium Executive", "Luxury"];
 const SUV_CLASSES = ["Subcompact/Urban", "Mid-Premium", "Premium", "Luxury"];
@@ -239,7 +240,16 @@ export default function MasterOmnichannelCRMPage() {
   };
 
   useEffect(() => {
+    syncExistingDispatchesToLeads();
     fetchLeads();
+
+    const handleUpdate = () => fetchLeads();
+    window.addEventListener("crm_leads_updated", handleUpdate);
+    window.addEventListener("storage", handleUpdate);
+    return () => {
+      window.removeEventListener("crm_leads_updated", handleUpdate);
+      window.removeEventListener("storage", handleUpdate);
+    };
   }, []);
 
   const updateLeadStatus = async (id: string, newStatus: string) => {

@@ -16,6 +16,7 @@ import {
   Car
 } from "lucide-react";
 import LeadDispatchModal, { extractLeadVehicleRequirements } from "@/components/admin/lead-dispatch-modal";
+import { syncExistingDispatchesToLeads } from "@/lib/lead-sync";
 
 export type LeadStatus = "NEW" | "CONTACTED" | "QUALIFIED" | "NEGOTIATION" | "WON" | "LOST" | "ARCHIVED";
 
@@ -154,8 +155,13 @@ export default function AdminOutstationLeadsPage() {
   };
 
   useEffect(() => {
+    syncExistingDispatchesToLeads();
     loadLeads();
     setSelectedIds([]);
+
+    const handleUpdate = () => loadLeads(false);
+    window.addEventListener("crm_leads_updated", handleUpdate);
+    return () => window.removeEventListener("crm_leads_updated", handleUpdate);
   }, [search, statusFilter, sortBy, sortOrder, currentPage, pageSize]);
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {

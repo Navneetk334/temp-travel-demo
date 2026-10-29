@@ -77,6 +77,30 @@ export default function ContactForm() {
       }
 
       setSuccess(true);
+      try {
+        const leadRecord = {
+          id: data.id || `contact_${Date.now()}`,
+          bookingRef: `TT-${Date.now().toString().slice(-6)}`,
+          customerName: payload.name,
+          companyName: "",
+          email: payload.email,
+          phone: payload.phone || "",
+          tripType: payload.subject ? `Contact Inquiry (${payload.subject})` : "General Query",
+          pickupLocation: "N/A",
+          dropLocation: "N/A",
+          status: "NEW",
+          notes: payload.message,
+          date: new Date().toISOString().slice(0, 10),
+          createdAt: new Date().toISOString()
+        };
+        const existingLeads = localStorage.getItem("user_uploaded_crm_leads");
+        const list = existingLeads ? JSON.parse(existingLeads) : [];
+        list.unshift(leadRecord);
+        localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(list));
+        window.dispatchEvent(new Event("crm_leads_updated"));
+      } catch (e) {
+        console.error("Failed to sync local contact lead:", e);
+      }
       setFormData({
         name: "",
         email: "",

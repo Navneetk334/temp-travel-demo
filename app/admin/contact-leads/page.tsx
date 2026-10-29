@@ -139,6 +139,10 @@ export default function AdminContactLeadsPage() {
   useEffect(() => {
     loadLeads();
     setSelectedIds([]);
+
+    const handleUpdate = () => loadLeads(false);
+    window.addEventListener("crm_leads_updated", handleUpdate);
+    return () => window.removeEventListener("crm_leads_updated", handleUpdate);
   }, [search, statusFilter, sortBy, sortOrder, currentPage, pageSize]);
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
