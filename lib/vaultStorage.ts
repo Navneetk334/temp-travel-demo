@@ -140,6 +140,7 @@ export interface DocumentViewOptions {
   regNumber?: string;
   dataUrl?: string | null;
   category?: string;
+  storageKey?: string;
 }
 
 /**
@@ -152,7 +153,8 @@ export function openDocumentInNewTab({
   expiryDate = "N/A",
   regNumber = "",
   dataUrl = null,
-  category = "COMPLIANCE & FLEET VAULT"
+  category = "COMPLIANCE & FLEET VAULT",
+  storageKey = ""
 }: DocumentViewOptions) {
   const newWindow = window.open("", "_blank");
   if (!newWindow) {
@@ -166,7 +168,9 @@ export function openDocumentInNewTab({
   const safeExp = (expiryDate || "Active Perpetual").replace(/"/g, "&quot;");
   const safeSubject = (regNumber || "TEMP TRAVEL CAR RENTALS PVT LTD").replace(/"/g, "&quot;");
   const safeCategory = category.replace(/"/g, "&quot;");
+  const safeStorageKey = storageKey.replace(/"/g, "&quot;");
 
+  const logoUrl = typeof window !== "undefined" ? `${window.location.origin}/images/logo.png` : "/images/logo.png";
   const isImage = dataUrl?.startsWith("data:image/") || /\.(png|jpe?g|webp|gif|svg)$/i.test(safeFileName);
   const isPdf = dataUrl?.startsWith("data:application/pdf") || safeFileName.toLowerCase().endsWith(".pdf");
 
@@ -188,9 +192,18 @@ export function openDocumentInNewTab({
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans flex flex-col selection:bg-amber-500 selection:text-slate-950">
   <!-- Top Navigation Bar -->
   <header class="border-b border-amber-500/20 bg-slate-900/95 backdrop-blur px-6 py-4 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-50 no-print">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-amber-500/20">
-        TT
+    <div class="flex items-center gap-4">
+      <!-- Official Logo -->
+      <div class="h-11 px-2.5 py-1 rounded-xl bg-slate-900 border border-white/10 flex items-center justify-center shadow-lg">
+        <img
+          src="${logoUrl}"
+          alt="Temp Travel Car Rentals Pvt Ltd"
+          class="h-9 w-auto object-contain max-w-[170px]"
+          onerror="this.style.display='none'; document.getElementById('tt-fallback').style.display='flex';"
+        />
+        <div id="tt-fallback" style="display:none" class="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 font-black items-center justify-center text-sm">
+          TT
+        </div>
       </div>
       <div>
         <h1 class="text-xs sm:text-sm font-black tracking-wide text-slate-50 uppercase">TEMP TRAVEL CAR RENTALS PVT LTD</h1>
@@ -198,17 +211,40 @@ export function openDocumentInNewTab({
       </div>
     </div>
     
-    <div class="flex items-center gap-3">
-      <button onclick="window.print()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl border border-white/10 transition-all flex items-center gap-2 cursor-pointer">
-        <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-        Print / Save PDF
+    <div class="flex flex-wrap items-center gap-3">
+      <!-- View Mode Buttons -->
+      <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-white/10">
+        <button
+          id="btn-original"
+          onclick="switchView('original')"
+          class="px-3.5 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-1.5 bg-amber-500 text-slate-950 shadow-md cursor-pointer"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          <span>Original Document</span>
+        </button>
+        <button
+          id="btn-cert"
+          onclick="switchView('cert')"
+          class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 text-slate-400 hover:text-white cursor-pointer"
+        >
+          <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+          <span>Digital Certificate</span>
+        </button>
+      </div>
+
+      <button onclick="window.print()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl border border-white/10 transition-all flex items-center gap-2 cursor-pointer">
+        <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+        <span>Print</span>
       </button>
-      ${dataUrl ? `
-      <a href="${dataUrl}" download="${safeFileName}" class="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 text-xs font-black rounded-xl hover:brightness-110 transition-all flex items-center gap-2 shadow-lg shadow-amber-500/20">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-        Download File
-      </a>
-      ` : ''}
+
+      <span id="download-btn-slot">
+        ${dataUrl ? `
+        <a id="download-link" href="${dataUrl}" download="${safeFileName}" class="px-3.5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 text-xs font-black rounded-xl hover:brightness-110 transition-all flex items-center gap-2 shadow-lg shadow-amber-500/20">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+          <span>Download File</span>
+        </a>
+        ` : ''}
+      </span>
     </div>
   </header>
 
@@ -252,58 +288,222 @@ export function openDocumentInNewTab({
       </div>
     </div>
 
-    <!-- Viewer Window Content -->
-    <div class="bg-surface border border-white/10 rounded-2xl p-4 sm:p-6 min-h-[500px] flex items-center justify-center shadow-2xl print-box">
-      ${dataUrl && isImage ? `
-        <div class="space-y-4 text-center w-full">
-          <div class="overflow-auto max-h-[750px] p-2 bg-slate-950/50 rounded-xl border border-white/5 flex items-center justify-center">
-            <img src="${dataUrl}" alt="${safeTitle}" class="max-w-full max-h-[700px] object-contain rounded-lg shadow-xl" />
+    <!-- VIEW 1: Original Uploaded Document Content -->
+    <div id="view-original" class="bg-surface border border-white/10 rounded-2xl p-4 sm:p-6 min-h-[500px] shadow-2xl print-box">
+      <div id="original-render-area">
+        ${dataUrl && isImage ? `
+          <div class="space-y-4 text-center w-full">
+            <div class="flex items-center justify-between border-b border-white/5 pb-3">
+              <span class="text-xs font-mono text-slate-400">Original Document Preview: <strong class="text-amber-400">${safeFileName}</strong></span>
+              <button onclick="switchView('cert')" class="text-xs font-bold text-amber-400 hover:underline flex items-center gap-1 cursor-pointer">
+                <span>View Digital Certificate</span> →
+              </button>
+            </div>
+            <div class="overflow-auto max-h-[750px] p-2 bg-slate-950/50 rounded-xl border border-white/5 flex items-center justify-center">
+              <img src="${dataUrl}" alt="${safeTitle}" class="max-w-full max-h-[700px] object-contain rounded-lg shadow-xl" />
+            </div>
           </div>
-          <p class="text-[11px] text-slate-400 font-mono">High-resolution document preview rendered from Temp Travel Secure Vault.</p>
-        </div>
-      ` : dataUrl && isPdf ? `
-        <div class="w-full h-full space-y-4">
-          <iframe src="${dataUrl}" class="w-full h-[750px] rounded-xl border border-white/10 bg-white" title="${safeTitle}"></iframe>
-          <p class="text-[11px] text-slate-400 font-mono text-center">Interactive PDF document preview loaded from Temp Travel Secure Vault.</p>
-        </div>
-      ` : `
-        <!-- Official Verification Archival Certificate View -->
-        <div class="max-w-md w-full text-center space-y-5 py-8">
-          <div class="w-20 h-20 rounded-3xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto shadow-inner">
-            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        ` : dataUrl && isPdf ? `
+          <div class="w-full h-full space-y-4">
+            <div class="flex items-center justify-between border-b border-white/5 pb-3">
+              <span class="text-xs font-mono text-slate-400">Original PDF Document: <strong class="text-amber-400">${safeFileName}</strong></span>
+              <button onclick="switchView('cert')" class="text-xs font-bold text-amber-400 hover:underline flex items-center gap-1 cursor-pointer">
+                <span>View Digital Certificate</span> →
+              </button>
+            </div>
+            <iframe src="${dataUrl}" class="w-full h-[750px] rounded-xl border border-white/10 bg-white" title="${safeTitle}"></iframe>
           </div>
-          
-          <div>
-            <h3 class="text-xl font-black text-slate-50">${safeTitle}</h3>
-            <p class="text-xs text-slate-400 mt-1">Archived as <span class="font-mono text-amber-300 font-bold">${safeFileName}</span></p>
-          </div>
+        ` : `
+          <!-- When raw binary file hasn't been uploaded yet or was loaded by name -->
+          <div class="text-center py-10 space-y-5 max-w-lg mx-auto">
+            <div class="w-20 h-20 rounded-3xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto shadow-inner">
+              <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            </div>
 
-          <div class="p-4 rounded-xl bg-slate-950/80 border border-white/5 text-xs font-mono text-left space-y-2 text-slate-300">
-            <div class="flex justify-between border-b border-white/5 pb-1.5">
-              <span class="text-slate-500">Document Type:</span>
-              <span class="font-bold text-amber-400">${safeCategory}</span>
+            <div>
+              <h3 class="text-xl font-black text-slate-50">Original File: ${safeFileName}</h3>
+              <p class="text-xs text-slate-400 mt-1">
+                Official document registered under Ref <strong class="text-amber-400 font-mono">${safeRef}</strong>.
+              </p>
             </div>
-            <div class="flex justify-between border-b border-white/5 pb-1.5">
-              <span class="text-slate-500">Reference / Policy:</span>
-              <span class="font-bold text-slate-100">${safeRef}</span>
+
+            <div class="p-4 bg-slate-950/80 rounded-2xl border border-white/5 text-xs text-left font-mono space-y-2 text-slate-300">
+              <div class="flex justify-between border-b border-white/5 pb-1">
+                <span class="text-slate-500">Document Name:</span>
+                <span class="font-bold text-amber-300">${safeFileName}</span>
+              </div>
+              <div class="flex justify-between border-b border-white/5 pb-1">
+                <span class="text-slate-500">Vehicle / Reg:</span>
+                <span class="text-slate-200">${safeSubject}</span>
+              </div>
+              <div class="flex justify-between border-b border-white/5 pb-1">
+                <span class="text-slate-500">Reference:</span>
+                <span class="text-slate-200">${safeRef}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">Expiry Date:</span>
+                <span class="text-emerald-400">${safeExp}</span>
+              </div>
             </div>
-            <div class="flex justify-between border-b border-white/5 pb-1.5">
-              <span class="text-slate-500">Validity Expiry:</span>
-              <span class="font-bold text-emerald-400">${safeExp}</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-slate-500">Vault Encryption:</span>
-              <span class="font-bold text-emerald-400">AES-256 Verified</span>
+
+            <div class="pt-3 space-y-3">
+              <label class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-black rounded-xl uppercase tracking-wider cursor-pointer shadow-lg shadow-amber-500/20 transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <span>Attach / Select File to Preview</span>
+                <input type="file" accept=".pdf,image/*" class="hidden" onchange="handleDirectUpload(this)" />
+              </label>
+
+              <div>
+                <button onclick="switchView('cert')" class="text-xs text-slate-400 hover:text-amber-400 underline cursor-pointer">
+                  Or View Official Digital Verification Certificate →
+                </button>
+              </div>
             </div>
           </div>
+        `}
+      </div>
+    </div>
 
-          <p class="text-[11px] text-slate-500 leading-relaxed">
-            This digital certificate confirms that the compliance document is formally registered in the Master Vault of TEMP TRAVEL CAR RENTALS PVT LTD.
-          </p>
+    <!-- VIEW 2: Official Verification Archival Certificate -->
+    <div id="view-cert" style="display:none;" class="bg-surface border border-white/10 rounded-2xl p-6 sm:p-10 shadow-2xl print-box">
+      <div class="max-w-lg w-full mx-auto text-center space-y-6 py-4">
+        <div class="w-20 h-20 rounded-3xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto shadow-inner">
+          <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
         </div>
-      `}
+        
+        <div>
+          <div class="text-[10px] font-mono uppercase tracking-widest text-emerald-400 font-bold">Official Document Certificate</div>
+          <h3 class="text-2xl font-black text-slate-50 mt-1">${safeTitle}</h3>
+          <p class="text-xs text-slate-400 mt-1">Archived as <span class="font-mono text-amber-300 font-bold">${safeFileName}</span></p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-950/80 border border-white/5 text-xs font-mono text-left space-y-2.5 text-slate-300">
+          <div class="flex justify-between border-b border-white/5 pb-2">
+            <span class="text-slate-500">Document Category:</span>
+            <span class="font-bold text-amber-400">${safeCategory}</span>
+          </div>
+          <div class="flex justify-between border-b border-white/5 pb-2">
+            <span class="text-slate-500">Reference / Policy:</span>
+            <span class="font-bold text-slate-100">${safeRef}</span>
+          </div>
+          <div class="flex justify-between border-b border-white/5 pb-2">
+            <span class="text-slate-500">Subject / Vehicle:</span>
+            <span class="font-bold text-slate-100">${safeSubject}</span>
+          </div>
+          <div class="flex justify-between border-b border-white/5 pb-2">
+            <span class="text-slate-500">Validity Expiry:</span>
+            <span class="font-bold text-emerald-400">${safeExp}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Vault Encryption:</span>
+            <span class="font-bold text-emerald-400">AES-256 Verified Compliance</span>
+          </div>
+        </div>
+
+        <!-- Prominent Button to switch to Original Document View -->
+        <div class="pt-2">
+          <button
+            onclick="switchView('original')"
+            class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-black rounded-xl uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 mx-auto cursor-pointer transition-all hover:scale-[1.02]"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <span>View Original Uploaded Document</span>
+          </button>
+        </div>
+
+        <p class="text-[11px] text-slate-500 leading-relaxed pt-2">
+          This digital certificate confirms that this compliance document is formally registered and archived in the Master Vault of TEMP TRAVEL CAR RENTALS PVT LTD.
+        </p>
+      </div>
     </div>
   </main>
+
+  <script>
+    const storageKey = "${safeStorageKey}";
+    const docTitle = "${safeTitle}";
+
+    function switchView(view) {
+      const origEl = document.getElementById('view-original');
+      const certEl = document.getElementById('view-cert');
+      const btnOrig = document.getElementById('btn-original');
+      const btnCert = document.getElementById('btn-cert');
+
+      if (view === 'original') {
+        origEl.style.display = 'block';
+        certEl.style.display = 'none';
+        btnOrig.className = 'px-3.5 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-1.5 bg-amber-500 text-slate-950 shadow-md cursor-pointer';
+        btnCert.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 text-slate-400 hover:text-white cursor-pointer';
+      } else {
+        origEl.style.display = 'none';
+        certEl.style.display = 'block';
+        btnCert.className = 'px-3.5 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-1.5 bg-amber-500 text-slate-950 shadow-md cursor-pointer';
+        btnOrig.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 text-slate-400 hover:text-white cursor-pointer';
+      }
+    }
+
+    function handleDirectUpload(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const url = e.target.result;
+        const isImg = file.type.startsWith('image/');
+        const isPdfDoc = file.type === 'application/pdf' || file.name.endsWith('.pdf');
+
+        const renderArea = document.getElementById('original-render-area');
+        if (isImg) {
+          renderArea.innerHTML = \`
+            <div class="space-y-4 text-center w-full">
+              <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                <span class="text-xs font-mono text-slate-400">Attached File: <strong class="text-amber-400">\${file.name}</strong></span>
+                <button onclick="switchView('cert')" class="text-xs font-bold text-amber-400 hover:underline flex items-center gap-1 cursor-pointer">
+                  <span>View Digital Certificate</span> →
+                </button>
+              </div>
+              <div class="overflow-auto max-h-[750px] p-2 bg-slate-950/50 rounded-xl border border-white/5 flex items-center justify-center">
+                <img src="\${url}" alt="\${docTitle}" class="max-w-full max-h-[700px] object-contain rounded-lg shadow-xl" />
+              </div>
+            </div>
+          \`;
+        } else if (isPdfDoc) {
+          renderArea.innerHTML = \`
+            <div class="w-full h-full space-y-4">
+              <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                <span class="text-xs font-mono text-slate-400">Attached PDF: <strong class="text-amber-400">\${file.name}</strong></span>
+                <button onclick="switchView('cert')" class="text-xs font-bold text-amber-400 hover:underline flex items-center gap-1 cursor-pointer">
+                  <span>View Digital Certificate</span> →
+                </button>
+              </div>
+              <iframe src="\${url}" class="w-full h-[750px] rounded-xl border border-white/10 bg-white" title="\${docTitle}"></iframe>
+            </div>
+          \`;
+        }
+
+        // Add download button to slot
+        const slot = document.getElementById('download-btn-slot');
+        slot.innerHTML = \`
+          <a href="\${url}" download="\${file.name}" class="px-3.5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 text-xs font-black rounded-xl hover:brightness-110 transition-all flex items-center gap-2 shadow-lg shadow-amber-500/20">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            <span>Download File</span>
+          </a>
+        \`;
+
+        // Save into IndexedDB if key exists
+        if (storageKey) {
+          try {
+            const req = indexedDB.open('TempTravel_Vault_DB', 1);
+            req.onsuccess = function(ev) {
+              const db = ev.target.result;
+              const tx = db.transaction('vault_files', 'readwrite');
+              tx.objectStore('vault_files').put(url, storageKey);
+            };
+          } catch(err) {}
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  </script>
 </body>
 </html>`);
 

@@ -217,7 +217,8 @@ export default function MasterSettingsVaultPage() {
   };
 
   const handleViewDoc = async (doc: any) => {
-    const dataUrl = await getVaultFile(`doc_company_${doc.id}`);
+    const key = `doc_company_${doc.id}`;
+    const dataUrl = await getVaultFile(key);
     openDocumentInNewTab({
       title: doc.title,
       fileName: doc.fileName || `${doc.title.replace(/\s+/g, "_")}.pdf`,
@@ -225,7 +226,8 @@ export default function MasterSettingsVaultPage() {
       expiryDate: doc.expiryDate,
       regNumber: "TEMP TRAVEL CAR RENTALS PVT LTD",
       dataUrl: dataUrl,
-      category: `COMPANY - ${doc.category}`
+      category: `COMPANY - ${doc.category}`,
+      storageKey: key
     });
   };
 

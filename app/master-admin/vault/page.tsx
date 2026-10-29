@@ -340,7 +340,8 @@ export default function MasterDocumentVaultPage() {
       expiryDate: doc.exp || "Valid",
       regNumber: folder.regNumber || folder.name,
       dataUrl: dataUrl,
-      category: activeRoot === "VEHICLES" ? "COMMERCIAL FLEET VAULT" : `${activeRoot} COMPLIANCE VAULT`
+      category: activeRoot === "VEHICLES" ? "COMMERCIAL FLEET VAULT" : `${activeRoot} COMPLIANCE VAULT`,
+      storageKey: key
     });
   };
 
