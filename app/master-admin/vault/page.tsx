@@ -22,6 +22,24 @@ import {
   X
 } from "lucide-react";
 
+function mapVehicleToFolder(v: any) {
+  const regNumber = v.registrationNumber || v.regNumber || "";
+  const regClean = (regNumber || "VEHICLE").toString().trim().replace(/\s+/g, "_");
+  const modelName = [v.make, v.model].filter(Boolean).join(" ").trim() || regNumber || "Commercial Vehicle";
+  return {
+    name: modelName,
+    regNumber: regNumber || "PENDING-REG",
+    docs: [
+      { title: "Vehicle RC Document", ref: v.rcNumber || `RC-${regNumber || "AUTO"}`, file: v.rcDocName || `rc_${regClean}.pdf` },
+      { title: "Insurance Policy", ref: v.insuranceNumber || "POL-8829102", file: v.insuranceDocName || `insurance_${regClean}.pdf`, exp: v.insuranceExpiry },
+      { title: "Fitness Certificate", ref: "FIT-COMPLIANCE", file: v.fitnessDocName || "fitness_cert.pdf", exp: v.fitnessExpiry },
+      { title: "All India Permit", ref: "AIP-NATIONAL", file: v.allIndiaPermitDocName || "all_india_permit.pdf", exp: v.allIndiaPermitExpiry || v.permitExpiry },
+      { title: "Motor Vehicle Tax Receipt", ref: "MV-TAX", file: v.yearlyPermitDocName || "motor_vehicle_tax.pdf", exp: v.yearlyPermitExpiry },
+      { title: "PUC Pollution Certificate", ref: "PUC-GREEN", file: v.pucDocName || "puc_certificate.pdf", exp: v.pucExpiry }
+    ]
+  };
+}
+
 export default function MasterDocumentVaultPage() {
   const [search, setSearch] = useState("");
   const [activeRoot, setActiveRoot] = useState<"VEHICLES" | "DRIVERS" | "STAFF">("VEHICLES");
@@ -33,30 +51,48 @@ export default function MasterDocumentVaultPage() {
   const [staffFolders, setStaffFolders] = useState<any[]>([]);
 
   useEffect(() => {
-    // 1. Auto-organize Vehicles from Local Storage
+    // 1. Auto-organize Vehicles from Local Storage immediately
+    let initialFolders: any[] = [];
     const savedFleet = localStorage.getItem("user_uploaded_fleet_vehicles") || localStorage.getItem("user_uploaded_fleet");
     if (savedFleet) {
       try {
         const fleet = JSON.parse(savedFleet);
-        const folders = fleet.map((v: any) => ({
-          name: `${v.make} ${v.model}`,
-          regNumber: v.registrationNumber,
-          docs: [
-            { title: "Vehicle RC Document", ref: v.rcNumber || `RC-${v.registrationNumber}`, file: v.rcDocName || `rc_${v.registrationNumber.replace(/\s+/g, "_")}.pdf` },
-            { title: "Insurance Policy", ref: v.insuranceNumber || "POL-8829102", file: v.insuranceDocName || `insurance_${v.registrationNumber.replace(/\s+/g, "_")}.pdf`, exp: v.insuranceExpiry },
-            { title: "Fitness Certificate", ref: "FIT-COMPLIANCE", file: v.fitnessDocName || "fitness_cert.pdf", exp: v.fitnessExpiry },
-            { title: "All India Permit", ref: "AIP-NATIONAL", file: v.allIndiaPermitDocName || "all_india_permit.pdf", exp: v.allIndiaPermitExpiry || v.permitExpiry },
-            { title: "Motor Vehicle Tax Receipt", ref: "MV-TAX", file: v.yearlyPermitDocName || "motor_vehicle_tax.pdf", exp: v.yearlyPermitExpiry },
-            { title: "PUC Pollution Certificate", ref: "PUC-GREEN", file: v.pucDocName || "puc_certificate.pdf", exp: v.pucExpiry }
-          ]
-        }));
-        setVehicleFolders(folders);
+        if (Array.isArray(fleet)) {
+          initialFolders = fleet.map(mapVehicleToFolder);
+          setVehicleFolders(initialFolders);
+        }
       } catch (e) {
-        console.error(e);
+        console.error("Error reading local fleet for vault:", e);
       }
-    } else {
-      setVehicleFolders([]);
     }
+
+    // Also fetch from DB via /api/fleet to ensure all vehicles from all sessions are displayed
+    fetch("/api/fleet")
+      .then(res => res.json())
+      .then(apiFleet => {
+        if (Array.isArray(apiFleet) && apiFleet.length > 0) {
+          setVehicleFolders(prev => {
+            const map = new Map<string, any>();
+            // Add API vehicles first
+            apiFleet.forEach((v: any) => {
+              const folder = mapVehicleToFolder(v);
+              const key = folder.regNumber.toUpperCase().trim();
+              map.set(key, folder);
+            });
+            // Overlay any local folders to preserve pending uploaded filenames
+            prev.forEach((f: any) => {
+              const key = (f.regNumber || "").toUpperCase().trim();
+              if (key && !map.has(key)) {
+                map.set(key, f);
+              }
+            });
+            return Array.from(map.values());
+          });
+        }
+      })
+      .catch(err => {
+        console.warn("Failed to fetch fleet from API for vault:", err);
+      });
 
     // 2. Auto-organize Drivers from Local Storage
     const savedDrivers = localStorage.getItem("user_uploaded_drivers");

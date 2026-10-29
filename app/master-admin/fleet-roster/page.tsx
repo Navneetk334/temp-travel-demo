@@ -95,10 +95,48 @@ export default function MasterFleetRosterPage() {
     setFormData(prev => ({ ...prev, categoryName: cat, vehicleClass: defaultClass }));
   };
 
+  const saveFleetToStorage = (list: any[]) => {
+    try {
+      localStorage.setItem("user_uploaded_fleet_vehicles", JSON.stringify(list));
+      localStorage.setItem("user_uploaded_fleet", JSON.stringify(list));
+    } catch (err) {
+      console.warn("Storage quota warning, saving without heavy images...", err);
+      try {
+        const stripped = list.map(v => ({
+          ...v,
+          imageUrl: v.imageUrl && v.imageUrl.length > 50000 ? "/images/hero-car.png" : v.imageUrl
+        }));
+        localStorage.setItem("user_uploaded_fleet_vehicles", JSON.stringify(stripped));
+        localStorage.setItem("user_uploaded_fleet", JSON.stringify(stripped));
+      } catch (e2) {
+        console.error("Critical localStorage error:", e2);
+      }
+    }
+  };
+
   // Load User Uploaded Fleet Vehicles
   useEffect(() => {
-    setLoading(true);
+    // 1. Immediately load any existing vehicles from localStorage so UI is never blank
+    const saved = localStorage.getItem("user_uploaded_fleet_vehicles") || localStorage.getItem("user_uploaded_fleet");
+    let hasLocal = false;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setVehicles(parsed);
+          setLoading(false);
+          hasLocal = true;
+        }
+      } catch (e) {
+        console.error("Failed to parse local fleet storage:", e);
+      }
+    }
 
+    if (!hasLocal) {
+      setLoading(true);
+    }
+
+    // 2. Fetch from database and seamlessly merge
     const loadFleet = async () => {
       try {
         const res = await fetch("/api/fleet");
@@ -106,12 +144,42 @@ export default function MasterFleetRosterPage() {
           const data = await res.json();
           const apiList = data.vehicles || [];
           if (apiList.length > 0) {
-            setVehicles(apiList);
-            try {
-              localStorage.setItem("user_uploaded_fleet", JSON.stringify(apiList));
-            } catch (e) {
-              console.error("Local storage quota exceeded");
-            }
+            setVehicles(prev => {
+              const localList = hasLocal && saved ? JSON.parse(saved) : prev;
+              const merged = [...apiList];
+
+              localList.forEach((localV: any) => {
+                const idx = merged.findIndex(
+                  m => (m.registrationNumber && m.registrationNumber.toUpperCase() === (localV.registrationNumber || "").toUpperCase()) || m.id === localV.id
+                );
+                if (idx >= 0) {
+                  merged[idx] = {
+                    ...merged[idx],
+                    rcDocName: localV.rcDocName || merged[idx].rcDocName,
+                    rcNumber: localV.rcNumber || merged[idx].rcNumber,
+                    insuranceDocName: localV.insuranceDocName || merged[idx].insuranceDocName,
+                    insuranceNumber: localV.insuranceNumber || merged[idx].insuranceNumber,
+                    insuranceProvider: localV.insuranceProvider || merged[idx].insuranceProvider,
+                    insuranceExpiry: localV.insuranceExpiry || merged[idx].insuranceExpiry,
+                    fitnessDocName: localV.fitnessDocName || merged[idx].fitnessDocName,
+                    fitnessExpiry: localV.fitnessExpiry || merged[idx].fitnessExpiry,
+                    allIndiaPermitDocName: localV.allIndiaPermitDocName || merged[idx].allIndiaPermitDocName,
+                    allIndiaPermitExpiry: localV.allIndiaPermitExpiry || merged[idx].allIndiaPermitExpiry,
+                    yearlyPermitDocName: localV.yearlyPermitDocName || merged[idx].yearlyPermitDocName,
+                    yearlyPermitExpiry: localV.yearlyPermitExpiry || merged[idx].yearlyPermitExpiry,
+                    pucDocName: localV.pucDocName || merged[idx].pucDocName,
+                    pucExpiry: localV.pucExpiry || merged[idx].pucExpiry,
+                    imageName: localV.imageName || merged[idx].imageName,
+                    imageUrl: localV.imageUrl || merged[idx].imageUrl
+                  };
+                } else {
+                  merged.push(localV);
+                }
+              });
+
+              saveFleetToStorage(merged);
+              return merged;
+            });
           }
         }
       } catch (e) {
@@ -293,12 +361,7 @@ export default function MasterFleetRosterPage() {
       }
 
       setVehicles(updatedList);
-      try {
-        localStorage.setItem("user_uploaded_fleet", JSON.stringify(updatedList));
-        localStorage.setItem("user_uploaded_fleet_vehicles", JSON.stringify(updatedList));
-      } catch (storageErr) {
-        console.error("Local storage error:", storageErr);
-      }
+      saveFleetToStorage(updatedList);
 
       setShowModal(false);
       setEditingVehicle(null);
@@ -316,8 +379,7 @@ export default function MasterFleetRosterPage() {
       const updated = vehicles.filter(item => item.id !== v.id);
       setVehicles(updated);
       setSelectedIds(selectedIds.filter(id => id !== v.id));
-      localStorage.setItem("user_uploaded_fleet", JSON.stringify(updated));
-      localStorage.setItem("user_uploaded_fleet_vehicles", JSON.stringify(updated));
+      saveFleetToStorage(updated);
       fetch(`/api/fleet/${v.id}`, { method: "DELETE" }).catch(e => console.error(e));
     }
   };
@@ -925,11 +987,59 @@ export default function MasterFleetRosterPage() {
                       if (file) {
                         const reader = new FileReader();
                         reader.onload = (event) => {
-                          setFormData(prev => ({
-                            ...prev,
-                            imageName: file.name,
-                            imageUrl: event.target?.result as string
-                          }));
+                          const rawDataUrl = event.target?.result as string;
+                          // Use canvas compression to keep image size small (<50KB) and prevent localStorage quota issues
+                          const img = new Image();
+                          img.onload = () => {
+                            try {
+                              const canvas = document.createElement("canvas");
+                              const MAX_WIDTH = 600;
+                              const MAX_HEIGHT = 400;
+                              let width = img.width;
+                              let height = img.height;
+
+                              if (width > height) {
+                                if (width > MAX_WIDTH) {
+                                  height = Math.round((height * MAX_WIDTH) / width);
+                                  width = MAX_WIDTH;
+                                }
+                              } else {
+                                if (height > MAX_HEIGHT) {
+                                  width = Math.round((width * MAX_HEIGHT) / height);
+                                  height = MAX_HEIGHT;
+                                }
+                              }
+
+                              canvas.width = width;
+                              canvas.height = height;
+                              const ctx = canvas.getContext("2d");
+                              if (ctx) {
+                                ctx.drawImage(img, 0, 0, width, height);
+                                const compressedUrl = canvas.toDataURL("image/jpeg", 0.75);
+                                setFormData(prev => ({
+                                  ...prev,
+                                  imageName: file.name,
+                                  imageUrl: compressedUrl
+                                }));
+                                return;
+                              }
+                            } catch (err) {
+                              console.warn("Canvas compression failed, falling back to raw data URL", err);
+                            }
+                            setFormData(prev => ({
+                              ...prev,
+                              imageName: file.name,
+                              imageUrl: rawDataUrl
+                            }));
+                          };
+                          img.onerror = () => {
+                            setFormData(prev => ({
+                              ...prev,
+                              imageName: file.name,
+                              imageUrl: rawDataUrl
+                            }));
+                          };
+                          img.src = rawDataUrl;
                         };
                         reader.readAsDataURL(file);
                       }
