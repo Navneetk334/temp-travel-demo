@@ -33,6 +33,18 @@ declare global {
 }
 
 import Portal from "@/components/shared/portal";
+import LocationInput from "@/components/shared/location-input";
+import QuickDispatchAssignmentModal from "@/components/admin/quick-dispatch-assignment-modal";
+
+const TRIP_TYPES = [
+  "Airport Transfer / Pickup & Drop",
+  "Local Rental (4hr / 40km)",
+  "Local Rental (8hr / 80km)",
+  "Local Rental (12hr / 120km)",
+  "Outstation (One Way)",
+  "Outstation (Round Trip)",
+  "Corporate Employee Transit"
+];
 
 export default function MasterDispatchRadarPage() {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -47,32 +59,87 @@ export default function MasterDispatchRadarPage() {
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [assignSuccess, setAssignSuccess] = useState(false);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [assigningDispatch, setAssigningDispatch] = useState<any | null>(null);
+
+  const [fleetVehicles, setFleetVehicles] = useState<any[]>([]);
+  const [registeredDrivers, setRegisteredDrivers] = useState<any[]>([]);
 
   const [assignForm, setAssignForm] = useState({
-    driverName: "Rajesh Kumar",
-    vehicleModel: "Maruti Suzuki Dzire",
+    driverId: "",
+    vehicleId: "",
     customerName: "",
+    phone: "",
     pickupLocation: "",
     destination: "",
-    tripType: "Airport Transfer"
+    tripType: "Airport Transfer / Pickup & Drop",
+    fare: "2800",
+    advance: "500"
   });
 
   const [drivers, setDrivers] = useState<any[]>([]);
 
-  // Load saved dispatches from localStorage
+  // Load saved dispatches, fleet vehicles, and drivers
   useEffect(() => {
+    // 1. Load active dispatches from localStorage
     const saved = localStorage.getItem("master_dispatches");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          setDrivers(prev => [...parsed, ...prev]);
+          setDrivers(parsed);
         }
       } catch (e) {
         console.error(e);
       }
     }
+
+    // 2. Load fleet vehicles
+    try {
+      const savedFleet = localStorage.getItem("user_uploaded_fleet_vehicles") || localStorage.getItem("user_uploaded_fleet");
+      if (savedFleet) {
+        const parsed = JSON.parse(savedFleet);
+        if (Array.isArray(parsed) && parsed.length > 0) setFleetVehicles(parsed);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    fetch("/api/fleet?minimal=true")
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data) {
+          const list = Array.isArray(data) ? data : (data.vehicles || []);
+          if (list.length > 0) setFleetVehicles(list);
+        }
+      })
+      .catch(e => console.error(e));
+
+    // 3. Load registered drivers
+    try {
+      const savedDrivers = localStorage.getItem("user_uploaded_drivers");
+      if (savedDrivers) {
+        const parsed = JSON.parse(savedDrivers);
+        if (Array.isArray(parsed) && parsed.length > 0) setRegisteredDrivers(parsed);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    fetch("/api/admin/drivers")
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setRegisteredDrivers(data);
+        }
+      })
+      .catch(e => console.error(e));
   }, []);
+
+  const handleSaveRadarAssignment = (updatedItem: any) => {
+    setDrivers((prev) => {
+      const next = prev.map((d) => (d.id === updatedItem.id ? updatedItem : d));
+      localStorage.setItem("master_dispatches", JSON.stringify(next));
+      return next;
+    });
+  };
 
   // Real Google Maps Tile URL (mt0, mt1, mt2, mt3)
   const getGoogleMapsTileUrl = () => {
@@ -153,36 +220,54 @@ export default function MasterDispatchRadarPage() {
     e.preventDefault();
     if (!assignForm.customerName || !assignForm.pickupLocation) return;
 
+    const assignedDrv = registeredDrivers.find(d => d.id === assignForm.driverId);
+    const assignedVeh = fleetVehicles.find(v => v.id === assignForm.vehicleId);
+
+    const hasAssignment = Boolean(assignedDrv && assignedVeh);
+
     const newDuty = {
-      id: `DRV-${Date.now()}`,
-      driverName: assignForm.driverName,
-      phone: "+91-9820112233",
-      vehicleModel: assignForm.vehicleModel,
-      vehicleCategory: "Executive",
-      regNumber: "MH 02 AB 9988",
+      id: `DISP-${Date.now()}`,
+      driverId: assignedDrv?.id || "",
+      driverName: assignedDrv?.name || "Pending Chauffeur",
+      phone: assignForm.phone || assignedDrv?.phone || "+91-9820112233",
+      driverPhone: assignedDrv?.phone || "",
+      vehicleId: assignedVeh?.id || "",
+      vehicleModel: assignedVeh ? `${assignedVeh.make} ${assignedVeh.model}` : "Commercial Fleet",
+      vehicleCategory: assignedVeh?.categoryName || "Sedan",
+      vehicleClass: assignedVeh?.vehicleClass || "Executive",
+      regNumber: assignedVeh?.registrationNumber || "Pending Vehicle",
       currentLocation: assignForm.pickupLocation,
       destination: assignForm.destination || "Destination Hub",
-      status: "ASSIGNED",
+      pickupLocation: assignForm.pickupLocation,
+      dropLocation: assignForm.destination,
+      status: hasAssignment ? "ASSIGNED" : "UNASSIGNED",
       speed: "0 km/h",
       eta: "15 Mins",
       tripType: assignForm.tripType,
       customerName: assignForm.customerName,
+      fare: assignForm.fare || "2800",
+      advance: assignForm.advance || "500",
       lat: 28.5910 + (Math.random() - 0.5) * 0.04,
       lng: 77.0250 + (Math.random() - 0.5) * 0.04
     };
 
-    setDrivers([newDuty, ...drivers]);
+    const updated = [newDuty, ...drivers];
+    setDrivers(updated);
+    localStorage.setItem("master_dispatches", JSON.stringify(updated));
     setAssignSuccess(true);
     setTimeout(() => {
       setAssignSuccess(false);
       setShowAssignModal(false);
       setAssignForm({
-        driverName: "Rajesh Kumar",
-        vehicleModel: "Maruti Suzuki Dzire",
+        driverId: "",
+        vehicleId: "",
         customerName: "",
+        phone: "",
         pickupLocation: "",
         destination: "",
-        tripType: "Airport Transfer"
+        tripType: "Airport Transfer / Pickup & Drop",
+        fare: "2800",
+        advance: "500"
       });
     }, 1500);
   };
@@ -377,12 +462,24 @@ export default function MasterDispatchRadarPage() {
               </div>
             </div>
 
-            <div className="pt-3 border-t border-border flex items-center justify-between gap-2">
+            <div className="pt-3 border-t border-border flex items-center gap-2">
               <button
-                onClick={() => setSelectedDriver(drv)}
-                className="w-full bg-background hover:bg-white/5 text-amber-400 border border-amber-500/30 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                type="button"
+                onClick={() => setAssigningDispatch(drv)}
+                className="flex-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                title="Assign or Reassign Vehicle & Chauffeur"
               >
-                <Activity className="w-3.5 h-3.5" /> Inspect GPS Ping
+                <UserCheck className="w-3.5 h-3.5" />
+                <span>Assign Car & Driver</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedDriver(drv)}
+                className="p-2 bg-background hover:bg-white/5 text-slate-300 border border-border rounded-xl text-xs font-bold transition-all flex items-center justify-center cursor-pointer"
+                title="Inspect GPS Telematics Ping"
+              >
+                <Activity className="w-3.5 h-3.5 text-amber-400" />
               </button>
             </div>
           </div>
@@ -393,7 +490,7 @@ export default function MasterDispatchRadarPage() {
       {showAssignModal && (
         <Portal>
           <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-            <div className="bg-surface border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100 max-h-[90vh] overflow-y-auto">
+            <div className="bg-surface border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-xl shadow-2xl space-y-4 relative text-slate-100 max-h-[90vh] overflow-y-auto">
               <button
                 onClick={() => setShowAssignModal(false)}
                 className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
@@ -414,84 +511,104 @@ export default function MasterDispatchRadarPage() {
                 </div>
               ) : (
                 <form onSubmit={handleAssignSubmit} className="space-y-4 text-xs">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-slate-300 font-bold">Select Driver *</label>
+                      <label className="text-slate-300 font-bold uppercase text-[10px]">Select Chauffeur *</label>
                       <select
-                        value={assignForm.driverName}
-                        onChange={(e) => setAssignForm({ ...assignForm, driverName: e.target.value })}
-                        className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
+                        value={assignForm.driverId}
+                        onChange={(e) => setAssignForm({ ...assignForm, driverId: e.target.value })}
+                        className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 cursor-pointer"
                       >
-                        <option value="Rajesh Kumar">Rajesh Kumar (Swift Dzire)</option>
-                        <option value="Suresh Patil">Suresh Patil (Innova Crysta)</option>
-                        <option value="Vikram Singh">Vikram Singh (Honda City)</option>
-                        <option value="Mahesh Yadav">Mahesh Yadav (Fortuner)</option>
+                        <option value="">-- Choose Chauffeur --</option>
+                        {registeredDrivers.map((d) => (
+                          <option key={d.id} value={d.id}>
+                            {d.name} &bull; {d.phone} {d.licenseNumber ? `(${d.licenseNumber})` : ""}
+                          </option>
+                        ))}
                       </select>
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-slate-300 font-bold">Trip Type</label>
+                      <label className="text-slate-300 font-bold uppercase text-[10px]">Select Vehicle *</label>
+                      <select
+                        value={assignForm.vehicleId}
+                        onChange={(e) => setAssignForm({ ...assignForm, vehicleId: e.target.value })}
+                        className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 cursor-pointer"
+                      >
+                        <option value="">-- Choose Vehicle --</option>
+                        {fleetVehicles.map((v) => (
+                          <option key={v.id} value={v.id}>
+                            {v.make} {v.model} ({v.registrationNumber}) &bull; {v.categoryName || v.category?.name || "Sedan"}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-slate-300 font-bold uppercase text-[10px]">Trip Type *</label>
                       <select
                         value={assignForm.tripType}
                         onChange={(e) => setAssignForm({ ...assignForm, tripType: e.target.value })}
-                        className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
+                        className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-bold text-amber-400 cursor-pointer"
                       >
-                        <option value="Airport Transfer">Airport Transfer</option>
-                        <option value="Local Rental">Local Rental (8hr / 80km)</option>
-                        <option value="Outstation Trip">Outstation Trip</option>
-                        <option value="Corporate Transit">Corporate Transit</option>
+                        {TRIP_TYPES.map((t) => (
+                          <option key={t} value={t}>
+                            {t}
+                          </option>
+                        ))}
                       </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-slate-300 font-bold uppercase text-[10px]">Passenger Name *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Vikram Malhotra"
+                        value={assignForm.customerName}
+                        onChange={(e) => setAssignForm({ ...assignForm, customerName: e.target.value })}
+                        className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
+                      />
                     </div>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Passenger Name *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Vikram Malhotra"
-                      value={assignForm.customerName}
-                      onChange={(e) => setAssignForm({ ...assignForm, customerName: e.target.value })}
-                      className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
-                    />
-                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-slate-300 font-bold uppercase text-[10px]">Pickup Location *</label>
+                      <LocationInput
+                        required
+                        placeholder="Search pickup hub or address..."
+                        value={assignForm.pickupLocation}
+                        onChange={(val) => setAssignForm({ ...assignForm, pickupLocation: val })}
+                      />
+                    </div>
 
-                  <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Pickup Location *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Chhatrapati Shivaji Maharaj Intl Airport (T2)"
-                      value={assignForm.pickupLocation}
-                      onChange={(e) => setAssignForm({ ...assignForm, pickupLocation: e.target.value })}
-                      className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-slate-300 font-bold">Destination Drop Location</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. BKC G-Block, Bandra East, Mumbai"
-                      value={assignForm.destination}
-                      onChange={(e) => setAssignForm({ ...assignForm, destination: e.target.value })}
-                      className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400"
-                    />
+                    <div className="space-y-1">
+                      <label className="text-slate-300 font-bold uppercase text-[10px]">Destination Drop Location</label>
+                      <LocationInput
+                        placeholder="Search drop destination..."
+                        value={assignForm.destination}
+                        onChange={(val) => setAssignForm({ ...assignForm, destination: val })}
+                      />
+                    </div>
                   </div>
 
                   <div className="pt-3 border-t border-border flex justify-end gap-3">
                     <button
                       type="button"
                       onClick={() => setShowAssignModal(false)}
-                      className="px-5 py-2.5 bg-background text-slate-400 hover:text-white rounded-xl text-xs font-bold"
+                      className="px-5 py-2.5 bg-background text-slate-400 hover:text-white rounded-xl text-xs font-bold cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer"
+                      className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer flex items-center gap-1.5"
                     >
-                      Dispatch Duty Now
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Dispatch Duty Now</span>
                     </button>
                   </div>
                 </form>
@@ -500,6 +617,16 @@ export default function MasterDispatchRadarPage() {
           </div>
         </Portal>
       )}
+
+      {/* Quick Dispatch Assignment & Reallocation Modal */}
+      <QuickDispatchAssignmentModal
+        isOpen={!!assigningDispatch}
+        onClose={() => setAssigningDispatch(null)}
+        dispatchItem={assigningDispatch}
+        fleetVehicles={fleetVehicles}
+        drivers={registeredDrivers}
+        onSave={handleSaveRadarAssignment}
+      />
 
       {/* Driver Telematics Drawer */}
       {selectedDriver && (

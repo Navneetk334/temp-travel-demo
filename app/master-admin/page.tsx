@@ -20,13 +20,29 @@ import {
   Layers,
   CreditCard,
   X,
+  Phone,
   PhoneCall,
   Plus,
   MapPin,
-  Search
+  Search,
+  UserCheck,
+  Navigation,
+  FileText
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 import LocationInput from "@/components/shared/location-input";
+import QuickDispatchAssignmentModal from "@/components/admin/quick-dispatch-assignment-modal";
+
+// Trip Types matching the website's booking engine
+const TRIP_TYPES = [
+  "Airport Transfer / Pickup & Drop",
+  "Local Rental (4hr / 40km)",
+  "Local Rental (8hr / 80km)",
+  "Local Rental (12hr / 120km)",
+  "Outstation (One Way)",
+  "Outstation (Round Trip)",
+  "Corporate Employee Transit"
+];
 
 // Category to Class Mapping Hierarchy matching PRD & Fleet Specs
 const CLASS_OPTIONS: Record<string, string[]> = {
@@ -102,15 +118,23 @@ export default function MasterAdminDashboard() {
   const [showDispatchModal, setShowDispatchModal] = useState(false);
   const [dispatchSuccess, setDispatchSuccess] = useState(false);
   const [fleetList, setFleetList] = useState<any[]>([]);
+  const [driversList, setDriversList] = useState<any[]>([]);
+  const [dispatches, setDispatches] = useState<any[]>([]);
+  const [assigningDispatch, setAssigningDispatch] = useState<any | null>(null);
 
   const [dispatchForm, setDispatchForm] = useState({
     customerName: "",
     phone: "",
+    tripType: "Airport Transfer / Pickup & Drop",
     vehicleCategory: "Sedan",
     vehicleClass: "Executive",
     vehicleModel: "Maruti Suzuki Ciaz",
     pickupLocation: "",
     dropLocation: "",
+    assignedVehicleId: "",
+    assignedDriverId: "",
+    fare: "2800",
+    advance: "500"
   });
 
   const [stats, setStats] = useState({
@@ -138,10 +162,11 @@ export default function MasterAdminDashboard() {
         console.error(e);
       }
 
-      const [rentalRes, corpRes, fleetRes] = await Promise.allSettled([
+      const [rentalRes, corpRes, fleetRes, drvRes] = await Promise.allSettled([
         fetch("/api/rental/lead"),
         fetch("/api/corporate/lead"),
-        fetch("/api/fleet?minimal=true")
+        fetch("/api/fleet?minimal=true"),
+        fetch("/api/admin/drivers")
       ]);
 
       let apiLeadsCount = 0;
@@ -171,6 +196,13 @@ export default function MasterAdminDashboard() {
           setFleetList(list);
         }
       }
+
+      if (drvRes.status === "fulfilled" && drvRes.value.ok) {
+        const drvData = await drvRes.value.json();
+        if (Array.isArray(drvData) && drvData.length > 0) {
+          setDriversList(drvData);
+        }
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -186,6 +218,34 @@ export default function MasterAdminDashboard() {
         const parsed = JSON.parse(savedFleet);
         if (Array.isArray(parsed) && parsed.length > 0) {
           setFleetList(parsed);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    // 2. Initial local drivers loading
+    try {
+      const savedDrivers = localStorage.getItem("user_uploaded_drivers");
+      if (savedDrivers) {
+        const parsed = JSON.parse(savedDrivers);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setDriversList(parsed);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    // 3. Initial dispatches loading
+    try {
+      const savedDispatches = localStorage.getItem("master_dispatches");
+      if (savedDispatches) {
+        const parsed = JSON.parse(savedDispatches);
+        if (Array.isArray(parsed)) {
+          setDispatches(parsed);
+          const activeCount = parsed.filter((d: any) => d.status === "IN_TRANSIT" || d.status === "ASSIGNED").length;
+          setStats(prev => ({ ...prev, activeRides: activeCount }));
         }
       }
     } catch (e) {
@@ -257,14 +317,49 @@ export default function MasterAdminDashboard() {
       return;
     }
 
+    const assignedVeh = fleetList.find(
+      (v) => v.id === dispatchForm.assignedVehicleId || v.registrationNumber === dispatchForm.assignedVehicleId
+    );
+    const assignedDrv = driversList.find(
+      (d) => d.id === dispatchForm.assignedDriverId || d.phone === dispatchForm.assignedDriverId
+    );
+
+    const hasFullAssignment = Boolean(assignedVeh && assignedDrv);
+    const dispatchStatus = hasFullAssignment ? "ASSIGNED" : "UNASSIGNED";
+
+    const newDispatchItem = {
+      id: `DISP-${Date.now()}`,
+      tripType: dispatchForm.tripType,
+      customerName: dispatchForm.customerName,
+      phone: dispatchForm.phone,
+      pickupLocation: dispatchForm.pickupLocation,
+      dropLocation: dispatchForm.dropLocation,
+      vehicleCategory: dispatchForm.vehicleCategory,
+      vehicleClass: dispatchForm.vehicleClass,
+      vehicleModel: assignedVeh ? `${assignedVeh.make} ${assignedVeh.model}` : dispatchForm.vehicleModel,
+      vehicleId: assignedVeh?.id || "",
+      regNumber: assignedVeh?.registrationNumber || "Pending Vehicle Allocation",
+      driverId: assignedDrv?.id || "",
+      driverName: assignedDrv?.name || "Pending Chauffeur Allocation",
+      driverPhone: assignedDrv?.phone || "",
+      status: dispatchStatus,
+      fare: dispatchForm.fare || "2800",
+      advance: dispatchForm.advance || "500",
+      speed: "0 km/h",
+      eta: "15 Mins to Pickup",
+      currentLocation: dispatchForm.pickupLocation,
+      destination: dispatchForm.dropLocation,
+      createdAt: new Date().toISOString()
+    };
+
     const payload = {
       customerName: dispatchForm.customerName,
       phone: dispatchForm.phone,
-      tripType: `Quick Dispatch - ${dispatchForm.vehicleCategory} (${dispatchForm.vehicleClass})`,
+      tripType: `${dispatchForm.tripType} - ${dispatchForm.vehicleCategory} (${dispatchForm.vehicleClass})`,
       pickupLocation: dispatchForm.pickupLocation,
       dropLocation: dispatchForm.dropLocation,
-      requirements: `Category: ${dispatchForm.vehicleCategory}, Class: ${dispatchForm.vehicleClass}, Model: ${dispatchForm.vehicleModel}. Pickup: ${dispatchForm.pickupLocation}, Drop: ${dispatchForm.dropLocation}.`,
-      notes: `Dispatched from Master HQ: Category=${dispatchForm.vehicleCategory}, Class=${dispatchForm.vehicleClass}, Model=${dispatchForm.vehicleModel}, Drop=${dispatchForm.dropLocation}`,
+      requirements: `Trip: ${dispatchForm.tripType}. Category: ${dispatchForm.vehicleCategory}, Class: ${dispatchForm.vehicleClass}, Model: ${dispatchForm.vehicleModel}. Pickup: ${dispatchForm.pickupLocation}, Drop: ${dispatchForm.dropLocation}.${assignedVeh ? ` Assigned Vehicle: ${assignedVeh.registrationNumber}.` : ""}${assignedDrv ? ` Assigned Chauffeur: ${assignedDrv.name} (${assignedDrv.phone}).` : ""}`,
+      notes: `Dispatched from Master HQ: Trip=${dispatchForm.tripType}, Category=${dispatchForm.vehicleCategory}, Class=${dispatchForm.vehicleClass}, Model=${dispatchForm.vehicleModel}`,
       status: "NEW",
     };
 
@@ -276,27 +371,11 @@ export default function MasterAdminDashboard() {
         body: JSON.stringify(payload),
       });
 
-      // Also persist dispatch entry locally for immediate view
+      // Persist dispatch entry locally for live telematics
       const existing = JSON.parse(localStorage.getItem("master_dispatches") || "[]");
-      existing.unshift({
-        id: `DISP-${Date.now()}`,
-        driverName: "Assigned Chauffeur",
-        phone: dispatchForm.phone,
-        vehicleModel: dispatchForm.vehicleModel,
-        vehicleCategory: dispatchForm.vehicleCategory,
-        vehicleClass: dispatchForm.vehicleClass,
-        regNumber: "COMMERCIAL-FLEET",
-        currentLocation: dispatchForm.pickupLocation,
-        destination: dispatchForm.dropLocation,
-        status: "ASSIGNED",
-        speed: "0 km/h",
-        eta: "10 Mins to Pickup",
-        tripType: `${dispatchForm.vehicleCategory} • ${dispatchForm.vehicleClass}`,
-        customerName: dispatchForm.customerName,
-        pickupLocation: dispatchForm.pickupLocation,
-        dropLocation: dispatchForm.dropLocation
-      });
-      localStorage.setItem("master_dispatches", JSON.stringify(existing));
+      const updatedList = [newDispatchItem, ...existing];
+      setDispatches(updatedList);
+      localStorage.setItem("master_dispatches", JSON.stringify(updatedList));
     } catch (err) {
       console.error(err);
     }
@@ -306,7 +385,7 @@ export default function MasterAdminDashboard() {
       {
         id: String(Date.now()),
         time: "Just now",
-        text: `Dispatched ${dispatchForm.vehicleModel} (${dispatchForm.vehicleCategory} - ${dispatchForm.vehicleClass}) for passenger ${dispatchForm.customerName} from ${dispatchForm.pickupLocation} to ${dispatchForm.dropLocation}.`,
+        text: `Dispatched [${dispatchForm.tripType}] ${dispatchForm.vehicleModel} for passenger ${dispatchForm.customerName} (${assignedVeh ? assignedVeh.registrationNumber : 'Awaiting Car'} / ${assignedDrv ? assignedDrv.name : 'Awaiting Driver'}).`,
         status: "DISPATCHED"
       },
       ...prev
@@ -318,14 +397,48 @@ export default function MasterAdminDashboard() {
       setDispatchForm({
         customerName: "",
         phone: "",
+        tripType: "Airport Transfer / Pickup & Drop",
         vehicleCategory: "Sedan",
         vehicleClass: "Executive",
         vehicleModel: "Maruti Suzuki Ciaz",
         pickupLocation: "",
         dropLocation: "",
+        assignedVehicleId: "",
+        assignedDriverId: "",
+        fare: "2800",
+        advance: "500"
       });
       setStats(prev => ({ ...prev, activeRides: prev.activeRides + 1, totalLeads: prev.totalLeads + 1 }));
     }, 1500);
+  };
+
+  const handleSaveAssignment = (updatedItem: any) => {
+    setDispatches(prev => {
+      const next = prev.map(d => d.id === updatedItem.id ? updatedItem : d);
+      localStorage.setItem("master_dispatches", JSON.stringify(next));
+      const activeCount = next.filter((d: any) => d.status === "IN_TRANSIT" || d.status === "ASSIGNED").length;
+      setStats(s => ({ ...s, activeRides: activeCount }));
+      return next;
+    });
+    setRecentLogs(prev => [
+      {
+        id: String(Date.now()),
+        time: "Just now",
+        text: `Allocated ${updatedItem.regNumber} & Chauffeur ${updatedItem.driverName} to dispatch #${updatedItem.id}.`,
+        status: updatedItem.status
+      },
+      ...prev
+    ]);
+  };
+
+  const handleQuickStatusChange = (id: string, newStatus: string) => {
+    setDispatches(prev => {
+      const next = prev.map(d => d.id === id ? { ...d, status: newStatus } : d);
+      localStorage.setItem("master_dispatches", JSON.stringify(next));
+      const activeCount = next.filter((d: any) => d.status === "IN_TRANSIT" || d.status === "ASSIGNED").length;
+      setStats(s => ({ ...s, activeRides: activeCount }));
+      return next;
+    });
   };
 
   return (
@@ -533,6 +646,163 @@ export default function MasterAdminDashboard() {
         </div>
       </div>
 
+      {/* Live Master Dispatch & Telematics Queue */}
+      <div className="bg-surface/80 backdrop-blur-xl border border-amber-500/30 rounded-2xl p-6 shadow-2xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <Radio className="w-5 h-5 text-amber-400 animate-pulse" />
+              <h2 className="text-lg font-bold text-slate-50">Live Master Dispatch & Telematics Queue</h2>
+              <span className="bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider font-mono">
+                {dispatches.length} Active Bookings
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 mt-1">
+              Real-time chauffeur allocation, live route telematics, and vehicle dispatch assignments.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Link
+              href="/master-admin/dispatch-radar"
+              className="flex items-center gap-1.5 bg-background hover:bg-slate-800 border border-amber-500/30 text-amber-400 px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
+            >
+              <Navigation className="w-3.5 h-3.5" />
+              <span>Full Radar Map</span>
+            </Link>
+            <button
+              onClick={() => setShowDispatchModal(true)}
+              className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md shadow-amber-500/20 cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>New Dispatch</span>
+            </button>
+          </div>
+        </div>
+
+        {dispatches.length === 0 ? (
+          <div className="py-12 text-center space-y-3 bg-background/50 border border-border rounded-xl">
+            <Car className="w-10 h-10 text-slate-500 mx-auto" />
+            <div className="text-sm font-bold text-slate-300">No Active Dispatches in Queue</div>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              Click Quick Dispatch to create a chauffeur booking and assign commercial vehicles from your fleet.
+            </p>
+            <button
+              onClick={() => setShowDispatchModal(true)}
+              className="text-xs text-amber-400 font-bold hover:underline cursor-pointer"
+            >
+              + Create Instant Dispatch
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {dispatches.map((item) => {
+              const isAssigned = item.status === "ASSIGNED" || item.status === "IN_TRANSIT" || item.status === "COMPLETED";
+              const hasChauffeur = item.driverName && !item.driverName.includes("Pending");
+              const hasCar = item.regNumber && !item.regNumber.includes("Pending");
+
+              return (
+                <div
+                  key={item.id}
+                  className="bg-background/90 border border-border hover:border-amber-500/40 rounded-2xl p-4 shadow-xl flex flex-col justify-between space-y-3 transition-all relative overflow-hidden"
+                >
+                  <div className="space-y-2.5">
+                    {/* Header: Status & Trip Type */}
+                    <div className="flex justify-between items-start gap-2">
+                      <span
+                        className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                          item.status === "IN_TRANSIT"
+                            ? "bg-amber-500/10 text-amber-400 border-amber-500/30 animate-pulse"
+                            : item.status === "ASSIGNED"
+                            ? "bg-blue-500/10 text-blue-400 border-blue-500/30"
+                            : item.status === "COMPLETED"
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                            : "bg-rose-500/10 text-rose-400 border-rose-500/30"
+                        }`}
+                      >
+                        {item.status.replace("_", " ")}
+                      </span>
+                      <span className="text-[10px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 font-bold">
+                        {item.tripType || "Quick Dispatch"}
+                      </span>
+                    </div>
+
+                    {/* Passenger & Vehicle Target */}
+                    <div>
+                      <h4 className="font-extrabold text-slate-100 text-sm">{item.customerName}</h4>
+                      <div className="text-[11px] text-slate-400 font-mono flex items-center gap-2 mt-0.5">
+                        <Phone className="w-3 h-3 text-slate-500" />
+                        <span>{item.phone}</span>
+                      </div>
+                      <div className="text-xs text-amber-400/90 font-semibold mt-1">
+                        {item.vehicleCategory || "Sedan"} &bull; {item.vehicleClass || "Executive"} &bull; {item.vehicleModel || "Any"}
+                      </div>
+                    </div>
+
+                    {/* Route Details */}
+                    <div className="bg-surface/80 p-2.5 rounded-xl border border-white/5 space-y-1.5 text-[11px]">
+                      <div className="flex items-start gap-1.5 text-slate-300">
+                        <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+                        <span className="line-clamp-1">{item.pickupLocation}</span>
+                      </div>
+                      {item.dropLocation && (
+                        <div className="flex items-start gap-1.5 text-slate-300">
+                          <Navigation className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                          <span className="line-clamp-1">{item.dropLocation}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Assigned Vehicle & Driver Status */}
+                    <div className="p-2.5 rounded-xl bg-surface/50 border border-white/5 space-y-1 text-[11px]">
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400 flex items-center gap-1">
+                          <Car className="w-3 h-3 text-amber-400" /> Car:
+                        </span>
+                        <strong className={hasCar ? "text-slate-100 font-mono" : "text-amber-400/80 font-mono italic text-[10px]"}>
+                          {item.regNumber || "Pending Allocation"}
+                        </strong>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400 flex items-center gap-1">
+                          <UserCheck className="w-3 h-3 text-emerald-400" /> Chauffeur:
+                        </span>
+                        <strong className={hasChauffeur ? "text-slate-100" : "text-amber-400/80 italic text-[10px]"}>
+                          {item.driverName || "Pending Allocation"}
+                        </strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions Bar */}
+                  <div className="pt-2 border-t border-border flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setAssigningDispatch(item)}
+                      className="flex-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <UserCheck className="w-3.5 h-3.5" />
+                      <span>{hasChauffeur && hasCar ? "Reassign" : "Assign Car & Chauffeur"}</span>
+                    </button>
+
+                    <select
+                      value={item.status}
+                      onChange={(e) => handleQuickStatusChange(item.id, e.target.value)}
+                      className="bg-background border border-border text-[10px] font-bold text-slate-300 rounded-xl px-2 py-2 focus:outline-none focus:border-amber-400 cursor-pointer"
+                    >
+                      <option value="ASSIGNED">Assigned</option>
+                      <option value="IN_TRANSIT">In Transit</option>
+                      <option value="COMPLETED">Completed</option>
+                      <option value="CANCELLED">Cancel</option>
+                    </select>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
       {/* Quick Navigation Modules Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Link
@@ -612,7 +882,8 @@ export default function MasterAdminDashboard() {
               </div>
             ) : (
               <form onSubmit={handleQuickDispatchSubmit} className="space-y-4 text-xs">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Row 1: Passenger Name, Mobile Number, Trip Type */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
                     <label className="text-slate-300 font-bold uppercase text-[10px]">Passenger Name *</label>
                     <input
@@ -639,8 +910,24 @@ export default function MasterAdminDashboard() {
                       className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-semibold font-mono"
                     />
                   </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-slate-300 font-bold uppercase text-[10px]">Trip Type *</label>
+                    <select
+                      value={dispatchForm.tripType}
+                      onChange={(e) => setDispatchForm({ ...dispatchForm, tripType: e.target.value })}
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-bold text-amber-400 cursor-pointer"
+                    >
+                      {TRIP_TYPES.map((t) => (
+                        <option key={t} value={t}>
+                          {t}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
+                {/* Row 2: Category, Class, Model */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
                     <label className="text-slate-300 font-bold uppercase text-[10px]">Vehicle Category *</label>
@@ -685,7 +972,54 @@ export default function MasterAdminDashboard() {
                   </div>
                 </div>
 
-                {/* Pickup Location & Drop Location with Address Search */}
+                {/* Row 3: Vehicle Allocation & Chauffeur Assignment */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-background/60 p-3.5 rounded-2xl border border-border">
+                  <div className="space-y-1.5">
+                    <label className="text-slate-300 font-bold uppercase text-[10px] flex items-center justify-between">
+                      <span className="flex items-center gap-1.5">
+                        <Car className="w-3.5 h-3.5 text-amber-400" />
+                        Assign Commercial Vehicle
+                      </span>
+                      <span className="text-[9px] text-slate-500 font-mono">Optional</span>
+                    </label>
+                    <select
+                      value={dispatchForm.assignedVehicleId}
+                      onChange={(e) => setDispatchForm({ ...dispatchForm, assignedVehicleId: e.target.value })}
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 text-xs focus:outline-none focus:border-amber-400 cursor-pointer"
+                    >
+                      <option value="">-- Assign Later / Auto-Allocate --</option>
+                      {fleetList.map((v) => (
+                        <option key={v.id} value={v.id}>
+                          {v.make} {v.model} ({v.registrationNumber}) &bull; {v.categoryName || v.category?.name || "Sedan"}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-slate-300 font-bold uppercase text-[10px] flex items-center justify-between">
+                      <span className="flex items-center gap-1.5">
+                        <UserCheck className="w-3.5 h-3.5 text-amber-400" />
+                        Assign Chauffeur
+                      </span>
+                      <span className="text-[9px] text-slate-500 font-mono">Optional</span>
+                    </label>
+                    <select
+                      value={dispatchForm.assignedDriverId}
+                      onChange={(e) => setDispatchForm({ ...dispatchForm, assignedDriverId: e.target.value })}
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 text-xs focus:outline-none focus:border-amber-400 cursor-pointer"
+                    >
+                      <option value="">-- Assign Later / Auto-Allocate --</option>
+                      {driversList.map((d) => (
+                        <option key={d.id} value={d.id}>
+                          {d.name} &bull; {d.phone} {d.licenseNumber ? `(${d.licenseNumber})` : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Row 4: Pickup Location & Drop Location with Address Search */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <label className="text-slate-300 font-bold uppercase text-[10px]">
@@ -712,6 +1046,31 @@ export default function MasterAdminDashboard() {
                   </div>
                 </div>
 
+                {/* Row 5: Agreed Fare & Advance */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-slate-300 font-bold uppercase text-[10px]">Agreed Fare (₹)</label>
+                    <input
+                      type="number"
+                      placeholder="e.g. 2800"
+                      value={dispatchForm.fare}
+                      onChange={(e) => setDispatchForm({ ...dispatchForm, fare: e.target.value })}
+                      className="w-full bg-background border border-border rounded-xl px-3.5 py-2 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-mono"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-slate-300 font-bold uppercase text-[10px]">Advance Collected (₹)</label>
+                    <input
+                      type="number"
+                      placeholder="e.g. 500"
+                      value={dispatchForm.advance}
+                      onChange={(e) => setDispatchForm({ ...dispatchForm, advance: e.target.value })}
+                      className="w-full bg-background border border-border rounded-xl px-3.5 py-2 text-slate-100 text-xs focus:outline-none focus:border-amber-400 font-mono"
+                    />
+                  </div>
+                </div>
+
                 <div className="pt-4 flex justify-end gap-3 border-t border-border">
                   <button
                     type="button"
@@ -722,9 +1081,10 @@ export default function MasterAdminDashboard() {
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer hover:from-amber-400 hover:to-amber-500 transition-all"
+                    className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer hover:from-amber-400 hover:to-amber-500 transition-all flex items-center gap-1.5"
                   >
-                    Dispatch Now
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Dispatch Now</span>
                   </button>
                 </div>
               </form>
@@ -733,6 +1093,16 @@ export default function MasterAdminDashboard() {
         </div>
         </Portal>
       )}
+
+      {/* Assignment & Chauffeur Allocation Modal */}
+      <QuickDispatchAssignmentModal
+        isOpen={!!assigningDispatch}
+        onClose={() => setAssigningDispatch(null)}
+        dispatchItem={assigningDispatch}
+        fleetVehicles={fleetList}
+        drivers={driversList}
+        onSave={handleSaveAssignment}
+      />
     </div>
   );
 }
