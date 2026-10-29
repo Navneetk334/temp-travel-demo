@@ -620,7 +620,16 @@ export default function MasterFleetRosterPage() {
                         const newFeaturedState = !v.isFeatured;
                         const updated = vehicles.map(item => item.id === v.id ? { ...item, isFeatured: newFeaturedState } : item);
                         setVehicles(updated);
-                        localStorage.setItem("user_uploaded_fleet", JSON.stringify(updated));
+                        saveFleetToStorage(updated);
+                        try {
+                          fetch(`/api/fleet/${v.id}`, {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ isFeatured: newFeaturedState })
+                          }).catch(err => console.error("Featured toggle sync error:", err));
+                        } catch (err) {
+                          console.error("Featured toggle error:", err);
+                        }
                       }}
                       className={`p-1.5 bg-background border rounded-lg transition-all cursor-pointer ${
                         v.isFeatured

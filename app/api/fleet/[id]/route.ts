@@ -7,31 +7,21 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const vehicle = await prisma.fleetVehicle.findUnique({
-      where: { id },
-      include: { category: true, driver: true }
+    const vehicle = await prisma.fleetVehicle.findFirst({
+      where: {
+        OR: [{ id }, { registrationNumber: id }]
+      },
+      include: {
+        category: true,
+        driver: { select: { id: true, name: true, phone: true } }
+      }
     });
 
     if (!vehicle) {
       return NextResponse.json({ error: "Vehicle not found" }, { status: 404 });
     }
 
-    let meta: any = {};
-    if (vehicle.vehicleType && vehicle.vehicleType.startsWith("{")) {
-      try {
-        meta = JSON.parse(vehicle.vehicleType);
-      } catch (e) {}
-    }
-
-    return NextResponse.json({
-      success: true,
-      vehicle: {
-        ...vehicle,
-        categoryName: vehicle.category?.name || "Sedan",
-        vehicleClass: vehicle.subCategory || "Executive",
-        ...meta
-      }
-    });
+    return NextResponse.json({ success: true, vehicle });
   } catch (error) {
     console.error("GET /api/fleet/[id] error:", error);
     return NextResponse.json({ error: "Failed to fetch vehicle" }, { status: 500 });
@@ -42,128 +32,128 @@ export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  return handleUpdate(req, params);
+}
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  return handleUpdate(req, params);
+}
+
+async function handleUpdate(
+  req: NextRequest,
+  params: Promise<{ id: string }>
+) {
   try {
     const { id } = await params;
     const body = await req.json();
 
-    const {
-      model,
-      make,
-      registrationNumber,
-      capacity,
-      categoryName,
-      vehicleClass,
-      subCategory,
-      perKmRate,
-      baseDailyRate,
-      fuelType,
-      transmission,
-      imageUrl,
-      rcNumber,
-      rcDocName,
-      insuranceProvider,
-      insuranceNumber,
-      insuranceDocName,
-      insuranceExpiry,
-      fitnessExpiry,
-      fitnessDocName,
-      allIndiaPermitExpiry,
-      allIndiaPermitDocName,
-      yearlyPermitExpiry,
-      yearlyPermitDocName,
-      pucExpiry,
-      pucDocName,
-      perHourRate,
-      driverAllowance,
-      nightAllowance,
-      imageName
-    } = body;
-
-    const targetCategorySlug = (categoryName || "Sedan").toLowerCase().includes("suv") ? "suv" : "sedan";
-    const targetCategoryName = targetCategorySlug === "suv" ? "SUV" : "Sedan";
-
-    let targetCategory = await prisma.vehicleCategory.findFirst({
+    // Find existing vehicle first by id or registrationNumber
+    const existing = await prisma.fleetVehicle.findFirst({
       where: {
-        OR: [
-          { slug: targetCategorySlug },
-          { name: { equals: targetCategoryName, mode: "insensitive" } }
-        ]
+        OR: [{ id }, { registrationNumber: id }]
       }
     });
 
-    if (!targetCategory) {
-      targetCategory = await prisma.vehicleCategory.create({
-        data: {
-          name: targetCategoryName,
-          slug: targetCategorySlug,
-          description: `Premium ${targetCategoryName} Fleet`,
-          baseHourlyRate: targetCategorySlug === "suv" ? 200 : 150,
-          baseKmsRate: targetCategorySlug === "suv" ? 18 : 14,
-          extraHrRate: targetCategorySlug === "suv" ? 200 : 150,
-          extraKmRate: targetCategorySlug === "suv" ? 18 : 14,
-          outstationKmRate: targetCategorySlug === "suv" ? 18 : 14
-        }
-      });
+    if (!existing) {
+      return NextResponse.json({ error: "Vehicle not found" }, { status: 404 });
     }
 
-    const cls = vehicleClass || subCategory || "Executive";
+    const updateData: any = {};
 
-    const metadataPayload = {
-      rcNumber: rcNumber || "",
-      rcDocName: rcDocName || "",
-      insuranceProvider: insuranceProvider || "HDFC ERGO General Insurance",
-      insuranceNumber: insuranceNumber || "",
-      insuranceDocName: insuranceDocName || "",
-      insuranceExpiry: insuranceExpiry || "2027-06-30",
-      fitnessExpiry: fitnessExpiry || "2027-12-31",
-      fitnessDocName: fitnessDocName || "",
-      allIndiaPermitExpiry: allIndiaPermitExpiry || "2028-03-15",
-      allIndiaPermitDocName: allIndiaPermitDocName || "",
-      yearlyPermitExpiry: yearlyPermitExpiry || "2027-03-15",
-      yearlyPermitDocName: yearlyPermitDocName || "",
-      pucExpiry: pucExpiry || "2026-11-30",
-      pucDocName: pucDocName || "",
-      perHourRate: Number(perHourRate) || 150,
-      driverAllowance: Number(driverAllowance) || 500,
-      nightAllowance: Number(nightAllowance) || 300,
-      imageName: imageName || ""
-    };
+    if (typeof body.isFeatured === "boolean") {
+      updateData.isFeatured = body.isFeatured;
+    }
+
+    if (body.make !== undefined) updateData.make = body.make;
+    if (body.model !== undefined) updateData.model = body.model;
+    if (body.registrationNumber !== undefined) updateData.registrationNumber = body.registrationNumber.trim().toUpperCase();
+    if (body.capacity !== undefined) updateData.capacity = Number(body.capacity);
+    if (body.fuelType !== undefined) updateData.fuelType = body.fuelType;
+    if (body.transmission !== undefined) updateData.transmission = body.transmission;
+    if (body.status !== undefined) updateData.status = body.status;
+    if (body.imageUrl !== undefined) updateData.imageUrl = body.imageUrl;
+    if (body.perKmRate !== undefined) updateData.perKmRate = Number(body.perKmRate);
+    if (body.baseDailyRate !== undefined) updateData.baseDailyRate = Number(body.baseDailyRate);
+    if (body.extraKmRate !== undefined) updateData.extraKmRate = Number(body.extraKmRate);
+    if (body.extraHrRate !== undefined) updateData.extraHrRate = Number(body.extraHrRate);
+    if (body.subCategory !== undefined || body.vehicleClass !== undefined) {
+      updateData.subCategory = body.vehicleClass || body.subCategory;
+    }
+    if (body.categoryId !== undefined && body.categoryId) {
+      updateData.categoryId = body.categoryId;
+    }
+    if (body.driverId !== undefined) {
+      updateData.driverId = body.driverId || null;
+    }
+
+    // Merge document/metadata in vehicleType if provided
+    if (
+      body.rcNumber ||
+      body.rcDocName ||
+      body.insuranceProvider ||
+      body.insuranceNumber ||
+      body.insuranceDocName ||
+      body.insuranceExpiry ||
+      body.fitnessExpiry ||
+      body.fitnessDocName ||
+      body.allIndiaPermitExpiry ||
+      body.allIndiaPermitDocName ||
+      body.yearlyPermitExpiry ||
+      body.yearlyPermitDocName ||
+      body.pucExpiry ||
+      body.pucDocName ||
+      body.perHourRate !== undefined ||
+      body.driverAllowance !== undefined ||
+      body.nightAllowance !== undefined ||
+      body.imageName
+    ) {
+      let currentMeta: any = {};
+      if (existing.vehicleType && existing.vehicleType.startsWith("{")) {
+        try {
+          currentMeta = JSON.parse(existing.vehicleType);
+        } catch (e) {
+          // ignore
+        }
+      }
+      const updatedMeta = {
+        ...currentMeta,
+        ...(body.rcNumber ? { rcNumber: body.rcNumber } : {}),
+        ...(body.rcDocName ? { rcDocName: body.rcDocName } : {}),
+        ...(body.insuranceProvider ? { insuranceProvider: body.insuranceProvider } : {}),
+        ...(body.insuranceNumber ? { insuranceNumber: body.insuranceNumber } : {}),
+        ...(body.insuranceDocName ? { insuranceDocName: body.insuranceDocName } : {}),
+        ...(body.insuranceExpiry ? { insuranceExpiry: body.insuranceExpiry } : {}),
+        ...(body.fitnessExpiry ? { fitnessExpiry: body.fitnessExpiry } : {}),
+        ...(body.fitnessDocName ? { fitnessDocName: body.fitnessDocName } : {}),
+        ...(body.allIndiaPermitExpiry ? { allIndiaPermitExpiry: body.allIndiaPermitExpiry } : {}),
+        ...(body.allIndiaPermitDocName ? { allIndiaPermitDocName: body.allIndiaPermitDocName } : {}),
+        ...(body.yearlyPermitExpiry ? { yearlyPermitExpiry: body.yearlyPermitExpiry } : {}),
+        ...(body.yearlyPermitDocName ? { yearlyPermitDocName: body.yearlyPermitDocName } : {}),
+        ...(body.pucExpiry ? { pucExpiry: body.pucExpiry } : {}),
+        ...(body.pucDocName ? { pucDocName: body.pucDocName } : {}),
+        ...(body.perHourRate !== undefined ? { perHourRate: Number(body.perHourRate) } : {}),
+        ...(body.driverAllowance !== undefined ? { driverAllowance: Number(body.driverAllowance) } : {}),
+        ...(body.nightAllowance !== undefined ? { nightAllowance: Number(body.nightAllowance) } : {}),
+        ...(body.imageName ? { imageName: body.imageName } : {})
+      };
+      updateData.vehicleType = JSON.stringify(updatedMeta);
+    }
 
     const updated = await prisma.fleetVehicle.update({
-      where: { id },
-      data: {
-        model: model || undefined,
-        make: make || undefined,
-        registrationNumber: registrationNumber ? registrationNumber.trim().toUpperCase() : undefined,
-        capacity: capacity ? Number(capacity) : undefined,
-        subCategory: cls,
-        vehicleType: JSON.stringify(metadataPayload),
-        categoryId: targetCategory.id,
-        fuelType: fuelType || undefined,
-        transmission: transmission || undefined,
-        perKmRate: perKmRate ? Number(perKmRate) : undefined,
-        baseDailyRate: baseDailyRate ? Number(baseDailyRate) : undefined,
-        imageUrl: imageUrl || undefined
+      where: { id: existing.id },
+      data: updateData,
+      include: {
+        category: true,
+        driver: { select: { id: true, name: true, phone: true } }
       }
     });
 
-    return NextResponse.json({
-      success: true,
-      vehicle: {
-        ...body,
-        id: updated.id,
-        make: updated.make,
-        model: updated.model,
-        registrationNumber: updated.registrationNumber,
-        categoryName: targetCategory.name,
-        vehicleClass: cls,
-        subCategory: cls,
-        ...metadataPayload,
-        imageUrl: updated.imageUrl
-      }
-    });
+    return NextResponse.json({ success: true, vehicle: updated });
   } catch (error) {
-    console.error("PUT /api/fleet/[id] error:", error);
+    console.error("PUT/PATCH /api/fleet/[id] error:", error);
     return NextResponse.json({ error: "Failed to update vehicle" }, { status: 500 });
   }
 }
@@ -174,9 +164,20 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    await prisma.fleetVehicle.delete({
-      where: { id }
+    const existing = await prisma.fleetVehicle.findFirst({
+      where: {
+        OR: [{ id }, { registrationNumber: id }]
+      }
     });
+
+    if (!existing) {
+      return NextResponse.json({ error: "Vehicle not found" }, { status: 404 });
+    }
+
+    await prisma.fleetVehicle.delete({
+      where: { id: existing.id }
+    });
+
     return NextResponse.json({ success: true, message: "Vehicle deleted successfully" });
   } catch (error) {
     console.error("DELETE /api/fleet/[id] error:", error);

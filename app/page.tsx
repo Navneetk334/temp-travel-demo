@@ -85,11 +85,15 @@ export default function Homepage() {
 
   useEffect(() => {
     // 1. Immediate local hydration for instant render without flash
-    const saved = localStorage.getItem("user_uploaded_fleet");
+    let localList: any[] = [];
+    const saved = typeof window !== "undefined"
+      ? (localStorage.getItem("user_uploaded_fleet") || localStorage.getItem("user_uploaded_fleet_vehicles"))
+      : null;
     if (saved) {
       try {
-        const localList = JSON.parse(saved);
-        if (Array.isArray(localList) && localList.length > 0) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          localList = parsed;
           let displayItems = localList.filter((v: any) => v.isFeatured);
           if (displayItems.length < 3) {
             const others = localList.filter((v: any) => !v.isFeatured);
@@ -108,7 +112,7 @@ export default function Homepage() {
           setVehiclesLoading(false);
         }
       } catch (e) {
-        console.error(e);
+        console.error("Local fleet parse error on homepage:", e);
       }
     }
 
@@ -121,16 +125,55 @@ export default function Homepage() {
       })
       .catch((err) => console.error(err));
 
-    // 2. Sync with live API
+    // 2. Sync with live API while preserving local featured state and deduplicating models
     fetch("/api/fleet?limit=100")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data) {
-          const vehicles = Array.isArray(data) ? data : (data.vehicles || []);
-          if (vehicles.length > 0) {
-            let displayItems = vehicles.filter((v: any) => v.isFeatured);
+          const apiVehicles = Array.isArray(data) ? data : (data.vehicles || []);
+          if (apiVehicles.length > 0) {
+            // Merge API list with localList
+            const merged = [...apiVehicles];
+            localList.forEach((localV: any) => {
+              const idx = merged.findIndex(
+                (m: any) =>
+                  (m.registrationNumber && localV.registrationNumber && m.registrationNumber.toUpperCase() === localV.registrationNumber.toUpperCase()) ||
+                  m.id === localV.id
+              );
+              if (idx >= 0) {
+                // If local storage specifically marked it featured, preserve it
+                if (localV.isFeatured) {
+                  merged[idx].isFeatured = true;
+                }
+              } else {
+                merged.push(localV);
+              }
+            });
+
+            // Model deduplication: 1 representative card per car model
+            const uniqueModels = new Map<string, any>();
+            merged.forEach((v: any) => {
+              const key = `${(v.make || "").trim()} ${(v.model || "").trim()}`.toLowerCase().replace(/\s+/g, " ");
+              if (!uniqueModels.has(key)) {
+                uniqueModels.set(key, v);
+              } else {
+                const existing = uniqueModels.get(key);
+                if (!existing.isFeatured && v.isFeatured) {
+                  uniqueModels.set(key, v);
+                } else if (
+                  (!existing.imageUrl || existing.imageUrl === "/images/hero-car.png") &&
+                  v.imageUrl &&
+                  v.imageUrl !== "/images/hero-car.png"
+                ) {
+                  uniqueModels.set(key, v);
+                }
+              }
+            });
+
+            const deduplicated = Array.from(uniqueModels.values());
+            let displayItems = deduplicated.filter((v: any) => v.isFeatured);
             if (displayItems.length < 3) {
-              const others = vehicles.filter((v: any) => !v.isFeatured);
+              const others = deduplicated.filter((v: any) => !v.isFeatured);
               displayItems = [...displayItems, ...others];
             }
             displayItems = displayItems.slice(0, 3);
