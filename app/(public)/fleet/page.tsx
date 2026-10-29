@@ -37,14 +37,43 @@ function FleetContent() {
   const [selectedBookingVehicle, setSelectedBookingVehicle] = useState<FleetVehicle | null>(null);
 
   useEffect(() => {
-    // 1. Fetch from API directly
+    // 1. Immediately load any existing vehicles from localStorage so UI is never blank
+    let localList: FleetVehicle[] = [];
+    try {
+      const saved = typeof window !== "undefined"
+        ? (localStorage.getItem("user_uploaded_fleet_vehicles") || localStorage.getItem("user_uploaded_fleet"))
+        : null;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          localList = parsed;
+          setVehicles(parsed);
+          setLoading(false);
+        }
+      }
+    } catch (e) {
+      console.error("Local fleet parse error:", e);
+    }
+
+    // 2. Fetch from API directly and merge
     fetch("/api/fleet?limit=100")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data) {
           const apiList = Array.isArray(data) ? data : (data.vehicles || []);
           if (apiList.length > 0) {
-            setVehicles(apiList);
+            setVehicles(() => {
+              const merged = [...apiList];
+              localList.forEach((localV) => {
+                const exists = merged.some(
+                  (m) => (m.registrationNumber && localV.registrationNumber && m.registrationNumber.toUpperCase() === localV.registrationNumber.toUpperCase()) || m.id === localV.id
+                );
+                if (!exists) {
+                  merged.push(localV);
+                }
+              });
+              return merged;
+            });
           }
         }
       })
@@ -64,6 +93,28 @@ function FleetContent() {
     const cat = (v.categoryName || "").toUpperCase();
     return cat.includes(selectedCategory);
   });
+
+  // Deduplicate by distinct car model so only one card per model (e.g. 1 Ertiga instead of 4) is displayed
+  const displayedVehicles = React.useMemo(() => {
+    const map = new Map<string, FleetVehicle>();
+    filteredVehicles.forEach((v) => {
+      const key = `${(v.make || "").trim()} ${(v.model || "").trim()}`.toLowerCase().replace(/\s+/g, " ");
+      if (!map.has(key)) {
+        map.set(key, v);
+      } else {
+        const existing = map.get(key)!;
+        // Prefer featured vehicles or vehicles with custom uploaded images
+        const hasCustomImg = v.imageUrl && v.imageUrl !== "/images/hero-car.png";
+        const existingHasCustomImg = existing.imageUrl && existing.imageUrl !== "/images/hero-car.png";
+        if (!existing.isFeatured && v.isFeatured) {
+          map.set(key, v);
+        } else if (!existingHasCustomImg && hasCustomImg) {
+          map.set(key, v);
+        }
+      }
+    });
+    return Array.from(map.values());
+  }, [filteredVehicles]);
 
   return (
     <div className="bg-background min-h-screen text-slate-100 pt-32 sm:pt-36 lg:pt-40 pb-20 px-4 sm:px-8 lg:px-12 xl:px-16">
@@ -113,7 +164,7 @@ function FleetContent() {
               Loading Fleet Roster...
             </div>
           </div>
-        ) : filteredVehicles.length === 0 ? (
+        ) : displayedVehicles.length === 0 ? (
           /* Empty State */
           <div className="bg-surface/60 border border-border rounded-3xl p-12 text-center max-w-xl mx-auto space-y-4">
             <Car className="w-12 h-12 text-amber-400/50 mx-auto" />
@@ -135,7 +186,7 @@ function FleetContent() {
         ) : (
           /* Vehicles Grid */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredVehicles.map((v) => (
+            {displayedVehicles.map((v) => (
               <div
                 key={v.id}
                 className="bg-surface/90 border border-border hover:border-amber-500/40 rounded-3xl p-6 shadow-2xl flex flex-col justify-between transition-all group relative overflow-hidden"
@@ -171,11 +222,6 @@ function FleetContent() {
                     <h3 className="text-xl font-extrabold text-slate-50 group-hover:text-amber-400 transition-colors">
                       {v.make} {v.model}
                     </h3>
-                    {v.registrationNumber && (
-                      <div className="text-xs font-mono text-slate-400 mt-1">
-                        Reg #: {v.registrationNumber}
-                      </div>
-                    )}
                   </div>
 
                   {/* Specs Matrix */}

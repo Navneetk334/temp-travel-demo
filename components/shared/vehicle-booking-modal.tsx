@@ -365,8 +365,8 @@ export default function VehicleBookingModal({
                 <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">
                   Vehicle Reservation Desk
                 </span>
-                <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded border border-white/10 font-bold">
-                  {vehicle.registrationNumber || "FLEET-ROSTER"}
+                <span className="text-[10px] font-mono text-amber-400/90 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 font-bold uppercase">
+                  {vehicle.categoryName} &bull; {vehicle.vehicleClass || vehicle.subCategory || "Commercial"}
                 </span>
               </div>
 
