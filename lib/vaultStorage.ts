@@ -212,23 +212,23 @@ export function openDocumentInNewTab({
     </div>
     
     <div class="flex flex-wrap items-center gap-3">
-      <!-- View Mode Buttons -->
+      <!-- View Mode Buttons (Digital Certificate is active by default) -->
       <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-white/10">
-        <button
-          id="btn-original"
-          onclick="switchView('original')"
-          class="px-3.5 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-1.5 bg-amber-500 text-slate-950 shadow-md cursor-pointer"
-        >
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-          <span>Original Document</span>
-        </button>
         <button
           id="btn-cert"
           onclick="switchView('cert')"
+          class="px-3.5 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-1.5 bg-amber-500 text-slate-950 shadow-md cursor-pointer"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+          <span>Digital Certificate</span>
+        </button>
+        <button
+          id="btn-original"
+          onclick="switchView('original')"
           class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 text-slate-400 hover:text-white cursor-pointer"
         >
-          <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-          <span>Digital Certificate</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          <span>Original Document</span>
         </button>
       </div>
 
@@ -237,14 +237,7 @@ export function openDocumentInNewTab({
         <span>Print</span>
       </button>
 
-      <span id="download-btn-slot">
-        ${dataUrl ? `
-        <a id="download-link" href="${dataUrl}" download="${safeFileName}" class="px-3.5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 text-xs font-black rounded-xl hover:brightness-110 transition-all flex items-center gap-2 shadow-lg shadow-amber-500/20">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-          <span>Download File</span>
-        </a>
-        ` : ''}
-      </span>
+      <span id="download-btn-slot"></span>
     </div>
   </header>
 
@@ -288,84 +281,8 @@ export function openDocumentInNewTab({
       </div>
     </div>
 
-    <!-- VIEW 1: Original Uploaded Document Content -->
-    <div id="view-original" class="bg-surface border border-white/10 rounded-2xl p-4 sm:p-6 min-h-[500px] shadow-2xl print-box">
-      <div id="original-render-area">
-        ${dataUrl && isImage ? `
-          <div class="space-y-4 text-center w-full">
-            <div class="flex items-center justify-between border-b border-white/5 pb-3">
-              <span class="text-xs font-mono text-slate-400">Original Document Preview: <strong class="text-amber-400">${safeFileName}</strong></span>
-              <button onclick="switchView('cert')" class="text-xs font-bold text-amber-400 hover:underline flex items-center gap-1 cursor-pointer">
-                <span>View Digital Certificate</span> →
-              </button>
-            </div>
-            <div class="overflow-auto max-h-[750px] p-2 bg-slate-950/50 rounded-xl border border-white/5 flex items-center justify-center">
-              <img src="${dataUrl}" alt="${safeTitle}" class="max-w-full max-h-[700px] object-contain rounded-lg shadow-xl" />
-            </div>
-          </div>
-        ` : dataUrl && isPdf ? `
-          <div class="w-full h-full space-y-4">
-            <div class="flex items-center justify-between border-b border-white/5 pb-3">
-              <span class="text-xs font-mono text-slate-400">Original PDF Document: <strong class="text-amber-400">${safeFileName}</strong></span>
-              <button onclick="switchView('cert')" class="text-xs font-bold text-amber-400 hover:underline flex items-center gap-1 cursor-pointer">
-                <span>View Digital Certificate</span> →
-              </button>
-            </div>
-            <iframe src="${dataUrl}" class="w-full h-[750px] rounded-xl border border-white/10 bg-white" title="${safeTitle}"></iframe>
-          </div>
-        ` : `
-          <!-- When raw binary file hasn't been uploaded yet or was loaded by name -->
-          <div class="text-center py-10 space-y-5 max-w-lg mx-auto">
-            <div class="w-20 h-20 rounded-3xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto shadow-inner">
-              <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-            </div>
-
-            <div>
-              <h3 class="text-xl font-black text-slate-50">Original File: ${safeFileName}</h3>
-              <p class="text-xs text-slate-400 mt-1">
-                Official document registered under Ref <strong class="text-amber-400 font-mono">${safeRef}</strong>.
-              </p>
-            </div>
-
-            <div class="p-4 bg-slate-950/80 rounded-2xl border border-white/5 text-xs text-left font-mono space-y-2 text-slate-300">
-              <div class="flex justify-between border-b border-white/5 pb-1">
-                <span class="text-slate-500">Document Name:</span>
-                <span class="font-bold text-amber-300">${safeFileName}</span>
-              </div>
-              <div class="flex justify-between border-b border-white/5 pb-1">
-                <span class="text-slate-500">Vehicle / Reg:</span>
-                <span class="text-slate-200">${safeSubject}</span>
-              </div>
-              <div class="flex justify-between border-b border-white/5 pb-1">
-                <span class="text-slate-500">Reference:</span>
-                <span class="text-slate-200">${safeRef}</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-slate-500">Expiry Date:</span>
-                <span class="text-emerald-400">${safeExp}</span>
-              </div>
-            </div>
-
-            <div class="pt-3 space-y-3">
-              <label class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-black rounded-xl uppercase tracking-wider cursor-pointer shadow-lg shadow-amber-500/20 transition-all">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                <span>Attach / Select File to Preview</span>
-                <input type="file" accept=".pdf,image/*" class="hidden" onchange="handleDirectUpload(this)" />
-              </label>
-
-              <div>
-                <button onclick="switchView('cert')" class="text-xs text-slate-400 hover:text-amber-400 underline cursor-pointer">
-                  Or View Official Digital Verification Certificate →
-                </button>
-              </div>
-            </div>
-          </div>
-        `}
-      </div>
-    </div>
-
-    <!-- VIEW 2: Official Verification Archival Certificate -->
-    <div id="view-cert" style="display:none;" class="bg-surface border border-white/10 rounded-2xl p-6 sm:p-10 shadow-2xl print-box">
+    <!-- VIEW 1: Official Verification Archival Certificate (ACTIVE BY DEFAULT ON OPEN) -->
+    <div id="view-cert" class="bg-surface border border-white/10 rounded-2xl p-6 sm:p-10 shadow-2xl print-box">
       <div class="max-w-lg w-full mx-auto text-center space-y-6 py-4">
         <div class="w-20 h-20 rounded-3xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto shadow-inner">
           <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
@@ -400,14 +317,14 @@ export function openDocumentInNewTab({
           </div>
         </div>
 
-        <!-- Prominent Button to switch to Original Document View -->
-        <div class="pt-2">
+        <!-- Prominent Button to view Original Uploaded Document -->
+        <div class="pt-3">
           <button
             onclick="switchView('original')"
-            class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-black rounded-xl uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 mx-auto cursor-pointer transition-all hover:scale-[1.02]"
+            class="w-full sm:w-auto px-7 py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-black rounded-xl uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2.5 mx-auto cursor-pointer transition-all hover:scale-[1.02]"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-            <span>View Original Uploaded Document</span>
+            <span>View Original (Uploaded Document)</span>
           </button>
         </div>
 
@@ -416,11 +333,54 @@ export function openDocumentInNewTab({
         </p>
       </div>
     </div>
+
+    <!-- VIEW 2: Original Uploaded Document Content (Hidden by default, shown when user clicks button) -->
+    <div id="view-original" style="display:none;" class="bg-surface border border-white/10 rounded-2xl p-4 sm:p-6 min-h-[500px] shadow-2xl print-box">
+      <div id="original-render-area"></div>
+    </div>
   </main>
 
   <script>
-    const storageKey = "${safeStorageKey}";
-    const docTitle = "${safeTitle}";
+    const rawDataUrl = ${JSON.stringify(dataUrl || "")};
+    const safeFileName = ${JSON.stringify(safeFileName)};
+    const safeTitle = ${JSON.stringify(safeTitle)};
+    const safeRef = ${JSON.stringify(safeRef)};
+    const safeSubject = ${JSON.stringify(safeSubject)};
+    const safeExp = ${JSON.stringify(safeExp)};
+    const storageKey = ${JSON.stringify(safeStorageKey)};
+    const isImage = ${Boolean(isImage)};
+    const isPdf = ${Boolean(isPdf)};
+
+    let activeBlobUrl = null;
+
+    // Helper to convert base64 data URL to Blob so Chrome never blocks it in iframe/embed
+    function b64toBlob(dataURI) {
+      try {
+        const parts = dataURI.split(',');
+        const mime = parts[0].split(':')[1].split(';')[0];
+        const byteString = atob(parts[1]);
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+        }
+        return new Blob([ab], { type: mime });
+      } catch(e) {
+        console.error("Error creating blob:", e);
+        return null;
+      }
+    }
+
+    if (rawDataUrl) {
+      if (isPdf || rawDataUrl.startsWith('data:application/pdf')) {
+        const blob = b64toBlob(rawDataUrl);
+        if (blob) {
+          activeBlobUrl = URL.createObjectURL(blob);
+        }
+      } else if (isImage) {
+        activeBlobUrl = rawDataUrl;
+      }
+    }
 
     function switchView(view) {
       const origEl = document.getElementById('view-original');
@@ -429,6 +389,7 @@ export function openDocumentInNewTab({
       const btnCert = document.getElementById('btn-cert');
 
       if (view === 'original') {
+        renderOriginalDoc();
         origEl.style.display = 'block';
         certEl.style.display = 'none';
         btnOrig.className = 'px-3.5 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-1.5 bg-amber-500 text-slate-950 shadow-md cursor-pointer';
@@ -438,6 +399,118 @@ export function openDocumentInNewTab({
         certEl.style.display = 'block';
         btnCert.className = 'px-3.5 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-1.5 bg-amber-500 text-slate-950 shadow-md cursor-pointer';
         btnOrig.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 text-slate-400 hover:text-white cursor-pointer';
+      }
+    }
+
+    function renderOriginalDoc() {
+      const container = document.getElementById('original-render-area');
+      if (!container) return;
+
+      if (rawDataUrl && isImage) {
+        container.innerHTML = \`
+          <div class="space-y-4 text-center w-full">
+            <div class="flex flex-wrap items-center justify-between border-b border-white/10 pb-3 gap-2">
+              <span class="text-xs font-mono text-slate-300">Original Document: <strong class="text-amber-400">\${safeFileName}</strong></span>
+              <div class="flex items-center gap-2">
+                <button onclick="switchView('cert')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-lg text-xs font-bold transition-all cursor-pointer">
+                  ← Back to Certificate
+                </button>
+                <a href="\${rawDataUrl}" download="\${safeFileName}" class="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-lg text-xs transition-all flex items-center gap-1.5 shadow-md">
+                  <span>Download Image</span>
+                </a>
+              </div>
+            </div>
+            <div class="overflow-auto max-h-[750px] p-3 bg-slate-950/70 rounded-2xl border border-white/5 flex items-center justify-center">
+              <img src="\${rawDataUrl}" alt="\${safeTitle}" class="max-w-full max-h-[700px] object-contain rounded-xl shadow-2xl" />
+            </div>
+          </div>
+        \`;
+      } else if (rawDataUrl && isPdf) {
+        const pdfSrc = activeBlobUrl || rawDataUrl;
+        container.innerHTML = \`
+          <div class="w-full h-full space-y-4">
+            <div class="flex flex-wrap items-center justify-between border-b border-white/10 pb-3 gap-2">
+              <span class="text-xs font-mono text-slate-300">Original PDF Document: <strong class="text-amber-400">\${safeFileName}</strong></span>
+              <div class="flex items-center gap-2">
+                <button onclick="switchView('cert')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-lg text-xs font-bold transition-all cursor-pointer">
+                  ← Back to Certificate
+                </button>
+                <button onclick="window.open('\${pdfSrc}', '_blank')" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/10 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer">
+                  <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                  <span>Open Fullscreen</span>
+                </button>
+                <a href="\${pdfSrc}" download="\${safeFileName}" class="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-lg text-xs transition-all flex items-center gap-1.5 shadow-md">
+                  <span>Download PDF</span>
+                </a>
+              </div>
+            </div>
+            <div class="w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-slate-900">
+              <iframe src="\${pdfSrc}" class="w-full h-[780px] bg-white border-0" title="\${safeTitle}"></iframe>
+            </div>
+          </div>
+        \`;
+      } else {
+        container.innerHTML = \`
+          <div class="text-center py-10 space-y-5 max-w-lg mx-auto">
+            <div class="w-20 h-20 rounded-3xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto shadow-inner">
+              <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            </div>
+
+            <div>
+              <h3 class="text-xl font-black text-slate-50">Original File: \${safeFileName}</h3>
+              <p class="text-xs text-slate-400 mt-1">
+                Official document registered under Ref <strong class="text-amber-400 font-mono">\${safeRef}</strong>.
+              </p>
+            </div>
+
+            <div class="p-4 bg-slate-950/80 rounded-2xl border border-white/5 text-xs text-left font-mono space-y-2 text-slate-300">
+              <div class="flex justify-between border-b border-white/5 pb-1">
+                <span class="text-slate-500">Document Name:</span>
+                <span class="font-bold text-amber-300">\${safeFileName}</span>
+              </div>
+              <div class="flex justify-between border-b border-white/5 pb-1">
+                <span class="text-slate-500">Vehicle / Reg:</span>
+                <span class="text-slate-200">\${safeSubject}</span>
+              </div>
+              <div class="flex justify-between border-b border-white/5 pb-1">
+                <span class="text-slate-500">Reference:</span>
+                <span class="text-slate-200">\${safeRef}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">Expiry Date:</span>
+                <span class="text-emerald-400">\${safeExp}</span>
+              </div>
+            </div>
+
+            <div class="pt-3 space-y-3">
+              <label class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-black rounded-xl uppercase tracking-wider cursor-pointer shadow-lg shadow-amber-500/20 transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <span>Attach / Select File to Preview</span>
+                <input type="file" accept=".pdf,image/*" class="hidden" onchange="handleDirectUpload(this)" />
+              </label>
+
+              <div>
+                <button onclick="switchView('cert')" class="text-xs text-slate-400 hover:text-amber-400 underline cursor-pointer">
+                  ← Return to Digital Verification Certificate
+                </button>
+              </div>
+            </div>
+          </div>
+        \`;
+      }
+
+      // Update download button in header if available
+      const downloadSlot = document.getElementById('download-btn-slot');
+      if (downloadSlot) {
+        if (activeBlobUrl || rawDataUrl) {
+          const dlUrl = activeBlobUrl || rawDataUrl;
+          downloadSlot.innerHTML = \`
+            <a href="\${dlUrl}" download="\${safeFileName}" class="px-3.5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 text-xs font-black rounded-xl hover:brightness-110 transition-all flex items-center gap-2 shadow-lg shadow-amber-500/20">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              <span>Download File</span>
+            </a>
+          \`;
+        }
       }
     }
 
@@ -451,43 +524,71 @@ export function openDocumentInNewTab({
         const isImg = file.type.startsWith('image/');
         const isPdfDoc = file.type === 'application/pdf' || file.name.endsWith('.pdf');
 
+        if (isPdfDoc) {
+          const blob = b64toBlob(url);
+          if (blob) {
+            activeBlobUrl = URL.createObjectURL(blob);
+          }
+        } else {
+          activeBlobUrl = url;
+        }
+
         const renderArea = document.getElementById('original-render-area');
         if (isImg) {
           renderArea.innerHTML = \`
             <div class="space-y-4 text-center w-full">
-              <div class="flex items-center justify-between border-b border-white/5 pb-3">
-                <span class="text-xs font-mono text-slate-400">Attached File: <strong class="text-amber-400">\${file.name}</strong></span>
-                <button onclick="switchView('cert')" class="text-xs font-bold text-amber-400 hover:underline flex items-center gap-1 cursor-pointer">
-                  <span>View Digital Certificate</span> →
-                </button>
+              <div class="flex flex-wrap items-center justify-between border-b border-white/10 pb-3 gap-2">
+                <span class="text-xs font-mono text-slate-300">Attached File: <strong class="text-amber-400">\${file.name}</strong></span>
+                <div class="flex items-center gap-2">
+                  <button onclick="switchView('cert')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-lg text-xs font-bold transition-all cursor-pointer">
+                    ← Back to Certificate
+                  </button>
+                  <a href="\${url}" download="\${file.name}" class="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-lg text-xs transition-all flex items-center gap-1.5 shadow-md">
+                    <span>Download Image</span>
+                  </a>
+                </div>
               </div>
-              <div class="overflow-auto max-h-[750px] p-2 bg-slate-950/50 rounded-xl border border-white/5 flex items-center justify-center">
-                <img src="\${url}" alt="\${docTitle}" class="max-w-full max-h-[700px] object-contain rounded-lg shadow-xl" />
+              <div class="overflow-auto max-h-[750px] p-3 bg-slate-950/70 rounded-2xl border border-white/5 flex items-center justify-center">
+                <img src="\${url}" alt="\${safeTitle}" class="max-w-full max-h-[700px] object-contain rounded-xl shadow-2xl" />
               </div>
             </div>
           \`;
         } else if (isPdfDoc) {
+          const pdfSrc = activeBlobUrl || url;
           renderArea.innerHTML = \`
             <div class="w-full h-full space-y-4">
-              <div class="flex items-center justify-between border-b border-white/5 pb-3">
-                <span class="text-xs font-mono text-slate-400">Attached PDF: <strong class="text-amber-400">\${file.name}</strong></span>
-                <button onclick="switchView('cert')" class="text-xs font-bold text-amber-400 hover:underline flex items-center gap-1 cursor-pointer">
-                  <span>View Digital Certificate</span> →
-                </button>
+              <div class="flex flex-wrap items-center justify-between border-b border-white/10 pb-3 gap-2">
+                <span class="text-xs font-mono text-slate-300">Attached PDF: <strong class="text-amber-400">\${file.name}</strong></span>
+                <div class="flex items-center gap-2">
+                  <button onclick="switchView('cert')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-lg text-xs font-bold transition-all cursor-pointer">
+                    ← Back to Certificate
+                  </button>
+                  <button onclick="window.open('\${pdfSrc}', '_blank')" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/10 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer">
+                    <span>Open Fullscreen</span>
+                  </button>
+                  <a href="\${pdfSrc}" download="\${file.name}" class="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-lg text-xs transition-all flex items-center gap-1.5 shadow-md">
+                    <span>Download PDF</span>
+                  </a>
+                </div>
               </div>
-              <iframe src="\${url}" class="w-full h-[750px] rounded-xl border border-white/10 bg-white" title="\${docTitle}"></iframe>
+              <div class="w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-slate-900">
+                <iframe src="\${pdfSrc}" class="w-full h-[780px] bg-white border-0" title="\${safeTitle}"></iframe>
+              </div>
             </div>
           \`;
         }
 
         // Add download button to slot
         const slot = document.getElementById('download-btn-slot');
-        slot.innerHTML = \`
-          <a href="\${url}" download="\${file.name}" class="px-3.5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 text-xs font-black rounded-xl hover:brightness-110 transition-all flex items-center gap-2 shadow-lg shadow-amber-500/20">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-            <span>Download File</span>
-          </a>
-        \`;
+        if (slot) {
+          const dl = activeBlobUrl || url;
+          slot.innerHTML = \`
+            <a href="\${dl}" download="\${file.name}" class="px-3.5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 text-xs font-black rounded-xl hover:brightness-110 transition-all flex items-center gap-2 shadow-lg shadow-amber-500/20">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              <span>Download File</span>
+            </a>
+          \`;
+        }
 
         // Save into IndexedDB if key exists
         if (storageKey) {
