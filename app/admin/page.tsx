@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+export const revalidate = 10;
 
 import React from "react";
 import prisma from "@/lib/prisma";
@@ -49,124 +49,113 @@ export default async function AdminDashboardPage() {
   let allBookings: any[] = [];
 
   try {
-    // 1. Fetch counts for all specific lead modules & metrics
-    pickupDropCount = await prisma.corporateLead.count({
-      where: { serviceType: { contains: "Pickup & Drop", mode: "insensitive" } }
-    });
-
-    corporateInquiryCount = await prisma.corporateLead.count({
-      where: { NOT: { serviceType: { contains: "Pickup & Drop", mode: "insensitive" } } }
-    });
-
-    localRentalCount = await prisma.rentalLead.count({
-      where: { tripType: { contains: "Local", mode: "insensitive" } }
-    });
-
-    outstationCount = await prisma.rentalLead.count({
-      where: { tripType: { contains: "Outstation", mode: "insensitive" } }
-    });
-
-    tourLeadsCount = await prisma.booking.count({
-      where: { type: "TOUR_PACKAGE" }
-    });
-
-    totalContactLeads = await prisma.contactLead.count();
-    totalBookings = await prisma.booking.count();
-    totalFleetVehicles = await prisma.fleetVehicle.count();
-    
-    const paymentAggregation = await prisma.razorpayPayment.aggregate({
-      _sum: { amount: true },
-      where: { status: "SUCCESS" }
-    });
-    totalPaymentsAmount = Number(paymentAggregation._sum.amount || 0);
-
-    // 2. Fetch recent bookings dispatches
-    recentBookings = await prisma.booking.findMany({
-      take: 5,
-      orderBy: { createdAt: "desc" },
-      include: {
-        customer: { select: { name: true } },
-        vehicleCategory: { select: { name: true } },
-        vehicle: { 
-          select: { 
-            registrationNumber: true,
-            driver: { select: { name: true } }
-          } 
+    // Execute consolidated queries in parallel via Promise.all
+    const [
+      corpLeads,
+      rentLeads,
+      contLeads,
+      allBookingsData,
+      fleetCount,
+      paymentAggregation
+    ] = await Promise.all([
+      prisma.corporateLead.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 300,
+        select: {
+          id: true,
+          companyName: true,
+          contactName: true,
+          phone: true,
+          email: true,
+          serviceType: true,
+          status: true,
+          createdAt: true
         }
-      }
-    });
+      }),
+      prisma.rentalLead.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 300,
+        select: {
+          id: true,
+          customerName: true,
+          phone: true,
+          pickupLocation: true,
+          dropLocation: true,
+          tripType: true,
+          status: true,
+          createdAt: true,
+          vehicleCategory: { select: { name: true } }
+        }
+      }),
+      prisma.contactLead.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 300,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          subject: true,
+          message: true,
+          status: true,
+          createdAt: true
+        }
+      }),
+      prisma.booking.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 300,
+        select: {
+          id: true,
+          bookingNumber: true,
+          type: true,
+          netAmount: true,
+          status: true,
+          createdAt: true,
+          customer: { select: { name: true } },
+          vehicleCategory: { select: { name: true } },
+          vehicle: {
+            select: {
+              registrationNumber: true,
+              driver: { select: { name: true } }
+            }
+          }
+        }
+      }),
+      prisma.fleetVehicle.count(),
+      prisma.razorpayPayment.aggregate({
+        _sum: { amount: true },
+        where: { status: "SUCCESS" }
+      })
+    ]);
 
-    // 3. Fetch recent submissions from distinct lead pipelines
-    recentPickupDropLeads = await prisma.corporateLead.findMany({
-      take: 2,
-      where: { serviceType: { contains: "Pickup & Drop", mode: "insensitive" } },
-      orderBy: { createdAt: "desc" }
-    });
+    // 1. Process Corporate Leads
+    pickupDropCount = corpLeads.filter(l => l.serviceType?.toLowerCase().includes("pickup & drop")).length;
+    corporateInquiryCount = corpLeads.filter(l => !l.serviceType?.toLowerCase().includes("pickup & drop")).length;
+    pickupDropConverted = corpLeads.filter(l => l.serviceType?.toLowerCase().includes("pickup & drop") && ["QUALIFIED", "NEGOTIATION", "WON"].includes(l.status)).length;
+    corpInquiryConverted = corpLeads.filter(l => !l.serviceType?.toLowerCase().includes("pickup & drop") && ["QUALIFIED", "NEGOTIATION", "WON"].includes(l.status)).length;
+    recentPickupDropLeads = corpLeads.filter(l => l.serviceType?.toLowerCase().includes("pickup & drop")).slice(0, 2);
+    recentCorporateInquiryLeads = corpLeads.filter(l => !l.serviceType?.toLowerCase().includes("pickup & drop")).slice(0, 2);
 
-    recentCorporateInquiryLeads = await prisma.corporateLead.findMany({
-      take: 2,
-      where: { NOT: { serviceType: { contains: "Pickup & Drop", mode: "insensitive" } } },
-      orderBy: { createdAt: "desc" }
-    });
+    // 2. Process Rental Leads
+    localRentalCount = rentLeads.filter(l => l.tripType?.toLowerCase().includes("local")).length;
+    outstationCount = rentLeads.filter(l => l.tripType?.toLowerCase().includes("outstation")).length;
+    localConverted = rentLeads.filter(l => l.tripType?.toLowerCase().includes("local") && ["CONTACTED", "QUALIFIED", "WON"].includes(l.status)).length;
+    outstationConverted = rentLeads.filter(l => l.tripType?.toLowerCase().includes("outstation") && ["CONTACTED", "QUALIFIED", "WON"].includes(l.status)).length;
+    recentLocalLeads = rentLeads.filter(l => l.tripType?.toLowerCase().includes("local")).slice(0, 2);
+    recentOutstationLeads = rentLeads.filter(l => l.tripType?.toLowerCase().includes("outstation")).slice(0, 2);
 
-    recentLocalLeads = await prisma.rentalLead.findMany({
-      take: 2,
-      where: { tripType: { contains: "Local", mode: "insensitive" } },
-      orderBy: { createdAt: "desc" },
-      include: { vehicleCategory: { select: { name: true } } }
-    });
+    // 3. Process Contact Leads
+    totalContactLeads = contLeads.length;
+    contactContacted = contLeads.filter(l => ["READ", "CONTACTED", "QUALIFIED"].includes(l.status)).length;
+    recentContactLeads = contLeads.slice(0, 2);
 
-    recentOutstationLeads = await prisma.rentalLead.findMany({
-      take: 2,
-      where: { tripType: { contains: "Outstation", mode: "insensitive" } },
-      orderBy: { createdAt: "desc" },
-      include: { vehicleCategory: { select: { name: true } } }
-    });
-
-    recentContactLeads = await prisma.contactLead.findMany({
-      take: 2,
-      orderBy: { createdAt: "desc" }
-    });
-
-    // 4. Fetch lead conversions counts for bar chart
-    pickupDropConverted = await prisma.corporateLead.count({ 
-      where: { 
-        serviceType: { contains: "Pickup & Drop", mode: "insensitive" },
-        status: { in: ["QUALIFIED", "NEGOTIATION", "WON"] } 
-      } 
-    });
-
-    localConverted = await prisma.rentalLead.count({ 
-      where: { 
-        tripType: { contains: "Local", mode: "insensitive" },
-        status: { in: ["CONTACTED", "QUALIFIED", "WON"] } 
-      } 
-    });
-
-    outstationConverted = await prisma.rentalLead.count({ 
-      where: { 
-        tripType: { contains: "Outstation", mode: "insensitive" },
-        status: { in: ["CONTACTED", "QUALIFIED", "WON"] } 
-      } 
-    });
-
-    corpInquiryConverted = await prisma.corporateLead.count({ 
-      where: { 
-        NOT: { serviceType: { contains: "Pickup & Drop", mode: "insensitive" } },
-        status: { in: ["QUALIFIED", "NEGOTIATION", "WON"] } 
-      } 
-    });
-
-    contactContacted = await prisma.contactLead.count({ 
-      where: { status: { in: ["READ", "CONTACTED", "QUALIFIED"] } } 
-    });
-
-    allBookings = await prisma.booking.findMany({
-      select: {
-        netAmount: true,
-        createdAt: true
-      }
-    });
+    // 4. Process Bookings & Payments
+    totalBookings = allBookingsData.length;
+    tourLeadsCount = allBookingsData.filter(b => b.type === "TOUR_PACKAGE").length;
+    recentBookings = allBookingsData.slice(0, 5);
+    totalFleetVehicles = fleetCount;
+    totalPaymentsAmount = Number(paymentAggregation._sum.amount || 0);
+    allBookings = allBookingsData;
   } catch (err) {
     console.error("AdminDashboardPage database fetch error:", err);
   }

@@ -13,7 +13,8 @@ import {
   ShieldCheck,
   Phone,
   Sparkles,
-  AlertCircle
+  AlertCircle,
+  Trash2
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 
@@ -24,6 +25,7 @@ export interface QuickDispatchAssignmentModalProps {
   fleetVehicles: any[];
   drivers: any[];
   onSave: (updatedDispatch: any) => void;
+  onDelete?: (id: string) => void;
 }
 
 export default function QuickDispatchAssignmentModal({
@@ -33,6 +35,7 @@ export default function QuickDispatchAssignmentModal({
   fleetVehicles,
   drivers,
   onSave,
+  onDelete,
 }: QuickDispatchAssignmentModalProps) {
   const [selectedVehicleId, setSelectedVehicleId] = useState("");
   const [selectedDriverId, setSelectedDriverId] = useState("");
@@ -265,21 +268,42 @@ export default function QuickDispatchAssignmentModal({
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-3 border-t border-border flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-5 py-2.5 bg-background text-slate-400 hover:text-white rounded-xl text-xs font-bold cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer transition-all flex items-center gap-1.5"
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Confirm Assignment</span>
-                </button>
+              <div className="pt-3 border-t border-border flex items-center justify-between gap-3">
+                {onDelete ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm("Are you sure you want to permanently delete this quick dispatch entry?")) {
+                        onDelete(dispatchItem.id);
+                        onClose();
+                      }
+                    }}
+                    className="px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-1.5"
+                    title="Delete this dispatch entry"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete Dispatch</span>
+                  </button>
+                ) : (
+                  <div />
+                )}
+
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="px-5 py-2.5 bg-background text-slate-400 hover:text-white rounded-xl text-xs font-bold cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer transition-all flex items-center gap-1.5"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Confirm Assignment</span>
+                  </button>
+                </div>
               </div>
             </form>
           )}

@@ -27,7 +27,8 @@ import {
   Search,
   UserCheck,
   Navigation,
-  FileText
+  FileText,
+  Trash2
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 import LocationInput from "@/components/shared/location-input";
@@ -441,6 +442,26 @@ export default function MasterAdminDashboard() {
     });
   };
 
+  const handleDeleteDispatch = (id: string) => {
+    if (!window.confirm("Are you sure you want to permanently delete this quick dispatch entry?")) return;
+    setDispatches(prev => {
+      const next = prev.filter(d => d.id !== id);
+      localStorage.setItem("master_dispatches", JSON.stringify(next));
+      const activeCount = next.filter((d: any) => d.status === "IN_TRANSIT" || d.status === "ASSIGNED").length;
+      setStats(s => ({ ...s, activeRides: activeCount }));
+      return next;
+    });
+    setRecentLogs(prev => [
+      {
+        id: String(Date.now()),
+        time: "Just now",
+        text: `Permanently removed dispatch entry #${id} from the active dispatch desk.`,
+        status: "CANCELLED"
+      },
+      ...prev
+    ]);
+  };
+
   return (
     <div className="space-y-8">
       {/* Header Title Section */}
@@ -795,6 +816,15 @@ export default function MasterAdminDashboard() {
                       <option value="COMPLETED">Completed</option>
                       <option value="CANCELLED">Cancel</option>
                     </select>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteDispatch(item.id)}
+                      className="p-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-xl text-xs font-bold transition-all flex items-center justify-center cursor-pointer"
+                      title="Permanently Delete Dispatch"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
               );
@@ -1102,6 +1132,7 @@ export default function MasterAdminDashboard() {
         fleetVehicles={fleetList}
         drivers={driversList}
         onSave={handleSaveAssignment}
+        onDelete={handleDeleteDispatch}
       />
     </div>
   );

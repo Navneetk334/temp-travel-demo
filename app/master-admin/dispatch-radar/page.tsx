@@ -23,7 +23,8 @@ import {
   Sun,
   Moon,
   Layers,
-  Maximize2
+  Maximize2,
+  Trash2
 } from "lucide-react";
 
 declare global {
@@ -139,6 +140,18 @@ export default function MasterDispatchRadarPage() {
       localStorage.setItem("master_dispatches", JSON.stringify(next));
       return next;
     });
+  };
+
+  const handleDeleteDispatch = (id: string) => {
+    if (!window.confirm("Are you sure you want to permanently delete this quick dispatch entry?")) return;
+    setDrivers((prev) => {
+      const next = prev.filter((d) => d.id !== id);
+      localStorage.setItem("master_dispatches", JSON.stringify(next));
+      return next;
+    });
+    if (selectedDriver?.id === id) {
+      setSelectedDriver(null);
+    }
   };
 
   // Real Google Maps Tile URL (mt0, mt1, mt2, mt3)
@@ -481,6 +494,15 @@ export default function MasterDispatchRadarPage() {
               >
                 <Activity className="w-3.5 h-3.5 text-amber-400" />
               </button>
+
+              <button
+                type="button"
+                onClick={() => handleDeleteDispatch(drv.id)}
+                className="p-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-xl text-xs font-bold transition-all flex items-center justify-center cursor-pointer"
+                title="Permanently Delete Dispatch"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
         ))}
@@ -626,6 +648,7 @@ export default function MasterDispatchRadarPage() {
         fleetVehicles={fleetVehicles}
         drivers={registeredDrivers}
         onSave={handleSaveRadarAssignment}
+        onDelete={handleDeleteDispatch}
       />
 
       {/* Driver Telematics Drawer */}
@@ -665,7 +688,16 @@ export default function MasterDispatchRadarPage() {
                 </div>
               </div>
 
-              <div className="pt-2 flex justify-end">
+              <div className="pt-2 flex justify-between items-center">
+                <button
+                  type="button"
+                  onClick={() => handleDeleteDispatch(selectedDriver.id)}
+                  className="px-3.5 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold rounded-xl text-xs cursor-pointer flex items-center gap-1.5 transition-all"
+                  title="Delete this dispatch"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete</span>
+                </button>
                 <button
                   onClick={() => setSelectedDriver(null)}
                   className="px-4 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs cursor-pointer"
