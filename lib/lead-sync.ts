@@ -17,20 +17,19 @@ export async function syncDispatchToLeads(dispatch: any) {
   const phone = formatLeadPhone(dispatch.phone || "");
   const email = dispatch.email || `${phone.replace(/\D/g, "") || "dispatch"}@lead.temptravel.in`;
   const tripType = dispatch.tripType || "Airport Transfer / Pickup & Drop";
-  const isPickupDrop = 
-    tripType.toLowerCase().includes("pickup") || 
-    tripType.toLowerCase().includes("airport") || 
-    tripType.toLowerCase().includes("drop");
-  const isCorporateB2B = 
-    tripType.toLowerCase().includes("corporate") || 
-    tripType.toLowerCase().includes("transit");
+  const tLower = tripType.toLowerCase();
+
+  const isLocal = tLower.includes("local") || tLower.includes("hourly");
+  const isOutstation = tLower.includes("outstation") || tLower.includes("round trip") || tLower.includes("one way");
+  const isPickupDrop = (tLower.includes("pickup") || tLower.includes("airport") || tLower.includes("drop")) && !isLocal && !isOutstation;
+  const isCorporateB2B = (tLower.includes("corporate") || tLower.includes("transit") || tLower.includes("shuttle")) && !isLocal && !isOutstation;
 
   let createdDbLead: any = null;
 
   try {
     if (isPickupDrop || isCorporateB2B) {
       const corpPayload = {
-        companyName: isCorporateB2B ? "Corporate Client" : "Individual / Quick Dispatch",
+        companyName: isCorporateB2B ? "Corporate Client" : "Individual",
         contactName: dispatch.customerName || "Customer Lead",
         email,
         phone,
@@ -82,7 +81,7 @@ export async function syncDispatchToLeads(dispatch: any) {
         id: leadId,
         bookingRef: dispatch.id,
         customerName: dispatch.customerName || "Customer Lead",
-        companyName: isCorporateB2B ? "Corporate Client" : "Individual / Quick Dispatch",
+        companyName: isCorporateB2B ? "Corporate Client" : "",
         phone,
         email,
         tripType,
@@ -121,11 +120,31 @@ export function syncExistingDispatchesToLeads() {
   if (typeof window === "undefined") return;
   try {
     const dispatches = JSON.parse(localStorage.getItem("master_dispatches") || "[]");
+    const existingLeads = JSON.parse(localStorage.getItem("user_uploaded_crm_leads") || "[]");
+
+    let modified = false;
+
+    // Clean up existing leads: remove "Individual / Quick Dispatch" companyName from non-corporate leads
+    const cleanedLeads = (Array.isArray(existingLeads) ? existingLeads : []).map((l: any) => {
+      const type = (l.tripType || "").toLowerCase();
+      const comp = (l.companyName || "").trim().toLowerCase();
+      const isCorp = (type.includes("corporate") || type.includes("transit")) && !type.includes("local") && !type.includes("outstation");
+      if (!isCorp && (comp.includes("individual") || comp.includes("quick dispatch"))) {
+        modified = true;
+        return { ...l, companyName: "" };
+      }
+      return l;
+    });
+
+    if (modified) {
+      localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(cleanedLeads));
+      window.dispatchEvent(new Event("crm_leads_updated"));
+    }
+
     if (!Array.isArray(dispatches) || dispatches.length === 0) return;
 
-    const existingLeads = JSON.parse(localStorage.getItem("user_uploaded_crm_leads") || "[]");
-    const leadIds = new Set(existingLeads.map((l: any) => l.id));
-    const leadRefs = new Set(existingLeads.map((l: any) => l.bookingRef));
+    const leadIds = new Set(cleanedLeads.map((l: any) => l.id));
+    const leadRefs = new Set(cleanedLeads.map((l: any) => l.bookingRef));
 
     for (const d of dispatches) {
       if (!leadIds.has(d.id) && !leadRefs.has(d.id)) {
@@ -136,3 +155,4 @@ export function syncExistingDispatchesToLeads() {
     console.error("syncExistingDispatchesToLeads error:", e);
   }
 }
+

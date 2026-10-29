@@ -515,13 +515,48 @@ export default function MasterOmnichannelCRMPage() {
   const getFilteredByTab = () => {
     switch (activeLeadTab) {
       case "pickup":
-        return leads.filter(l => (l.tripType || "").toLowerCase().includes("pickup") || (l.notes || "").toLowerCase().includes("pickup") || (l.tripType || "").toLowerCase().includes("drop"));
+        return leads.filter(l => {
+          const type = (l.tripType || "").toLowerCase();
+          const notes = (l.notes || "").toLowerCase();
+          if (type.includes("local") || type.includes("hourly") || type.includes("outstation") || type.includes("round trip") || type.includes("one way")) {
+            return false;
+          }
+          return type.includes("pickup") || type.includes("airport") || notes.includes("pickup") || type.includes("drop");
+        });
       case "local":
-        return leads.filter(l => (l.tripType || "").toLowerCase().includes("local") || (l.tripType || "").toLowerCase().includes("hourly") || (l.notes || "").toLowerCase().includes("local"));
+        return leads.filter(l => {
+          const type = (l.tripType || "").toLowerCase();
+          const notes = (l.notes || "").toLowerCase();
+          return type.includes("local") || type.includes("hourly") || notes.includes("local");
+        });
       case "outstation":
-        return leads.filter(l => (l.tripType || "").toLowerCase().includes("outstation") || (l.tripType || "").toLowerCase().includes("round trip") || (l.tripType || "").toLowerCase().includes("one way"));
+        return leads.filter(l => {
+          const type = (l.tripType || "").toLowerCase();
+          const notes = (l.notes || "").toLowerCase();
+          return type.includes("outstation") || type.includes("round trip") || type.includes("one way") || notes.includes("outstation");
+        });
       case "corporate":
-        return leads.filter(l => (l.companyName && l.companyName.trim() !== "") || (l.tripType || "").toLowerCase().includes("corporate") || (l.tripType || "").toLowerCase().includes("working"));
+        return leads.filter(l => {
+          const type = (l.tripType || "").toLowerCase();
+          const comp = (l.companyName || "").trim().toLowerCase();
+
+          // Exclude any Local Rentals, Outstation Trips, or Airport Pickup & Drop
+          if (
+            type.includes("local") ||
+            type.includes("hourly") ||
+            type.includes("outstation") ||
+            type.includes("round trip") ||
+            type.includes("one way") ||
+            type.includes("pickup") ||
+            type.includes("airport")
+          ) {
+            return false;
+          }
+
+          const hasRealCompany = comp !== "" && comp !== "individual" && !comp.includes("individual");
+          const isCorp = type.includes("corporate") || type.includes("working") || type.includes("employee") || type.includes("transit") || type.includes("b2b");
+          return hasRealCompany || isCorp;
+        });
       case "tour":
         return leads.filter(l => (l.tripType || "").toLowerCase().includes("tour"));
       case "contact":

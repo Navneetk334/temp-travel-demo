@@ -115,11 +115,25 @@ export default function AdminCorporateLeadsPage() {
         if (local) {
           const parsed = JSON.parse(local);
           if (Array.isArray(parsed)) {
-            const matching = parsed.filter((l: any) => 
-              (l.tripType || "").toLowerCase().includes("pickup") || 
-              (l.tripType || "").toLowerCase().includes("airport") ||
-              (l.notes || "").toLowerCase().includes("pickup")
-            ).map((l: any) => ({
+            const matching = parsed.filter((l: any) => {
+              const type = (l.tripType || "").toLowerCase();
+              const notes = (l.notes || "").toLowerCase();
+              if (
+                type.includes("local") ||
+                type.includes("hourly") ||
+                type.includes("outstation") ||
+                type.includes("round trip") ||
+                type.includes("one way")
+              ) {
+                return false;
+              }
+              return (
+                type.includes("pickup") ||
+                type.includes("airport") ||
+                notes.includes("pickup") ||
+                type.includes("drop")
+              );
+            }).map((l: any) => ({
               id: l.id || `lead_${Date.now()}`,
               companyName: l.companyName || "Individual",
               contactName: l.customerName || "Customer",

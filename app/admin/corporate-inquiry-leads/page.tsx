@@ -103,12 +103,24 @@ export default function AdminCorporateInquiryLeadsPage() {
         if (local) {
           const parsed = JSON.parse(local);
           if (Array.isArray(parsed)) {
-            const matching = parsed.filter((l: any) => 
-              (l.companyName && l.companyName !== "Individual") ||
-              (l.tripType || "").toLowerCase().includes("corporate") ||
-              (l.tripType || "").toLowerCase().includes("working") ||
-              (l.notes || "").toLowerCase().includes("corporate")
-            ).map((l: any) => ({
+            const matching = parsed.filter((l: any) => {
+              const type = (l.tripType || "").toLowerCase();
+              const comp = (l.companyName || "").trim().toLowerCase();
+              if (
+                type.includes("local") ||
+                type.includes("hourly") ||
+                type.includes("outstation") ||
+                type.includes("round trip") ||
+                type.includes("one way") ||
+                type.includes("pickup") ||
+                type.includes("airport")
+              ) {
+                return false;
+              }
+              const hasCompany = comp !== "" && comp !== "individual" && !comp.includes("individual");
+              const isCorp = type.includes("corporate") || type.includes("working") || (l.notes || "").toLowerCase().includes("corporate");
+              return hasCompany || isCorp;
+            }).map((l: any) => ({
               id: l.id || `lead_${Date.now()}`,
               companyName: l.companyName || "Corporate Client",
               contactName: l.customerName || "Contact Person",
