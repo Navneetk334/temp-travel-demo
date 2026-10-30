@@ -145,14 +145,30 @@ export default function MasterOmnichannelCRMPage() {
 
   // Normalize incoming lead from any API or local format into consistent structure
   const normalizeLead = (raw: any, defaultType: string = "Rental Inquiry") => {
+    const custName = raw.customerName || raw.contactName || raw.customer?.name || raw.name || "Customer Lead";
+    const custPhone = raw.phone || raw.customer?.phone || "";
+    const custEmail = raw.email || raw.customer?.email || "";
+
+    let tripType = raw.tripType || raw.serviceType;
+    if (!tripType && raw.type) {
+      if (raw.type === "TOUR_PACKAGE") tripType = "Tour Package Booking";
+      else if (raw.type === "LOCAL_RENTAL") tripType = "Local Hourly Rental";
+      else if (raw.type === "OUTSTATION") tripType = "Outstation Trip";
+      else if (raw.type === "AIRPORT_TRANSFER") tripType = "Airport Transfer / Pickup & Drop";
+      else tripType = raw.type;
+    }
+    if (!tripType) {
+      tripType = raw.tourPackageId ? "Tour Package Booking" : (raw.subject ? `Contact Inquiry (${raw.subject})` : defaultType);
+    }
+
     return {
       id: raw.id || `lead_${Math.random().toString(36).substring(2, 9)}`,
       bookingRef: raw.bookingRef || raw.bookingNumber || `TT-${(raw.id || Date.now().toString()).slice(-6).toUpperCase()}`,
-      customerName: raw.customerName || raw.contactName || raw.name || "Customer Lead",
+      customerName: custName,
       companyName: raw.companyName || "",
-      phone: raw.phone || "",
-      email: raw.email || "",
-      tripType: raw.tripType || raw.serviceType || (raw.tourPackageId ? "Tour Package Booking" : (raw.subject ? `Contact Inquiry (${raw.subject})` : defaultType)),
+      phone: custPhone,
+      email: custEmail,
+      tripType,
       pickupLocation: raw.pickupLocation || raw.pickupLocations || raw.pickup || "-",
       dropLocation: raw.dropLocation || raw.drop || "-",
       status: (raw.status || "NEW").toUpperCase(),
@@ -191,7 +207,7 @@ export default function MasterOmnichannelCRMPage() {
       const [rentalRes, corpRes, toursRes, contactRes] = await Promise.allSettled([
         fetch("/api/rental/lead"),
         fetch("/api/corporate/lead"),
-        fetch("/api/bookings"),
+        fetch("/api/bookings?bookingType=TOUR_PACKAGE"),
         fetch("/api/contact")
       ]);
 
@@ -212,7 +228,9 @@ export default function MasterOmnichannelCRMPage() {
       if (toursRes.status === "fulfilled" && toursRes.value.ok) {
         const data = await toursRes.value.json();
         const items = Array.isArray(data) ? data : (data.bookings || []);
-        items.forEach((item: any) => fetchedList.push(normalizeLead(item, "Tour Package Booking")));
+        items
+          .filter((item: any) => item.type === "TOUR_PACKAGE" || item.tourPackageId)
+          .forEach((item: any) => fetchedList.push(normalizeLead(item, "Tour Package Booking")));
       }
 
       if (contactRes.status === "fulfilled" && contactRes.value.ok) {
@@ -222,9 +240,14 @@ export default function MasterOmnichannelCRMPage() {
       }
 
       const map = new Map();
-      combinedLeads.forEach(item => map.set(item.id, item));
+      combinedLeads.forEach(item => {
+        map.set(item.id, item);
+        if (item.bookingRef) map.set(item.bookingRef, item);
+      });
       fetchedList.forEach(item => {
-        if (!map.has(item.id)) map.set(item.id, item);
+        if (!map.has(item.id) && (!item.bookingRef || !map.has(item.bookingRef))) {
+          map.set(item.id, item);
+        }
       });
 
       const merged = Array.from(map.values()).sort(
@@ -558,7 +581,25 @@ export default function MasterOmnichannelCRMPage() {
           return hasRealCompany || isCorp;
         });
       case "tour":
-        return leads.filter(l => (l.tripType || "").toLowerCase().includes("tour"));
+        return leads.filter(l => {
+          const type = (l.tripType || "").toLowerCase();
+          // Strictly exclude local rentals, outstation trips, airport pickup & drop, and corporate
+          if (
+            type.includes("local") ||
+            type.includes("hourly") ||
+            type.includes("outstation") ||
+            type.includes("round trip") ||
+            type.includes("one way") ||
+            type.includes("pickup") ||
+            type.includes("airport") ||
+            type.includes("transit") ||
+            type.includes("shuttle") ||
+            type.includes("working")
+          ) {
+            return false;
+          }
+          return type.includes("tour");
+        });
       case "contact":
         return leads.filter(l => (l.tripType || "").toLowerCase().includes("contact") || (l.tripType || "").toLowerCase().includes("inquiry"));
       default:

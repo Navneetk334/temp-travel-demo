@@ -14,6 +14,7 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get("search") || "";
     const status = searchParams.get("status") || "";
     const paymentStatus = searchParams.get("paymentStatus") || "";
+    const bookingType = searchParams.get("bookingType") || searchParams.get("type") || "";
     const sortBy = searchParams.get("sortBy") || "createdAt";
     const sortOrder = searchParams.get("sortOrder") === "asc" ? "asc" : "desc";
     const page = parseInt(searchParams.get("page") || "1", 10);
@@ -23,6 +24,10 @@ export async function GET(req: NextRequest) {
     const where: any = {};
     if (status) {
       where.status = status;
+    }
+
+    if (bookingType) {
+      where.type = bookingType;
     }
 
     if (paymentStatus) {
@@ -81,14 +86,19 @@ export async function GET(req: NextRequest) {
       take: limit,
     });
 
+    const countWhere: any = {};
+    if (bookingType) {
+      countWhere.type = bookingType;
+    }
+
     const [pendingCount, confirmedCount, driverAssignedCount, vehicleAssignedCount, inProgressCount, completedCount, cancelledCount] = await Promise.all([
-      prisma.booking.count({ where: { status: "PENDING" } }),
-      prisma.booking.count({ where: { status: "CONFIRMED" } }),
-      prisma.booking.count({ where: { status: "DRIVER_ASSIGNED" } }),
-      prisma.booking.count({ where: { status: "VEHICLE_ASSIGNED" } }),
-      prisma.booking.count({ where: { status: { in: ["IN_PROGRESS", "IN_TRANSIT"] } } }),
-      prisma.booking.count({ where: { status: "COMPLETED" } }),
-      prisma.booking.count({ where: { status: "CANCELLED" } }),
+      prisma.booking.count({ where: { ...countWhere, status: "PENDING" } }),
+      prisma.booking.count({ where: { ...countWhere, status: "CONFIRMED" } }),
+      prisma.booking.count({ where: { ...countWhere, status: "DRIVER_ASSIGNED" } }),
+      prisma.booking.count({ where: { ...countWhere, status: "VEHICLE_ASSIGNED" } }),
+      prisma.booking.count({ where: { ...countWhere, status: { in: ["IN_PROGRESS", "IN_TRANSIT"] } } }),
+      prisma.booking.count({ where: { ...countWhere, status: "COMPLETED" } }),
+      prisma.booking.count({ where: { ...countWhere, status: "CANCELLED" } }),
     ]);
 
     const totalPages = Math.ceil(totalCount / limit) || 1;

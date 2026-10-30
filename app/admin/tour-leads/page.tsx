@@ -66,10 +66,24 @@ export default function AdminTourLeadsPage() {
         if (local) {
           const parsed = JSON.parse(local);
           if (Array.isArray(parsed)) {
-            const matching = parsed.filter((l: any) => 
-              (l.tripType || "").toLowerCase().includes("tour") ||
-              (l.notes || "").toLowerCase().includes("tour")
-            ).map((l: any) => ({
+            const matching = parsed.filter((l: any) => {
+              const type = (l.tripType || "").toLowerCase();
+              if (
+                type.includes("local") ||
+                type.includes("hourly") ||
+                type.includes("outstation") ||
+                type.includes("round trip") ||
+                type.includes("one way") ||
+                type.includes("pickup") ||
+                type.includes("airport") ||
+                type.includes("transit") ||
+                type.includes("shuttle") ||
+                type.includes("corporate")
+              ) {
+                return false;
+              }
+              return type.includes("tour");
+            }).map((l: any) => ({
               id: l.id || `book_${Date.now()}`,
               bookingNumber: l.bookingRef || `BKG-${Date.now().toString().slice(-6)}`,
               name: l.customerName || "Tour Passenger",

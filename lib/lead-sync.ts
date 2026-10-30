@@ -124,17 +124,29 @@ export function syncExistingDispatchesToLeads() {
 
     let modified = false;
 
-    // Clean up existing leads: remove "Individual / Quick Dispatch" companyName from non-corporate leads
-    const cleanedLeads = (Array.isArray(existingLeads) ? existingLeads : []).map((l: any) => {
-      const type = (l.tripType || "").toLowerCase();
-      const comp = (l.companyName || "").trim().toLowerCase();
-      const isCorp = (type.includes("corporate") || type.includes("transit")) && !type.includes("local") && !type.includes("outstation");
-      if (!isCorp && (comp.includes("individual") || comp.includes("quick dispatch"))) {
-        modified = true;
-        return { ...l, companyName: "" };
-      }
-      return l;
-    });
+    // Clean up existing leads:
+    // 1. Remove "Individual / Quick Dispatch" companyName from non-corporate leads
+    // 2. Remove duplicate/stale "Tour Package Booking" leads created erroneously for non-tour dispatches
+    const cleanedLeads = (Array.isArray(existingLeads) ? existingLeads : [])
+      .filter((l: any) => {
+        const type = (l.tripType || "").toLowerCase();
+        const ref = (l.bookingRef || l.id || "");
+        if (ref.startsWith("DISP-") && type === "tour package booking") {
+          modified = true;
+          return false;
+        }
+        return true;
+      })
+      .map((l: any) => {
+        const type = (l.tripType || "").toLowerCase();
+        const comp = (l.companyName || "").trim().toLowerCase();
+        const isCorp = (type.includes("corporate") || type.includes("transit")) && !type.includes("local") && !type.includes("outstation");
+        if (!isCorp && (comp.includes("individual") || comp.includes("quick dispatch"))) {
+          modified = true;
+          return { ...l, companyName: "" };
+        }
+        return l;
+      });
 
     if (modified) {
       localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(cleanedLeads));
