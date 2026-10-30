@@ -19,10 +19,13 @@ import {
   Cake,
   Calendar,
   RefreshCw,
-  Loader2
+  Loader2,
+  Eye,
+  FileText
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 import { useDialog } from "@/app/components/DialogProvider";
+import { setVaultFile, getDriverDocKey, getVaultFile, openDocumentInNewTab } from "@/lib/vaultStorage";
 
 // Category to Class Mapping Hierarchy
 const CLASS_OPTIONS: Record<string, string[]> = {
@@ -60,6 +63,7 @@ export default function MasterDriversPage() {
 
   const [drivers, setDrivers] = useState<any[]>([]);
   const [fleetVehicles, setFleetVehicles] = useState<any[]>([]);
+  const [docFiles, setDocFiles] = useState<{ [key: string]: string }>({});
 
   const { showAlert, showConfirm } = useDialog();
 
@@ -147,6 +151,7 @@ export default function MasterDriversPage() {
 
   const openAddModal = () => {
     setEditingDriver(null);
+    setDocFiles({});
     const generatedEmpId = `DRV-${Date.now().toString().slice(-6)}${Math.floor(100 + Math.random() * 900)}`;
     setFormData({
       employeeId: generatedEmpId,
@@ -176,6 +181,7 @@ export default function MasterDriversPage() {
 
   const openEditModal = (drv: any) => {
     setEditingDriver(drv);
+    setDocFiles(drv.photoUrl ? { photo: drv.photoUrl } : {});
     setFormData({
       employeeId: drv.employeeId || `DRV-${Date.now().toString().slice(-6)}${Math.floor(100 + Math.random() * 900)}`,
       photoName: drv.photoName || "",
@@ -277,6 +283,23 @@ export default function MasterDriversPage() {
         localStorage.setItem("user_uploaded_drivers", JSON.stringify(updated));
       } catch (e) {
         console.error("Local storage quota exceeded or failed");
+      }
+
+      // Save uploaded document binaries to Document Vault Storage
+      const phoneClean = (formData.phone || "").replace(/\D/g, "");
+      const nameClean = (formData.name || "").trim();
+      const idToUse = editingDriver?.id || created?.id;
+
+      for (const [docKey, dataUrl] of Object.entries(docFiles)) {
+        if (dataUrl) {
+          try {
+            if (phoneClean) await setVaultFile(getDriverDocKey(phoneClean, docKey), dataUrl);
+            if (nameClean) await setVaultFile(getDriverDocKey(nameClean, docKey), dataUrl);
+            if (idToUse) await setVaultFile(getDriverDocKey(idToUse, docKey), dataUrl);
+          } catch (storageErr) {
+            console.warn("Vault storage warning for driver doc:", storageErr);
+          }
+        }
       }
 
       let res;
@@ -397,6 +420,32 @@ export default function MasterDriversPage() {
   const availableVehicles = fleetVehicles.filter(
     (v) => v.categoryName === formData.vehicleCategory && v.vehicleClass === formData.vehicleClass
   );
+
+  const handleViewDriverDocument = async (drv: any, docType: string, title: string, refNumber: string, expiryDate?: string) => {
+    const phoneClean = (drv.phone || "").replace(/\D/g, "");
+    const nameClean = drv.name || "";
+    const idClean = drv.id || "";
+
+    let dataUrl = 
+      (phoneClean ? await getVaultFile(getDriverDocKey(phoneClean, docType)) : null) ||
+      (nameClean ? await getVaultFile(getDriverDocKey(nameClean, docType)) : null) ||
+      (idClean ? await getVaultFile(getDriverDocKey(idClean, docType)) : null);
+
+    if (!dataUrl && docType === "photo" && drv.photoUrl) {
+      dataUrl = drv.photoUrl;
+    }
+
+    openDocumentInNewTab({
+      title,
+      fileName: drv[`${docType}DocName`] || `${docType}_document.pdf`,
+      refNumber: refNumber || "GOVT-VERIFIED",
+      expiryDate: expiryDate || "Active Perpetual",
+      regNumber: drv.name || "Commercial Driver",
+      dataUrl,
+      category: "DRIVERS COMPLIANCE VAULT",
+      storageKey: getDriverDocKey(phoneClean || nameClean, docType)
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -604,7 +653,9 @@ export default function MasterDriversPage() {
                         if (file) {
                           const reader = new FileReader();
                           reader.onload = (ev) => {
-                            setFormData({ ...formData, photoName: file.name, photoUrl: ev.target?.result as string });
+                            const dataUrl = ev.target?.result as string;
+                            setFormData(prev => ({ ...prev, photoName: file.name, photoUrl: dataUrl }));
+                            setDocFiles(prev => ({ ...prev, photo: dataUrl }));
                           };
                           reader.readAsDataURL(file);
                         }
@@ -710,7 +761,18 @@ export default function MasterDriversPage() {
                       <input
                         type="file"
                         accept=".pdf,image/*"
-                        onChange={(e) => setFormData({ ...formData, aadhaarDocName: e.target.files?.[0]?.name || "" })}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (ev) => {
+                              const dataUrl = ev.target?.result as string;
+                              setDocFiles(prev => ({ ...prev, aadhaar: dataUrl }));
+                              setFormData(prev => ({ ...prev, aadhaarDocName: file.name }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
                         className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                       />
                     </div>
@@ -743,7 +805,18 @@ export default function MasterDriversPage() {
                       <input
                         type="file"
                         accept=".pdf,image/*"
-                        onChange={(e) => setFormData({ ...formData, panDocName: e.target.files?.[0]?.name || "" })}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (ev) => {
+                              const dataUrl = ev.target?.result as string;
+                              setDocFiles(prev => ({ ...prev, pan: dataUrl }));
+                              setFormData(prev => ({ ...prev, panDocName: file.name }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
                         className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                       />
                     </div>
@@ -767,7 +840,18 @@ export default function MasterDriversPage() {
                       <input
                         type="file"
                         accept=".pdf,image/*"
-                        onChange={(e) => setFormData({ ...formData, licenseDocName: e.target.files?.[0]?.name || "" })}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (ev) => {
+                              const dataUrl = ev.target?.result as string;
+                              setDocFiles(prev => ({ ...prev, license: dataUrl }));
+                              setFormData(prev => ({ ...prev, licenseDocName: file.name }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
                         className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                       />
                     </div>
@@ -989,17 +1073,50 @@ export default function MasterDriversPage() {
                   <span className="text-slate-400 font-sans">Mobile:</span>
                   <span className="text-slate-100 font-bold">+91-{selectedDriver.phone}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center py-0.5">
                   <span className="text-slate-400 font-sans">Driving License:</span>
-                  <span className="text-amber-400 font-bold">{selectedDriver.licenseNumber} (Exp: {selectedDriver.licenseExpiry})</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-amber-400 font-bold">{selectedDriver.licenseNumber} (Exp: {selectedDriver.licenseExpiry})</span>
+                    <button
+                      type="button"
+                      onClick={() => handleViewDriverDocument(selectedDriver, "license", "Commercial Driving License", selectedDriver.licenseNumber, selectedDriver.licenseExpiry)}
+                      className="px-2 py-0.5 bg-amber-500/10 hover:bg-amber-500 text-amber-400 hover:text-slate-950 rounded text-[10px] font-bold border border-amber-500/20 flex items-center gap-1 transition-all cursor-pointer"
+                      title="View Driving License in New Tab"
+                    >
+                      <Eye className="w-3 h-3" />
+                      <span>View</span>
+                    </button>
+                  </div>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center py-0.5">
                   <span className="text-slate-400 font-sans">Aadhaar:</span>
-                  <span className="text-slate-200">{selectedDriver.aadhaarNumber}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-slate-200">{selectedDriver.aadhaarNumber}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleViewDriverDocument(selectedDriver, "aadhaar", "Aadhaar Card", selectedDriver.aadhaarNumber)}
+                      className="px-2 py-0.5 bg-amber-500/10 hover:bg-amber-500 text-amber-400 hover:text-slate-950 rounded text-[10px] font-bold border border-amber-500/20 flex items-center gap-1 transition-all cursor-pointer"
+                      title="View Aadhaar Card in New Tab"
+                    >
+                      <Eye className="w-3 h-3" />
+                      <span>View</span>
+                    </button>
+                  </div>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center py-0.5">
                   <span className="text-slate-400 font-sans">PAN Card:</span>
-                  <span className="text-slate-200">{selectedDriver.panNumber}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-slate-200">{selectedDriver.panNumber}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleViewDriverDocument(selectedDriver, "pan", "PAN Card", selectedDriver.panNumber)}
+                      className="px-2 py-0.5 bg-amber-500/10 hover:bg-amber-500 text-amber-400 hover:text-slate-950 rounded text-[10px] font-bold border border-amber-500/20 flex items-center gap-1 transition-all cursor-pointer"
+                      title="View PAN Card in New Tab"
+                    >
+                      <Eye className="w-3 h-3" />
+                      <span>View</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 

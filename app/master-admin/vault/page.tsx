@@ -333,6 +333,20 @@ export default function MasterDocumentVaultPage() {
     const key = getStorageKey(folder, doc.key);
     let dataUrl = await getVaultFile(key);
 
+    if (!dataUrl && activeRoot === "DRIVERS") {
+      const phoneClean = (folder.phone || "").replace(/\D/g, "");
+      const nameClean = folder.name || "";
+      const idClean = folder.id || "";
+      dataUrl = 
+        (phoneClean ? await getVaultFile(getDriverDocKey(phoneClean, doc.key)) : null) ||
+        (nameClean ? await getVaultFile(getDriverDocKey(nameClean, doc.key)) : null) ||
+        (idClean ? await getVaultFile(getDriverDocKey(idClean, doc.key)) : null);
+
+      if (!dataUrl && doc.key === "photo" && folder.driverRaw?.photoUrl) {
+        dataUrl = folder.driverRaw.photoUrl;
+      }
+    }
+
     openDocumentInNewTab({
       title: doc.title,
       fileName: doc.file || `${doc.title.replace(/\s+/g, "_")}.pdf`,
@@ -371,6 +385,13 @@ export default function MasterDocumentVaultPage() {
     const storageKey = getStorageKey(folder, doc.key);
     if (modalFormData.dataUrl) {
       await setVaultFile(storageKey, modalFormData.dataUrl);
+      if (activeRoot === "DRIVERS") {
+        const phoneClean = (folder.phone || "").replace(/\D/g, "");
+        const nameClean = (folder.name || "").trim();
+        if (phoneClean) await setVaultFile(getDriverDocKey(phoneClean, doc.key), modalFormData.dataUrl);
+        if (nameClean) await setVaultFile(getDriverDocKey(nameClean, doc.key), modalFormData.dataUrl);
+        if (folder.id) await setVaultFile(getDriverDocKey(folder.id, doc.key), modalFormData.dataUrl);
+      }
     }
 
     // 2. Update local state
