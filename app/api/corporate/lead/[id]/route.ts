@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
 import { leadAdminUpdateSchema } from "@/lib/validations/corporate";
 import { verifyAdmin } from "@/lib/auth";
@@ -77,6 +78,14 @@ export async function DELETE(
     await prisma.corporateLead.delete({
       where: { id: id },
     });
+
+    try {
+      revalidatePath("/admin");
+      revalidatePath("/admin/corporate-leads");
+      revalidatePath("/admin/corporate-inquiry-leads");
+    } catch (e) {
+      console.warn("revalidatePath error in DELETE /api/corporate/lead/[id]:", e);
+    }
 
     return NextResponse.json({ message: "Lead deleted successfully" }, { status: 200 });
   } catch (error) {

@@ -36,7 +36,8 @@ export async function syncDispatchToLeads(dispatch: any) {
         employeeCount: 1,
         pickupLocations: dispatch.pickupLocation || "Pickup Hub",
         serviceType: tripType,
-        requirements: `Quick Dispatch: ${dispatch.vehicleCategory || "Sedan"} ${dispatch.vehicleClass || "Executive"} (${dispatch.vehicleModel || "Standard"}). Drop: ${dispatch.dropLocation || "Destination"}. Fare: ₹${dispatch.fare || "2800"}. Advance: ₹${dispatch.advance || "500"}.${dispatch.regNumber && !dispatch.regNumber.includes("Pending") ? ` Assigned Car: ${dispatch.regNumber}.` : ""}${dispatch.driverName && !dispatch.driverName.includes("Pending") ? ` Chauffeur: ${dispatch.driverName}.` : ""}`,
+        requirements: `[Ref: ${dispatch.id}] Quick Dispatch: ${dispatch.vehicleCategory || "Sedan"} ${dispatch.vehicleClass || "Executive"} (${dispatch.vehicleModel || "Standard"}). Drop: ${dispatch.dropLocation || "Destination"}. Fare: ₹${dispatch.fare || "2800"}. Advance: ₹${dispatch.advance || "500"}.${dispatch.regNumber && !dispatch.regNumber.includes("Pending") ? ` Assigned Car: ${dispatch.regNumber}.` : ""}${dispatch.driverName && !dispatch.driverName.includes("Pending") ? ` Chauffeur: ${dispatch.driverName}.` : ""}`,
+        notes: `[Ref: ${dispatch.id}] Quick Dispatch`,
         status: dispatch.status === "COMPLETED" ? "WON" : (dispatch.status === "CANCELLED" ? "LOST" : "NEW")
       };
 
@@ -56,7 +57,7 @@ export async function syncDispatchToLeads(dispatch: any) {
         dropLocation: dispatch.dropLocation || null,
         pickupDateTime: new Date().toISOString(),
         tripType,
-        notes: `Quick Dispatch: ${dispatch.vehicleCategory || "Sedan"} ${dispatch.vehicleClass || "Executive"} (${dispatch.vehicleModel || "Standard"}). Fare: ₹${dispatch.fare || "2800"}. Advance: ₹${dispatch.advance || "500"}.${dispatch.regNumber && !dispatch.regNumber.includes("Pending") ? ` Assigned Car: ${dispatch.regNumber}.` : ""}${dispatch.driverName && !dispatch.driverName.includes("Pending") ? ` Chauffeur: ${dispatch.driverName}.` : ""}`,
+        notes: `[Ref: ${dispatch.id}] Quick Dispatch: ${dispatch.vehicleCategory || "Sedan"} ${dispatch.vehicleClass || "Executive"} (${dispatch.vehicleModel || "Standard"}). Fare: ₹${dispatch.fare || "2800"}. Advance: ₹${dispatch.advance || "500"}.${dispatch.regNumber && !dispatch.regNumber.includes("Pending") ? ` Assigned Car: ${dispatch.regNumber}.` : ""}${dispatch.driverName && !dispatch.driverName.includes("Pending") ? ` Chauffeur: ${dispatch.driverName}.` : ""}`,
         status: dispatch.status === "COMPLETED" ? "WON" : (dispatch.status === "CANCELLED" ? "LOST" : "NEW")
       };
 
@@ -105,14 +106,26 @@ export async function syncDispatchToLeads(dispatch: any) {
 }
 
 export function removeDispatchFromLeads(dispatchId: string) {
-  if (typeof window === "undefined") return;
+  if (typeof window !== "undefined") {
+    try {
+      const existing = JSON.parse(localStorage.getItem("user_uploaded_crm_leads") || "[]");
+      const nextLeads = existing.filter((l: any) => l.id !== dispatchId && l.bookingRef !== dispatchId);
+      localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(nextLeads));
+      window.dispatchEvent(new Event("crm_leads_updated"));
+    } catch (e) {
+      console.error("removeDispatchFromLeads localStorage error:", e);
+    }
+  }
+
+  // Also invoke backend API to prune database records (Bookings, Payments, RentalLeads, CorporateLeads)
   try {
-    const existing = JSON.parse(localStorage.getItem("user_uploaded_crm_leads") || "[]");
-    const nextLeads = existing.filter((l: any) => l.id !== dispatchId && l.bookingRef !== dispatchId);
-    localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(nextLeads));
-    window.dispatchEvent(new Event("crm_leads_updated"));
+    fetch(`/api/bookings/dispatch?id=${encodeURIComponent(dispatchId)}`, {
+      method: "DELETE"
+    }).catch((err) => {
+      console.warn("Could not delete backend dispatch records:", err);
+    });
   } catch (e) {
-    console.error("removeDispatchFromLeads error:", e);
+    console.error("removeDispatchFromLeads backend call error:", e);
   }
 }
 

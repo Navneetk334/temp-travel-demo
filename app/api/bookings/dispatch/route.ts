@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
@@ -113,5 +114,81 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error("POST /api/bookings/dispatch error:", error);
     return NextResponse.json({ error: error.message || "Failed to dispatch booking" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+    if (!id) {
+      return NextResponse.json({ error: "Missing dispatch id parameter" }, { status: 400 });
+    }
+
+    // 1. Delete associated Razorpay payments and Bookings
+    const matchingBookings = await prisma.booking.findMany({
+      where: {
+        OR: [
+          { id: id },
+          { bookingNumber: id },
+          { notes: { contains: id } }
+        ]
+      },
+      select: { id: true }
+    });
+
+    const bookingIds = matchingBookings.map((b) => b.id);
+    if (bookingIds.length > 0) {
+      await prisma.razorpayPayment.deleteMany({
+        where: { bookingId: { in: bookingIds } }
+      });
+      await prisma.booking.deleteMany({
+        where: { id: { in: bookingIds } }
+      });
+    }
+
+    // 2. Delete associated Rental Leads
+    await prisma.rentalLead.deleteMany({
+      where: {
+        OR: [
+          { id: id },
+          { notes: { contains: id } }
+        ]
+      }
+    });
+
+    // 3. Delete associated Corporate Leads
+    await prisma.corporateLead.deleteMany({
+      where: {
+        OR: [
+          { id: id },
+          { notes: { contains: id } },
+          { requirements: { contains: id } }
+        ]
+      }
+    });
+
+    // 4. Invalidate relevant caches immediately
+    try {
+      revalidatePath("/admin");
+      revalidatePath("/admin/bookings-dispatch");
+      revalidatePath("/admin/local-rental-leads");
+      revalidatePath("/admin/outstation-leads");
+      revalidatePath("/admin/corporate-leads");
+      revalidatePath("/admin/tour-leads");
+      revalidatePath("/master-admin");
+      revalidatePath("/master-admin/crm");
+      revalidatePath("/master-admin/dispatch-radar");
+    } catch (e) {
+      console.warn("revalidatePath error in DELETE /api/bookings/dispatch:", e);
+    }
+
+    return NextResponse.json(
+      { success: true, message: `Dispatch ${id} and associated lead/booking records removed successfully.` },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    console.error("DELETE /api/bookings/dispatch error:", error);
+    return NextResponse.json({ error: error.message || "Failed to delete dispatch" }, { status: 500 });
   }
 }

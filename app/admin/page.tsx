@@ -1,4 +1,5 @@
-export const revalidate = 10;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 import React from "react";
 import prisma from "@/lib/prisma";

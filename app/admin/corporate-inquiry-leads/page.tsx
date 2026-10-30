@@ -251,6 +251,20 @@ export default function AdminCorporateInquiryLeadsPage() {
     }
 
     try {
+      const local = localStorage.getItem("user_uploaded_crm_leads");
+      if (local) {
+        const parsed = JSON.parse(local);
+        if (Array.isArray(parsed)) {
+          const next = parsed.filter((l: any) => l.id !== id && l.bookingRef !== id);
+          localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(next));
+          window.dispatchEvent(new Event("crm_leads_updated"));
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    try {
       await fetch(`/api/corporate/lead/${id}`, { method: "DELETE" });
       loadLeads(false);
     } catch (e) {
@@ -269,6 +283,20 @@ export default function AdminCorporateInquiryLeadsPage() {
     setTotalCount((prev) => Math.max(0, prev - idsToDelete.length));
     if (activeLead && idsToDelete.includes(activeLead.id)) {
       setActiveLead(null);
+    }
+
+    try {
+      const local = localStorage.getItem("user_uploaded_crm_leads");
+      if (local) {
+        const parsed = JSON.parse(local);
+        if (Array.isArray(parsed)) {
+          const next = parsed.filter((l: any) => !idsToDelete.includes(l.id) && !idsToDelete.includes(l.bookingRef));
+          localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(next));
+          window.dispatchEvent(new Event("crm_leads_updated"));
+        }
+      }
+    } catch (e) {
+      console.error(e);
     }
 
     try {

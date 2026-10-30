@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
 import { verifyAdmin } from "@/lib/auth";
 
@@ -122,6 +123,14 @@ export async function DELETE(
     await prisma.booking.delete({
       where: { id }
     });
+
+    try {
+      revalidatePath("/admin");
+      revalidatePath("/admin/bookings-dispatch");
+      revalidatePath("/admin/tour-leads");
+    } catch (e) {
+      console.warn("revalidatePath error in DELETE /api/bookings/[id]:", e);
+    }
 
     return NextResponse.json({ message: "Booking deleted successfully" }, { status: 200 });
   } catch (error) {

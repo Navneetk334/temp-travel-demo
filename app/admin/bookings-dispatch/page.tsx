@@ -320,6 +320,23 @@ export default function BookingDispatchPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this booking record?")) return;
+    const targetBooking = bookings.find((b) => b.id === id);
+    const bookingNum = targetBooking?.bookingNumber;
+
+    try {
+      const local = localStorage.getItem("user_uploaded_crm_leads");
+      if (local) {
+        const parsed = JSON.parse(local);
+        if (Array.isArray(parsed)) {
+          const next = parsed.filter((l: any) => l.id !== id && l.bookingRef !== id && (bookingNum ? l.bookingRef !== bookingNum : true));
+          localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(next));
+          window.dispatchEvent(new Event("crm_leads_updated"));
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
     try {
       const res = await fetch(`/api/bookings/${id}`, { method: "DELETE" });
       if (res.ok) {

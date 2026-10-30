@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
 import { rentalLeadAdminUpdateSchema } from "@/lib/validations/rental";
 import { verifyAdmin } from "@/lib/auth";
@@ -87,6 +88,14 @@ export async function DELETE(
     await prisma.rentalLead.delete({
       where: { id: id },
     });
+
+    try {
+      revalidatePath("/admin");
+      revalidatePath("/admin/local-rental-leads");
+      revalidatePath("/admin/outstation-leads");
+    } catch (e) {
+      console.warn("revalidatePath error in DELETE /api/rental/lead/[id]:", e);
+    }
 
     return NextResponse.json({ message: "Inquiry removed successfully" }, { status: 200 });
   } catch (error) {
