@@ -52,11 +52,13 @@ function calculateAge(dobString: string): number | null {
 }
 
 const DEFAULT_DEPARTMENTS = [
-  { id: "dept_ops", name: "Operations & Fleet Management" },
-  { id: "dept_acc", name: "Accounts & Billing" },
-  { id: "dept_crm", name: "Customer Relations & Dispatch" },
-  { id: "dept_hr", name: "Human Resources & Administration" },
-  { id: "dept_exec", name: "Executive Management" }
+  { id: "dept_accounts", name: "Accounts" },
+  { id: "dept_operations", name: "Operations" },
+  { id: "dept_it_admin", name: "IT & Administration" },
+  { id: "dept_fleet", name: "Fleet Management" },
+  { id: "dept_marketing", name: "Marketing" },
+  { id: "dept_sales", name: "Sales" },
+  { id: "dept_billing", name: "Billing" }
 ];
 
 export default function MasterOfficeStaffPage() {
@@ -174,7 +176,7 @@ export default function MasterOfficeStaffPage() {
   const openAddModal = () => {
     setEditingStaff(null);
     const generatedEmpId = `EMP-${Date.now().toString().slice(-6)}${Math.floor(100 + Math.random() * 900)}`;
-    const defaultDept = departments[0]?.id || "dept_ops";
+    const defaultDept = departments[0]?.id || "dept_operations";
     setFormData({
       employeeId: generatedEmpId,
       name: "",

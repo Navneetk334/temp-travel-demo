@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 const DEFAULT_DEPARTMENTS = [
+  "Accounts",
+  "Operations",
+  "IT & Administration",
+  "Fleet Management",
+  "Marketing",
+  "Sales",
+  "Billing"
+];
+
+const LEGACY_DEPARTMENTS = [
   "Operations & Fleet Management",
   "Accounts & Billing",
   "Customer Relations & Dispatch",
@@ -11,22 +21,31 @@ const DEFAULT_DEPARTMENTS = [
 
 export async function GET(req: NextRequest) {
   try {
+    // 1. Ensure all new default departments exist
+    for (const name of DEFAULT_DEPARTMENTS) {
+      await prisma.department.upsert({
+        where: { name },
+        update: {},
+        create: { name }
+      }).catch(() => {});
+    }
+
+    // 2. Safely clean up any empty legacy departments
+    for (const oldName of LEGACY_DEPARTMENTS) {
+      try {
+        const oldDept = await prisma.department.findUnique({
+          where: { name: oldName },
+          include: { admins: true }
+        });
+        if (oldDept && oldDept.admins.length === 0) {
+          await prisma.department.delete({ where: { id: oldDept.id } }).catch(() => {});
+        }
+      } catch (e) {}
+    }
+
     let departments = await prisma.department.findMany({
       orderBy: { name: "asc" }
     });
-
-    if (!departments || departments.length === 0) {
-      for (const name of DEFAULT_DEPARTMENTS) {
-        await prisma.department.upsert({
-          where: { name },
-          update: {},
-          create: { name }
-        }).catch(() => {});
-      }
-      departments = await prisma.department.findMany({
-        orderBy: { name: "asc" }
-      });
-    }
 
     if (!departments || departments.length === 0) {
       departments = DEFAULT_DEPARTMENTS.map((name, idx) => ({
