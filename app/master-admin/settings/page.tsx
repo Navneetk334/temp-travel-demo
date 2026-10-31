@@ -65,12 +65,14 @@ export default function MasterSettingsVaultPage() {
   const [showAddDocModal, setShowAddDocModal] = useState(false);
   const [editingDoc, setEditingDoc] = useState<any | null>(null);
   const [vaultDocs, setVaultDocs] = useState<any[]>([]);
+  const [docHasExpiry, setDocHasExpiry] = useState<boolean>(false);
+  const [editDocHasExpiry, setEditDocHasExpiry] = useState<boolean>(false);
 
   const [newDoc, setNewDoc] = useState({
     title: "",
     category: "COMPANY",
     refNumber: "",
-    expiryDate: "2028-12-31",
+    expiryDate: "",
     fileName: "",
     dataUrl: ""
   });
@@ -167,7 +169,7 @@ export default function MasterSettingsVaultPage() {
       title: newDoc.title,
       category: newDoc.category,
       refNumber: newDoc.refNumber || `REF-${Date.now().toString().slice(-6)}`,
-      expiryDate: newDoc.expiryDate || "Active Perpetual",
+      expiryDate: docHasExpiry ? (newDoc.expiryDate || "No Expiry") : "No Expiry",
       fileName: fileName,
       status: "VALID"
     };
@@ -176,7 +178,8 @@ export default function MasterSettingsVaultPage() {
     setVaultDocs(updated);
     saveCompanyDocsToStorage(updated);
     setShowAddDocModal(false);
-    setNewDoc({ title: "", category: "COMPANY", refNumber: "", expiryDate: "2028-12-31", fileName: "", dataUrl: "" });
+    setDocHasExpiry(false);
+    setNewDoc({ title: "", category: "COMPANY", refNumber: "", expiryDate: "", fileName: "", dataUrl: "" });
   };
 
   const handleUpdateDocSubmit = async (e: React.FormEvent) => {
@@ -194,7 +197,7 @@ export default function MasterSettingsVaultPage() {
           title: editingDoc.title,
           category: editingDoc.category,
           refNumber: editingDoc.refNumber,
-          expiryDate: editingDoc.expiryDate,
+          expiryDate: editDocHasExpiry ? (editingDoc.expiryDate || "No Expiry") : "No Expiry",
           fileName: editingDoc.fileName || d.fileName
         };
       }
@@ -439,7 +442,11 @@ export default function MasterSettingsVaultPage() {
               <p className="text-xs text-slate-400">Store and track company-level compliance certificates, incorporation documents, and ISO files.</p>
             </div>
             <button
-              onClick={() => setShowAddDocModal(true)}
+              onClick={() => {
+                setDocHasExpiry(false);
+                setNewDoc({ title: "", category: "COMPANY", refNumber: "", expiryDate: "", fileName: "", dataUrl: "" });
+                setShowAddDocModal(true);
+              }}
               className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer transition-all"
             >
               <Upload className="w-4 h-4" />
@@ -483,7 +490,9 @@ export default function MasterSettingsVaultPage() {
 
                   <div className="text-xs font-mono text-slate-400 flex justify-between">
                     <span>Expiry Date:</span>
-                    <strong className="text-emerald-400">{doc.expiryDate || "Perpetual"}</strong>
+                    <strong className={doc.expiryDate && doc.expiryDate !== "No Expiry" ? "text-emerald-400" : "text-slate-400"}>
+                      {doc.expiryDate || "No Expiry"}
+                    </strong>
                   </div>
                 </div>
 
@@ -501,7 +510,16 @@ export default function MasterSettingsVaultPage() {
 
                   <button
                     type="button"
-                    onClick={() => setEditingDoc({ ...doc, dataUrl: "" })}
+                    onClick={() => {
+                      const hasExp = Boolean(
+                        doc.expiryDate &&
+                        doc.expiryDate !== "No Expiry" &&
+                        doc.expiryDate !== "Perpetual" &&
+                        doc.expiryDate !== "Active Perpetual"
+                      );
+                      setEditDocHasExpiry(hasExp);
+                      setEditingDoc({ ...doc, dataUrl: "" });
+                    }}
                     className="px-2.5 py-1.5 bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-300 text-xs font-bold rounded-lg border border-white/10 flex items-center gap-1.5 transition-all cursor-pointer"
                     title="Change or replace document"
                   >
@@ -657,15 +675,58 @@ export default function MasterSettingsVaultPage() {
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-slate-400 font-bold">Expiry Date</label>
-                  <input
-                    type="date"
-                    value={newDoc.expiryDate}
-                    onClick={(e) => e.currentTarget.showPicker?.()}
-                    onChange={(e) => setNewDoc({ ...newDoc, expiryDate: e.target.value })}
-                    className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 font-mono focus:outline-none focus:border-amber-400 cursor-pointer [color-scheme:dark]"
-                  />
+                {/* Does this document have expiry tab selection */}
+                <div className="space-y-2 pt-1">
+                  <label className="text-slate-300 font-bold block text-xs">
+                    Does this document have expiry
+                  </label>
+                  <div className="inline-flex p-1 bg-background border border-border rounded-xl">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDocHasExpiry(true);
+                        if (!newDoc.expiryDate || newDoc.expiryDate === "No Expiry") {
+                          setNewDoc(prev => ({ ...prev, expiryDate: "" }));
+                        }
+                      }}
+                      className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        docHasExpiry
+                          ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 font-black"
+                          : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      Yes
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDocHasExpiry(false);
+                        setNewDoc(prev => ({ ...prev, expiryDate: "" }));
+                      }}
+                      className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        !docHasExpiry
+                          ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 font-black"
+                          : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      No
+                    </button>
+                  </div>
+
+                  {/* If yes, then show the date picker to select the expiry date and if no then nothing happens */}
+                  {docHasExpiry && (
+                    <div className="space-y-1 pt-1.5 animate-in fade-in duration-200">
+                      <label className="text-slate-400 font-bold">Select Expiry Date *</label>
+                      <input
+                        type="date"
+                        required={docHasExpiry}
+                        value={newDoc.expiryDate}
+                        onClick={(e) => e.currentTarget.showPicker?.()}
+                        onChange={(e) => setNewDoc({ ...newDoc, expiryDate: e.target.value })}
+                        className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 font-mono focus:outline-none focus:border-amber-400 cursor-pointer [color-scheme:dark]"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="pt-2 flex justify-end gap-3">
@@ -751,15 +812,58 @@ export default function MasterSettingsVaultPage() {
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-slate-400 font-bold">Expiry Date</label>
-                  <input
-                    type="date"
-                    value={editingDoc.expiryDate}
-                    onClick={(e) => e.currentTarget.showPicker?.()}
-                    onChange={(e) => setEditingDoc({ ...editingDoc, expiryDate: e.target.value })}
-                    className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 font-mono focus:outline-none focus:border-amber-400 cursor-pointer [color-scheme:dark]"
-                  />
+                {/* Does this document have expiry tab selection */}
+                <div className="space-y-2 pt-1">
+                  <label className="text-slate-300 font-bold block text-xs">
+                    Does this document have expiry
+                  </label>
+                  <div className="inline-flex p-1 bg-background border border-border rounded-xl">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditDocHasExpiry(true);
+                        if (!editingDoc.expiryDate || editingDoc.expiryDate === "No Expiry") {
+                          setEditingDoc((prev: any) => ({ ...prev, expiryDate: "" }));
+                        }
+                      }}
+                      className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        editDocHasExpiry
+                          ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 font-black"
+                          : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      Yes
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditDocHasExpiry(false);
+                        setEditingDoc((prev: any) => ({ ...prev, expiryDate: "" }));
+                      }}
+                      className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        !editDocHasExpiry
+                          ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 font-black"
+                          : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      No
+                    </button>
+                  </div>
+
+                  {/* If yes, then show the date picker to select the expiry date and if no then nothing happens */}
+                  {editDocHasExpiry && (
+                    <div className="space-y-1 pt-1.5 animate-in fade-in duration-200">
+                      <label className="text-slate-400 font-bold">Select Expiry Date *</label>
+                      <input
+                        type="date"
+                        required={editDocHasExpiry}
+                        value={editingDoc.expiryDate}
+                        onClick={(e) => e.currentTarget.showPicker?.()}
+                        onChange={(e) => setEditingDoc({ ...editingDoc, expiryDate: e.target.value })}
+                        className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 font-mono focus:outline-none focus:border-amber-400 cursor-pointer [color-scheme:dark]"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="pt-2 flex justify-end gap-3">
