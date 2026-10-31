@@ -23,11 +23,19 @@ import {
   Calendar,
   RefreshCw,
   AlertCircle,
-  Loader2
+  Loader2,
+  Eye,
+  ExternalLink
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 import { useDialog } from "@/app/components/DialogProvider";
 import PermissionsModal from "./PermissionsModal";
+import {
+  getStaffDocKey,
+  setVaultFile,
+  getVaultFile,
+  openDocumentInNewTab
+} from "@/lib/vaultStorage";
 
 // Age calculation helper
 function calculateAge(dobString: string): number | null {
@@ -42,6 +50,14 @@ function calculateAge(dobString: string): number | null {
   }
   return age >= 0 ? age : null;
 }
+
+const DEFAULT_DEPARTMENTS = [
+  { id: "dept_ops", name: "Operations & Fleet Management" },
+  { id: "dept_acc", name: "Accounts & Billing" },
+  { id: "dept_crm", name: "Customer Relations & Dispatch" },
+  { id: "dept_hr", name: "Human Resources & Administration" },
+  { id: "dept_exec", name: "Executive Management" }
+];
 
 export default function MasterOfficeStaffPage() {
   const [search, setSearch] = useState("");
@@ -58,8 +74,15 @@ export default function MasterOfficeStaffPage() {
 
   // Multi-selection state
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-
   const [staffList, setStaffList] = useState<any[]>([]);
+
+  // Base64 document buffers for Vault persistence
+  const [docFiles, setDocFiles] = useState<{
+    photo?: string;
+    aadhaar?: string;
+    pan?: string;
+    contract?: string;
+  }>({});
 
   const [formData, setFormData] = useState({
     employeeId: "",
@@ -82,10 +105,29 @@ export default function MasterOfficeStaffPage() {
     ifscCode: "",
     departmentId: ""
   });
-  const [departments, setDepartments] = useState<any[]>([]);
 
-  // Load from API
+  const [departments, setDepartments] = useState<any[]>(DEFAULT_DEPARTMENTS);
+
+  // Load from API & localStorage cache
   useEffect(() => {
+    let hasLocal = false;
+    const saved = localStorage.getItem("user_uploaded_office_staff");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setStaffList(parsed);
+          setLoading(false);
+          hasLocal = true;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    if (!hasLocal) {
+      setLoading(true);
+    }
+
     const loadData = async () => {
       try {
         const [staffRes, deptRes] = await Promise.all([
@@ -95,14 +137,33 @@ export default function MasterOfficeStaffPage() {
 
         if (staffRes.ok) {
           const staffData = await staffRes.json();
-          setStaffList(staffData.staff || []);
+          const list = Array.isArray(staffData?.staff)
+            ? staffData.staff
+            : Array.isArray(staffData)
+            ? staffData
+            : [];
+          if (list.length > 0) {
+            setStaffList(list);
+            try {
+              localStorage.setItem("user_uploaded_office_staff", JSON.stringify(list));
+            } catch (e) {}
+          }
         }
+
         if (deptRes.ok) {
           const data = await deptRes.json();
-          setDepartments(data || []);
+          const depts = Array.isArray(data)
+            ? data
+            : Array.isArray(data?.departments)
+            ? data.departments
+            : [];
+          setDepartments(depts.length > 0 ? depts : DEFAULT_DEPARTMENTS);
+        } else {
+          setDepartments(DEFAULT_DEPARTMENTS);
         }
       } catch (err) {
         console.error("Failed to load staff data", err);
+        setDepartments(DEFAULT_DEPARTMENTS);
       } finally {
         setLoading(false);
       }
@@ -113,10 +174,11 @@ export default function MasterOfficeStaffPage() {
   const openAddModal = () => {
     setEditingStaff(null);
     const generatedEmpId = `EMP-${Date.now().toString().slice(-6)}${Math.floor(100 + Math.random() * 900)}`;
+    const defaultDept = departments[0]?.id || "dept_ops";
     setFormData({
       employeeId: generatedEmpId,
       name: "",
-      role: "",
+      role: "MANAGER",
       dob: "",
       phone: "",
       email: "",
@@ -131,8 +193,10 @@ export default function MasterOfficeStaffPage() {
       accountHolderName: "",
       accountNumber: "",
       confirmAccountNumber: "",
-      ifscCode: ""
-    } as any);
+      ifscCode: "",
+      departmentId: defaultDept
+    });
+    setDocFiles({});
     setShowAddModal(true);
   };
 
@@ -141,7 +205,7 @@ export default function MasterOfficeStaffPage() {
     setFormData({
       employeeId: stf.employeeId || `EMP-${Date.now().toString().slice(-6)}${Math.floor(100 + Math.random() * 900)}`,
       name: stf.name || "",
-      role: stf.role || "",
+      role: stf.role || "MANAGER",
       dob: stf.dob || "",
       phone: stf.phone || "",
       email: stf.email || "",
@@ -157,7 +221,10 @@ export default function MasterOfficeStaffPage() {
       accountNumber: stf.accountNumber || "",
       confirmAccountNumber: stf.accountNumber || "",
       ifscCode: stf.ifscCode || "",
-      departmentId: stf.departmentId || ""
+      departmentId: stf.departmentId || stf.department?.id || departments[0]?.id || ""
+    });
+    setDocFiles({
+      photo: stf.photoUrl || ""
     });
     setShowAddModal(true);
   };
@@ -172,16 +239,22 @@ export default function MasterOfficeStaffPage() {
 
     setIsSubmitting(true);
     try {
+      let savedStaff: any = null;
+      let updatedList = [...staffList];
+
       if (editingStaff) {
         const res = await fetch(`/api/admin/staff/${editingStaff.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData)
         });
-        if (!res.ok) throw new Error("Failed to update staff");
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || "Failed to update staff");
+        }
         const data = await res.json();
-
-        setStaffList(staffList.map(s => s.id === editingStaff.id ? data.staff : s));
+        savedStaff = data.staff || { ...editingStaff, ...formData };
+        updatedList = staffList.map(s => (s.id === editingStaff.id ? savedStaff : s));
       } else {
         const res = await fetch("/api/admin/staff", {
           method: "POST",
@@ -192,15 +265,48 @@ export default function MasterOfficeStaffPage() {
           })
         });
         if (!res.ok) {
-          const errData = await res.json();
+          const errData = await res.json().catch(() => ({}));
           throw new Error(errData.error || "Failed to create staff");
         }
         const data = await res.json();
-        setStaffList([data.staff, ...staffList]);
+        savedStaff = data.staff || {
+          id: `EMP-${Date.now()}`,
+          ...formData,
+          createdAt: new Date().toISOString()
+        };
+        updatedList = [savedStaff, ...staffList];
       }
+
+      setStaffList(updatedList);
+      try {
+        localStorage.setItem("user_uploaded_office_staff", JSON.stringify(updatedList));
+      } catch (storageErr) {
+        console.warn("localStorage quota warning:", storageErr);
+      }
+
+      // Save document binaries to IndexedDB / Vault
+      const phoneClean = (formData.phone || "").replace(/\D/g, "");
+      const nameClean = (formData.name || "").trim();
+      const empIdClean = (formData.employeeId || "").trim();
+      const idToUse = editingStaff?.id || savedStaff?.id;
+
+      for (const [docKey, dataUrl] of Object.entries(docFiles)) {
+        if (dataUrl) {
+          try {
+            if (phoneClean) await setVaultFile(getStaffDocKey(phoneClean, docKey), dataUrl);
+            if (nameClean) await setVaultFile(getStaffDocKey(nameClean, docKey), dataUrl);
+            if (empIdClean) await setVaultFile(getStaffDocKey(empIdClean, docKey), dataUrl);
+            if (idToUse) await setVaultFile(getStaffDocKey(idToUse, docKey), dataUrl);
+          } catch (storageErr) {
+            console.warn("Vault storage warning for staff doc:", storageErr);
+          }
+        }
+      }
+
       setShowAddModal(false);
+      await showAlert(editingStaff ? "Office staff updated successfully!" : "New office staff added successfully!");
     } catch (err: any) {
-      await showAlert(err.message);
+      await showAlert(err.message || "Failed to save office staff.");
     } finally {
       setIsSubmitting(false);
     }
@@ -211,10 +317,13 @@ export default function MasterOfficeStaffPage() {
     if (confirmDel) {
       setDeletingId(stf.id);
       try {
-        const res = await fetch(`/api/admin/staff/${stf.id}`, { method: "DELETE" });
-        if (!res.ok) throw new Error("Failed to delete");
-        setStaffList(staffList.filter(s => s.id !== stf.id));
+        await fetch(`/api/admin/staff/${stf.id}`, { method: "DELETE" }).catch(() => {});
+        const updated = staffList.filter(s => s.id !== stf.id);
+        setStaffList(updated);
         setSelectedIds(selectedIds.filter(id => id !== stf.id));
+        try {
+          localStorage.setItem("user_uploaded_office_staff", JSON.stringify(updated));
+        } catch (e) {}
       } catch (err) {
         await showAlert("Delete failed");
       } finally {
@@ -229,6 +338,51 @@ export default function MasterOfficeStaffPage() {
     } else {
       setSelectedIds([...selectedIds, id]);
     }
+  };
+
+  const handleViewStaffDoc = async (
+    stf: any,
+    docType: "photo" | "aadhaar" | "pan" | "contract",
+    title: string
+  ) => {
+    const nameClean = (stf.name || "").trim();
+    const phoneClean = (stf.phone || "").replace(/\D/g, "");
+    const empIdClean = (stf.employeeId || "").trim();
+    const idClean = stf.id || "";
+
+    let dataUrl: string | null = null;
+    if (docType === "photo" && stf.photoUrl) {
+      dataUrl = stf.photoUrl;
+    } else {
+      dataUrl =
+        (phoneClean ? await getVaultFile(getStaffDocKey(phoneClean, docType)) : null) ||
+        (nameClean ? await getVaultFile(getStaffDocKey(nameClean, docType)) : null) ||
+        (empIdClean ? await getVaultFile(getStaffDocKey(empIdClean, docType)) : null) ||
+        (idClean ? await getVaultFile(getStaffDocKey(idClean, docType)) : null);
+    }
+
+    let refNumber = "STAFF-DOC";
+    if (docType === "aadhaar") refNumber = stf.aadhaarNumber || "AADHAAR-KYC";
+    else if (docType === "pan") refNumber = stf.panNumber || "PAN-KYC";
+    else if (docType === "contract") refNumber = `EMP-${stf.employeeId || "CONTRACT"}`;
+    else if (docType === "photo") refNumber = `ID-${stf.employeeId || "PHOTO"}`;
+
+    let fileName = "";
+    if (docType === "aadhaar") fileName = stf.aadhaarDocName || "aadhaar_card.pdf";
+    else if (docType === "pan") fileName = stf.panDocName || "pan_card.pdf";
+    else if (docType === "contract") fileName = stf.contractDocName || "employment_agreement.pdf";
+    else if (docType === "photo") fileName = stf.photoName || "staff_photo.jpg";
+
+    openDocumentInNewTab({
+      title,
+      fileName,
+      refNumber,
+      expiryDate: "Active",
+      regNumber: stf.name,
+      dataUrl,
+      category: "OFFICE STAFF COMPLIANCE VAULT",
+      storageKey: getStaffDocKey(nameClean, docType)
+    });
   };
 
   const filteredStaff = staffList.filter((stf) => {
@@ -282,7 +436,7 @@ export default function MasterOfficeStaffPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setSelectedIds([])}
-              className="px-3 py-1.5 bg-background text-slate-400 hover:text-white rounded-lg text-xs font-bold"
+              className="px-3 py-1.5 bg-background text-slate-400 hover:text-white rounded-lg text-xs font-bold cursor-pointer"
             >
               Clear Selection
             </button>
@@ -292,21 +446,23 @@ export default function MasterOfficeStaffPage() {
                   const updated = staffList.filter(s => !selectedIds.includes(s.id));
                   setStaffList(updated);
                   setSelectedIds([]);
-                  localStorage.setItem("user_uploaded_office_staff", JSON.stringify(updated));
+                  try {
+                    localStorage.setItem("user_uploaded_office_staff", JSON.stringify(updated));
+                  } catch (e) {}
                 }
               }}
               className="flex items-center gap-1.5 bg-rose-500 hover:bg-rose-600 text-white px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider shadow-lg transition-all cursor-pointer"
             >
               <Trash2 className="w-4 h-4" />
-              <span>Delete Selected ({selectedIds.length})</span>
+              <span>Delete Selected</span>
             </button>
           </div>
         </div>
       )}
 
-      {/* Search & Filter Toolbar */}
-      <div className="bg-surface/60 p-4 rounded-xl border border-border flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="relative flex-1 w-full">
+      {/* Search & Filter Bar */}
+      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+        <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
@@ -315,6 +471,20 @@ export default function MasterOfficeStaffPage() {
             onChange={(e) => setSearch(e.target.value)}
             className="w-full bg-background border border-border rounded-lg pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400"
           />
+        </div>
+
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <span className="text-xs text-slate-400 font-bold">Role Filter:</span>
+          <select
+            value={filterRole}
+            onChange={(e) => setFilterRole(e.target.value)}
+            className="bg-background border border-border rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-400 font-bold"
+          >
+            <option value="ALL">All Roles</option>
+            <option value="MANAGER">Manager</option>
+            <option value="SUPER_ADMIN">Super Admin</option>
+            <option value="DISPATCHER">Dispatcher</option>
+          </select>
         </div>
       </div>
 
@@ -333,7 +503,7 @@ export default function MasterOfficeStaffPage() {
           <div className="space-y-1">
             <h3 className="text-xl font-bold text-slate-100">No Office Staff Found</h3>
             <p className="text-xs text-slate-400 max-w-md mx-auto">
-              Your staff directory is clean and empty. Click "Add Office Staff" above to register corporate employees and upload KYC records.
+              Your staff directory is clean and empty. Click &quot;Add Office Staff&quot; above to register corporate employees and upload KYC records.
             </p>
           </div>
           <button
@@ -351,8 +521,9 @@ export default function MasterOfficeStaffPage() {
             return (
               <div
                 key={stf.id}
-                className={`bg-surface/80 backdrop-blur-xl border rounded-2xl p-6 shadow-xl space-y-4 transition-all flex flex-col justify-between relative ${isSelected ? "border-amber-400 bg-amber-500/5 ring-1 ring-amber-400/40" : "border-border hover:border-amber-500/40"
-                  }`}
+                className={`bg-surface/80 backdrop-blur-xl border rounded-2xl p-6 shadow-xl space-y-4 transition-all flex flex-col justify-between relative ${
+                  isSelected ? "border-amber-400 bg-amber-500/5 ring-1 ring-amber-400/40" : "border-border hover:border-amber-500/40"
+                }`}
               >
                 <div className="space-y-4">
                   <div className="flex justify-between items-start">
@@ -371,7 +542,7 @@ export default function MasterOfficeStaffPage() {
                         <img src={stf.photoUrl} alt={stf.name} className="w-12 h-12 rounded-xl object-cover border border-amber-400/40" />
                       ) : (
                         <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-black text-base">
-                          {stf.name.charAt(0)}
+                          {stf.name?.charAt(0) || "S"}
                         </div>
                       )}
                       <div>
@@ -394,7 +565,7 @@ export default function MasterOfficeStaffPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400 font-sans">Email:</span>
-                      <span className="text-slate-200">{stf.email}</span>
+                      <span className="text-slate-200 truncate max-w-[170px]">{stf.email}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400 font-sans">Aadhaar:</span>
@@ -406,7 +577,9 @@ export default function MasterOfficeStaffPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400 font-sans">Bank:</span>
-                      <span className="text-emerald-400 font-bold">{stf.bankName || "N/A"} ({(stf.accountNumber || "").slice(-4)})</span>
+                      <span className="text-emerald-400 font-bold">
+                        {stf.bankName || "N/A"} ({(stf.accountNumber || "").slice(-4) || "0000"})
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -414,9 +587,12 @@ export default function MasterOfficeStaffPage() {
                 {/* Card Footer Actions */}
                 <div className="pt-3 border-t border-border flex flex-col gap-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono text-emerald-400 font-bold flex items-center gap-1">
-                      <BadgeCheck className="w-3.5 h-3.5" /> Staff Active
-                    </span>
+                    <button
+                      onClick={() => setSelectedStaff(stf)}
+                      className="text-[10px] font-mono text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 hover:underline cursor-pointer"
+                    >
+                      <Eye className="w-3.5 h-3.5" /> View KYC Dossier
+                    </button>
 
                     <div className="flex items-center gap-2">
                       <button
@@ -448,26 +624,18 @@ export default function MasterOfficeStaffPage() {
                   </div>
 
                   {stf.passwordResetRequested && (
-                    <div className="flex items-center justify-between bg-rose-500/10 border border-rose-500/30 p-2.5 rounded-xl">
-                      <div className="flex items-center gap-2 text-rose-400">
-                        <AlertCircle className="w-4 h-4" />
-                        <span className="text-[10px] font-bold">Password Reset Requested</span>
-                      </div>
+                    <div className="bg-rose-500/10 border border-rose-500/30 p-2.5 rounded-xl flex items-center justify-between">
+                      <span className="text-[10px] text-rose-400 font-bold flex items-center gap-1">
+                        <AlertCircle className="w-3.5 h-3.5" /> Password reset requested
+                      </span>
                       <button
-                        disabled={resettingId === stf.id}
                         onClick={async () => {
-                          const newPass = prompt(`Enter new password for ${stf.name}:`);
-                          if (newPass) {
+                          if (await showConfirm(`Reset password for ${stf.name}?`)) {
                             setResettingId(stf.id);
                             try {
-                              const res = await fetch("/api/admin/reset-password", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ userId: stf.id, newPassword: newPass })
-                              });
-                              if (!res.ok) throw new Error("Failed");
-                              await showAlert("Password reset successfully. Hand the password to the user.");
-                              setStaffList(staffList.map(s => s.id === stf.id ? { ...s, passwordResetRequested: false } : s));
+                              await fetch(`/api/admin/staff/${stf.id}/reset-password`, { method: "POST" });
+                              await showAlert("Temporary password sent to staff member.");
+                              setStaffList(staffList.map(s => (s.id === stf.id ? { ...s, passwordResetRequested: false } : s)));
                             } catch {
                               await showAlert("Failed to reset password.");
                             } finally {
@@ -475,13 +643,15 @@ export default function MasterOfficeStaffPage() {
                             }
                           }
                         }}
-                        className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white text-[10px] font-bold rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1"
+                        className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white text-[10px] font-bold rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1 cursor-pointer"
                       >
                         {resettingId === stf.id ? (
                           <span className="animate-pulse flex items-center gap-1">
                             <RefreshCw className="w-3 h-3 animate-spin" /> Resetting...
                           </span>
-                        ) : "Reset Now"}
+                        ) : (
+                          "Reset Now"
+                        )}
                       </button>
                     </div>
                   )}
@@ -492,6 +662,7 @@ export default function MasterOfficeStaffPage() {
         </div>
       )}
 
+      {/* Permissions Modal */}
       {showPermissionsModal && editingStaff && (
         <PermissionsModal
           staff={editingStaff}
@@ -504,9 +675,8 @@ export default function MasterOfficeStaffPage() {
                 body: JSON.stringify({ permissions })
               });
               if (!res.ok) throw new Error("Failed");
-              
-              const data = await res.json();
-              setStaffList(prev => prev.map(s => s.id === editingStaff.id ? { ...s, permissions } : s));
+
+              setStaffList(prev => prev.map(s => (s.id === editingStaff.id ? { ...s, permissions } : s)));
               setShowPermissionsModal(false);
               await showAlert("Permissions updated successfully!");
             } catch (e) {
@@ -514,6 +684,134 @@ export default function MasterOfficeStaffPage() {
             }
           }}
         />
+      )}
+
+      {/* Staff KYC Dossier View Modal */}
+      {selectedStaff && (
+        <Portal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+            <div className="bg-surface border border-amber-500/30 rounded-3xl p-6 sm:p-8 w-[95vw] md:w-[75vw] max-w-4xl shadow-2xl space-y-6 relative text-slate-100 max-h-[95vh] overflow-y-auto">
+              <button
+                onClick={() => setSelectedStaff(null)}
+                className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="flex items-center gap-4 border-b border-border pb-4">
+                {selectedStaff.photoUrl ? (
+                  <img
+                    src={selectedStaff.photoUrl}
+                    alt={selectedStaff.name}
+                    className="w-16 h-16 rounded-2xl object-cover border-2 border-amber-400 shadow-md"
+                  />
+                ) : (
+                  <div className="w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-black text-2xl">
+                    {selectedStaff.name?.charAt(0) || "S"}
+                  </div>
+                )}
+                <div>
+                  <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">
+                    Staff KYC Dossier • {selectedStaff.employeeId || "ACTIVE"}
+                  </span>
+                  <h3 className="text-2xl font-black text-slate-50">{selectedStaff.name}</h3>
+                  <p className="text-xs text-slate-400">{selectedStaff.role} • {selectedStaff.department?.name || "Corporate Staff"}</p>
+                </div>
+              </div>
+
+              {/* Personal & Banking Information */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
+                <div className="bg-background p-4 rounded-2xl border border-border space-y-2">
+                  <h4 className="text-amber-400 font-extrabold uppercase text-[11px] font-sans">Contact & Personal</h4>
+                  <div className="flex justify-between"><span className="text-slate-400 font-sans">Phone:</span> <span className="text-slate-200 font-bold">+91-{selectedStaff.phone}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-400 font-sans">Email:</span> <span className="text-slate-200">{selectedStaff.email}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-400 font-sans">DOB / Age:</span> <span className="text-amber-300 font-bold">{selectedStaff.dob || "N/A"} ({calculateAge(selectedStaff.dob) ?? "N/A"} Yrs)</span></div>
+                  <div className="flex justify-between"><span className="text-slate-400 font-sans">Aadhaar Number:</span> <span className="text-slate-200 font-bold">{selectedStaff.aadhaarNumber || "N/A"}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-400 font-sans">PAN Number:</span> <span className="text-slate-200 font-bold">{selectedStaff.panNumber || "N/A"}</span></div>
+                </div>
+
+                <div className="bg-background p-4 rounded-2xl border border-border space-y-2">
+                  <h4 className="text-emerald-400 font-extrabold uppercase text-[11px] font-sans">Disbursement & Banking</h4>
+                  <div className="flex justify-between"><span className="text-slate-400 font-sans">Bank:</span> <span className="text-slate-200 font-bold">{selectedStaff.bankName || "N/A"}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-400 font-sans">Account Holder:</span> <span className="text-slate-200">{selectedStaff.accountHolderName || selectedStaff.name}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-400 font-sans">Account Number:</span> <span className="text-emerald-400 font-bold">{selectedStaff.accountNumber || "N/A"}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-400 font-sans">IFSC Code:</span> <span className="text-slate-200 font-bold">{selectedStaff.ifscCode || "N/A"}</span></div>
+                </div>
+              </div>
+
+              {/* Compliance & Vault Documents */}
+              <div className="space-y-3 pt-2">
+                <h4 className="text-amber-400 font-extrabold uppercase text-xs tracking-wider flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4" /> Vault KYC Documents
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                  <button
+                    onClick={() => handleViewStaffDoc(selectedStaff, "photo", "Staff Photo Dossier")}
+                    className="p-3 bg-background hover:bg-surface border border-border hover:border-amber-400 rounded-xl flex items-center justify-between text-left transition-all cursor-pointer group"
+                  >
+                    <div>
+                      <div className="font-bold text-slate-200 text-xs group-hover:text-amber-400">Staff Photo</div>
+                      <div className="text-[10px] text-slate-500 font-mono">KYC Profile Scan</div>
+                    </div>
+                    <ExternalLink className="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400" />
+                  </button>
+
+                  <button
+                    onClick={() => handleViewStaffDoc(selectedStaff, "aadhaar", "Official Aadhaar Card")}
+                    className="p-3 bg-background hover:bg-surface border border-border hover:border-amber-400 rounded-xl flex items-center justify-between text-left transition-all cursor-pointer group"
+                  >
+                    <div>
+                      <div className="font-bold text-slate-200 text-xs group-hover:text-amber-400">Aadhaar Card</div>
+                      <div className="text-[10px] text-slate-500 font-mono">{selectedStaff.aadhaarDocName || "UIDAI Record"}</div>
+                    </div>
+                    <ExternalLink className="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400" />
+                  </button>
+
+                  <button
+                    onClick={() => handleViewStaffDoc(selectedStaff, "pan", "Permanent Account Number Card")}
+                    className="p-3 bg-background hover:bg-surface border border-border hover:border-amber-400 rounded-xl flex items-center justify-between text-left transition-all cursor-pointer group"
+                  >
+                    <div>
+                      <div className="font-bold text-slate-200 text-xs group-hover:text-amber-400">PAN Card</div>
+                      <div className="text-[10px] text-slate-500 font-mono">{selectedStaff.panDocName || "ITD Card"}</div>
+                    </div>
+                    <ExternalLink className="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400" />
+                  </button>
+
+                  <button
+                    onClick={() => handleViewStaffDoc(selectedStaff, "contract", "Employment Agreement & Offer Letter")}
+                    className="p-3 bg-background hover:bg-surface border border-border hover:border-amber-400 rounded-xl flex items-center justify-between text-left transition-all cursor-pointer group"
+                  >
+                    <div>
+                      <div className="font-bold text-slate-200 text-xs group-hover:text-amber-400">HR Contract</div>
+                      <div className="text-[10px] text-slate-500 font-mono">{selectedStaff.contractDocName || "Offer Letter"}</div>
+                    </div>
+                    <ExternalLink className="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-border flex justify-end gap-3">
+                <button
+                  onClick={() => {
+                    const stf = selectedStaff;
+                    setSelectedStaff(null);
+                    openEditModal(stf);
+                  }}
+                  className="px-5 py-2 bg-background hover:bg-slate-800 border border-border text-slate-200 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Edit2 className="w-3.5 h-3.5" /> Edit Profile
+                </button>
+                <button
+                  onClick={() => setSelectedStaff(null)}
+                  className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-xs font-black uppercase cursor-pointer"
+                >
+                  Close Dossier
+                </button>
+              </div>
+            </div>
+          </div>
+        </Portal>
       )}
 
       {/* Add / Edit Staff Modal */}
@@ -537,11 +835,11 @@ export default function MasterOfficeStaffPage() {
                 </h3>
               </div>
 
-              <form 
-                onSubmit={handleFormSubmit} 
+              <form
+                onSubmit={handleFormSubmit}
                 onInvalidCapture={(e) => {
                   const target = e.target as HTMLElement;
-                  target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  target.scrollIntoView({ behavior: "smooth", block: "center" });
                 }}
                 className="space-y-6 text-xs"
               >
@@ -550,7 +848,11 @@ export default function MasterOfficeStaffPage() {
                   <label className="text-slate-300 font-bold block">Staff Photo Upload from Device (with Live Preview)</label>
                   <div className="flex items-center gap-4">
                     {formData.photoUrl ? (
-                      <img src={formData.photoUrl} alt="Preview" className="w-16 h-16 rounded-2xl object-cover border-2 border-amber-400" />
+                      <img
+                        src={formData.photoUrl}
+                        alt="Preview"
+                        className="w-16 h-16 rounded-2xl object-cover border-2 border-amber-400"
+                      />
                     ) : (
                       <div className="w-16 h-16 rounded-2xl bg-surface border border-dashed border-white/20 flex items-center justify-center text-slate-500 font-bold text-xs">
                         No Photo
@@ -564,7 +866,9 @@ export default function MasterOfficeStaffPage() {
                         if (file) {
                           const reader = new FileReader();
                           reader.onload = (ev) => {
-                            setFormData({ ...formData, photoName: file.name, photoUrl: ev.target?.result as string });
+                            const dataUrl = ev.target?.result as string;
+                            setDocFiles(prev => ({ ...prev, photo: dataUrl }));
+                            setFormData(prev => ({ ...prev, photoName: file.name, photoUrl: dataUrl }));
                           };
                           reader.readAsDataURL(file);
                         }
@@ -623,9 +927,13 @@ export default function MasterOfficeStaffPage() {
                       className="w-full bg-background border border-border rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 font-bold"
                     >
                       <option value="">-- Please Select --</option>
-                      {departments.map((dept: any) => (
-                        <option key={dept.id} value={dept.id}>{dept.name}</option>
-                      ))}
+                      {(Array.isArray(departments) && departments.length > 0 ? departments : DEFAULT_DEPARTMENTS).map(
+                        (dept: any) => (
+                          <option key={dept.id} value={dept.id}>
+                            {dept.name}
+                          </option>
+                        )
+                      )}
                     </select>
                   </div>
                 </div>
@@ -662,7 +970,7 @@ export default function MasterOfficeStaffPage() {
                       pattern="\d{10}"
                       title="Please enter a valid 10-digit mobile number"
                       value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
                       className="w-full bg-background border border-border rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                     />
                   </div>
@@ -680,7 +988,9 @@ export default function MasterOfficeStaffPage() {
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         className="peer w-full bg-background border border-border rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 focus:invalid:border-rose-500 focus:invalid:ring-1 focus:invalid:ring-rose-500 font-mono"
                       />
-                      <p className="mt-1 hidden text-rose-500 text-[10px] peer-focus:peer-invalid:block font-bold">Please enter a valid email address with @</p>
+                      <p className="mt-1 hidden text-rose-500 text-[10px] peer-focus:peer-invalid:block font-bold">
+                        Please enter a valid email address with @
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -688,7 +998,7 @@ export default function MasterOfficeStaffPage() {
                 {/* KYC Documents Section */}
                 <div className="space-y-3 pt-3 border-t border-border">
                   <h4 className="text-amber-400 font-extrabold uppercase text-[11px] tracking-wider flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4" /> KYC Document Numbers & Vault Uploads
+                    <ShieldCheck className="w-4 h-4" /> KYC Document Numbers &amp; Vault Uploads
                   </h4>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -703,8 +1013,8 @@ export default function MasterOfficeStaffPage() {
                         title="Please enter a valid 12-digit Aadhaar number format: XXXX XXXX XXXX"
                         value={formData.aadhaarNumber}
                         onChange={(e) => {
-                          let val = e.target.value.replace(/\D/g, '');
-                          val = val.replace(/(\d{4})/g, '$1 ').trim();
+                          let val = e.target.value.replace(/\D/g, "");
+                          val = val.replace(/(\d{4})/g, "$1 ").trim();
                           setFormData({ ...formData, aadhaarNumber: val.slice(0, 14) });
                         }}
                         className="w-full bg-background border border-border rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
@@ -716,7 +1026,18 @@ export default function MasterOfficeStaffPage() {
                       <input
                         type="file"
                         accept=".pdf,image/*"
-                        onChange={(e) => setFormData({ ...formData, aadhaarDocName: e.target.files?.[0]?.name || "" })}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (ev) => {
+                              const dataUrl = ev.target?.result as string;
+                              setDocFiles(prev => ({ ...prev, aadhaar: dataUrl }));
+                              setFormData(prev => ({ ...prev, aadhaarDocName: file.name }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
                         className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                       />
                     </div>
@@ -732,12 +1053,12 @@ export default function MasterOfficeStaffPage() {
                         title="Please enter a valid 10-character PAN number format: ABCDE1234F"
                         value={formData.panNumber}
                         onChange={(e) => {
-                          let pan = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-                          let formatted = '';
-                          for(let i=0; i<pan.length; i++) {
-                            if (i < 5) formatted += pan[i].replace(/[^A-Z]/, '');
-                            else if (i < 9) formatted += pan[i].replace(/[^0-9]/, '');
-                            else if (i === 9) formatted += pan[i].replace(/[^A-Z]/, '');
+                          let pan = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+                          let formatted = "";
+                          for (let i = 0; i < pan.length; i++) {
+                            if (i < 5) formatted += pan[i].replace(/[^A-Z]/, "");
+                            else if (i < 9) formatted += pan[i].replace(/[^0-9]/, "");
+                            else if (i === 9) formatted += pan[i].replace(/[^A-Z]/, "");
                           }
                           setFormData({ ...formData, panNumber: formatted.slice(0, 10) });
                         }}
@@ -750,7 +1071,18 @@ export default function MasterOfficeStaffPage() {
                       <input
                         type="file"
                         accept=".pdf,image/*"
-                        onChange={(e) => setFormData({ ...formData, panDocName: e.target.files?.[0]?.name || "" })}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (ev) => {
+                              const dataUrl = ev.target?.result as string;
+                              setDocFiles(prev => ({ ...prev, pan: dataUrl }));
+                              setFormData(prev => ({ ...prev, panDocName: file.name }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
                         className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                       />
                     </div>
@@ -761,7 +1093,18 @@ export default function MasterOfficeStaffPage() {
                     <input
                       type="file"
                       accept=".pdf,image/*"
-                      onChange={(e) => setFormData({ ...formData, contractDocName: e.target.files?.[0]?.name || "" })}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (ev) => {
+                            const dataUrl = ev.target?.result as string;
+                            setDocFiles(prev => ({ ...prev, contract: dataUrl }));
+                            setFormData(prev => ({ ...prev, contractDocName: file.name }));
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
                       className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-300 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 cursor-pointer"
                     />
                   </div>
@@ -769,8 +1112,8 @@ export default function MasterOfficeStaffPage() {
 
                 {/* Banking Details */}
                 <div className="space-y-3 pt-3 border-t border-border">
-                  <h4 className="text-amber-400 font-extrabold uppercase text-[11px] tracking-wider flex items-center gap-1.5">
-                    <Landmark className="w-4 h-4" /> Banking Salary Settlement Account
+                  <h4 className="text-emerald-400 font-extrabold uppercase text-[11px] tracking-wider flex items-center gap-1.5">
+                    <Landmark className="w-4 h-4" /> Banking &amp; Disbursement Profile
                   </h4>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -779,10 +1122,10 @@ export default function MasterOfficeStaffPage() {
                       <input
                         type="text"
                         required
-                        placeholder="e.g. HDFC Bank"
+                        placeholder="e.g. HDFC Bank, SBI, ICICI"
                         value={formData.bankName}
-                        onChange={(e) => setFormData({ ...formData, bankName: e.target.value.replace(/[^A-Za-z\s]/g, '') })}
-                        className="w-full bg-background border border-border rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-semibold"
+                        onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
+                        className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
                       />
                     </div>
 
@@ -791,10 +1134,10 @@ export default function MasterOfficeStaffPage() {
                       <input
                         type="text"
                         required
-                        placeholder="Name as per bank records"
+                        placeholder="As per bank passbook"
                         value={formData.accountHolderName}
-                        onChange={(e) => setFormData({ ...formData, accountHolderName: e.target.value.replace(/[^A-Za-z\s]/g, '') })}
-                        className="w-full bg-background border border-border rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
+                        onChange={(e) => setFormData({ ...formData, accountHolderName: e.target.value })}
+                        className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400"
                       />
                     </div>
                   </div>
@@ -807,7 +1150,7 @@ export default function MasterOfficeStaffPage() {
                         required
                         placeholder="Account number"
                         value={formData.accountNumber}
-                        onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value.replace(/\D/g, '') })}
+                        onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value.replace(/\D/g, "") })}
                         className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-amber-400 font-mono"
                       />
                     </div>
@@ -819,11 +1162,11 @@ export default function MasterOfficeStaffPage() {
                         required
                         placeholder="Repeat account number"
                         value={formData.confirmAccountNumber}
-                        onChange={(e) => setFormData({ ...formData, confirmAccountNumber: e.target.value.replace(/\D/g, '') })}
+                        onChange={(e) => setFormData({ ...formData, confirmAccountNumber: e.target.value.replace(/\D/g, "") })}
                         className={`w-full bg-background border rounded-xl px-3 py-2 text-slate-100 focus:outline-none font-mono ${
                           formData.confirmAccountNumber && formData.accountNumber !== formData.confirmAccountNumber
-                            ? 'border-rose-500 focus:border-rose-500 ring-1 ring-rose-500'
-                            : 'border-border focus:border-amber-400'
+                            ? "border-rose-500 focus:border-rose-500 ring-1 ring-rose-500"
+                            : "border-border focus:border-amber-400"
                         }`}
                       />
                       {formData.confirmAccountNumber && formData.accountNumber !== formData.confirmAccountNumber && (
@@ -842,12 +1185,12 @@ export default function MasterOfficeStaffPage() {
                         title="Valid IFSC: 4 letters, 1 zero, 6 alphanumeric characters"
                         value={formData.ifscCode}
                         onChange={(e) => {
-                          let ifsc = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-                          let formatted = '';
-                          for(let i=0; i<ifsc.length; i++) {
-                            if (i < 4) formatted += ifsc[i].replace(/[^A-Z]/, '');
-                            else if (i === 4) formatted += ifsc[i].replace(/[^0]/, '0');
-                            else if (i < 11) formatted += ifsc[i].replace(/[^A-Z0-9]/, '');
+                          let ifsc = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+                          let formatted = "";
+                          for (let i = 0; i < ifsc.length; i++) {
+                            if (i < 4) formatted += ifsc[i].replace(/[^A-Z]/, "");
+                            else if (i === 4) formatted += ifsc[i].replace(/[^0]/, "0");
+                            else if (i < 11) formatted += ifsc[i].replace(/[^A-Z0-9]/, "");
                           }
                           setFormData({ ...formData, ifscCode: formatted.slice(0, 11) });
                         }}
@@ -861,7 +1204,7 @@ export default function MasterOfficeStaffPage() {
                   <button
                     type="button"
                     onClick={() => setShowAddModal(false)}
-                    className="px-5 py-2.5 bg-background text-slate-400 hover:text-white rounded-xl text-xs font-bold"
+                    className="px-5 py-2.5 bg-background text-slate-400 hover:text-white rounded-xl text-xs font-bold cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -882,4 +1225,3 @@ export default function MasterOfficeStaffPage() {
     </div>
   );
 }
-

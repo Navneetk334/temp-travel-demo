@@ -48,13 +48,24 @@ export async function POST(req: NextRequest) {
 
     const passwordHash = await hashPassword(password);
 
+    // Validate departmentId exists in database before linking to avoid FK constraint error
+    let validDeptId: string | null = null;
+    if (departmentId) {
+      try {
+        const found = await prisma.department.findUnique({ where: { id: departmentId } });
+        if (found) validDeptId = departmentId;
+      } catch (e) {
+        validDeptId = null;
+      }
+    }
+
     const newStaff = await prisma.admin.create({
       data: {
         name,
         email,
         passwordHash,
         role: role || "MANAGER",
-        departmentId: departmentId || null,
+        departmentId: validDeptId,
         employeeId: employeeId || null,
         phone: phone || null,
         dob: dob || null,

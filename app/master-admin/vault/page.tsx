@@ -293,6 +293,33 @@ export default function MasterDocumentVaultPage() {
         console.error(e);
       }
     }
+
+    // Also fetch staff from API to ensure complete sync
+    fetch("/api/admin/staff")
+      .then(res => res.json())
+      .then(apiData => {
+        const list = Array.isArray(apiData?.staff) ? apiData.staff : (Array.isArray(apiData) ? apiData : []);
+        if (list.length > 0) {
+          setStaffFolders(prev => {
+            const map = new Map<string, VaultFolderItem>();
+            list.forEach((s: any) => {
+              const folder = mapStaffToFolder(s);
+              const key = (folder.name || folder.id || "").toLowerCase().trim();
+              if (key) map.set(key, folder);
+            });
+            prev.forEach((f: VaultFolderItem) => {
+              const key = (f.name || f.id || "").toLowerCase().trim();
+              if (key && !map.has(key)) {
+                map.set(key, f);
+              }
+            });
+            return Array.from(map.values());
+          });
+        }
+      })
+      .catch(err => {
+        console.warn("Failed to fetch staff from API for vault:", err);
+      });
   }, []);
 
   const currentFolderList =
@@ -344,6 +371,20 @@ export default function MasterDocumentVaultPage() {
 
       if (!dataUrl && doc.key === "photo" && folder.driverRaw?.photoUrl) {
         dataUrl = folder.driverRaw.photoUrl;
+      }
+    }
+
+    if (!dataUrl && activeRoot === "STAFF") {
+      const nameClean = folder.name || "";
+      const phoneClean = (folder.phone || folder.staffRaw?.phone || "").replace(/\D/g, "");
+      const empIdClean = folder.staffRaw?.employeeId || folder.id || "";
+      dataUrl =
+        (nameClean ? await getVaultFile(getStaffDocKey(nameClean, doc.key)) : null) ||
+        (phoneClean ? await getVaultFile(getStaffDocKey(phoneClean, doc.key)) : null) ||
+        (empIdClean ? await getVaultFile(getStaffDocKey(empIdClean, doc.key)) : null);
+
+      if (!dataUrl && doc.key === "photo" && folder.staffRaw?.photoUrl) {
+        dataUrl = folder.staffRaw.photoUrl;
       }
     }
 

@@ -18,13 +18,24 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       bankName, accountHolderName, accountNumber, ifscCode, permissions
     } = body;
 
+    // Validate departmentId exists in database before linking to avoid FK constraint error
+    let validDeptId: string | null = null;
+    if (departmentId) {
+      try {
+        const found = await prisma.department.findUnique({ where: { id: departmentId } });
+        if (found) validDeptId = departmentId;
+      } catch (e) {
+        validDeptId = null;
+      }
+    }
+
     const updatedStaff = await prisma.admin.update({
       where: { id },
       data: {
         name,
         email,
         role,
-        departmentId: departmentId || null,
+        departmentId: validDeptId,
         isActive: isActive !== undefined ? isActive : true,
         employeeId: employeeId || null,
         phone: phone || null,

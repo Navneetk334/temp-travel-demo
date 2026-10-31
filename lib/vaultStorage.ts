@@ -448,7 +448,76 @@ export function generateFallbackVaultDocument({
     return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
   }
 
-  // 5. Default Photo / ID Badge
+  // 5. Official Employment Agreement / Contract / HR Offer Letter
+  if (tLower.includes("contract") || tLower.includes("offer") || tLower.includes("agreement") || tLower.includes("employment")) {
+    const formattedRef = ref || "EMP-AGREEMENT-HQ";
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 540" width="100%" height="100%">
+      <defs>
+        <linearGradient id="contract_bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#0F172A"/>
+          <stop offset="50%" stop-color="#1E1E38"/>
+          <stop offset="100%" stop-color="#0F172A"/>
+        </linearGradient>
+        <filter id="shadowContract" x="-5%" y="-5%" width="110%" height="110%">
+          <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.5"/>
+        </filter>
+      </defs>
+      <!-- Background Card -->
+      <rect x="25" y="20" width="800" height="500" rx="24" fill="url(#contract_bg)" stroke="#6366F1" stroke-width="2.5" filter="url(#shadowContract)"/>
+      
+      <!-- Top Header -->
+      <g transform="translate(50, 45)">
+        <rect x="0" y="0" width="750" height="60" rx="12" fill="#4F46E5"/>
+        <text x="375" y="27" font-family="sans-serif" font-size="16" font-weight="900" fill="#FFFFFF" text-anchor="middle">TEMP TRAVEL CAR RENTALS PVT LTD • CORPORATE HR WING</text>
+        <text x="375" y="48" font-family="sans-serif" font-size="13" font-weight="900" fill="#E0E7FF" text-anchor="middle">OFFICIAL EMPLOYMENT CONTRACT &amp; APPOINTMENT AGREEMENT</text>
+      </g>
+      
+      <!-- Seal / Shield -->
+      <g transform="translate(60, 130)">
+        <rect width="140" height="175" rx="14" fill="#1E1E38" stroke="#6366F1" stroke-width="2"/>
+        <circle cx="70" cy="70" r="40" fill="#312E81"/>
+        <path d="M 52 70 L 64 82 L 88 56" fill="none" stroke="#A5B4FC" stroke-width="4.5" stroke-linecap="round"/>
+        <rect x="15" y="130" width="110" height="30" rx="6" fill="#4F46E5"/>
+        <text x="70" y="150" font-family="sans-serif" font-size="10" font-weight="900" fill="#FFFFFF" text-anchor="middle">AUTHORIZED HR</text>
+      </g>
+      
+      <!-- Details -->
+      <g transform="translate(230, 135)">
+        <text x="0" y="20" font-family="sans-serif" font-size="12" font-weight="700" fill="#94A3B8">AGREEMENT / REF NO.:</text>
+        <rect x="0" y="28" width="370" height="42" rx="8" fill="#1E1E38" stroke="#6366F1" stroke-width="1.5"/>
+        <text x="185" y="56" font-family="monospace, sans-serif" font-size="20" font-weight="900" fill="#A5B4FC" letter-spacing="2" text-anchor="middle">${formattedRef}</text>
+        
+        <text x="0" y="98" font-family="sans-serif" font-size="12" font-weight="700" fill="#94A3B8">EMPLOYEE / CANDIDATE NAME:</text>
+        <text x="0" y="125" font-family="sans-serif" font-size="22" font-weight="900" fill="#F8FAFC">${subject.toUpperCase()}</text>
+        
+        <text x="0" y="160" font-family="sans-serif" font-size="12" font-weight="700" fill="#94A3B8">EMPLOYMENT STATUS:</text>
+        <text x="0" y="185" font-family="sans-serif" font-size="16" font-weight="900" fill="#34D399">ACTIVE CONFIRMED STAFF • FULL TIME</text>
+        
+        <text x="0" y="220" font-family="sans-serif" font-size="12" font-weight="700" fill="#94A3B8">EMPLOYER ORGANIZATION:</text>
+        <text x="0" y="245" font-family="sans-serif" font-size="14" font-weight="900" fill="#E2E8F0">TEMP TRAVEL CAR RENTALS PVT LTD, NEW DELHI</text>
+      </g>
+      
+      <!-- Stamp / QR -->
+      <g transform="translate(630, 135)">
+        <rect width="150" height="150" rx="14" fill="#1E1E38" stroke="#6366F1" stroke-width="2"/>
+        <circle cx="75" cy="75" r="55" fill="none" stroke="#6366F1" stroke-width="2" stroke-dasharray="6,4"/>
+        <circle cx="75" cy="75" r="42" fill="#312E81"/>
+        <text x="75" y="65" font-family="sans-serif" font-size="9" font-weight="900" fill="#C7D2FE" text-anchor="middle">TEMP TRAVEL</text>
+        <text x="75" y="78" font-family="sans-serif" font-size="8" font-weight="900" fill="#818CF8" text-anchor="middle">CORP SEAL</text>
+        <text x="75" y="92" font-family="sans-serif" font-size="8" font-weight="900" fill="#34D399" text-anchor="middle">VERIFIED</text>
+        <text x="75" y="140" font-family="sans-serif" font-size="8" font-weight="900" fill="#94A3B8" text-anchor="middle">DIGITALLY SIGNED</text>
+      </g>
+      
+      <!-- Footer -->
+      <g transform="translate(50, 440)">
+        <rect width="750" height="55" rx="12" fill="#1E1E38" stroke="#312E81" stroke-width="1.5"/>
+        <text x="375" y="34" font-family="sans-serif" font-size="13" font-weight="900" fill="#A5B4FC" text-anchor="middle">CONFIDENTIAL HR RECORD • PROTECTED UNDER CORPORATE VAULT</text>
+      </g>
+    </svg>`;
+    return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+  }
+
+  // 6. Default Photo / ID Badge
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 540" width="100%" height="100%">
     <rect x="25" y="20" width="800" height="500" rx="24" fill="#0F172A" stroke="#F59E0B" stroke-width="2"/>
     <g transform="translate(50, 45)">
