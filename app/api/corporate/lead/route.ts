@@ -82,8 +82,25 @@ export async function GET(req: NextRequest) {
 
     const totalPages = Math.ceil(totalCount / limit) || 1;
 
+    const mappedLeads = leads.map((lead: any) => {
+      let dropLocation = "";
+      if (lead.requirements) {
+        const dropMatch = lead.requirements.match(/(?:Drop Address|Drop Location|Drop):\s*([^.\n]+(?:\.[^.\n]+)*?)(?=\.\s*(?:Pickup Time|Drop Time|Fare|Advance|Car|Chauffeur|Notes|$)|$|\n)/i);
+        if (dropMatch && dropMatch[1]) dropLocation = dropMatch[1].trim();
+      }
+      if (!dropLocation && lead.notes) {
+        const dropMatchNotes = lead.notes.match(/(?:Drop Address|Drop Location|Drop):\s*([^\n\r.]+)/i);
+        if (dropMatchNotes && dropMatchNotes[1]) dropLocation = dropMatchNotes[1].trim();
+      }
+      return {
+        ...lead,
+        pickupLocation: lead.pickupLocations || "",
+        dropLocation: dropLocation || null,
+      };
+    });
+
     return NextResponse.json({
-      leads,
+      leads: mappedLeads,
       pagination: {
         totalCount,
         totalPages,
@@ -131,6 +148,16 @@ export async function POST(req: NextRequest) {
 
     const dataToSave = result.success ? result.data : sanitizedBody;
 
+    const dropAddress = (rawBody.dropLocation || rawBody.drop || "").trim();
+    let finalRequirements = dataToSave.requirements || null;
+    if (dropAddress && (!finalRequirements || !finalRequirements.toLowerCase().includes("drop"))) {
+      finalRequirements = finalRequirements ? `${finalRequirements}. Drop Address: ${dropAddress}` : `Drop Address: ${dropAddress}`;
+    }
+    let finalNotes = rawBody.notes || null;
+    if (dropAddress && (!finalNotes || !finalNotes.includes(dropAddress))) {
+      finalNotes = finalNotes ? `${finalNotes}\nDrop Location: ${dropAddress}` : `Drop Location: ${dropAddress}`;
+    }
+
     try {
       const lead = await prisma.corporateLead.create({
         data: {
@@ -141,18 +168,25 @@ export async function POST(req: NextRequest) {
           employeeCount: dataToSave.employeeCount || 1,
           pickupLocations: dataToSave.pickupLocations || null,
           serviceType: dataToSave.serviceType,
-          requirements: dataToSave.requirements || null,
-          notes: rawBody.notes || null,
+          requirements: finalRequirements,
+          notes: finalNotes,
           status: (rawBody.status as any) || "NEW",
         },
       });
-      return NextResponse.json(lead, { status: 201 });
+      return NextResponse.json({
+        ...lead,
+        pickupLocation: lead.pickupLocations || "",
+        dropLocation: dropAddress || null,
+      }, { status: 201 });
     } catch (dbError) {
       console.warn("Database unavailable for corporate lead creation, generating fallback response:", dbError);
       const fallbackLead = {
         id: `corp_${Date.now()}`,
         ...dataToSave,
-        notes: rawBody.notes || null,
+        requirements: finalRequirements,
+        notes: finalNotes,
+        pickupLocation: dataToSave.pickupLocations || "",
+        dropLocation: dropAddress || null,
         status: rawBody.status || "NEW",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()

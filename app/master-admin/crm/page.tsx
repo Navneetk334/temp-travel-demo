@@ -32,7 +32,7 @@ import {
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 import LocationInput from "@/components/shared/location-input";
-import { extractLeadVehicleRequirements } from "@/components/admin/lead-dispatch-modal";
+import { extractLeadVehicleRequirements, extractPickupLocation, extractDropLocation } from "@/components/admin/lead-dispatch-modal";
 import { useDialog } from "@/app/components/DialogProvider";
 import { syncExistingDispatchesToLeads } from "@/lib/lead-sync";
 
@@ -161,6 +161,9 @@ export default function MasterOmnichannelCRMPage() {
       tripType = raw.tourPackageId ? "Tour Package Booking" : (raw.subject ? `Contact Inquiry (${raw.subject})` : defaultType);
     }
 
+    const pLoc = extractPickupLocation(raw);
+    const dLoc = extractDropLocation(raw);
+
     return {
       id: raw.id || `lead_${Math.random().toString(36).substring(2, 9)}`,
       bookingRef: raw.bookingRef || raw.bookingNumber || `TT-${(raw.id || Date.now().toString()).slice(-6).toUpperCase()}`,
@@ -169,8 +172,8 @@ export default function MasterOmnichannelCRMPage() {
       phone: custPhone,
       email: custEmail,
       tripType,
-      pickupLocation: raw.pickupLocation || raw.pickupLocations || raw.pickup || "-",
-      dropLocation: raw.dropLocation || raw.drop || "-",
+      pickupLocation: pLoc || raw.pickupLocation || raw.pickupLocations || raw.pickup || "-",
+      dropLocation: dLoc || raw.dropLocation || raw.drop || "-",
       status: (raw.status || "NEW").toUpperCase(),
       createdAt: raw.createdAt || raw.date || new Date().toISOString(),
       notes: raw.notes || raw.requirements || raw.message || raw.details || "",
@@ -347,8 +350,8 @@ export default function MasterOmnichannelCRMPage() {
       fare: "2800",
       advance: "500",
       paymentMode: "Cash Collection",
-      pickupLocation: lead.pickupLocation || "",
-      dropLocation: lead.dropLocation || "",
+      pickupLocation: extractPickupLocation(lead) || (lead.pickupLocation !== "-" ? lead.pickupLocation : "") || "",
+      dropLocation: extractDropLocation(lead) || (lead.dropLocation !== "-" ? lead.dropLocation : "") || "",
       pickupDateTime: new Date().toISOString().slice(0, 16),
       notes: lead.notes || `Dispatched via Master CRM for ${lead.customerName}`
     });

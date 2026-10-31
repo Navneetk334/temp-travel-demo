@@ -64,6 +64,37 @@ export function extractLeadVehicleRequirements(lead: any): {
   return { category, vehicleClass, model, isVehiclePreSelected };
 }
 
+export function extractPickupLocation(lead: any): string {
+  if (!lead) return "";
+  if (lead.pickupLocation && typeof lead.pickupLocation === "string" && lead.pickupLocation.trim() && lead.pickupLocation.trim() !== "Pickup Hub" && lead.pickupLocation.trim() !== "-") {
+    return lead.pickupLocation.trim();
+  }
+  if (lead.pickupLocations && typeof lead.pickupLocations === "string" && lead.pickupLocations.trim() && lead.pickupLocations.trim() !== "Pickup Hub" && lead.pickupLocations.trim() !== "-") {
+    return lead.pickupLocations.trim();
+  }
+  if (lead.pickup && typeof lead.pickup === "string" && lead.pickup.trim() && lead.pickup.trim() !== "Pickup Hub" && lead.pickup.trim() !== "-") {
+    return lead.pickup.trim();
+  }
+  const text = `${lead.requirements || ""} ${lead.notes || ""}`;
+  const match = text.match(/(?:Pickup Address|Pickup Location|Pickup):\s*([^.\n]+(?:\.[^.\n]+)*?)(?=\.\s*(?:Drop Address|Drop Location|Drop|Pickup Time|Drop Time|Fare|$)|$|\n)/i)
+    || text.match(/(?:Pickup Address|Pickup Location|Pickup):\s*([^\n\r]+)/i);
+  return match && match[1] ? match[1].trim() : (lead.pickupLocations || lead.pickupLocation || lead.pickup || "");
+}
+
+export function extractDropLocation(lead: any): string {
+  if (!lead) return "";
+  if (lead.dropLocation && typeof lead.dropLocation === "string" && lead.dropLocation.trim() && lead.dropLocation.trim() !== "-") {
+    return lead.dropLocation.trim();
+  }
+  if (lead.drop && typeof lead.drop === "string" && lead.drop.trim() && lead.drop.trim() !== "-") {
+    return lead.drop.trim();
+  }
+  const text = `${lead.requirements || ""} ${lead.notes || ""}`;
+  const match = text.match(/(?:Drop Address|Drop Location|Drop):\s*([^.\n]+(?:\.[^.\n]+)*?)(?=\.\s*(?:Pickup Time|Drop Time|Fare|Advance|Car|Chauffeur|Notes|$)|$|\n)/i)
+    || text.match(/(?:Drop Address|Drop Location|Drop):\s*([^\n\r]+)/i);
+  return match && match[1] ? match[1].trim() : "";
+}
+
 export default function LeadDispatchModal({
   isOpen,
   onClose,
@@ -199,8 +230,8 @@ export default function LeadDispatchModal({
         fare: "2800",
         advance: "500",
         paymentMode: "Cash Collection",
-        pickupLocation: lead.pickupLocation || lead.pickup || "",
-        dropLocation: lead.dropLocation || lead.drop || "",
+        pickupLocation: extractPickupLocation(lead),
+        dropLocation: extractDropLocation(lead),
         pickupDateTime: lead.pickupDateTime || new Date().toISOString().slice(0, 16),
         notes: lead.notes || `Dispatched via Website Admin for ${lead.customerName || lead.name || "Customer"}`
       });

@@ -25,7 +25,7 @@ import {
   HelpCircle,
   Truck
 } from "lucide-react";
-import LeadDispatchModal from "@/components/admin/lead-dispatch-modal";
+import LeadDispatchModal, { extractPickupLocation, extractDropLocation } from "@/components/admin/lead-dispatch-modal";
 import { syncExistingDispatchesToLeads } from "@/lib/lead-sync";
 
 export type LeadStatus = "NEW" | "CONTACTED" | "QUALIFIED" | "NEGOTIATION" | "WON" | "LOST" | "ARCHIVED";
@@ -38,6 +38,8 @@ interface Lead {
   phone: string;
   employeeCount?: number | null;
   pickupLocations?: string | null;
+  pickupLocation?: string | null;
+  dropLocation?: string | null;
   serviceType: string;
   requirements?: string | null;
   notes?: string | null;
@@ -592,7 +594,11 @@ export default function AdminCorporateLeadsPage() {
                           </td>
                           <td className="p-4 text-right space-x-1" onClick={(e) => e.stopPropagation()}>
                             <button
-                              onClick={() => setDispatchLead(lead)}
+                              onClick={() => setDispatchLead({
+                                ...lead,
+                                pickupLocation: extractPickupLocation(lead),
+                                dropLocation: extractDropLocation(lead),
+                              })}
                               title="Dispatch Fleet & Chauffeur"
                               className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-2.5 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all shadow-sm cursor-pointer"
                             >
@@ -682,7 +688,13 @@ export default function AdminCorporateLeadsPage() {
                     {activeLead.status}
                   </span>
                   <button
-                    onClick={() => setDispatchLead({ ...activeLead, customerName: activeLead.contactName || activeLead.companyName, tripType: activeLead.serviceType })}
+                    onClick={() => setDispatchLead({
+                      ...activeLead,
+                      customerName: activeLead.contactName || activeLead.companyName,
+                      tripType: activeLead.serviceType,
+                      pickupLocation: extractPickupLocation(activeLead),
+                      dropLocation: extractDropLocation(activeLead),
+                    })}
                     className="flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 cursor-pointer"
                   >
                     <Truck className="w-3.5 h-3.5" />
@@ -735,10 +747,17 @@ export default function AdminCorporateLeadsPage() {
                   <span className="font-bold text-amber-400">{activeLead.serviceType}</span>
                 </div>
 
-                {activeLead.pickupLocations && (
+                {(activeLead.pickupLocations || extractPickupLocation(activeLead)) && (
                   <div className="bg-background/40 p-3 rounded-lg border border-border space-y-1">
                     <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Pickup / Transit Locations</div>
-                    <div className="text-slate-200 leading-relaxed">{activeLead.pickupLocations}</div>
+                    <div className="text-slate-200 leading-relaxed">{extractPickupLocation(activeLead) || activeLead.pickupLocations}</div>
+                  </div>
+                )}
+
+                {extractDropLocation(activeLead) && (
+                  <div className="bg-background/40 p-3 rounded-lg border border-border space-y-1">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Drop Location</div>
+                    <div className="text-slate-200 leading-relaxed">{extractDropLocation(activeLead)}</div>
                   </div>
                 )}
 

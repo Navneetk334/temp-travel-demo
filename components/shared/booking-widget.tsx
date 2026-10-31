@@ -838,6 +838,8 @@ export default function BookingWidget() {
           phone: formattedPhone,
           employeeCount: 1,
           pickupLocations: corpData.pickup.trim(),
+          pickupLocation: corpData.pickup.trim(),
+          dropLocation: corpData.drop.trim(),
           serviceType: `Pickup & Drop (${pickupDropSubTab === "working" ? `Working - ${corpData.company.trim()}` : "Individual"})`,
           requirements: `Booking Type: ${pickupDropSubTab === "working" ? "Working" : "Individual"}.${pickupDropSubTab === "working" ? ` Company: ${corpData.company.trim()}.` : ""} Gender: ${corpData.gender}. Pickup Address: ${corpData.pickup.trim()}. Drop Address: ${corpData.drop.trim()}. Pickup Time: ${pickupTimeStr}, Drop Time: ${dropTimeStr}.`
         };
@@ -1000,6 +1002,7 @@ export default function BookingWidget() {
           tripType: payload.serviceType || payload.tripType || payload.details || "Rental Inquiry",
           pickupLocation: payload.pickupLocations || payload.pickupLocation || "",
           dropLocation: payload.dropLocation || "",
+          requirements: payload.requirements || "",
           status: "NEW",
           date: new Date().toISOString().slice(0, 10),
           createdAt: new Date().toISOString()
