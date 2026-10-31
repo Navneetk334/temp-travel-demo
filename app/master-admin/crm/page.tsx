@@ -199,7 +199,18 @@ export default function MasterOmnichannelCRMPage() {
     }
 
     if (combinedLeads.length > 0) {
-      setLeads([...combinedLeads]);
+      const initialSeen = new Set<string>();
+      const uniqueLocal: any[] = [];
+      combinedLeads.forEach((l: any) => {
+        if (!l) return;
+        const idKey = l.id ? `id_${l.id}` : null;
+        const refKey = l.bookingRef ? `ref_${l.bookingRef}` : null;
+        if ((idKey && initialSeen.has(idKey)) || (refKey && initialSeen.has(refKey))) return;
+        if (idKey) initialSeen.add(idKey);
+        if (refKey) initialSeen.add(refKey);
+        uniqueLocal.push(l);
+      });
+      setLeads(uniqueLocal);
     }
 
     // 2. Concurrently fetch all live CRM sources from backend
@@ -239,18 +250,26 @@ export default function MasterOmnichannelCRMPage() {
         items.forEach((item: any) => fetchedList.push(normalizeLead(item, "Contact Inquiry")));
       }
 
-      const map = new Map();
-      combinedLeads.forEach(item => {
-        map.set(item.id, item);
-        if (item.bookingRef) map.set(item.bookingRef, item);
-      });
-      fetchedList.forEach(item => {
-        if (!map.has(item.id) && (!item.bookingRef || !map.has(item.bookingRef))) {
-          map.set(item.id, item);
-        }
-      });
+      const seen = new Set<string>();
+      const merged: any[] = [];
 
-      const merged = Array.from(map.values()).sort(
+      const addIfUnique = (item: any) => {
+        if (!item) return;
+        const idKey = item.id ? `id_${item.id}` : null;
+        const refKey = item.bookingRef ? `ref_${item.bookingRef}` : null;
+
+        if (idKey && seen.has(idKey)) return;
+        if (refKey && seen.has(refKey)) return;
+
+        if (idKey) seen.add(idKey);
+        if (refKey) seen.add(refKey);
+        merged.push(item);
+      };
+
+      combinedLeads.forEach(addIfUnique);
+      fetchedList.forEach(addIfUnique);
+
+      merged.sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
 

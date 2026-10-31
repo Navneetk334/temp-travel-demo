@@ -1007,8 +1007,8 @@ export default function BookingWidget() {
 
         const existingLeads = localStorage.getItem("user_uploaded_crm_leads");
         const list = existingLeads ? JSON.parse(existingLeads) : [];
-        list.unshift(leadRecord);
-        localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(list));
+        const nextList = [leadRecord, ...list.filter((l: any) => l.id !== leadRecord.id && l.bookingRef !== leadRecord.bookingRef)];
+        localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(nextList));
       } catch (e) {
         console.error("Failed to save local CRM lead:", e);
       }
