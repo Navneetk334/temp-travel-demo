@@ -35,10 +35,11 @@ import {
   Activity,
   Check,
   Sliders,
-  Laptop
+  Laptop,
+  Loader2
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
-import { DutySlipRecord } from "@/app/api/duties/route";
+import { DutySlipRecord } from "@/lib/duties";
 
 export default function AdminDutiesPage() {
   const [duties, setDuties] = useState<DutySlipRecord[]>([]);
@@ -123,6 +124,8 @@ export default function AdminDutiesPage() {
   };
 
   const [formData, setFormData] = useState(initialFormState);
+  const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
+  const [isSubmittingForm, setIsSubmittingForm] = useState(false);
 
   // Fetch all duties
   const fetchDuties = async () => {
@@ -135,9 +138,91 @@ export default function AdminDutiesPage() {
 
       const res = await fetch(`/api/duties?${params.toString()}`);
       const data = await res.json();
-      if (data.success && data.duties) {
-        setDuties(data.duties);
+      let serverDuties: DutySlipRecord[] = [];
+      if (data.success && Array.isArray(data.duties)) {
+        serverDuties = data.duties;
       }
+
+      // Check localStorage deleted IDs to ensure deleted items never flash/reappear
+      let deletedIds: string[] = [];
+      try {
+        deletedIds = JSON.parse(localStorage.getItem("admin_deleted_duty_ids") || "[]");
+      } catch (e) {}
+
+      // Check localStorage custom slips to merge any immediate local additions
+      let localCustom: DutySlipRecord[] = [];
+      try {
+        localCustom = JSON.parse(localStorage.getItem("admin_custom_duty_slips") || "[]");
+      } catch (e) {}
+
+      // Check localStorage master_dispatches in case any local dispatches are pending sync
+      let localDispatches: DutySlipRecord[] = [];
+      try {
+        const rawDisp = JSON.parse(localStorage.getItem("master_dispatches") || "[]");
+        if (Array.isArray(rawDisp)) {
+          localDispatches = rawDisp.map((d: any): DutySlipRecord => ({
+            id: d.id || `DS-${d.bookingNumber || Date.now()}`,
+            tripSheetNo: d.bookingNumber || d.pnr || `TT-DS-${String(d.id || Date.now()).slice(-4)}`,
+            carNo: d.regNumber || d.vehicleModel || "Assigned Fleet",
+            date: d.pickupDate || (d.createdAt ? String(d.createdAt).split("T")[0] : new Date().toISOString().split("T")[0]),
+            reportedTo: d.customerName || "Customer Lead",
+            account: d.tripType || "Dispatched Ride",
+            reportAt: d.pickupLocation || "Pickup Hub",
+            garageDepartureTime: "06:30 AM",
+            garageOpeningKm: "45100",
+            reportingTime: d.pickupTime || "08:00 AM",
+            reportingKm: "45115",
+            releaseTime: "06:30 PM",
+            releaseKm: "45195",
+            garagingTime: "07:30 PM",
+            garagingKm: "45210",
+            totalHours: "8.0",
+            totalKms: "80",
+            remarks: `[Local Dispatch] ${d.tripType || "Ride"} - ${d.vehicleCategory || "Fleet"}`,
+            serviceFeedback: "EXCELLENT",
+            parkingTollTax: "0",
+            releaseDate: d.pickupDate || new Date().toISOString().split("T")[0],
+            placeOfRelease: d.dropLocation || "Drop Hub",
+            mobile: d.phone || "",
+            officeTo: "Operations Desk",
+            bookedBy: d.customerName || "Staff",
+            officeFor: d.tripType || "Dispatch",
+            garageInTime: "07:30 PM",
+            garageInKm: "45210",
+            officeReleasePlace: d.dropLocation || "Drop Hub",
+            parkingAmount: "0",
+            handoverPerson: d.driverName || "Assigned Chauffeur",
+            handoverDate: d.pickupDate || new Date().toISOString().split("T")[0],
+            handoverTime: "07:45 PM",
+            officeRemarks: `Status: ${d.status || "CONFIRMED"} | Fare: ₹${d.fare || 0}`,
+            usageTracks: [
+              { id: "1", from: "Garage", to: d.pickupLocation || "Pickup Hub", details: "Reporting" },
+              { id: "2", from: d.pickupLocation || "Pickup Hub", to: d.dropLocation || "Drop Hub", details: "Transit" }
+            ],
+            slipImageUrl: "/images/hero/hero-bg.webp",
+            slipImageName: `slip_${d.bookingNumber || d.id}.jpg`,
+            createdAt: d.createdAt || new Date().toISOString(),
+            updatedAt: d.updatedAt || new Date().toISOString(),
+          }));
+        }
+      } catch (e) {}
+
+      const combined = [...localCustom, ...serverDuties, ...localDispatches];
+      const seen = new Set<string>();
+      const filtered = combined.filter((d) => {
+        if (!d || !d.id) return false;
+        if (deletedIds.includes(d.id) || (d.tripSheetNo && deletedIds.includes(d.tripSheetNo))) {
+          return false;
+        }
+        if (seen.has(d.id) || (d.tripSheetNo && seen.has(d.tripSheetNo))) {
+          return false;
+        }
+        seen.add(d.id);
+        if (d.tripSheetNo) seen.add(d.tripSheetNo);
+        return true;
+      });
+
+      setDuties(filtered);
     } catch (err) {
       console.error("Error fetching duties:", err);
     } finally {
@@ -544,20 +629,37 @@ export default function AdminDutiesPage() {
   // Submit Duty Form
   const handleSubmitDutyForm = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmittingForm(true);
     try {
       if (editingDuty) {
         // Edit flow
+        const res = await fetch(`/api/duties/${editingDuty.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+        const resData = await res.json();
+        const updated = resData.duty || {
+          ...editingDuty,
+          ...formData,
+          updatedAt: new Date().toISOString(),
+        };
+
         setDuties((prev) =>
-          prev.map((d) =>
-            d.id === editingDuty.id
-              ? {
-                  ...d,
-                  ...formData,
-                  updatedAt: new Date().toISOString(),
-                }
-              : d
-          )
+          prev.map((d) => (d.id === editingDuty.id ? updated : d))
         );
+
+        // Update local cache
+        try {
+          const localCustom: DutySlipRecord[] = JSON.parse(localStorage.getItem("admin_custom_duty_slips") || "[]");
+          const idx = localCustom.findIndex((d) => d.id === editingDuty.id);
+          if (idx >= 0) {
+            localCustom[idx] = updated;
+          } else {
+            localCustom.unshift(updated);
+          }
+          localStorage.setItem("admin_custom_duty_slips", JSON.stringify(localCustom));
+        } catch (e) {}
       } else {
         // Create flow
         const res = await fetch("/api/duties", {
@@ -568,20 +670,57 @@ export default function AdminDutiesPage() {
         const resData = await res.json();
         if (resData.success && resData.duty) {
           setDuties((prev) => [resData.duty, ...prev]);
+
+          // Save to local cache
+          try {
+            const localCustom: DutySlipRecord[] = JSON.parse(localStorage.getItem("admin_custom_duty_slips") || "[]");
+            localCustom.unshift(resData.duty);
+            localStorage.setItem("admin_custom_duty_slips", JSON.stringify(localCustom));
+          } catch (e) {}
         }
       }
       setIsFormModalOpen(false);
       setEditingDuty(null);
     } catch (err) {
       console.error("Submit error:", err);
+    } finally {
+      setIsSubmittingForm(false);
     }
   };
 
   // Delete Record
-  const handleDeleteDuty = (id: string) => {
-    if (confirm("Are you sure you want to delete this Duty Slip record?")) {
-      setDuties((prev) => prev.filter((d) => d.id !== id));
-      if (viewingDuty?.id === id) setViewingDuty(null);
+  const handleDeleteDuty = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this Duty Slip record?")) {
+      return;
+    }
+
+    setIsDeletingId(id);
+    try {
+      // 1. Optimistic UI update
+      setDuties((prev) => prev.filter((d) => d.id !== id && d.tripSheetNo !== id));
+      if (viewingDuty?.id === id || viewingDuty?.tripSheetNo === id) setViewingDuty(null);
+
+      // 2. Persist in localStorage deleted list so it NEVER returns
+      try {
+        const stored = JSON.parse(localStorage.getItem("admin_deleted_duty_ids") || "[]");
+        if (!stored.includes(id)) {
+          stored.push(id);
+          localStorage.setItem("admin_deleted_duty_ids", JSON.stringify(stored));
+        }
+        // Also remove from local custom slips if present
+        const localCustom: DutySlipRecord[] = JSON.parse(localStorage.getItem("admin_custom_duty_slips") || "[]");
+        const filteredCustom = localCustom.filter((d) => d.id !== id && d.tripSheetNo !== id);
+        localStorage.setItem("admin_custom_duty_slips", JSON.stringify(filteredCustom));
+      } catch (e) {}
+
+      // 3. Call backend DELETE API
+      await fetch(`/api/duties/${id}`, {
+        method: "DELETE",
+      });
+    } catch (err) {
+      console.error("Delete duty slip error:", err);
+    } finally {
+      setIsDeletingId(null);
     }
   };
 
@@ -852,10 +991,15 @@ export default function AdminDutiesPage() {
 
                         <button
                           onClick={() => handleDeleteDuty(duty.id)}
-                          className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors"
+                          disabled={isDeletingId === duty.id}
+                          className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors disabled:opacity-50"
                           title="Delete Record"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          {isDeletingId === duty.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin text-red-400" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
                         </button>
                       </div>
                     </td>
@@ -1439,9 +1583,11 @@ export default function AdminDutiesPage() {
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2.5 bg-accent hover:bg-yellow-500 text-slate-950 font-black rounded-xl uppercase tracking-wider transition-all shadow-lg shadow-accent/20"
+                    disabled={isSubmittingForm}
+                    className="flex items-center gap-2 px-6 py-2.5 bg-accent hover:bg-yellow-500 text-slate-950 font-black rounded-xl uppercase tracking-wider transition-all shadow-lg shadow-accent/20 disabled:opacity-50"
                   >
-                    {editingDuty ? "Update Duty Slip Entry" : "Save Duty Slip Entry"}
+                    {isSubmittingForm && <Loader2 className="w-4 h-4 animate-spin text-slate-950" />}
+                    <span>{editingDuty ? "Update Duty Slip Entry" : "Save Duty Slip Entry"}</span>
                   </button>
                 </div>
               </form>

@@ -1,153 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+import { 
+  DutySlipRecord, 
+  dutySlipsStore, 
+  getDeletedDutySlipIds, 
+  getCustomDutySlips, 
+  saveCustomDutySlips 
+} from "@/lib/duties";
 
-export interface DutySlipRecord {
-  id: string;
-  tripSheetNo: string;
-  carNo: string;
-  date: string;
-  reportedTo: string;
-  account: string;
-  reportAt: string;
-  
-  // Time & Kilometer Log
-  garageDepartureTime: string;
-  garageOpeningKm: string;
-  reportingTime: string;
-  reportingKm: string;
-  releaseTime: string;
-  releaseKm: string;
-  garagingTime: string;
-  garagingKm: string;
-  totalHours: string;
-  totalKms: string;
-  remarks: string;
-
-  // Feedback & Settlement
-  serviceFeedback: "EXCELLENT" | "GOOD" | "POOR" | string;
-  parkingTollTax: string;
-  releaseDate: string;
-  placeOfRelease: string;
-  mobile: string;
-
-  // Office Use Only
-  officeTo: string;
-  bookedBy: string;
-  officeFor: string;
-  garageInTime: string;
-  garageInKm: string;
-  officeReleasePlace: string;
-  parkingAmount: string;
-  handoverPerson: string;
-  handoverDate: string;
-  handoverTime: string;
-  officeRemarks: string;
-
-  // Car Usage Track Sheet (multi-leg)
-  usageTracks: Array<{ id: string; from: string; to: string; details?: string }>;
-
-  // Scanned Image Vault
-  slipImageUrl?: string;
-  slipImageName?: string;
-
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Global In-Memory Persistence for Duty Slips across dev/production instances
-let dutySlipsStore: DutySlipRecord[] = [
-  {
-    id: "DS-2026-001",
-    tripSheetNo: "TT-DS-9842",
-    carNo: "DL 1ZB 9842",
-    date: "2026-08-24",
-    reportedTo: "Mr. Rajesh Malhotra",
-    account: "McKinsey & Company India",
-    reportAt: "Aerocity Hotel Pullman, New Delhi",
-    garageDepartureTime: "06:30 AM",
-    garageOpeningKm: "45120",
-    reportingTime: "07:15 AM",
-    reportingKm: "45138",
-    releaseTime: "07:45 PM",
-    releaseKm: "45280",
-    garagingTime: "08:30 PM",
-    garagingKm: "45302",
-    totalHours: "14.0",
-    totalKms: "182",
-    remarks: "Executive Corporate Commute & Airport Transit",
-    serviceFeedback: "EXCELLENT",
-    parkingTollTax: "420",
-    releaseDate: "2026-08-24",
-    placeOfRelease: "Aerocity, New Delhi",
-    mobile: "+91 98112 34567",
-    officeTo: "Corporate Billing Desk",
-    bookedBy: "Sunita Verma (SPOC)",
-    officeFor: "Executive Partner Transit",
-    garageInTime: "08:30 PM",
-    garageInKm: "45302",
-    officeReleasePlace: "Garage Qutub Vihar",
-    parkingAmount: "420",
-    handoverPerson: "Mukesh Kumar (Chauffeur)",
-    handoverDate: "2026-08-24",
-    handoverTime: "08:45 PM",
-    officeRemarks: "Toll receipts verified and signed by client",
-    usageTracks: [
-      { id: "1", from: "Garage (Qutub Vihar)", to: "Pullman Aerocity", details: "Morning Reporting" },
-      { id: "2", from: "Pullman Aerocity", to: "Cyber City DLF Phase 2 Gurugram", details: "Client Office Commute" },
-      { id: "3", from: "Cyber City Gurugram", to: "Taj Palace Diplomatic Enclave", details: "Board Meeting" },
-      { id: "4", from: "Taj Palace", to: "IGI Airport T3 Terminal", details: "Evening Drop" },
-      { id: "5", from: "IGI Airport T3", to: "Garage (Qutub Vihar)", details: "Garaging Return" },
-    ],
-    slipImageUrl: "/images/hero/hero-bg.webp",
-    slipImageName: "duty_slip_9842.jpg",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "DS-2026-002",
-    tripSheetNo: "TT-DS-9843",
-    carNo: "DL 2CA 4519",
-    date: "2026-08-25",
-    reportedTo: "Dr. Ananya Sen",
-    account: "Max Healthcare Ltd",
-    reportAt: "Saket Institutional Area, New Delhi",
-    garageDepartureTime: "08:00 AM",
-    garageOpeningKm: "32100",
-    reportingTime: "08:40 AM",
-    reportingKm: "32115",
-    releaseTime: "05:30 PM",
-    releaseKm: "32195",
-    garagingTime: "06:15 PM",
-    garagingKm: "32210",
-    totalHours: "10.25",
-    totalKms: "110",
-    remarks: "Local Medical Delegation Mobility",
-    serviceFeedback: "EXCELLENT",
-    parkingTollTax: "180",
-    releaseDate: "2026-08-25",
-    placeOfRelease: "Max Hospital Saket",
-    mobile: "+91 98765 43210",
-    officeTo: "Healthcare Mobility Desk",
-    bookedBy: "Dr. Sen Office",
-    officeFor: "Visiting Faculty Transfer",
-    garageInTime: "06:15 PM",
-    garageInKm: "32210",
-    officeReleasePlace: "Saket Metro",
-    parkingAmount: "180",
-    handoverPerson: "Ramesh Chand (Chauffeur)",
-    handoverDate: "2026-08-25",
-    handoverTime: "06:30 PM",
-    officeRemarks: "Clean vehicle and satisfactory service confirmed",
-    usageTracks: [
-      { id: "1", from: "Garage", to: "Saket Max Hospital", details: "Reporting" },
-      { id: "2", from: "Max Hospital Saket", to: "AIIMS New Delhi", details: "Conference" },
-      { id: "3", from: "AIIMS", to: "Max Hospital Saket", details: "Return" },
-    ],
-    slipImageUrl: "/images/hero/hero-bg.webp",
-    slipImageName: "duty_slip_9843.jpg",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  }
-];
+export type { DutySlipRecord };
 
 export async function GET(req: NextRequest) {
   try {
@@ -156,8 +17,140 @@ export async function GET(req: NextRequest) {
     const date = searchParams.get("date") || "";
     const feedback = searchParams.get("feedback") || "";
 
-    let filtered = [...dutySlipsStore];
+    // 1. Fetch deleted IDs to enforce permanent deletion
+    const deletedIds = await getDeletedDutySlipIds();
 
+    // 2. Fetch custom / manual duty slips from persistent database storage
+    const customSlips = await getCustomDutySlips();
+
+    // 3. Fetch real bookings & dispatches from Prisma database
+    let bookingDuties: DutySlipRecord[] = [];
+    try {
+      const bookings = await prisma.booking.findMany({
+        include: {
+          customer: { select: { name: true, phone: true, email: true } },
+          vehicle: {
+            select: {
+              id: true,
+              registrationNumber: true,
+              model: true,
+              driver: { select: { name: true, phone: true } }
+            }
+          },
+          vehicleCategory: { select: { name: true } },
+          payments: true,
+        },
+        orderBy: { createdAt: "desc" },
+        take: 100,
+      });
+
+      bookingDuties = bookings.map((b): DutySlipRecord => {
+        // Extract assigned chauffeur from notes if explicitly logged during dispatch
+        let driverName = b.vehicle?.driver?.name || "Designated Chauffeur";
+        if (b.notes) {
+          const match = b.notes.match(/\[AssignedDriver:\s*([^|]+)/i);
+          if (match && match[1]) {
+            driverName = match[1].trim();
+          }
+        }
+
+        const bookingDate = b.pickupDateTime 
+          ? new Date(b.pickupDateTime).toISOString().split("T")[0]
+          : (b.createdAt ? new Date(b.createdAt).toISOString().split("T")[0] : new Date().toISOString().split("T")[0]);
+
+        const pickupTimeStr = b.pickupDateTime
+          ? new Date(b.pickupDateTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })
+          : "08:00 AM";
+
+        const carReg = b.vehicle?.registrationNumber || (b.vehicle?.model ? `${b.vehicle.model}` : "Pending Car Assignment");
+        const fareKms = b.rentalDurationKms 
+          ? String(b.rentalDurationKms) 
+          : (b.estimatedDistance ? String(Math.round(Number(b.estimatedDistance))) : (b.type === "AIRPORT_TRANSFER" ? "45" : (b.type === "OUTSTATION" ? "250" : "80")));
+        const fareHrs = b.rentalDurationHrs ? String(b.rentalDurationHrs) : (b.type === "AIRPORT_TRANSFER" ? "4.0" : "8.0");
+        const tollTax = b.taxAmount ? String(Math.round(Number(b.taxAmount))) : "0";
+
+        let accountLabel = "Individual Client Transit";
+        if (b.type === "AIRPORT_TRANSFER") accountLabel = "Airport Transfer / Pickup & Drop";
+        else if (b.type === "LOCAL_RENTAL") accountLabel = "Local City Mobility (Hourly)";
+        else if (b.type === "OUTSTATION") accountLabel = "Intercity Outstation Journey";
+        else if (b.type === "TOUR_PACKAGE") accountLabel = "Tour Package Itinerary";
+
+        return {
+          id: b.id,
+          tripSheetNo: b.bookingNumber,
+          carNo: carReg,
+          date: bookingDate,
+          reportedTo: b.customer?.name || "Customer Lead",
+          account: accountLabel,
+          reportAt: b.pickupLocation || "Pickup Hub",
+          
+          garageDepartureTime: "06:30 AM",
+          garageOpeningKm: "45100",
+          reportingTime: pickupTimeStr,
+          reportingKm: "45115",
+          releaseTime: "06:30 PM",
+          releaseKm: String(45115 + (parseInt(fareKms) || 80)),
+          garagingTime: "07:30 PM",
+          garagingKm: String(45115 + (parseInt(fareKms) || 80) + 15),
+          totalHours: fareHrs,
+          totalKms: fareKms,
+          remarks: b.notes || `${b.type} Dispatched Trip Sheet`,
+
+          serviceFeedback: "EXCELLENT",
+          parkingTollTax: tollTax,
+          releaseDate: b.returnDateTime 
+            ? new Date(b.returnDateTime).toISOString().split("T")[0] 
+            : bookingDate,
+          placeOfRelease: b.dropLocation || "Destination Hub",
+          mobile: b.customer?.phone || "+91 98201 12233",
+
+          officeTo: "Corporate Billing & Operations Desk",
+          bookedBy: b.customer?.name || "SPOC Desk",
+          officeFor: b.type,
+          garageInTime: "07:30 PM",
+          garageInKm: String(45115 + (parseInt(fareKms) || 80) + 15),
+          officeReleasePlace: b.dropLocation || "Drop Hub",
+          parkingAmount: tollTax,
+          handoverPerson: driverName,
+          handoverDate: bookingDate,
+          handoverTime: "07:45 PM",
+          officeRemarks: `Status: ${b.status} | Net: ₹${Number(b.netAmount || 0).toLocaleString()}`,
+
+          usageTracks: [
+            { id: "1", from: "Garage", to: b.pickupLocation || "Pickup Hub", details: "Reporting Leg" },
+            { id: "2", from: b.pickupLocation || "Pickup Hub", to: b.dropLocation || "Drop Location", details: "Passenger Commute" }
+          ],
+
+          slipImageUrl: "/images/hero/hero-bg.webp",
+          slipImageName: `duty_slip_${b.bookingNumber}.jpg`,
+          createdAt: b.createdAt.toISOString(),
+          updatedAt: b.updatedAt.toISOString(),
+        };
+      });
+    } catch (e) {
+      console.warn("Could not query bookings for duties:", e);
+    }
+
+    // 4. Combine all sources and deduplicate by ID and tripSheetNo
+    const combined = [...customSlips, ...dutySlipsStore, ...bookingDuties];
+    const seen = new Set<string>();
+    let filtered: DutySlipRecord[] = [];
+
+    for (const item of combined) {
+      if (!item || !item.id) continue;
+      // Filter out permanently deleted IDs or tripSheetNos
+      if (deletedIds.includes(item.id) || (item.tripSheetNo && deletedIds.includes(item.tripSheetNo))) {
+        continue;
+      }
+      if (seen.has(item.id) || (item.tripSheetNo && seen.has(item.tripSheetNo))) {
+        continue;
+      }
+      seen.add(item.id);
+      if (item.tripSheetNo) seen.add(item.tripSheetNo);
+      filtered.push(item);
+    }
+
+    // 5. Apply filters
     if (search) {
       filtered = filtered.filter(
         (ds) =>
@@ -167,7 +160,8 @@ export async function GET(req: NextRequest) {
           ds.account.toLowerCase().includes(search) ||
           ds.reportAt.toLowerCase().includes(search) ||
           ds.mobile.includes(search) ||
-          ds.placeOfRelease.toLowerCase().includes(search)
+          ds.placeOfRelease.toLowerCase().includes(search) ||
+          ds.handoverPerson.toLowerCase().includes(search)
       );
     }
 
@@ -202,25 +196,25 @@ export async function POST(req: NextRequest) {
     }
 
     const newRecord: DutySlipRecord = {
-      id: `DS-${Date.now()}`,
+      id: body.id || `DS-${Date.now()}`,
       tripSheetNo: body.tripSheetNo || `TT-DS-${Math.floor(1000 + Math.random() * 9000)}`,
       carNo: body.carNo || "",
       date: body.date || new Date().toISOString().split("T")[0],
       reportedTo: body.reportedTo || "",
-      account: body.account || "",
+      account: body.account || "Individual Client Rental",
       reportAt: body.reportAt || "",
       
       // Time & KMs
-      garageDepartureTime: body.garageDepartureTime || "",
-      garageOpeningKm: body.garageOpeningKm || "0",
-      reportingTime: body.reportingTime || "",
-      reportingKm: body.reportingKm || "0",
-      releaseTime: body.releaseTime || "",
-      releaseKm: body.releaseKm || "0",
-      garagingTime: body.garagingTime || "",
-      garagingKm: body.garagingKm || "0",
-      totalHours: body.totalHours || "0",
-      totalKms: body.totalKms || "0",
+      garageDepartureTime: body.garageDepartureTime || "06:30 AM",
+      garageOpeningKm: body.garageOpeningKm || "45100",
+      reportingTime: body.reportingTime || "07:30 AM",
+      reportingKm: body.reportingKm || "45115",
+      releaseTime: body.releaseTime || "06:30 PM",
+      releaseKm: body.releaseKm || "45195",
+      garagingTime: body.garagingTime || "07:30 PM",
+      garagingKm: body.garagingKm || "45210",
+      totalHours: body.totalHours || "8.0",
+      totalKms: body.totalKms || "80",
       remarks: body.remarks || "",
 
       // Feedback & Settlement
@@ -231,16 +225,16 @@ export async function POST(req: NextRequest) {
       mobile: body.mobile || "",
 
       // Office Use
-      officeTo: body.officeTo || "",
+      officeTo: body.officeTo || "Operations & Billing Desk",
       bookedBy: body.bookedBy || "",
-      officeFor: body.officeFor || "",
-      garageInTime: body.garageInTime || body.garagingTime || "",
-      garageInKm: body.garageInKm || body.garagingKm || "",
+      officeFor: body.officeFor || "Corporate / Retail Transit",
+      garageInTime: body.garageInTime || body.garagingTime || "07:30 PM",
+      garageInKm: body.garageInKm || body.garagingKm || "45210",
       officeReleasePlace: body.officeReleasePlace || body.placeOfRelease || "",
       parkingAmount: body.parkingAmount || body.parkingTollTax || "0",
-      handoverPerson: body.handoverPerson || "",
+      handoverPerson: body.handoverPerson || "Chauffeur",
       handoverDate: body.handoverDate || body.date || new Date().toISOString().split("T")[0],
-      handoverTime: body.handoverTime || "",
+      handoverTime: body.handoverTime || "07:45 PM",
       officeRemarks: body.officeRemarks || "",
 
       usageTracks: Array.isArray(body.usageTracks) ? body.usageTracks : [],
@@ -252,6 +246,12 @@ export async function POST(req: NextRequest) {
       updatedAt: new Date().toISOString(),
     };
 
+    // 1. Persist to PostgreSQL via SiteSetting registry
+    const currentList = await getCustomDutySlips();
+    const updatedList = [newRecord, ...currentList.filter(d => d.id !== newRecord.id)];
+    await saveCustomDutySlips(updatedList);
+
+    // 2. Also keep in runtime store
     dutySlipsStore.unshift(newRecord);
 
     return NextResponse.json({
