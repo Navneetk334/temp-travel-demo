@@ -282,7 +282,7 @@ export default function LeadDispatchModal({
       notes: dispatchForm.notes,
       createdAt: new Date().toISOString(),
       customer: {
-        name: lead.customerName || lead.name || "Customer Lead",
+        name: lead.customerName || lead.contactName || lead.name || lead.companyName || "Customer Lead",
         phone: lead.phone || "",
         email: lead.email || ""
       },
@@ -315,8 +315,13 @@ export default function LeadDispatchModal({
       if (crmStored) {
         const crmList = JSON.parse(crmStored);
         if (Array.isArray(crmList)) {
-          const updatedCRM = crmList.map((l: any) => l.id === lead.id ? { ...l, status: "WON" } : l);
+          const updatedCRM = crmList.map((l: any) =>
+            (l.id === lead.id || l.bookingRef === lead.bookingRef || (l.phone && lead.phone && l.phone === lead.phone))
+              ? { ...l, status: "WON" }
+              : l
+          );
           localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(updatedCRM));
+          window.dispatchEvent(new Event("crm_leads_updated"));
         }
       }
     } catch (e) {
@@ -338,7 +343,7 @@ export default function LeadDispatchModal({
           dropLocation: dispatchForm.dropLocation,
           pickupDateTime: dispatchForm.pickupDateTime,
           notes: dispatchForm.notes,
-          customerName: lead.customerName || lead.name,
+          customerName: lead.customerName || lead.contactName || lead.name || lead.companyName || "Customer Lead",
           customerPhone: lead.phone,
           customerEmail: lead.email,
           tripType: lead.tripType,

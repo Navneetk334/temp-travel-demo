@@ -596,6 +596,7 @@ export default function AdminCorporateLeadsPage() {
                             <button
                               onClick={() => setDispatchLead({
                                 ...lead,
+                                customerName: lead.contactName || lead.companyName || "Customer Lead",
                                 pickupLocation: extractPickupLocation(lead),
                                 dropLocation: extractDropLocation(lead),
                               })}

@@ -269,8 +269,33 @@ export default function MasterOmnichannelCRMPage() {
         merged.push(item);
       };
 
-      combinedLeads.forEach(addIfUnique);
+      // Live database leads take precedence so updated status (e.g. WON) overrides stale local status
       fetchedList.forEach(addIfUnique);
+      combinedLeads.forEach(addIfUnique);
+
+      // Keep user_uploaded_crm_leads updated with the latest live status
+      try {
+        const localCRM = localStorage.getItem("user_uploaded_crm_leads");
+        if (localCRM) {
+          const parsed = JSON.parse(localCRM);
+          if (Array.isArray(parsed)) {
+            let updated = false;
+            const syncedLocal = parsed.map((l: any) => {
+              const liveMatch = fetchedList.find((f: any) => f.id === l.id || f.bookingRef === l.bookingRef || (f.phone === l.phone && f.email === l.email));
+              if (liveMatch && liveMatch.status && liveMatch.status !== l.status) {
+                updated = true;
+                return { ...l, status: liveMatch.status };
+              }
+              return l;
+            });
+            if (updated) {
+              localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(syncedLocal));
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Local sync error:", e);
+      }
 
       merged.sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -298,21 +323,30 @@ export default function MasterOmnichannelCRMPage() {
   }, []);
 
   const updateLeadStatus = async (id: string, newStatus: string) => {
+    const dbStatus = newStatus === "CONVERTED" ? "WON" : newStatus;
     const updated = leads.map(l => l.id === id ? { ...l, status: newStatus } : l);
     setLeads(updated);
 
     try {
       localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(updated));
+      window.dispatchEvent(new Event("crm_leads_updated"));
     } catch (e) {
       console.error("Error saving updated lead status:", e);
     }
 
     try {
-      await fetch(`/api/rental/lead`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, status: newStatus }),
-      });
+      await Promise.allSettled([
+        fetch(`/api/rental/lead`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, status: dbStatus }),
+        }),
+        fetch(`/api/corporate/lead/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: dbStatus }),
+        })
+      ]);
     } catch (e) {
       console.error(e);
     }

@@ -164,31 +164,100 @@ export default function MasterAdminDashboard() {
         console.error(e);
       }
 
-      const [rentalRes, corpRes, fleetRes, drvRes] = await Promise.allSettled([
+      const [rentalRes, corpRes, fleetRes, drvRes, bookingsRes] = await Promise.allSettled([
         fetch("/api/rental/lead"),
         fetch("/api/corporate/lead"),
         fetch("/api/fleet?minimal=true"),
-        fetch("/api/admin/drivers")
+        fetch("/api/admin/drivers"),
+        fetch("/api/bookings")
       ]);
 
-      let apiLeadsCount = 0;
+      const seenLeadKeys = new Set<string>();
+      let uniqueLeadsCount = 0;
+
+      const trackLead = (item: any) => {
+        if (!item) return;
+        const key = item.id || item.bookingRef || `${item.phone || ""}_${item.email || ""}`;
+        if (key && !seenLeadKeys.has(key)) {
+          seenLeadKeys.add(key);
+          uniqueLeadsCount++;
+        }
+      };
+
+      try {
+        const localCRM = localStorage.getItem("user_uploaded_crm_leads");
+        if (localCRM) {
+          const parsed = JSON.parse(localCRM);
+          if (Array.isArray(parsed)) parsed.forEach(trackLead);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+
       if (rentalRes.status === "fulfilled" && rentalRes.value.ok) {
         const data = await rentalRes.value.json();
         const items = Array.isArray(data) ? data : (data.leads || []);
-        apiLeadsCount += items.length;
+        items.forEach(trackLead);
       }
       if (corpRes.status === "fulfilled" && corpRes.value.ok) {
         const data = await corpRes.value.json();
         const items = Array.isArray(data) ? data : (data.leads || []);
-        apiLeadsCount += items.length;
+        items.forEach(trackLead);
       }
-
-      const calculatedTotalLeads = Math.max(totalLocalCount, apiLeadsCount, totalLocalCount + apiLeadsCount);
 
       setStats(prev => ({
         ...prev,
-        totalLeads: calculatedTotalLeads
+        totalLeads: uniqueLeadsCount
       }));
+
+      // Synchronize live dispatches into Master Telematics Queue
+      if (bookingsRes.status === "fulfilled" && bookingsRes.value.ok) {
+        const bData = await bookingsRes.value.json();
+        const bList = Array.isArray(bData) ? bData : (bData.bookings || []);
+        if (bList.length > 0) {
+          const mappedBookings = bList.map((b: any) => ({
+            id: b.id || b.bookingNumber,
+            customerName: b.customer?.name || "Customer Lead",
+            phone: b.customer?.phone || "",
+            email: b.customer?.email || "",
+            tripType: b.type ? b.type.replace(/_/g, " ") : "Dispatched Ride",
+            vehicleCategory: b.vehicleCategory?.name || "Sedan",
+            vehicleClass: b.vehicle?.model ? "" : "Executive",
+            vehicleModel: b.vehicle?.model || "Standard",
+            pickupLocation: b.pickupLocation || "Pickup Hub",
+            dropLocation: b.dropLocation || "",
+            fare: b.netAmount ? String(b.netAmount) : "2800",
+            advance: b.payments?.[0]?.amount ? String(b.payments[0].amount) : "0",
+            status: b.status || "CONFIRMED",
+            regNumber: b.vehicle?.registrationNumber || "Pending Allocation",
+            driverName: b.vehicle?.driver?.name || "Pending Allocation",
+            driverPhone: b.vehicle?.driver?.phone || "",
+            createdAt: b.createdAt
+          }));
+
+          const localDisp = JSON.parse(localStorage.getItem("master_dispatches") || "[]");
+          const seenDisp = new Set<string>();
+          const allDispatches: any[] = [];
+
+          mappedBookings.forEach((d: any) => {
+            seenDisp.add(d.id);
+            allDispatches.push(d);
+          });
+
+          if (Array.isArray(localDisp)) {
+            localDisp.forEach((d: any) => {
+              if (d && !seenDisp.has(d.id)) {
+                seenDisp.add(d.id);
+                allDispatches.push(d);
+              }
+            });
+          }
+
+          setDispatches(allDispatches);
+          const activeCount = allDispatches.filter((d: any) => d.status === "IN_TRANSIT" || d.status === "ASSIGNED" || d.status === "CONFIRMED").length;
+          setStats(prev => ({ ...prev, activeRides: activeCount }));
+        }
+      }
 
       if (fleetRes.status === "fulfilled" && fleetRes.value.ok) {
         const fleetData = await fleetRes.value.json();
