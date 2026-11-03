@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { 
   MapPin, 
   Search, 
@@ -12,7 +13,8 @@ import {
   Archive, 
   ChevronLeft, 
   ChevronRight,
-  Truck
+  Truck,
+  CheckCircle2
 } from "lucide-react";
 import LeadDispatchModal from "@/components/admin/lead-dispatch-modal";
 
@@ -481,14 +483,25 @@ export default function AdminTourLeadsPage() {
                             </span>
                           </td>
                           <td className="p-4 text-right space-x-1" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              onClick={() => setDispatchLead({ ...lead, customerName: lead.contactName, tripType: "Tour Package Booking" })}
-                              title="Dispatch Fleet & Chauffeur"
-                              className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-2.5 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all shadow-sm cursor-pointer"
-                            >
-                              <Truck className="w-3.5 h-3.5" />
-                              <span>Dispatch</span>
-                            </button>
+                            {lead.status !== "PENDING" && lead.status !== "CANCELLED" ? (
+                              <Link
+                                href="/admin/bookings-dispatch"
+                                title="Booking already dispatched — View in Dispatch CRM"
+                                className="inline-flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 font-bold px-2.5 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all shadow-sm cursor-pointer"
+                              >
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                                <span>Dispatched</span>
+                              </Link>
+                            ) : (
+                              <button
+                                onClick={() => setDispatchLead({ ...lead, customerName: lead.contactName, tripType: "Tour Package Booking" })}
+                                title="Dispatch Fleet & Chauffeur"
+                                className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-2.5 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all shadow-sm cursor-pointer"
+                              >
+                                <Truck className="w-3.5 h-3.5" />
+                                <span>Dispatch</span>
+                              </button>
+                            )}
                             <button
                               onClick={() => handleDelete(lead.id)}
                               title="Delete Lead"
@@ -523,13 +536,23 @@ export default function AdminTourLeadsPage() {
                   <span className={`text-[10px] font-extrabold py-1 px-3 rounded-full border uppercase ${getStatusBadge(activeLead.status)}`}>
                     {activeLead.status}
                   </span>
-                  <button
-                    onClick={() => setDispatchLead({ ...activeLead, customerName: activeLead.contactName, tripType: "Tour Package Booking" })}
-                    className="flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 cursor-pointer"
-                  >
-                    <Truck className="w-3.5 h-3.5" />
-                    <span>Dispatch Ride</span>
-                  </button>
+                  {activeLead.status !== "PENDING" && activeLead.status !== "CANCELLED" ? (
+                    <Link
+                      href="/admin/bookings-dispatch"
+                      className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 font-bold px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-sm cursor-pointer"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>View Dispatched Booking</span>
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() => setDispatchLead({ ...activeLead, customerName: activeLead.contactName, tripType: "Tour Package Booking" })}
+                      className="flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 cursor-pointer"
+                    >
+                      <Truck className="w-3.5 h-3.5" />
+                      <span>Dispatch Ride</span>
+                    </button>
+                  )}
                 </div>
               </div>
 

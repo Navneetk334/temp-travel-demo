@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { 
   Car, 
   Search, 
@@ -18,7 +19,8 @@ import {
   ChevronRight,
   Navigation,
   Compass,
-  Truck
+  Truck,
+  CheckCircle2
 } from "lucide-react";
 import LeadDispatchModal, { extractLeadVehicleRequirements } from "@/components/admin/lead-dispatch-modal";
 
@@ -558,14 +560,25 @@ export default function AdminRentalLeadsPage() {
                             </span>
                           </td>
                           <td className="p-4 text-right space-x-1" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              onClick={() => setDispatchLead(lead)}
-                              title="Dispatch Fleet & Chauffeur"
-                              className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-2.5 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all shadow-sm cursor-pointer"
-                            >
-                              <Truck className="w-3.5 h-3.5" />
-                              <span>Dispatch</span>
-                            </button>
+                            {lead.status === "WON" ? (
+                              <Link
+                                href="/admin/bookings-dispatch"
+                                title="Ride already dispatched — View in Dispatch CRM"
+                                className="inline-flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 font-bold px-2.5 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all shadow-sm cursor-pointer"
+                              >
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                                <span>Dispatched</span>
+                              </Link>
+                            ) : (
+                              <button
+                                onClick={() => setDispatchLead(lead)}
+                                title="Dispatch Fleet & Chauffeur"
+                                className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-2.5 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all shadow-sm cursor-pointer"
+                              >
+                                <Truck className="w-3.5 h-3.5" />
+                                <span>Dispatch</span>
+                              </button>
+                            )}
                             <button
                               onClick={() => handleStatusChange(lead.id, "ARCHIVED")}
                               title="Archive Inquiry"
@@ -648,13 +661,23 @@ export default function AdminRentalLeadsPage() {
                   <span className={`text-[10px] font-extrabold py-1 px-3 rounded-full border uppercase ${getStatusBadge(activeLead.status)}`}>
                     {activeLead.status}
                   </span>
-                  <button
-                    onClick={() => setDispatchLead(activeLead)}
-                    className="flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 cursor-pointer"
-                  >
-                    <Truck className="w-3.5 h-3.5" />
-                    <span>Dispatch Ride</span>
-                  </button>
+                  {activeLead.status === "WON" ? (
+                    <Link
+                      href="/admin/bookings-dispatch"
+                      className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 font-bold px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-sm cursor-pointer"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>View Dispatched Booking</span>
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() => setDispatchLead(activeLead)}
+                      className="flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 cursor-pointer"
+                    >
+                      <Truck className="w-3.5 h-3.5" />
+                      <span>Dispatch Ride</span>
+                    </button>
+                  )}
                 </div>
               </div>
 

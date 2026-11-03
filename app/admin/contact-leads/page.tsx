@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { 
   Mail, 
   Search, 
@@ -18,11 +19,12 @@ import {
   ChevronLeft,
   ChevronRight,
   CheckCheck,
-  Truck
+  Truck,
+  CheckCircle2
 } from "lucide-react";
 import LeadDispatchModal from "@/components/admin/lead-dispatch-modal";
 
-export type ContactStatus = "NEW" | "READ" | "CONTACTED" | "QUALIFIED" | "LOST" | "ARCHIVED";
+export type ContactStatus = "NEW" | "READ" | "CONTACTED" | "QUALIFIED" | "WON" | "LOST" | "ARCHIVED";
 
 interface ContactLead {
   id: string;
@@ -246,6 +248,8 @@ export default function AdminContactLeadsPage() {
       case "CONTACTED":
         return "bg-blue-500/10 text-blue-400 border-blue-500/20";
       case "QUALIFIED":
+        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+      case "WON":
         return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
       case "LOST":
         return "bg-rose-500/10 text-rose-400 border-rose-500/20";
@@ -490,14 +494,25 @@ export default function AdminContactLeadsPage() {
                             </span>
                           </td>
                           <td className="p-4 text-right space-x-1" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              onClick={() => setDispatchLead({ ...lead, customerName: lead.name, tripType: `Contact Inquiry (${lead.subject || "General"})` })}
-                              title="Dispatch Fleet & Chauffeur"
-                              className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-2.5 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all shadow-sm cursor-pointer"
-                            >
-                              <Truck className="w-3.5 h-3.5" />
-                              <span>Dispatch</span>
-                            </button>
+                            {lead.status === "WON" ? (
+                              <Link
+                                href="/admin/bookings-dispatch"
+                                title="Ride already dispatched — View in Dispatch CRM"
+                                className="inline-flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 font-bold px-2.5 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all shadow-sm cursor-pointer"
+                              >
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                                <span>Dispatched</span>
+                              </Link>
+                            ) : (
+                              <button
+                                onClick={() => setDispatchLead({ ...lead, customerName: lead.name, tripType: `Contact Inquiry (${lead.subject || "General"})` })}
+                                title="Dispatch Fleet & Chauffeur"
+                                className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-2.5 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all shadow-sm cursor-pointer"
+                              >
+                                <Truck className="w-3.5 h-3.5" />
+                                <span>Dispatch</span>
+                              </button>
+                            )}
                             {lead.status === "NEW" && (
                               <button
                                 onClick={() => handleStatusChange(lead.id, "READ")}
@@ -596,13 +611,23 @@ export default function AdminContactLeadsPage() {
                   <span className={`text-[10px] font-extrabold py-1 px-3 rounded-full border uppercase ${getStatusBadge(activeLead.status)}`}>
                     {activeLead.status === "CONTACTED" ? "REPLIED" : activeLead.status}
                   </span>
-                  <button
-                    onClick={() => setDispatchLead({ ...activeLead, customerName: activeLead.name, tripType: `Contact Inquiry (${activeLead.subject || "General"})` })}
-                    className="flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 cursor-pointer"
-                  >
-                    <Truck className="w-3.5 h-3.5" />
-                    <span>Dispatch Ride</span>
-                  </button>
+                  {activeLead.status === "WON" ? (
+                    <Link
+                      href="/admin/bookings-dispatch"
+                      className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 font-bold px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-sm cursor-pointer"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>View Dispatched Booking</span>
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() => setDispatchLead({ ...activeLead, customerName: activeLead.name, tripType: `Contact Inquiry (${activeLead.subject || "General"})` })}
+                      className="flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 cursor-pointer"
+                    >
+                      <Truck className="w-3.5 h-3.5" />
+                      <span>Dispatch Ride</span>
+                    </button>
+                  )}
                 </div>
               </div>
 

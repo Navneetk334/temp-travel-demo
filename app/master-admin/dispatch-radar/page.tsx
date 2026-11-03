@@ -79,6 +79,9 @@ export default function MasterDispatchRadarPage() {
   });
 
   const [drivers, setDrivers] = useState<any[]>([]);
+  const [activeBookings, setActiveBookings] = useState<any[]>([]);
+  const [busyVehiclesMap, setBusyVehiclesMap] = useState<Record<string, string>>({});
+  const [busyDriversMap, setBusyDriversMap] = useState<Record<string, string>>({});
 
   // Load saved dispatches, fleet vehicles, and drivers
   useEffect(() => {
@@ -134,8 +137,57 @@ export default function MasterDispatchRadarPage() {
       })
       .catch(e => console.error(e));
 
+    // 4. Fetch active bookings for driver & vehicle busy tracking
+    fetch("/api/bookings?limit=100")
+      .then(res => res.ok ? res.json() : null)
+      .then(bData => {
+        if (bData) {
+          const list = Array.isArray(bData) ? bData : (bData.bookings || []);
+          setActiveBookings(list);
+          const vMap: Record<string, string> = {};
+          const dMap: Record<string, string> = {};
+          list.forEach((b: any) => {
+            const isActive = b.status !== "COMPLETED" && b.status !== "CANCELLED";
+            if (isActive) {
+              const ref = b.bookingNumber || `TT-${b.id?.slice(-6) || "RIDE"}`;
+              if (b.vehicleId) vMap[b.vehicleId] = ref;
+              if (b.vehicle?.id) vMap[b.vehicle.id] = ref;
+              if (b.vehicle?.registrationNumber) vMap[b.vehicle.registrationNumber.toUpperCase()] = ref;
+              if (b.driverId) dMap[b.driverId] = ref;
+              if (b.vehicle?.driver?.id) dMap[b.vehicle.driver.id] = ref;
+              if (b.vehicle?.driver?.phone) {
+                const cleanPhone = b.vehicle.driver.phone.replace(/\D/g, "").slice(-10);
+                if (cleanPhone) dMap[cleanPhone] = ref;
+              }
+            }
+          });
+          setBusyVehiclesMap(vMap);
+          setBusyDriversMap(dMap);
+        }
+      })
+      .catch(e => console.error(e));
+
     syncExistingDispatchesToLeads();
   }, []);
+
+  const getVehicleBusy = (v: any) => {
+    if (!v) return null;
+    if (v.id && busyVehiclesMap[v.id]) return busyVehiclesMap[v.id];
+    if (v.registrationNumber && busyVehiclesMap[v.registrationNumber.toUpperCase()]) {
+      return busyVehiclesMap[v.registrationNumber.toUpperCase()];
+    }
+    return null;
+  };
+
+  const getDriverBusy = (d: any) => {
+    if (!d) return null;
+    if (d.id && busyDriversMap[d.id]) return busyDriversMap[d.id];
+    if (d.phone) {
+      const clean = d.phone.replace(/\D/g, "").slice(-10);
+      if (clean && busyDriversMap[clean]) return busyDriversMap[clean];
+    }
+    return null;
+  };
 
   const handleSaveRadarAssignment = (updatedItem: any) => {
     setDrivers((prev) => {
@@ -240,6 +292,21 @@ export default function MasterDispatchRadarPage() {
 
     const assignedDrv = registeredDrivers.find(d => d.id === assignForm.driverId);
     const assignedVeh = fleetVehicles.find(v => v.id === assignForm.vehicleId);
+
+    if (assignedVeh) {
+      const busyRef = getVehicleBusy(assignedVeh);
+      if (busyRef) {
+        alert(`Vehicle ${assignedVeh.registrationNumber} is currently on duty in ride #${busyRef}. Please select an available vehicle.`);
+        return;
+      }
+    }
+    if (assignedDrv) {
+      const busyRef = getDriverBusy(assignedDrv);
+      if (busyRef) {
+        alert(`Chauffeur ${assignedDrv.name} is currently on duty in ride #${busyRef}. Please select an available chauffeur.`);
+        return;
+      }
+    }
 
     const hasAssignment = Boolean(assignedDrv && assignedVeh);
 
@@ -548,11 +615,25 @@ export default function MasterDispatchRadarPage() {
                         className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 cursor-pointer"
                       >
                         <option value="">-- Choose Chauffeur --</option>
-                        {registeredDrivers.map((d) => (
-                          <option key={d.id} value={d.id}>
-                            {d.name} &bull; {d.phone} {d.licenseNumber ? `(${d.licenseNumber})` : ""}
-                          </option>
-                        ))}
+                        <optgroup label="Available Chauffeurs (Ready)">
+                          {registeredDrivers.filter(d => !getDriverBusy(d)).map((d) => (
+                            <option key={d.id} value={d.id}>
+                              {d.name} &bull; {d.phone} {d.licenseNumber ? `(${d.licenseNumber})` : ""}
+                            </option>
+                          ))}
+                        </optgroup>
+                        {registeredDrivers.filter(d => getDriverBusy(d)).length > 0 && (
+                          <optgroup label="Currently Assigned / On Duty (Disabled)">
+                            {registeredDrivers.filter(d => getDriverBusy(d)).map((d) => {
+                              const busyRide = getDriverBusy(d);
+                              return (
+                                <option key={d.id} value={d.id} disabled className="text-slate-500 bg-slate-900/90 italic">
+                                  ⛔ {d.name} &bull; {d.phone} [ON DUTY - Ride #{busyRide}]
+                                </option>
+                              );
+                            })}
+                          </optgroup>
+                        )}
                       </select>
                     </div>
 
@@ -564,11 +645,25 @@ export default function MasterDispatchRadarPage() {
                         className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-slate-100 focus:outline-none focus:border-amber-400 cursor-pointer"
                       >
                         <option value="">-- Choose Vehicle --</option>
-                        {fleetVehicles.map((v) => (
-                          <option key={v.id} value={v.id}>
-                            {v.make} {v.model} ({v.registrationNumber}) &bull; {v.categoryName || v.category?.name || "Sedan"}
-                          </option>
-                        ))}
+                        <optgroup label="Available Fleet (Ready)">
+                          {fleetVehicles.filter(v => !getVehicleBusy(v)).map((v) => (
+                            <option key={v.id} value={v.id}>
+                              {v.make} {v.model} ({v.registrationNumber}) &bull; {v.categoryName || v.category?.name || "Sedan"}
+                            </option>
+                          ))}
+                        </optgroup>
+                        {fleetVehicles.filter(v => getVehicleBusy(v)).length > 0 && (
+                          <optgroup label="Currently Assigned / On Duty (Disabled)">
+                            {fleetVehicles.filter(v => getVehicleBusy(v)).map((v) => {
+                              const busyRide = getVehicleBusy(v);
+                              return (
+                                <option key={v.id} value={v.id} disabled className="text-slate-500 bg-slate-900/90 italic">
+                                  ⛔ {v.make} {v.model} ({v.registrationNumber}) [ON DUTY - Ride #{busyRide}]
+                                </option>
+                              );
+                            })}
+                          </optgroup>
+                        )}
                       </select>
                     </div>
                   </div>

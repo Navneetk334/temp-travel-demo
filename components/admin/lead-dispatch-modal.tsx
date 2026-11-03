@@ -13,7 +13,8 @@ import {
   ArrowRight,
   Filter,
   Sparkles,
-  MapPin
+  MapPin,
+  AlertCircle
 } from "lucide-react";
 import LocationInput from "@/components/shared/location-input";
 import Portal from "@/components/shared/portal";
@@ -103,6 +104,7 @@ export default function LeadDispatchModal({
 }: LeadDispatchModalProps) {
   const [availableVehicles, setAvailableVehicles] = useState<any[]>([]);
   const [availableDrivers, setAvailableDrivers] = useState<any[]>([]);
+  const [activeBookings, setActiveBookings] = useState<any[]>([]);
   const [dispatchedSuccess, setDispatchedSuccess] = useState<any | null>(null);
 
   // Vehicle Category & Class Filter States for Dispatch Desk
@@ -123,6 +125,55 @@ export default function LeadDispatchModal({
 
   // Extract lead vehicle specs
   const leadVehReq = useMemo(() => extractLeadVehicleRequirements(lead), [lead]);
+
+  // Busy vehicles and chauffeurs tracking from live active bookings
+  const busyVehiclesMap = useMemo(() => {
+    const map = new Map<string, { bookingNumber: string; status: string; customerName: string }>();
+    activeBookings.forEach((b: any) => {
+      const info = {
+        bookingNumber: b.bookingNumber,
+        status: b.status,
+        customerName: b.customer?.name || "Customer"
+      };
+      if (b.vehicleId) map.set(b.vehicleId, info);
+      if (b.vehicle?.id) map.set(b.vehicle.id, info);
+      if (b.vehicle?.registrationNumber) map.set(b.vehicle.registrationNumber.toUpperCase(), info);
+    });
+    return map;
+  }, [activeBookings]);
+
+  const busyDriversMap = useMemo(() => {
+    const map = new Map<string, { bookingNumber: string; vehicleReg: string }>();
+    activeBookings.forEach((b: any) => {
+      const info = {
+        bookingNumber: b.bookingNumber,
+        vehicleReg: b.vehicle?.registrationNumber || "Fleet Car"
+      };
+      if (b.vehicle?.driver?.id) map.set(b.vehicle.driver.id, info);
+      if (b.driverId) map.set(b.driverId, info);
+      if (b.vehicle?.driver?.phone) map.set(b.vehicle.driver.phone.replace(/\D/g, "").slice(-10), info);
+      if (b.vehicle?.driver?.name) map.set(b.vehicle.driver.name.trim().toLowerCase(), info);
+    });
+    return map;
+  }, [activeBookings]);
+
+  const getVehicleBusy = (veh: any) => {
+    if (!veh) return null;
+    if (veh.id && busyVehiclesMap.has(veh.id)) return busyVehiclesMap.get(veh.id);
+    const reg = (veh.registrationNumber || "").toUpperCase();
+    if (reg && busyVehiclesMap.has(reg)) return busyVehiclesMap.get(reg);
+    return null;
+  };
+
+  const getDriverBusy = (drv: any) => {
+    if (!drv) return null;
+    if (drv.id && busyDriversMap.has(drv.id)) return busyDriversMap.get(drv.id);
+    const phoneClean = (drv.phone || "").replace(/\D/g, "").slice(-10);
+    if (phoneClean && busyDriversMap.has(phoneClean)) return busyDriversMap.get(phoneClean);
+    const nameClean = (drv.name || "").trim().toLowerCase();
+    if (nameClean && busyDriversMap.has(nameClean)) return busyDriversMap.get(nameClean);
+    return null;
+  };
 
   // Load registered fleet vehicles and drivers for assignment
   useEffect(() => {
@@ -157,9 +208,10 @@ export default function LeadDispatchModal({
     // 3. Live Sync from API
     const syncLiveSources = async () => {
       try {
-        const [fleetRes, drvRes] = await Promise.allSettled([
+        const [fleetRes, drvRes, bookingsRes] = await Promise.allSettled([
           fetch("/api/fleet"),
-          fetch("/api/admin/drivers")
+          fetch("/api/admin/drivers"),
+          fetch("/api/bookings?limit=100")
         ]);
 
         if (fleetRes.status === "fulfilled" && fleetRes.value.ok) {
@@ -173,22 +225,31 @@ export default function LeadDispatchModal({
                 vMap.set(v.id || v.registrationNumber, v);
               }
             });
-            setAvailableVehicles(Array.from(vMap.values()));
+            vList = Array.from(vMap.values());
+            setAvailableVehicles(vList);
           }
         }
 
         if (drvRes.status === "fulfilled" && drvRes.value.ok) {
-          const apiDrivers = await drvRes.value.json();
-          if (Array.isArray(apiDrivers) && apiDrivers.length > 0) {
+          const drvData = await drvRes.value.json();
+          if (Array.isArray(drvData) && drvData.length > 0) {
             const dMap = new Map();
             dList.forEach(d => dMap.set(d.id || d.phone, d));
-            apiDrivers.forEach((d: any) => {
+            drvData.forEach((d: any) => {
               if (!dMap.has(d.id || d.phone)) {
                 dMap.set(d.id || d.phone, d);
               }
             });
-            setAvailableDrivers(Array.from(dMap.values()));
+            dList = Array.from(dMap.values());
+            setAvailableDrivers(dList);
           }
+        }
+
+        if (bookingsRes.status === "fulfilled" && bookingsRes.value.ok) {
+          const bData = await bookingsRes.value.json();
+          const bList = Array.isArray(bData) ? bData : (bData.bookings || []);
+          const activeOnly = bList.filter((b: any) => b.status !== "COMPLETED" && b.status !== "CANCELLED");
+          setActiveBookings(activeOnly);
         }
       } catch (err) {
         console.error("Live dispatch sync error:", err);
@@ -222,11 +283,19 @@ export default function LeadDispatchModal({
       setCategoryFilter(initialCat);
       setClassFilter(initialClass);
 
-      const chosenVehId = preMatchedVehicle?.id || vList[0]?.id || "";
+      // Default to an available (not busy) vehicle
+      const availableVList = vList.filter((v: any) => !getVehicleBusy(v));
+      const chosenVehId = (preMatchedVehicle && !getVehicleBusy(preMatchedVehicle))
+        ? preMatchedVehicle.id
+        : (availableVList[0]?.id || vList[0]?.id || "");
+
+      // Default to an available (not busy) driver
+      const availableDList = dList.filter((d: any) => !getDriverBusy(d));
+      const chosenDrvId = availableDList[0]?.id || dList[0]?.id || "";
 
       setDispatchForm({
         vehicleId: chosenVehId,
-        driverId: dList[0]?.id || "",
+        driverId: chosenDrvId,
         fare: "2800",
         advance: "500",
         paymentMode: "Cash Collection",
@@ -263,8 +332,20 @@ export default function LeadDispatchModal({
   const handleConfirmDispatch = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const assignedVeh = availableVehicles.find(v => v.id === dispatchForm.vehicleId) || filteredVehicles[0] || availableVehicles[0];
-    const assignedDrv = availableDrivers.find(d => d.id === dispatchForm.driverId) || availableDrivers[0];
+    const assignedVeh = availableVehicles.find(v => v.id === dispatchForm.vehicleId) || filteredVehicles.find(v => !getVehicleBusy(v)) || availableVehicles[0];
+    const assignedDrv = availableDrivers.find(d => d.id === dispatchForm.driverId) || availableDrivers.find(d => !getDriverBusy(d)) || availableDrivers[0];
+
+    if (assignedVeh && getVehicleBusy(assignedVeh)) {
+      const busy = getVehicleBusy(assignedVeh);
+      alert(`Vehicle ${assignedVeh.registrationNumber} is already on active duty for ride #${busy?.bookingNumber}. Please select an available vehicle.`);
+      return;
+    }
+    if (assignedDrv && getDriverBusy(assignedDrv)) {
+      const busy = getDriverBusy(assignedDrv);
+      alert(`Chauffeur ${assignedDrv.name} is already assigned to ride #${busy?.bookingNumber}. Please select an available chauffeur.`);
+      return;
+    }
+
     const finalBookingRef = lead.bookingRef || lead.bookingNumber || (lead.id ? `TT-${lead.id.slice(-6).toUpperCase()}` : `TT-${Date.now().toString().slice(-6)}`);
     
     const dispatchedBooking = {
@@ -513,6 +594,19 @@ export default function LeadDispatchModal({
                     )}
                   </div>
                 ) : null}
+
+                {/* Warning if lead is already marked WON / DISPATCHED */}
+                {(lead.status === "WON" || lead.status === "CONVERTED" || lead.status === "COMPLETED") && (
+                  <div className="mt-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex items-start gap-2.5">
+                    <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-extrabold uppercase tracking-wider block text-amber-300">Caution: Lead Already Dispatched ({lead.status})</span>
+                      <p className="text-[11px] text-slate-300 mt-0.5">
+                        This lead is already converted. Dispatching again will assign another chauffeur/car and create an additional booking record.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Assignment Controls: Vehicle Filter (Category & Class) & Chauffeur */}
@@ -523,7 +617,7 @@ export default function LeadDispatchModal({
                     <span>Filter Fleet for Dispatch</span>
                   </span>
                   <span className="text-[11px] text-slate-400">
-                    Available: <strong className="text-amber-400">{filteredVehicles.length}</strong> vehicle(s)
+                    Ready for Duty: <strong className="text-emerald-400">{filteredVehicles.filter(v => !getVehicleBusy(v)).length}</strong> of {filteredVehicles.length} vehicle(s)
                   </span>
                 </div>
 
@@ -573,7 +667,7 @@ export default function LeadDispatchModal({
                   </div>
                 </div>
 
-                {/* Vehicle & Chauffeur Dropdowns */}
+                {/* Vehicle & Chauffeur Dropdowns with Duty Status */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-white/5">
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
@@ -587,11 +681,27 @@ export default function LeadDispatchModal({
                       className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-mono cursor-pointer"
                     >
                       <option value="" disabled>- Select Fleet Vehicle -</option>
-                      {filteredVehicles.map((veh) => (
-                        <option key={veh.id} value={veh.id} className="bg-slate-900">
-                          {veh.make} {veh.model} ({veh.registrationNumber}) • {veh.categoryName || "Sedan"} - {veh.vehicleClass || "Executive"}
-                        </option>
-                      ))}
+                      {filteredVehicles.filter(v => !getVehicleBusy(v)).length > 0 && (
+                        <optgroup label="Available Fleet (Ready for Dispatch)">
+                          {filteredVehicles.filter(v => !getVehicleBusy(v)).map((veh) => (
+                            <option key={veh.id} value={veh.id} className="bg-slate-900 text-emerald-300">
+                              ✓ {veh.make} {veh.model} ({veh.registrationNumber}) • {veh.categoryName || "Sedan"}
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
+                      {filteredVehicles.filter(v => getVehicleBusy(v)).length > 0 && (
+                        <optgroup label="Currently Assigned / On Duty (Disabled)">
+                          {filteredVehicles.filter(v => getVehicleBusy(v)).map((veh) => {
+                            const busy = getVehicleBusy(veh);
+                            return (
+                              <option key={veh.id} value={veh.id} disabled className="bg-slate-950 text-slate-500">
+                                ⛔ [ON DUTY - Ride #{busy?.bookingNumber}] {veh.make} {veh.model} ({veh.registrationNumber})
+                              </option>
+                            );
+                          })}
+                        </optgroup>
+                      )}
                     </select>
                   </div>
 
@@ -607,11 +717,27 @@ export default function LeadDispatchModal({
                       className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-mono cursor-pointer"
                     >
                       <option value="" disabled>- Select Assigned Chauffeur -</option>
-                      {availableDrivers.map((drv) => (
-                        <option key={drv.id} value={drv.id} className="bg-slate-900">
-                          {drv.name} (+91 {drv.phone})
-                        </option>
-                      ))}
+                      {availableDrivers.filter(d => !getDriverBusy(d)).length > 0 && (
+                        <optgroup label="Available Chauffeurs (Ready for Duty)">
+                          {availableDrivers.filter(d => !getDriverBusy(d)).map((drv) => (
+                            <option key={drv.id} value={drv.id} className="bg-slate-900 text-emerald-300">
+                              ✓ {drv.name} (+91 {drv.phone})
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
+                      {availableDrivers.filter(d => getDriverBusy(d)).length > 0 && (
+                        <optgroup label="Currently Assigned / On Duty (Disabled)">
+                          {availableDrivers.filter(d => getDriverBusy(d)).map((drv) => {
+                            const busy = getDriverBusy(drv);
+                            return (
+                              <option key={drv.id} value={drv.id} disabled className="bg-slate-950 text-slate-500">
+                                ⛔ [ON DUTY - Car {busy?.vehicleReg} • Ride #{busy?.bookingNumber}] {drv.name}
+                              </option>
+                            );
+                          })}
+                        </optgroup>
+                      )}
                     </select>
                   </div>
                 </div>

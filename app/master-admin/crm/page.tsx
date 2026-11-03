@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import {
   Users,
   Building2,
@@ -53,10 +54,59 @@ export default function MasterOmnichannelCRMPage() {
   const [dispatchedSuccess, setDispatchedSuccess] = useState<any | null>(null);
   const [availableVehicles, setAvailableVehicles] = useState<any[]>([]);
   const [availableDrivers, setAvailableDrivers] = useState<any[]>([]);
+  const [activeBookings, setActiveBookings] = useState<any[]>([]);
   const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
   const [classFilter, setClassFilter] = useState<string>("ALL");
 
   const { showConfirm } = useDialog();
+
+  const busyVehiclesMap = useMemo(() => {
+    const map = new Map<string, { bookingNumber: string; status: string; customerName: string }>();
+    activeBookings.forEach((b: any) => {
+      const info = {
+        bookingNumber: b.bookingNumber,
+        status: b.status,
+        customerName: b.customer?.name || "Customer"
+      };
+      if (b.vehicleId) map.set(b.vehicleId, info);
+      if (b.vehicle?.id) map.set(b.vehicle.id, info);
+      if (b.vehicle?.registrationNumber) map.set(b.vehicle.registrationNumber.toUpperCase(), info);
+    });
+    return map;
+  }, [activeBookings]);
+
+  const busyDriversMap = useMemo(() => {
+    const map = new Map<string, { bookingNumber: string; vehicleReg: string }>();
+    activeBookings.forEach((b: any) => {
+      const info = {
+        bookingNumber: b.bookingNumber,
+        vehicleReg: b.vehicle?.registrationNumber || "Fleet Car"
+      };
+      if (b.vehicle?.driver?.id) map.set(b.vehicle.driver.id, info);
+      if (b.driverId) map.set(b.driverId, info);
+      if (b.vehicle?.driver?.phone) map.set(b.vehicle.driver.phone.replace(/\D/g, "").slice(-10), info);
+      if (b.vehicle?.driver?.name) map.set(b.vehicle.driver.name.trim().toLowerCase(), info);
+    });
+    return map;
+  }, [activeBookings]);
+
+  const getVehicleBusy = (veh: any) => {
+    if (!veh) return null;
+    if (veh.id && busyVehiclesMap.has(veh.id)) return busyVehiclesMap.get(veh.id);
+    const reg = (veh.registrationNumber || "").toUpperCase();
+    if (reg && busyVehiclesMap.has(reg)) return busyVehiclesMap.get(reg);
+    return null;
+  };
+
+  const getDriverBusy = (drv: any) => {
+    if (!drv) return null;
+    if (drv.id && busyDriversMap.has(drv.id)) return busyDriversMap.get(drv.id);
+    const phoneClean = (drv.phone || "").replace(/\D/g, "").slice(-10);
+    if (phoneClean && busyDriversMap.has(phoneClean)) return busyDriversMap.get(phoneClean);
+    const nameClean = (drv.name || "").trim().toLowerCase();
+    if (nameClean && busyDriversMap.has(nameClean)) return busyDriversMap.get(nameClean);
+    return null;
+  };
 
   // Dispatch Form State
   const [dispatchForm, setDispatchForm] = useState({
@@ -102,9 +152,10 @@ export default function MasterOmnichannelCRMPage() {
     // 3. Live Sync from API (Fleet & Drivers)
     const syncLiveSources = async () => {
       try {
-        const [fleetRes, drvRes] = await Promise.allSettled([
+        const [fleetRes, drvRes, bookingsRes] = await Promise.allSettled([
           fetch("/api/fleet?minimal=true"),
-          fetch("/api/admin/drivers")
+          fetch("/api/admin/drivers"),
+          fetch("/api/bookings?limit=100")
         ]);
 
         if (fleetRes.status === "fulfilled" && fleetRes.value.ok) {
@@ -134,6 +185,12 @@ export default function MasterOmnichannelCRMPage() {
             });
             setAvailableDrivers(Array.from(dMap.values()));
           }
+        }
+
+        if (bookingsRes.status === "fulfilled" && bookingsRes.value.ok) {
+          const bData = await bookingsRes.value.json();
+          const bList = Array.isArray(bData) ? bData : (bData.bookings || []);
+          setActiveBookings(bList.filter((b: any) => b.status !== "COMPLETED" && b.status !== "CANCELLED"));
         }
       } catch (err) {
         console.error("Live CRM dispatch sync error:", err);
@@ -376,11 +433,17 @@ export default function MasterOmnichannelCRMPage() {
     setCategoryFilter(initialCat);
     setClassFilter(initialClass);
 
-    const chosenVehId = preMatchedVehicle?.id || availableVehicles[0]?.id || "";
+    const availableV = availableVehicles.filter(v => !getVehicleBusy(v));
+    const chosenVehId = (preMatchedVehicle && !getVehicleBusy(preMatchedVehicle))
+      ? preMatchedVehicle.id
+      : (availableV[0]?.id || availableVehicles[0]?.id || "");
+
+    const availableD = availableDrivers.filter(d => !getDriverBusy(d));
+    const chosenDrvId = availableD[0]?.id || availableDrivers[0]?.id || "";
 
     setDispatchForm({
       vehicleId: chosenVehId,
-      driverId: availableDrivers[0]?.id || "",
+      driverId: chosenDrvId,
       fare: "2800",
       advance: "500",
       paymentMode: "Cash Collection",
@@ -413,8 +476,19 @@ export default function MasterOmnichannelCRMPage() {
     e.preventDefault();
     if (!dispatchModalLead) return;
 
-    const assignedVeh = availableVehicles.find(v => v.id === dispatchForm.vehicleId) || filteredVehicles[0] || availableVehicles[0];
-    const assignedDrv = availableDrivers.find(d => d.id === dispatchForm.driverId) || availableDrivers[0];
+    const assignedVeh = availableVehicles.find(v => v.id === dispatchForm.vehicleId) || filteredVehicles.find(v => !getVehicleBusy(v)) || availableVehicles[0];
+    const assignedDrv = availableDrivers.find(d => d.id === dispatchForm.driverId) || availableDrivers.find(d => !getDriverBusy(d)) || availableDrivers[0];
+
+    if (assignedVeh && getVehicleBusy(assignedVeh)) {
+      const busy = getVehicleBusy(assignedVeh);
+      alert(`Vehicle ${assignedVeh.registrationNumber} is already on active duty for ride #${busy?.bookingNumber}. Please select an available vehicle from the fleet.`);
+      return;
+    }
+    if (assignedDrv && getDriverBusy(assignedDrv)) {
+      const busy = getDriverBusy(assignedDrv);
+      alert(`Chauffeur ${assignedDrv.name} is already assigned to ride #${busy?.bookingNumber}. Please select an available chauffeur.`);
+      return;
+    }
     const finalBookingRef = dispatchModalLead.bookingRef || `TT-${Date.now().toString().slice(-6)}`;
 
     const dispatchedBooking = {
@@ -910,14 +984,25 @@ export default function MasterOmnichannelCRMPage() {
                       </td>
                       <td className="py-4 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
-                          <button
-                            onClick={() => openDispatchModal(lead)}
-                            className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all shadow-md shadow-amber-500/20 cursor-pointer"
-                            title="Assign Fleet & Driver to Dispatch Ride"
-                          >
-                            <Truck className="w-3.5 h-3.5" />
-                            <span>Dispatch</span>
-                          </button>
+                          {lead.status === "CONVERTED" || lead.status === "WON" ? (
+                            <Link
+                              href="/admin/bookings-dispatch"
+                              className="inline-flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 px-2.5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer"
+                              title="Ride already dispatched — View in Dispatch CRM"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                              <span>Dispatched</span>
+                            </Link>
+                          ) : (
+                            <button
+                              onClick={() => openDispatchModal(lead)}
+                              className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all shadow-md shadow-amber-500/20 cursor-pointer"
+                              title="Assign Fleet & Driver to Dispatch Ride"
+                            >
+                              <Truck className="w-3.5 h-3.5" />
+                              <span>Dispatch</span>
+                            </button>
+                          )}
                           <button
                             onClick={() => setSelectedLead(lead)}
                             className="inline-flex items-center gap-1 bg-background hover:bg-slate-800 text-slate-300 hover:text-white border border-border px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer"
@@ -1036,7 +1121,7 @@ export default function MasterOmnichannelCRMPage() {
                     <span>Filter Fleet for Dispatch</span>
                   </span>
                   <span className="text-[11px] text-slate-400">
-                    Available: <strong className="text-amber-400">{filteredVehicles.length}</strong> vehicle(s)
+                    Ready for Duty: <strong className="text-emerald-400">{filteredVehicles.filter(v => !getVehicleBusy(v)).length}</strong> of {filteredVehicles.length} vehicle(s)
                   </span>
                 </div>
 
@@ -1086,7 +1171,7 @@ export default function MasterOmnichannelCRMPage() {
                   </div>
                 </div>
 
-                {/* Vehicle & Chauffeur Dropdowns */}
+                {/* Vehicle & Chauffeur Dropdowns with Duty Status */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-border">
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
@@ -1100,11 +1185,27 @@ export default function MasterOmnichannelCRMPage() {
                       className="w-full bg-background border border-border rounded-xl p-3 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-mono cursor-pointer"
                     >
                       <option value="" disabled>- Select Fleet Vehicle -</option>
-                      {filteredVehicles.map((veh) => (
-                        <option key={veh.id} value={veh.id} className="bg-surface">
-                          {veh.make} {veh.model} ({veh.registrationNumber}) • {veh.categoryName || "Sedan"} - {veh.vehicleClass || "Executive"}
-                        </option>
-                      ))}
+                      {filteredVehicles.filter(v => !getVehicleBusy(v)).length > 0 && (
+                        <optgroup label="Available Fleet (Ready for Dispatch)">
+                          {filteredVehicles.filter(v => !getVehicleBusy(v)).map((veh) => (
+                            <option key={veh.id} value={veh.id} className="bg-surface text-emerald-400">
+                              ✓ {veh.make} {veh.model} ({veh.registrationNumber}) • {veh.categoryName || "Sedan"}
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
+                      {filteredVehicles.filter(v => getVehicleBusy(v)).length > 0 && (
+                        <optgroup label="Currently Assigned / On Duty (Disabled)">
+                          {filteredVehicles.filter(v => getVehicleBusy(v)).map((veh) => {
+                            const busy = getVehicleBusy(veh);
+                            return (
+                              <option key={veh.id} value={veh.id} disabled className="bg-surface text-slate-500">
+                                ⛔ [ON DUTY - Ride #{busy?.bookingNumber}] {veh.make} {veh.model} ({veh.registrationNumber})
+                              </option>
+                            );
+                          })}
+                        </optgroup>
+                      )}
                     </select>
                   </div>
 
@@ -1120,11 +1221,27 @@ export default function MasterOmnichannelCRMPage() {
                       className="w-full bg-background border border-border rounded-xl p-3 text-xs text-slate-100 focus:outline-none focus:border-amber-400 font-mono cursor-pointer"
                     >
                       <option value="" disabled>- Select Assigned Chauffeur -</option>
-                      {availableDrivers.map((drv) => (
-                        <option key={drv.id} value={drv.id} className="bg-surface">
-                          {drv.name} (+91 {drv.phone})
-                        </option>
-                      ))}
+                      {availableDrivers.filter(d => !getDriverBusy(d)).length > 0 && (
+                        <optgroup label="Available Chauffeurs (Ready for Duty)">
+                          {availableDrivers.filter(d => !getDriverBusy(d)).map((drv) => (
+                            <option key={drv.id} value={drv.id} className="bg-surface text-emerald-400">
+                              ✓ {drv.name} (+91 {drv.phone})
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
+                      {availableDrivers.filter(d => getDriverBusy(d)).length > 0 && (
+                        <optgroup label="Currently Assigned / On Duty (Disabled)">
+                          {availableDrivers.filter(d => getDriverBusy(d)).map((drv) => {
+                            const busy = getDriverBusy(drv);
+                            return (
+                              <option key={drv.id} value={drv.id} disabled className="bg-surface text-slate-500">
+                                ⛔ [ON DUTY - Car {busy?.vehicleReg} • Ride #{busy?.bookingNumber}] {drv.name}
+                              </option>
+                            );
+                          })}
+                        </optgroup>
+                      )}
                     </select>
                   </div>
                 </div>
@@ -1369,17 +1486,27 @@ export default function MasterOmnichannelCRMPage() {
               </div>
 
               <div className="pt-2 flex justify-between items-center">
-                <button
-                  onClick={() => {
-                    const leadToDispatch = selectedLead;
-                    setSelectedLead(null);
-                    openDispatchModal(leadToDispatch);
-                  }}
-                  className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black px-4 py-2 rounded-xl text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 cursor-pointer"
-                >
-                  <Truck className="w-4 h-4" />
-                  <span>Dispatch & Book Ride</span>
-                </button>
+                {selectedLead.status === "CONVERTED" || selectedLead.status === "WON" ? (
+                  <Link
+                    href="/admin/bookings-dispatch"
+                    className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 font-bold px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition-all cursor-pointer"
+                  >
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <span>View Dispatched Booking</span>
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => {
+                      const leadToDispatch = selectedLead;
+                      setSelectedLead(null);
+                      openDispatchModal(leadToDispatch);
+                    }}
+                    className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black px-4 py-2 rounded-xl text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 cursor-pointer"
+                  >
+                    <Truck className="w-4 h-4" />
+                    <span>Dispatch & Book Ride</span>
+                  </button>
+                )}
 
                 <button
                   onClick={() => setSelectedLead(null)}

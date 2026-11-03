@@ -327,6 +327,49 @@ export default function MasterAdminDashboard() {
     syncExistingDispatchesToLeads();
   }, []);
 
+  const busyVehiclesMap = useMemo(() => {
+    const map = new Map<string, { bookingNumber: string; reg: string }>();
+    dispatches.forEach((d: any) => {
+      if (d.status !== "COMPLETED" && d.status !== "CANCELLED") {
+        const info = { bookingNumber: d.id, reg: d.regNumber };
+        if (d.assignedVehicleId) map.set(d.assignedVehicleId, info);
+        if (d.regNumber) map.set(d.regNumber.toUpperCase(), info);
+      }
+    });
+    return map;
+  }, [dispatches]);
+
+  const busyDriversMap = useMemo(() => {
+    const map = new Map<string, { bookingNumber: string; name: string }>();
+    dispatches.forEach((d: any) => {
+      if (d.status !== "COMPLETED" && d.status !== "CANCELLED") {
+        const info = { bookingNumber: d.id, name: d.driverName };
+        if (d.assignedDriverId) map.set(d.assignedDriverId, info);
+        if (d.driverPhone) map.set(d.driverPhone.replace(/\D/g, "").slice(-10), info);
+        if (d.driverName) map.set(d.driverName.trim().toLowerCase(), info);
+      }
+    });
+    return map;
+  }, [dispatches]);
+
+  const isVehBusy = (v: any) => {
+    if (!v) return null;
+    if (v.id && busyVehiclesMap.has(v.id)) return busyVehiclesMap.get(v.id);
+    const reg = (v.registrationNumber || "").toUpperCase();
+    if (reg && busyVehiclesMap.has(reg)) return busyVehiclesMap.get(reg);
+    return null;
+  };
+
+  const isDrvBusy = (d: any) => {
+    if (!d) return null;
+    if (d.id && busyDriversMap.has(d.id)) return busyDriversMap.get(d.id);
+    const phone = (d.phone || "").replace(/\D/g, "").slice(-10);
+    if (phone && busyDriversMap.has(phone)) return busyDriversMap.get(phone);
+    const name = (d.name || "").trim().toLowerCase();
+    if (name && busyDriversMap.has(name)) return busyDriversMap.get(name);
+    return null;
+  };
+
   // Category and Class selection handlers
   const handleCategoryChange = (cat: string) => {
     const defaultClass = CLASS_OPTIONS[cat]?.[0] || "Executive";
@@ -1086,11 +1129,27 @@ export default function MasterAdminDashboard() {
                       className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 text-xs focus:outline-none focus:border-amber-400 cursor-pointer"
                     >
                       <option value="">-- Assign Later / Auto-Allocate --</option>
-                      {fleetList.map((v) => (
-                        <option key={v.id} value={v.id}>
-                          {v.make} {v.model} ({v.registrationNumber}) &bull; {v.categoryName || v.category?.name || "Sedan"}
-                        </option>
-                      ))}
+                      {fleetList.filter(v => !isVehBusy(v)).length > 0 && (
+                        <optgroup label="Available Fleet (Ready for Ride)">
+                          {fleetList.filter(v => !isVehBusy(v)).map((v) => (
+                            <option key={v.id} value={v.id} className="text-emerald-400">
+                              ✓ {v.make} {v.model} ({v.registrationNumber}) &bull; {v.categoryName || v.category?.name || "Sedan"}
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
+                      {fleetList.filter(v => isVehBusy(v)).length > 0 && (
+                        <optgroup label="Currently On Duty / Busy (Disabled)">
+                          {fleetList.filter(v => isVehBusy(v)).map((v) => {
+                            const busy = isVehBusy(v);
+                            return (
+                              <option key={v.id} value={v.id} disabled className="text-slate-500">
+                                ⛔ [ON DUTY - Ride #{busy?.bookingNumber}] {v.make} {v.model} ({v.registrationNumber})
+                              </option>
+                            );
+                          })}
+                        </optgroup>
+                      )}
                     </select>
                   </div>
 
@@ -1108,11 +1167,27 @@ export default function MasterAdminDashboard() {
                       className="w-full bg-background border border-border rounded-xl px-3 py-2 text-slate-100 text-xs focus:outline-none focus:border-amber-400 cursor-pointer"
                     >
                       <option value="">-- Assign Later / Auto-Allocate --</option>
-                      {driversList.map((d) => (
-                        <option key={d.id} value={d.id}>
-                          {d.name} &bull; {d.phone} {d.licenseNumber ? `(${d.licenseNumber})` : ""}
-                        </option>
-                      ))}
+                      {driversList.filter(d => !isDrvBusy(d)).length > 0 && (
+                        <optgroup label="Available Chauffeurs (Ready for Duty)">
+                          {driversList.filter(d => !isDrvBusy(d)).map((d) => (
+                            <option key={d.id} value={d.id} className="text-emerald-400">
+                              ✓ {d.name} &bull; {d.phone}
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
+                      {driversList.filter(d => isDrvBusy(d)).length > 0 && (
+                        <optgroup label="Currently Assigned / On Duty (Disabled)">
+                          {driversList.filter(d => isDrvBusy(d)).map((d) => {
+                            const busy = isDrvBusy(d);
+                            return (
+                              <option key={d.id} value={d.id} disabled className="text-slate-500">
+                                ⛔ [ON DUTY - Ride #{busy?.bookingNumber}] {d.name}
+                              </option>
+                            );
+                          })}
+                        </optgroup>
+                      )}
                     </select>
                   </div>
                 </div>
