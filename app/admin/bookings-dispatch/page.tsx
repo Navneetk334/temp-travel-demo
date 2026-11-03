@@ -105,6 +105,7 @@ interface Stats {
 export default function BookingDispatchPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [vehicles, setVehicles] = useState<any[]>([]);
+  const [drivers, setDrivers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -130,6 +131,7 @@ export default function BookingDispatchPage() {
   const [activeBooking, setActiveBooking] = useState<Booking | null>(null);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState("");
+  const [selectedDriverId, setSelectedDriverId] = useState("");
   const [newNoteInput, setNewNoteInput] = useState("");
 
   const loadData = async () => {
@@ -181,6 +183,13 @@ export default function BookingDispatchPage() {
         }
       });
       setVehicles(Array.from(vMap.values()));
+
+      // Fetch drivers for separate driver assignment
+      const driversRes = await fetch("/api/admin/drivers");
+      if (driversRes.ok) {
+        const driversData = await driversRes.json();
+        setDrivers(Array.isArray(driversData) ? driversData : []);
+      }
     } catch (err) {
       console.error("Failed to load bookings dispatch:", err);
     } finally {
@@ -230,6 +239,11 @@ export default function BookingDispatchPage() {
   const handleAssignVehicle = async () => {
     if (!activeBooking) return;
     const selectedVeh = vehicles.find(v => v.id === selectedVehicleId);
+    const selectedDrv = drivers.find(d => d.id === selectedDriverId);
+
+    const targetDriver = selectedDrv 
+      ? { id: selectedDrv.id, name: selectedDrv.name, phone: selectedDrv.phone } 
+      : (selectedVeh?.driver ? { id: selectedVeh.driver.id, name: selectedVeh.driver.name, phone: selectedVeh.driver.phone } : null);
     
     // Update local storage
     try {
@@ -241,13 +255,19 @@ export default function BookingDispatchPage() {
             if (b.id === activeBooking.id || b.bookingNumber === activeBooking.bookingNumber) {
               return {
                 ...b,
-                status: "VEHICLE_ASSIGNED" as BookingStatus,
+                status: (selectedVeh && targetDriver ? "VEHICLE_ASSIGNED" : (targetDriver ? "DRIVER_ASSIGNED" : "CONFIRMED")) as BookingStatus,
+                driver: targetDriver,
                 vehicle: selectedVeh ? {
                   id: selectedVeh.id,
                   model: `${selectedVeh.make || ""} ${selectedVeh.model || ""}`.trim(),
                   registrationNumber: selectedVeh.registrationNumber,
-                  driver: selectedVeh.driver ? { name: selectedVeh.driver.name, phone: selectedVeh.driver.phone } : null
-                } : b.vehicle
+                  driver: targetDriver
+                } : (targetDriver ? {
+                  id: "",
+                  model: "Commercial Fleet",
+                  registrationNumber: "Pending Vehicle",
+                  driver: targetDriver
+                } : b.vehicle)
               };
             }
             return b;
@@ -265,7 +285,8 @@ export default function BookingDispatchPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           vehicleId: selectedVehicleId || null,
-          status: "VEHICLE_ASSIGNED",
+          driverId: selectedDriverId || null,
+          status: selectedVeh ? "VEHICLE_ASSIGNED" : (selectedDrv ? "DRIVER_ASSIGNED" : "CONFIRMED"),
           notes: activeBooking.notes || "",
         }),
       });
@@ -364,6 +385,8 @@ export default function BookingDispatchPage() {
   const openBookingInspector = (booking: Booking) => {
     setActiveBooking(booking);
     setSelectedVehicleId(booking.vehicle?.id || "");
+    const dId = (booking as any).driver?.id || (booking.vehicle as any)?.driver?.id || "";
+    setSelectedDriverId(dId);
     setNewNoteInput("");
   };
 
@@ -810,14 +833,22 @@ export default function BookingDispatchPage() {
                         {activeBooking.vehicle.registrationNumber}
                       </span>
                     </div>
-                    {activeBooking.vehicle.driver ? (
-                      <div className="text-slate-400 flex items-center gap-1.5 pt-1">
+                    {activeBooking.vehicle.driver || (activeBooking as any).driver ? (
+                      <div className="text-slate-300 flex items-center gap-1.5 pt-1">
                         <User className="w-3.5 h-3.5 text-accent" />
-                        <span>Driver: <strong className="text-slate-200">{activeBooking.vehicle.driver.name}</strong> ({activeBooking.vehicle.driver.phone})</span>
+                        <span>Driver: <strong className="text-slate-100">{activeBooking.vehicle.driver?.name || (activeBooking as any).driver?.name}</strong> ({activeBooking.vehicle.driver?.phone || (activeBooking as any).driver?.phone})</span>
                       </div>
                     ) : (
-                      <div className="text-amber-400 text-[11px] italic">No driver linked to vehicle registration in fleet.</div>
+                      <div className="text-amber-400 text-[11px] italic">No driver assigned to this ride yet.</div>
                     )}
+                  </div>
+                ) : (activeBooking as any).driver ? (
+                  <div className="space-y-1 text-xs">
+                    <div className="text-yellow-400/90 text-xs italic">Pending vehicle allocation</div>
+                    <div className="text-slate-300 flex items-center gap-1.5 pt-1">
+                      <User className="w-3.5 h-3.5 text-accent" />
+                      <span>Assigned Driver: <strong className="text-slate-100">{(activeBooking as any).driver.name}</strong> ({(activeBooking as any).driver.phone})</span>
+                    </div>
                   </div>
                 ) : (
                   <div className="text-yellow-400/90 text-xs italic">
@@ -922,19 +953,59 @@ export default function BookingDispatchPage() {
               </div>
 
               <div className="space-y-4">
-                <label className="text-xs font-bold text-slate-300 block">Select Vehicle from Active Fleet</label>
-                <select
-                  value={selectedVehicleId}
-                  onChange={(e) => setSelectedVehicleId(e.target.value)}
-                  className="w-full bg-background border border-border rounded-lg p-3 text-xs text-slate-100 focus:outline-none focus:border-accent"
-                >
-                  <option value="">Unassign / No Vehicle</option>
-                  {vehicles.map((v) => (
-                    <option key={v.id} value={v.id} className="bg-surface">
-                      {v.model} &bull; {v.registrationNumber} {v.driver ? `(Driver: ${v.driver.name})` : "(No Driver)"}
-                    </option>
-                  ))}
-                </select>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-300 flex items-center justify-between">
+                    <span>1. Select Fleet Vehicle</span>
+                    <span className="text-[10px] text-slate-400">Independent Selection</span>
+                  </label>
+                  <select
+                    value={selectedVehicleId}
+                    onChange={(e) => {
+                      const newVehId = e.target.value;
+                      setSelectedVehicleId(newVehId);
+                      // If no driver currently chosen, optionally suggest the car's default driver
+                      if (!selectedDriverId && newVehId) {
+                        const veh = vehicles.find(v => v.id === newVehId);
+                        if (veh?.driver?.id) {
+                          setSelectedDriverId(veh.driver.id);
+                        }
+                      }
+                    }}
+                    className="w-full bg-background border border-border rounded-lg p-3 text-xs text-slate-100 focus:outline-none focus:border-accent font-mono cursor-pointer"
+                  >
+                    <option value="">Unassign / No Vehicle</option>
+                    {vehicles.map((v) => (
+                      <option key={v.id} value={v.id} className="bg-surface">
+                        {v.model} &bull; {v.registrationNumber} {v.driver ? `[Default Driver: ${v.driver.name}]` : "(No Default Driver)"}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-300 flex items-center justify-between">
+                    <span>2. Select Chauffeur / Driver</span>
+                    <span className="text-[10px] text-amber-400 font-medium">Independent of Vehicle</span>
+                  </label>
+                  <select
+                    value={selectedDriverId}
+                    onChange={(e) => setSelectedDriverId(e.target.value)}
+                    className="w-full bg-background border border-border rounded-lg p-3 text-xs text-slate-100 focus:outline-none focus:border-accent font-mono cursor-pointer"
+                  >
+                    <option value="">Unassign / No Driver</option>
+                    {drivers.map((d) => {
+                      const isCarDefault = selectedVehicleId && vehicles.find(v => v.id === selectedVehicleId)?.driver?.id === d.id;
+                      return (
+                        <option key={d.id} value={d.id} className="bg-surface">
+                          {d.name} &bull; {d.phone} {isCarDefault ? "★ [Default for Selected Car]" : ""}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <p className="text-[10px] text-slate-400 leading-relaxed">
+                    💡 <strong>Independent Driver Allocation:</strong> If the vehicle&apos;s regular driver is on holiday, leave, or unavailable, you can freely select any active driver from the list.
+                  </p>
+                </div>
               </div>
 
               <div className="flex gap-3 pt-2">

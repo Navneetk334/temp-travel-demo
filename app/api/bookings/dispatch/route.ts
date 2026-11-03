@@ -65,6 +65,24 @@ export async function POST(req: NextRequest) {
     else if (tripTypeLower.includes("airport")) bType = "AIRPORT_TRANSFER";
     else if (tripTypeLower.includes("tour")) bType = "TOUR_PACKAGE";
 
+    // 2.5 Resolve explicitly assigned chauffeur if provided
+    let driverTag = "";
+    if (driverId) {
+      try {
+        const drv = await prisma.user.findFirst({
+          where: { id: driverId },
+          select: { id: true, name: true, phone: true }
+        });
+        if (drv) {
+          driverTag = `[AssignedDriver: ${drv.name}|${drv.phone}|${drv.id}]`;
+        }
+      } catch (err) {
+        console.warn("Could not lookup driver details:", err);
+      }
+    }
+
+    const finalNotes = [notes || "Dispatched via Admin", driverTag].filter(Boolean).join(" ");
+
     // 3. Create Booking
     const booking = await prisma.booking.create({
       data: {
@@ -80,7 +98,7 @@ export async function POST(req: NextRequest) {
         totalAmount: totalAmount - taxAmount,
         taxAmount: taxAmount,
         netAmount: netAmount,
-        notes: notes || "Dispatched via Admin",
+        notes: finalNotes,
       },
     });
 

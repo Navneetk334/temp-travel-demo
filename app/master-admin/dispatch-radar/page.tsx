@@ -616,11 +616,14 @@ export default function MasterDispatchRadarPage() {
                       >
                         <option value="">-- Choose Chauffeur --</option>
                         <optgroup label="Available Chauffeurs (Ready)">
-                          {registeredDrivers.filter(d => !getDriverBusy(d)).map((d) => (
-                            <option key={d.id} value={d.id}>
-                              {d.name} &bull; {d.phone} {d.licenseNumber ? `(${d.licenseNumber})` : ""}
-                            </option>
-                          ))}
+                          {registeredDrivers.filter(d => !getDriverBusy(d)).map((d) => {
+                            const isCarDefault = assignForm.vehicleId && fleetVehicles.find(v => v.id === assignForm.vehicleId)?.driverId === d.id;
+                            return (
+                              <option key={d.id} value={d.id}>
+                                {d.name} &bull; {d.phone} {isCarDefault ? "★ [Default for Car]" : ""} {d.licenseNumber ? `(${d.licenseNumber})` : ""}
+                              </option>
+                            );
+                          })}
                         </optgroup>
                         {registeredDrivers.filter(d => getDriverBusy(d)).length > 0 && (
                           <optgroup label="Currently Assigned / On Duty (Disabled)">

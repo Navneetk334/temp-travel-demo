@@ -1223,11 +1223,15 @@ export default function MasterOmnichannelCRMPage() {
                       <option value="" disabled>- Select Assigned Chauffeur -</option>
                       {availableDrivers.filter(d => !getDriverBusy(d)).length > 0 && (
                         <optgroup label="Available Chauffeurs (Ready for Duty)">
-                          {availableDrivers.filter(d => !getDriverBusy(d)).map((drv) => (
-                            <option key={drv.id} value={drv.id} className="bg-surface text-emerald-400">
-                              ✓ {drv.name} (+91 {drv.phone})
-                            </option>
-                          ))}
+                          {availableDrivers.filter(d => !getDriverBusy(d)).map((drv) => {
+                            const selectedVeh = availableVehicles.find(v => v.id === dispatchForm.vehicleId);
+                            const isCarDefault = selectedVeh?.driver?.id === drv.id;
+                            return (
+                              <option key={drv.id} value={drv.id} className="bg-surface text-emerald-400">
+                                ✓ {drv.name} (+91 {drv.phone}) {isCarDefault ? "★ [Default for Car]" : ""}
+                              </option>
+                            );
+                          })}
                         </optgroup>
                       )}
                       {availableDrivers.filter(d => getDriverBusy(d)).length > 0 && (
@@ -1244,6 +1248,10 @@ export default function MasterOmnichannelCRMPage() {
                       )}
                     </select>
                   </div>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-background/60 border border-border text-[11px] text-slate-400 flex items-center gap-2">
+                  <span>💡 <strong>Independent Chauffeur Selection:</strong> If the vehicle&apos;s regular driver is on holiday, leave, or unavailable, you can freely select any active driver from the list.</span>
                 </div>
               </div>
 

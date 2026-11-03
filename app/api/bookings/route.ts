@@ -44,6 +44,7 @@ export async function GET(req: NextRequest) {
         { customer: { phone: { contains: search, mode: "insensitive" } } },
         { pickupLocation: { contains: search, mode: "insensitive" } },
         { dropLocation: { contains: search, mode: "insensitive" } },
+        { notes: { contains: search, mode: "insensitive" } },
         { vehicle: { registrationNumber: { contains: search, mode: "insensitive" } } },
         { vehicle: { driver: { name: { contains: search, mode: "insensitive" } } } },
       ];
@@ -103,8 +104,36 @@ export async function GET(req: NextRequest) {
 
     const totalPages = Math.ceil(totalCount / limit) || 1;
 
+    const enrichedBookings = bookings.map((b) => {
+      let customDriver = null;
+      if (b.notes) {
+        const match = b.notes.match(/\[AssignedDriver:\s*([^|\]]+)\|([^|\]]+)(?:\|([^\]]+))?\]/);
+        if (match) {
+          customDriver = {
+            name: match[1].trim(),
+            phone: match[2].trim(),
+            id: match[3]?.trim() || null
+          };
+        }
+      }
+      const activeDriver = customDriver || b.vehicle?.driver || null;
+      return {
+        ...b,
+        driver: activeDriver,
+        vehicle: b.vehicle ? {
+          ...b.vehicle,
+          driver: activeDriver
+        } : (activeDriver ? {
+          id: "",
+          model: "Commercial Fleet",
+          registrationNumber: "Pending Vehicle",
+          driver: activeDriver
+        } : null)
+      };
+    });
+
     return NextResponse.json({
-      bookings,
+      bookings: enrichedBookings,
       pagination: {
         totalCount,
         totalPages,

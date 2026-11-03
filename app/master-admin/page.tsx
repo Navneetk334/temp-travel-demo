@@ -1169,11 +1169,14 @@ export default function MasterAdminDashboard() {
                       <option value="">-- Assign Later / Auto-Allocate --</option>
                       {driversList.filter(d => !isDrvBusy(d)).length > 0 && (
                         <optgroup label="Available Chauffeurs (Ready for Duty)">
-                          {driversList.filter(d => !isDrvBusy(d)).map((d) => (
-                            <option key={d.id} value={d.id} className="text-emerald-400">
-                              ✓ {d.name} &bull; {d.phone}
-                            </option>
-                          ))}
+                          {driversList.filter(d => !isDrvBusy(d)).map((d) => {
+                            const isCarDefault = dispatchForm.assignedVehicleId && fleetList.find(v => v.id === dispatchForm.assignedVehicleId)?.driverId === d.id;
+                            return (
+                              <option key={d.id} value={d.id} className="text-emerald-400">
+                                ✓ {d.name} &bull; {d.phone} {isCarDefault ? "★ [Default for Car]" : ""}
+                              </option>
+                            );
+                          })}
                         </optgroup>
                       )}
                       {driversList.filter(d => isDrvBusy(d)).length > 0 && (
@@ -1190,6 +1193,10 @@ export default function MasterAdminDashboard() {
                       )}
                     </select>
                   </div>
+                </div>
+
+                <div className="p-2 rounded-xl bg-background/40 border border-border text-[10px] text-slate-400 flex items-center gap-1.5">
+                  <span>💡 <strong>Independent Allocation:</strong> Select vehicle and chauffeur separately. If the car&apos;s regular driver is on holiday or unavailable, you can assign any other active chauffeur.</span>
                 </div>
 
                 {/* Row 4: Pickup Location & Drop Location with Address Search */}

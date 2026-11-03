@@ -719,11 +719,15 @@ export default function LeadDispatchModal({
                       <option value="" disabled>- Select Assigned Chauffeur -</option>
                       {availableDrivers.filter(d => !getDriverBusy(d)).length > 0 && (
                         <optgroup label="Available Chauffeurs (Ready for Duty)">
-                          {availableDrivers.filter(d => !getDriverBusy(d)).map((drv) => (
-                            <option key={drv.id} value={drv.id} className="bg-slate-900 text-emerald-300">
-                              ✓ {drv.name} (+91 {drv.phone})
-                            </option>
-                          ))}
+                          {availableDrivers.filter(d => !getDriverBusy(d)).map((drv) => {
+                            const selectedVeh = availableVehicles.find(v => v.id === dispatchForm.vehicleId);
+                            const isCarDefault = selectedVeh?.driver?.id === drv.id;
+                            return (
+                              <option key={drv.id} value={drv.id} className="bg-slate-900 text-emerald-300">
+                                ✓ {drv.name} (+91 {drv.phone}) {isCarDefault ? "★ [Default for Car]" : ""}
+                              </option>
+                            );
+                          })}
                         </optgroup>
                       )}
                       {availableDrivers.filter(d => getDriverBusy(d)).length > 0 && (
@@ -740,6 +744,10 @@ export default function LeadDispatchModal({
                       )}
                     </select>
                   </div>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-slate-900/80 border border-white/5 text-[11px] text-slate-400 flex items-center gap-2">
+                  <span>💡 <strong>Independent Allocation:</strong> You can assign any available chauffeur to any vehicle. If the car&apos;s regular driver is on holiday or unavailable, simply choose any other available chauffeur.</span>
                 </div>
               </div>
 

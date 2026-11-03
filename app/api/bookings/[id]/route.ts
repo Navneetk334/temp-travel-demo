@@ -45,7 +45,34 @@ export async function GET(
       return NextResponse.json({ error: "Booking not found" }, { status: 404 });
     }
 
-    return NextResponse.json(booking, { status: 200 });
+    let customDriver = null;
+    if (booking.notes) {
+      const match = booking.notes.match(/\[AssignedDriver:\s*([^|\]]+)\|([^|\]]+)(?:\|([^\]]+))?\]/);
+      if (match) {
+        customDriver = {
+          name: match[1].trim(),
+          phone: match[2].trim(),
+          id: match[3]?.trim() || null
+        };
+      }
+    }
+    const activeDriver = customDriver || booking.vehicle?.driver || null;
+
+    const enrichedBooking = {
+      ...booking,
+      driver: activeDriver,
+      vehicle: booking.vehicle ? {
+        ...booking.vehicle,
+        driver: activeDriver
+      } : (activeDriver ? {
+        id: "",
+        model: "Commercial Fleet",
+        registrationNumber: "Pending Vehicle",
+        driver: activeDriver
+      } : null)
+    };
+
+    return NextResponse.json(enrichedBooking, { status: 200 });
   } catch (error) {
     console.error(`GET /api/bookings/${id} error:`, error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -64,18 +91,45 @@ export async function PUT(
     }
 
     const body = await req.json();
-    const { status, vehicleId, notes } = body;
+    const { status, vehicleId, driverId, notes } = body;
+
+    const currentBooking = await prisma.booking.findUnique({
+      where: { id },
+      select: { notes: true, status: true }
+    });
 
     const updateData: any = {};
     if (status) updateData.status = status;
-    if (notes !== undefined) updateData.notes = notes;
+    
+    // Resolve notes with assigned driver tag
+    let effectiveNotes = notes !== undefined ? notes : (currentBooking?.notes || "");
+    if (driverId !== undefined) {
+      // Strip any existing driver tag first
+      effectiveNotes = effectiveNotes.replace(/\[AssignedDriver:\s*[^\]]+\]/g, "").trim();
+      if (driverId) {
+        const drv = await prisma.user.findFirst({
+          where: { id: driverId },
+          select: { id: true, name: true, phone: true }
+        });
+        if (drv) {
+          effectiveNotes = `${effectiveNotes} [AssignedDriver: ${drv.name}|${drv.phone}|${drv.id}]`.trim();
+        }
+      }
+      updateData.notes = effectiveNotes;
+    } else if (notes !== undefined) {
+      updateData.notes = notes;
+    }
     
     if (vehicleId !== undefined) {
       updateData.vehicleId = vehicleId || null;
-      // If assigning a vehicle and status is PENDING or CONFIRMED, automatically advance status to VEHICLE_ASSIGNED
+      // If assigning a vehicle and status is PENDING or CONFIRMED, automatically advance status
       if (vehicleId && (!status || status === "PENDING" || status === "CONFIRMED")) {
         updateData.status = "VEHICLE_ASSIGNED";
       }
+    }
+
+    if (driverId && !vehicleId && (!status || status === "PENDING" || status === "CONFIRMED")) {
+      updateData.status = "DRIVER_ASSIGNED";
     }
 
     const updatedBooking = await prisma.booking.update({
@@ -102,7 +156,34 @@ export async function PUT(
       }
     });
 
-    return NextResponse.json(updatedBooking, { status: 200 });
+    let customDriver = null;
+    if (updatedBooking.notes) {
+      const match = updatedBooking.notes.match(/\[AssignedDriver:\s*([^|\]]+)\|([^|\]]+)(?:\|([^\]]+))?\]/);
+      if (match) {
+        customDriver = {
+          name: match[1].trim(),
+          phone: match[2].trim(),
+          id: match[3]?.trim() || null
+        };
+      }
+    }
+    const activeDriver = customDriver || updatedBooking.vehicle?.driver || null;
+
+    const enrichedResult = {
+      ...updatedBooking,
+      driver: activeDriver,
+      vehicle: updatedBooking.vehicle ? {
+        ...updatedBooking.vehicle,
+        driver: activeDriver
+      } : (activeDriver ? {
+        id: "",
+        model: "Commercial Fleet",
+        registrationNumber: "Pending Vehicle",
+        driver: activeDriver
+      } : null)
+    };
+
+    return NextResponse.json(enrichedResult, { status: 200 });
   } catch (error) {
     console.error(`PUT /api/bookings/${id} error:`, error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
