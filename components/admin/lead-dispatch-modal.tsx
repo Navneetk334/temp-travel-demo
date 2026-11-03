@@ -265,7 +265,7 @@ export default function LeadDispatchModal({
 
     const assignedVeh = availableVehicles.find(v => v.id === dispatchForm.vehicleId) || filteredVehicles[0] || availableVehicles[0];
     const assignedDrv = availableDrivers.find(d => d.id === dispatchForm.driverId) || availableDrivers[0];
-    const finalBookingRef = lead.bookingRef || lead.bookingNumber || `TT-${Date.now().toString().slice(-6)}`;
+    const finalBookingRef = lead.bookingRef || lead.bookingNumber || (lead.id ? `TT-${lead.id.slice(-6).toUpperCase()}` : `TT-${Date.now().toString().slice(-6)}`);
     
     const dispatchedBooking = {
       id: `booking_${Date.now()}`,

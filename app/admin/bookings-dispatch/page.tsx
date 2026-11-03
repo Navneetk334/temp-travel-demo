@@ -21,7 +21,8 @@ import {
   ShieldCheck,
   MessageSquare,
   ArrowRight,
-  UserCheck
+  UserCheck,
+  Trash2
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 
@@ -644,6 +645,13 @@ export default function BookingDispatchPage() {
                               >
                                 <UserCheck className="w-4 h-4" />
                               </button>
+                              <button
+                                onClick={() => handleDelete(booking.id)}
+                                title="Delete Dispatch Booking"
+                                className="inline-flex p-1.5 bg-surface border border-border rounded-lg text-slate-400 hover:text-red-400 transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
                             </td>
                           </tr>
                         );
@@ -709,9 +717,19 @@ export default function BookingDispatchPage() {
                   <h3 className="text-xl font-extrabold text-slate-50 mt-0.5">{activeBooking.customer?.name}</h3>
                   <p className="text-[11px] text-slate-400 mt-0.5">Pickup: {new Date(activeBooking.pickupDateTime).toLocaleString("en-IN")}</p>
                 </div>
-                <span className={`text-[10px] font-extrabold py-1 px-3 rounded-full border uppercase ${getStatusBadge(activeBooking.status)}`}>
-                  {activeBooking.status}
-                </span>
+                <div className="flex flex-col items-end gap-2">
+                  <span className={`text-[10px] font-extrabold py-1 px-3 rounded-full border uppercase ${getStatusBadge(activeBooking.status)}`}>
+                    {activeBooking.status}
+                  </span>
+                  <button
+                    onClick={() => handleDelete(activeBooking.id)}
+                    title="Delete Dispatch Booking"
+                    className="inline-flex items-center gap-1 text-[11px] text-red-400 hover:text-red-300 transition-colors cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete</span>
+                  </button>
+                </div>
               </div>
 
               {/* Visual Booking Lifecycle Timeline */}
