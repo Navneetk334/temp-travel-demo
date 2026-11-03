@@ -226,7 +226,7 @@ export default function ContactPage() {
                   </div>
                 </div>
                 <a
-                  href="https://www.google.com/maps/search/?api=1&query=28.5763965,77.0282025"
+                  href="https://www.google.com/maps/place/?q=place_id:ChIJ5Zoykd0bDTkRc8tFlL_O6rY"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-4 py-2.5 rounded-lg text-xs tracking-wider transition-all shadow-lg shrink-0 uppercase"
