@@ -36,7 +36,14 @@ import Portal from "@/components/shared/portal";
 import LocationInput from "@/components/shared/location-input";
 import { extractLeadVehicleRequirements, extractPickupLocation, extractDropLocation } from "@/components/admin/lead-dispatch-modal";
 import { useDialog } from "@/app/components/DialogProvider";
-import { syncExistingDispatchesToLeads } from "@/lib/lead-sync";
+import { 
+  syncExistingDispatchesToLeads,
+  UNIFIED_LEAD_STATUSES,
+  normalizeLeadStatus,
+  getCurrentAdminUser,
+  createLeadStatusAuditLog,
+  parseLastLeadChange
+} from "@/lib/lead-sync";
 
 const SEDAN_CLASSES = ["Compact", "Executive", "Premium Executive", "Luxury"];
 const SUV_CLASSES = ["Subcompact/Urban", "Mid-Premium", "Premium", "Luxury"];
@@ -233,7 +240,10 @@ export default function MasterOmnichannelCRMPage() {
       tripType,
       pickupLocation: pLoc || raw.pickupLocation || raw.pickupLocations || raw.pickup || "-",
       dropLocation: dLoc || raw.dropLocation || raw.drop || "-",
-      status: (raw.status || "NEW").toUpperCase(),
+      status: normalizeLeadStatus(raw.status),
+      lastChangedBy: raw.lastChangedBy || null,
+      lastChangedPanel: raw.lastChangedPanel || null,
+      lastChangedAt: raw.lastChangedAt || null,
       createdAt: raw.createdAt || raw.date || new Date().toISOString(),
       notes: raw.notes || raw.requirements || raw.message || raw.details || "",
       sourceApi: defaultType === "Rental Inquiry" ? "/api/rental/lead" :
@@ -382,9 +392,40 @@ export default function MasterOmnichannelCRMPage() {
   }, []);
 
   const updateLeadStatus = async (id: string, newStatus: string) => {
-    const dbStatus = newStatus === "CONVERTED" ? "WON" : newStatus;
-    const updated = leads.map(l => l.id === id ? { ...l, status: newStatus } : l);
+    const normStatus = normalizeLeadStatus(newStatus);
+    const { userName, panel } = getCurrentAdminUser("Master Admin Panel");
+    const target = leads.find(l => l.id === id);
+    const existingNotes = target?.notes || "";
+
+    const { updatedNotes } = createLeadStatusAuditLog({
+      oldStatus: target?.status,
+      newStatus: normStatus,
+      userName,
+      panel,
+      existingNotes,
+    });
+
+    const timestamp = new Date().toISOString();
+    const updated = leads.map(l => l.id === id ? { 
+      ...l, 
+      status: normStatus, 
+      notes: updatedNotes,
+      lastChangedBy: userName,
+      lastChangedPanel: panel,
+      lastChangedAt: timestamp
+    } : l);
     setLeads(updated);
+
+    if (selectedLead && selectedLead.id === id) {
+      setSelectedLead({
+        ...selectedLead,
+        status: normStatus,
+        notes: updatedNotes,
+        lastChangedBy: userName,
+        lastChangedPanel: panel,
+        lastChangedAt: timestamp
+      });
+    }
 
     try {
       localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(updated));
@@ -398,12 +439,17 @@ export default function MasterOmnichannelCRMPage() {
         fetch(`/api/rental/lead`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id, status: dbStatus }),
+          body: JSON.stringify({ id, status: normStatus, notes: updatedNotes }),
         }),
         fetch(`/api/corporate/lead/${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: dbStatus }),
+          body: JSON.stringify({ status: normStatus, notes: updatedNotes }),
+        }),
+        fetch(`/api/contact/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: normStatus }),
         })
       ]);
     } catch (e) {
@@ -573,8 +619,8 @@ export default function MasterOmnichannelCRMPage() {
       console.error("Failed to dispatch to live API:", err);
     }
 
-    // 2. Mark Lead as CONVERTED in CRM
-    updateLeadStatus(dispatchModalLead.id, "CONVERTED");
+    // 2. Mark Lead as WON in CRM (bidirectionally synced)
+    updateLeadStatus(dispatchModalLead.id, "WON");
 
     // 3. Show Dispatched Dossier Confirmation
     setDispatchedSuccess({
@@ -611,11 +657,13 @@ export default function MasterOmnichannelCRMPage() {
     );
   };
 
-  const handleBulkStatusChange = (newStatus: string) => {
+  const handleBulkStatusChange = async (newStatus: string) => {
     if (selectedLeadIds.length === 0) return;
-    const updated = leads.map(l => selectedLeadIds.includes(l.id) ? { ...l, status: newStatus } : l);
-    setLeads(updated);
-    localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(updated));
+    const ids = [...selectedLeadIds];
+    for (const id of ids) {
+      await updateLeadStatus(id, newStatus);
+    }
+    setSelectedLeadIds([]);
   };
 
   const handleBulkDelete = async () => {
@@ -751,7 +799,7 @@ export default function MasterOmnichannelCRMPage() {
       (l.bookingRef || "").toLowerCase().includes(search.toLowerCase()) ||
       (l.pickupLocation || "").toLowerCase().includes(search.toLowerCase());
 
-    const matchesStatus = statusFilter === "ALL" || (l.status || "NEW") === statusFilter;
+    const matchesStatus = statusFilter === "ALL" || normalizeLeadStatus(l.status) === normalizeLeadStatus(statusFilter);
     return matchesSearch && matchesStatus;
   });
 
@@ -840,14 +888,14 @@ export default function MasterOmnichannelCRMPage() {
           <div className="flex items-center gap-2 flex-wrap">
             <Filter className="w-4 h-4 text-slate-400" />
             <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Status:</span>
-            {["ALL", "NEW", "CONTACTED", "QUALIFIED", "CONVERTED", "LOST"].map((st) => (
+            {["ALL", ...UNIFIED_LEAD_STATUSES].map((st) => (
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
                 className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase transition-all cursor-pointer ${
                   statusFilter === st
-                    ? "bg-amber-500 text-slate-950 font-black"
-                    : "bg-background text-slate-400 hover:text-white"
+                    ? "bg-amber-500 text-slate-950 font-black shadow-md shadow-amber-500/20"
+                    : "bg-background text-slate-400 hover:text-white border border-border"
                 }`}
               >
                 {st}
@@ -878,11 +926,11 @@ export default function MasterOmnichannelCRMPage() {
                 defaultValue=""
               >
                 <option value="" disabled>Change Status...</option>
-                <option value="NEW">NEW</option>
-                <option value="CONTACTED">CONTACTED</option>
-                <option value="QUALIFIED">QUALIFIED</option>
-                <option value="CONVERTED">CONVERTED</option>
-                <option value="LOST">LOST</option>
+                {UNIFIED_LEAD_STATUSES.map((st) => (
+                  <option key={st} value={st} className="bg-slate-900 text-slate-100">
+                    {st}
+                  </option>
+                ))}
               </select>
 
               <button
@@ -971,20 +1019,47 @@ export default function MasterOmnichannelCRMPage() {
                       </td>
                       <td className="py-4 px-4">
                         <select
-                          value={lead.status || "NEW"}
+                          value={normalizeLeadStatus(lead.status)}
                           onChange={(e) => updateLeadStatus(lead.id, e.target.value)}
                           className={`border rounded-lg px-2.5 py-1 text-[11px] font-bold focus:outline-none cursor-pointer ${
-                            lead.status === "CONVERTED"
+                            normalizeLeadStatus(lead.status) === "WON"
                               ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30 font-black"
+                              : normalizeLeadStatus(lead.status) === "LOST"
+                              ? "bg-rose-500/10 text-rose-400 border-rose-500/30 font-bold"
+                              : normalizeLeadStatus(lead.status) === "NEGOTIATION"
+                              ? "bg-orange-500/10 text-orange-400 border-orange-500/30 font-bold"
+                              : normalizeLeadStatus(lead.status) === "QUALIFIED"
+                              ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/30 font-bold"
+                              : normalizeLeadStatus(lead.status) === "CONTACTED"
+                              ? "bg-sky-500/10 text-sky-400 border-sky-500/30 font-bold"
+                              : normalizeLeadStatus(lead.status) === "ARCHIVED"
+                              ? "bg-slate-500/10 text-slate-400 border-slate-500/30 font-bold"
                               : "bg-background text-amber-400 border-border"
                           }`}
                         >
-                          <option value="NEW">NEW</option>
-                          <option value="CONTACTED">CONTACTED</option>
-                          <option value="QUALIFIED">QUALIFIED</option>
-                          <option value="CONVERTED">CONVERTED</option>
-                          <option value="LOST">LOST</option>
+                          {UNIFIED_LEAD_STATUSES.map((st) => (
+                            <option key={st} value={st} className="bg-slate-900 text-slate-100">
+                              {st}
+                            </option>
+                          ))}
                         </select>
+                        {(() => {
+                          const lastChange = parseLastLeadChange(lead);
+                          if (lastChange.changedBy) {
+                            return (
+                              <div className="text-[10px] text-slate-400 mt-1 leading-tight flex items-center gap-1 font-sans">
+                                <span className="text-slate-500">By</span>
+                                <span className="text-amber-400 font-bold truncate max-w-[90px]" title={lastChange.changedBy}>
+                                  {lastChange.changedBy}
+                                </span>
+                                <span className="text-slate-500 text-[9px] shrink-0">
+                                  ({lastChange.panel === "Master Admin Panel" ? "Master HQ" : "Admin Desk"})
+                                </span>
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
                       </td>
                       <td className="py-4 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
@@ -1504,7 +1579,52 @@ export default function MasterOmnichannelCRMPage() {
                 {selectedLead.dropLocation && (
                   <div>Drop Address: <strong className="text-slate-200">{selectedLead.dropLocation}</strong></div>
                 )}
-                <div>Notes: <p className="text-slate-400 font-sans mt-1">{selectedLead.notes || "No special instructions recorded."}</p></div>
+              </div>
+
+              {/* Status Update Pipeline Selector */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Update Pipeline Status</label>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {UNIFIED_LEAD_STATUSES.map((st) => (
+                    <button
+                      key={st}
+                      type="button"
+                      onClick={() => updateLeadStatus(selectedLead.id, st)}
+                      className={`py-1.5 px-2 rounded-lg text-[10px] font-extrabold tracking-wider border transition-all cursor-pointer ${
+                        normalizeLeadStatus(selectedLead.status) === st
+                          ? "bg-amber-500 text-slate-950 border-amber-500 font-black shadow-md shadow-amber-500/20"
+                          : "bg-background text-slate-400 border-border hover:border-white/20 hover:text-slate-200"
+                      }`}
+                    >
+                      {st}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Last Changed By Audit Banner */}
+              {(() => {
+                const lastChange = parseLastLeadChange(selectedLead);
+                if (lastChange.changedBy) {
+                  return (
+                    <div className="bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-xl text-xs space-y-0.5">
+                      <div className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">Last Status Update</div>
+                      <div className="text-slate-200 text-[11px]">
+                        Changed by <strong className="text-amber-300">{lastChange.changedBy}</strong> ({lastChange.panel})
+                        {lastChange.timestamp && <span className="text-slate-400"> on {lastChange.timestamp}</span>}
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+
+              {/* Follow-up / Audit History Trail */}
+              <div className="space-y-1.5 border-t border-border pt-3">
+                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Audit & Follow-up History Log</div>
+                <div className="bg-background/80 p-3 rounded-lg border border-border text-xs font-mono text-slate-300 max-h-36 overflow-y-auto whitespace-pre-wrap leading-relaxed space-y-1 scrollbar-thin">
+                  {selectedLead.notes || "No previous history recorded."}
+                </div>
               </div>
 
               <div className="pt-2 flex justify-between items-center">

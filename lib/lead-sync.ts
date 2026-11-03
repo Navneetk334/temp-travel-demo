@@ -181,3 +181,183 @@ export function syncExistingDispatchesToLeads() {
   }
 }
 
+export const UNIFIED_LEAD_STATUSES = [
+  "NEW",
+  "CONTACTED",
+  "QUALIFIED",
+  "NEGOTIATION",
+  "WON",
+  "LOST",
+  "ARCHIVED",
+] as const;
+
+export type UnifiedLeadStatus = typeof UNIFIED_LEAD_STATUSES[number];
+
+export function normalizeLeadStatus(status?: string | null): UnifiedLeadStatus {
+  if (!status) return "NEW";
+  const s = status.trim().toUpperCase();
+  if (s === "CONVERTED") return "WON";
+  if (s === "READ") return "CONTACTED";
+  if (UNIFIED_LEAD_STATUSES.includes(s as UnifiedLeadStatus)) {
+    return s as UnifiedLeadStatus;
+  }
+  return "NEW";
+}
+
+export function getCurrentAdminUser(defaultPanel: "Admin Panel" | "Master Admin Panel" = "Admin Panel"): {
+  userName: string;
+  panel: "Admin Panel" | "Master Admin Panel";
+} {
+  if (typeof window === "undefined") {
+    return { userName: "Admin", panel: defaultPanel };
+  }
+
+  if (defaultPanel === "Master Admin Panel") {
+    try {
+      const masterUser = localStorage.getItem("tt_master_admin_user");
+      if (masterUser) {
+        const u = JSON.parse(masterUser);
+        const name = u.name || u.email || "Master Admin";
+        return { userName: name, panel: "Master Admin Panel" };
+      }
+    } catch (e) {}
+    try {
+      const adminUser = localStorage.getItem("tt_admin_user");
+      if (adminUser) {
+        const u = JSON.parse(adminUser);
+        const name = u.name || u.email || "Master Admin";
+        return { userName: name, panel: "Master Admin Panel" };
+      }
+    } catch (e) {}
+    return { userName: "Master Admin", panel: "Master Admin Panel" };
+  }
+
+  // Admin Panel
+  try {
+    const adminUser = localStorage.getItem("tt_admin_user");
+    if (adminUser) {
+      const u = JSON.parse(adminUser);
+      const name = u.name || u.email || "Operations Staff";
+      return { userName: name, panel: "Admin Panel" };
+    }
+  } catch (e) {}
+  return { userName: "Operations Staff", panel: "Admin Panel" };
+}
+
+export function createLeadStatusAuditLog({
+  oldStatus,
+  newStatus,
+  userName,
+  panel,
+  existingNotes,
+}: {
+  oldStatus?: string | null;
+  newStatus: string;
+  userName: string;
+  panel: "Admin Panel" | "Master Admin Panel";
+  existingNotes?: string | null;
+}): {
+  updatedNotes: string;
+  auditMessage: string;
+  timestamp: string;
+} {
+  const timestamp = new Date().toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  const normalizedNew = normalizeLeadStatus(newStatus);
+  const normalizedOld = oldStatus ? normalizeLeadStatus(oldStatus) : null;
+  const statusDiff = normalizedOld && normalizedOld !== normalizedNew ? `from ${normalizedOld} to ${normalizedNew}` : `to ${normalizedNew}`;
+
+  const auditMessage = `Status changed ${statusDiff} by ${userName} (${panel})`;
+  const logLine = `[${timestamp}] ${auditMessage}`;
+  const updatedNotes = existingNotes ? `${existingNotes}\n${logLine}` : logLine;
+
+  return { updatedNotes, auditMessage, timestamp };
+}
+
+export function parseLastLeadChange(lead: {
+  notes?: string | null;
+  lastChangedBy?: string | null;
+  lastChangedPanel?: string | null;
+  lastChangedAt?: string | null;
+}): {
+  changedBy: string | null;
+  panel: string | null;
+  timestamp: string | null;
+  fullText: string | null;
+} {
+  if (lead.lastChangedBy && lead.lastChangedPanel) {
+    return {
+      changedBy: lead.lastChangedBy,
+      panel: lead.lastChangedPanel,
+      timestamp: lead.lastChangedAt || null,
+      fullText: `Changed by ${lead.lastChangedBy} (${lead.lastChangedPanel})`,
+    };
+  }
+
+  if (!lead.notes) return { changedBy: null, panel: null, timestamp: null, fullText: null };
+
+  const lines = lead.notes.split("\n");
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const line = lines[i].trim();
+    const statusMatch = line.match(/^\[([^\]]+)\]\s*(?:Status changed.*?to\s+([A-Z_]+)\s+)?by\s+(.*?)\s+\(([^)]+)\)/i);
+    if (statusMatch) {
+      return {
+        timestamp: statusMatch[1],
+        changedBy: statusMatch[3],
+        panel: statusMatch[4],
+        fullText: `Changed by ${statusMatch[3]} (${statusMatch[4]})`,
+      };
+    }
+  }
+
+  return { changedBy: null, panel: null, timestamp: null, fullText: null };
+}
+
+export function syncLeadStatusUpdateAcrossPanels({
+  leadId,
+  newStatus,
+  updatedNotes,
+  userName,
+  panel,
+}: {
+  leadId: string;
+  newStatus: string;
+  updatedNotes: string;
+  userName: string;
+  panel: "Admin Panel" | "Master Admin Panel";
+}) {
+  if (typeof window === "undefined") return;
+  try {
+    const existing = JSON.parse(localStorage.getItem("user_uploaded_crm_leads") || "[]");
+    const normalized = normalizeLeadStatus(newStatus);
+    const timestamp = new Date().toISOString();
+
+    const updated = existing.map((l: any) => {
+      if (l.id === leadId || l.bookingRef === leadId) {
+        return {
+          ...l,
+          status: normalized,
+          notes: updatedNotes,
+          lastChangedBy: userName,
+          lastChangedPanel: panel,
+          lastChangedAt: timestamp,
+          updatedAt: timestamp,
+        };
+      }
+      return l;
+    });
+
+    localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(updated));
+    window.dispatchEvent(new Event("crm_leads_updated"));
+  } catch (e) {
+    console.error("syncLeadStatusUpdateAcrossPanels error:", e);
+  }
+}
+
+

@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import LocationInput from "@/components/shared/location-input";
 import Portal from "@/components/shared/portal";
+import { getCurrentAdminUser, createLeadStatusAuditLog } from "@/lib/lead-sync";
 
 export interface LeadDispatchModalProps {
   isOpen: boolean;
@@ -395,6 +396,16 @@ export default function LeadDispatchModal({
 
     // Removed localStorage save for dispatch
 
+    const { userName, panel } = getCurrentAdminUser("Admin Panel");
+    const { updatedNotes } = createLeadStatusAuditLog({
+      oldStatus: lead.status,
+      newStatus: "WON",
+      userName,
+      panel,
+      existingNotes: lead.notes,
+    });
+    const nowIso = new Date().toISOString();
+
     try {
       const crmStored = localStorage.getItem("user_uploaded_crm_leads");
       if (crmStored) {
@@ -402,7 +413,15 @@ export default function LeadDispatchModal({
         if (Array.isArray(crmList)) {
           const updatedCRM = crmList.map((l: any) =>
             (l.id === lead.id || l.bookingRef === lead.bookingRef || (l.phone && lead.phone && l.phone === lead.phone))
-              ? { ...l, status: "WON" }
+              ? { 
+                  ...l, 
+                  status: "WON",
+                  notes: updatedNotes,
+                  lastChangedBy: userName,
+                  lastChangedPanel: panel,
+                  lastChangedAt: nowIso,
+                  updatedAt: nowIso
+                }
               : l
           );
           localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(updatedCRM));
@@ -412,6 +431,21 @@ export default function LeadDispatchModal({
     } catch (e) {
       console.error(e);
     }
+
+    try {
+      await Promise.allSettled([
+        fetch(`/api/rental/lead`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: lead.id, status: "WON", notes: updatedNotes }),
+        }),
+        fetch(`/api/corporate/lead/${lead.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "WON", notes: updatedNotes }),
+        })
+      ]);
+    } catch (e) {}
 
     try {
       await fetch(`/api/bookings/dispatch`, {

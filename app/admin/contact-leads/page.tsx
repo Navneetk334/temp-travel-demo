@@ -20,11 +20,20 @@ import {
   ChevronRight,
   CheckCheck,
   Truck,
-  CheckCircle2
+  CheckCircle2,
+  Loader2
 } from "lucide-react";
 import LeadDispatchModal from "@/components/admin/lead-dispatch-modal";
+import { 
+  getCurrentAdminUser,
+  createLeadStatusAuditLog,
+  parseLastLeadChange,
+  syncLeadStatusUpdateAcrossPanels,
+  UNIFIED_LEAD_STATUSES,
+  normalizeLeadStatus
+} from "@/lib/lead-sync";
 
-export type ContactStatus = "NEW" | "READ" | "CONTACTED" | "QUALIFIED" | "WON" | "LOST" | "ARCHIVED";
+export type ContactStatus = "NEW" | "READ" | "CONTACTED" | "QUALIFIED" | "NEGOTIATION" | "WON" | "LOST" | "ARCHIVED";
 
 interface ContactLead {
   id: string;
@@ -70,6 +79,7 @@ export default function AdminContactLeadsPage() {
   });
 
   const [activeLead, setActiveLead] = useState<ContactLead | null>(null);
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -162,7 +172,18 @@ export default function AdminContactLeadsPage() {
   };
 
   const handleStatusChange = async (id: string, newStatus: ContactStatus) => {
+    setUpdatingStatus(newStatus);
     try {
+      const target = leads.find((l) => l.id === id);
+      const { userName, panel } = getCurrentAdminUser("Admin Panel");
+      const { updatedNotes } = createLeadStatusAuditLog({
+        oldStatus: target?.status,
+        newStatus,
+        userName,
+        panel,
+        existingNotes: (target as any)?.notes || target?.message,
+      });
+
       const res = await fetch(`/api/contact/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -171,14 +192,23 @@ export default function AdminContactLeadsPage() {
 
       if (res.ok) {
         const updated = await res.json();
-        setLeads(leads.map((l) => (l.id === id ? updated : l)));
+        setLeads(leads.map((l) => (l.id === id ? { ...l, status: newStatus } : l)));
         if (activeLead && activeLead.id === id) {
-          setActiveLead(updated);
+          setActiveLead({ ...activeLead, status: newStatus });
         }
+        syncLeadStatusUpdateAcrossPanels({
+          leadId: id,
+          newStatus,
+          updatedNotes,
+          userName,
+          panel,
+        });
         loadLeads(false);
       }
     } catch (err) {
       console.error("Failed to update status:", err);
+    } finally {
+      setUpdatingStatus(null);
     }
   };
 
@@ -492,6 +522,17 @@ export default function AdminContactLeadsPage() {
                             <span className={`text-[9px] font-extrabold py-0.5 px-2 rounded-full border tracking-wide uppercase ${getStatusBadge(lead.status)}`}>
                               {lead.status === "CONTACTED" ? "REPLIED" : lead.status}
                             </span>
+                            {(() => {
+                              const lastChange = parseLastLeadChange(lead as any);
+                              if (lastChange.changedBy) {
+                                return (
+                                  <div className="text-[9px] text-slate-400 mt-1 font-sans">
+                                    By <span className="text-amber-400 font-bold">{lastChange.changedBy}</span> ({lastChange.panel === "Master Admin Panel" ? "Master HQ" : "Admin"})
+                                  </div>
+                                );
+                              }
+                              return null;
+                            })()}
                           </td>
                           <td className="p-4 text-right space-x-1" onClick={(e) => e.stopPropagation()}>
                             {lead.status === "WON" ? (
@@ -634,47 +675,42 @@ export default function AdminContactLeadsPage() {
               {/* Status Update Quick Buttons */}
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Quick Status Actions</label>
-                <div className="grid grid-cols-3 gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => handleStatusChange(activeLead.id, "READ")}
-                    className={`py-2 px-2 rounded-lg text-[10px] font-extrabold tracking-wider border flex items-center justify-center gap-1 transition-all ${
-                      activeLead.status === "READ"
-                        ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40 font-black"
-                        : "bg-background/60 text-slate-400 border-border hover:border-cyan-500/40 hover:text-cyan-300"
-                    }`}
-                  >
-                    <Eye className="w-3.5 h-3.5" />
-                    <span>MARK READ</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleStatusChange(activeLead.id, "CONTACTED")}
-                    className={`py-2 px-2 rounded-lg text-[10px] font-extrabold tracking-wider border flex items-center justify-center gap-1 transition-all ${
-                      activeLead.status === "CONTACTED"
-                        ? "bg-blue-500/20 text-blue-300 border-blue-500/40 font-black"
-                        : "bg-background/60 text-slate-400 border-border hover:border-blue-500/40 hover:text-blue-300"
-                    }`}
-                  >
-                    <MessageCircle className="w-3.5 h-3.5" />
-                    <span>REPLIED</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleStatusChange(activeLead.id, "ARCHIVED")}
-                    className={`py-2 px-2 rounded-lg text-[10px] font-extrabold tracking-wider border flex items-center justify-center gap-1 transition-all ${
-                      activeLead.status === "ARCHIVED"
-                        ? "bg-slate-500/20 text-slate-300 border-slate-500/40 font-black"
-                        : "bg-background/60 text-slate-400 border-border hover:border-slate-500/40 hover:text-slate-300"
-                    }`}
-                  >
-                    <Archive className="w-3.5 h-3.5" />
-                    <span>ARCHIVE</span>
-                  </button>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {(["NEW", "READ", "CONTACTED", "QUALIFIED", "NEGOTIATION", "WON", "LOST", "ARCHIVED"] as ContactStatus[]).map((st) => (
+                    <button
+                      key={st}
+                      type="button"
+                      disabled={updatingStatus !== null}
+                      onClick={() => handleStatusChange(activeLead.id, st)}
+                      className={`py-1.5 px-2 rounded-lg text-[10px] font-extrabold tracking-wider border flex items-center justify-center gap-1 transition-all ${
+                        activeLead.status === st
+                          ? "bg-accent text-slate-950 border-accent font-black shadow-md"
+                          : "bg-background/60 text-slate-400 border-border hover:border-white/20 hover:text-slate-200"
+                      } disabled:opacity-60 disabled:cursor-not-allowed`}
+                    >
+                      {updatingStatus === st && <Loader2 className="w-2.5 h-2.5 animate-spin" />}
+                      <span>{st}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
+
+              {/* Last Changed By Audit Indicator */}
+              {(() => {
+                const lastChange = parseLastLeadChange(activeLead as any);
+                if (lastChange.changedBy) {
+                  return (
+                    <div className="bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-xl text-xs space-y-0.5">
+                      <div className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">Last Status Update</div>
+                      <div className="text-slate-200 text-[11px]">
+                        Changed by <strong className="text-amber-300">{lastChange.changedBy}</strong> ({lastChange.panel})
+                        {lastChange.timestamp && <span className="text-slate-400"> on {lastChange.timestamp}</span>}
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
 
               {/* Sender Details */}
               <div className="space-y-3 border-t border-border pt-4 text-xs text-slate-300">

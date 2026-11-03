@@ -24,6 +24,14 @@ import {
   Loader2
 } from "lucide-react";
 import LeadDispatchModal, { extractLeadVehicleRequirements } from "@/components/admin/lead-dispatch-modal";
+import { 
+  getCurrentAdminUser,
+  createLeadStatusAuditLog,
+  parseLastLeadChange,
+  syncLeadStatusUpdateAcrossPanels,
+  UNIFIED_LEAD_STATUSES,
+  normalizeLeadStatus
+} from "@/lib/lead-sync";
 
 export type LeadStatus = "NEW" | "CONTACTED" | "QUALIFIED" | "NEGOTIATION" | "WON" | "LOST" | "ARCHIVED";
 
@@ -179,12 +187,21 @@ export default function AdminRentalLeadsPage() {
     setUpdatingStatus(newStatus);
     try {
       const target = leads.find((l) => l.id === id);
+      const { userName, panel } = getCurrentAdminUser("Admin Panel");
+      const { updatedNotes } = createLeadStatusAuditLog({
+        oldStatus: target?.status,
+        newStatus,
+        userName,
+        panel,
+        existingNotes: target?.notes,
+      });
+
       const res = await fetch(`/api/rental/lead/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           status: newStatus,
-          notes: target?.notes || "",
+          notes: updatedNotes,
         }),
       });
 
@@ -194,6 +211,13 @@ export default function AdminRentalLeadsPage() {
         if (activeLead && activeLead.id === id) {
           setActiveLead(updated);
         }
+        syncLeadStatusUpdateAcrossPanels({
+          leadId: id,
+          newStatus,
+          updatedNotes,
+          userName,
+          panel,
+        });
         loadLeads(false);
       }
     } catch (err) {
@@ -209,6 +233,7 @@ export default function AdminRentalLeadsPage() {
 
     try {
       const target = leads.find((l) => l.id === id);
+      const { userName, panel } = getCurrentAdminUser("Admin Panel");
       const timestamp = new Date().toLocaleString("en-IN", {
         day: "2-digit",
         month: "short",
@@ -217,7 +242,7 @@ export default function AdminRentalLeadsPage() {
         minute: "2-digit",
       });
 
-      const entry = `[${timestamp}] ${newNoteInput.trim()}`;
+      const entry = `[${timestamp}] Note by ${userName} (${panel}): ${newNoteInput.trim()}`;
       const existingNotes = target?.notes ? `${target.notes}\n${entry}` : entry;
 
       const res = await fetch(`/api/rental/lead/${id}`, {
@@ -233,6 +258,13 @@ export default function AdminRentalLeadsPage() {
         const updated = await res.json();
         setLeads(leads.map((l) => (l.id === id ? updated : l)));
         setActiveLead(updated);
+        syncLeadStatusUpdateAcrossPanels({
+          leadId: id,
+          newStatus: target?.status || "NEW",
+          updatedNotes: existingNotes,
+          userName,
+          panel,
+        });
         setNewNoteInput("");
       }
     } catch (err) {
@@ -567,6 +599,17 @@ export default function AdminRentalLeadsPage() {
                             <span className={`text-[9px] font-extrabold py-0.5 px-2 rounded-full border tracking-wide uppercase ${getStatusBadge(lead.status)}`}>
                               {lead.status}
                             </span>
+                            {(() => {
+                              const lastChange = parseLastLeadChange(lead);
+                              if (lastChange.changedBy) {
+                                return (
+                                  <div className="text-[9px] text-slate-400 mt-1 font-sans">
+                                    By <span className="text-amber-400 font-bold">{lastChange.changedBy}</span> ({lastChange.panel === "Master Admin Panel" ? "Master HQ" : "Admin"})
+                                  </div>
+                                );
+                              }
+                              return null;
+                            })()}
                           </td>
                           <td className="p-4 text-right space-x-1" onClick={(e) => e.stopPropagation()}>
                             {lead.status === "WON" ? (
@@ -712,6 +755,23 @@ export default function AdminRentalLeadsPage() {
                   ))}
                 </div>
               </div>
+
+              {/* Last Changed By Audit Indicator */}
+              {(() => {
+                const lastChange = parseLastLeadChange(activeLead);
+                if (lastChange.changedBy) {
+                  return (
+                    <div className="bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-xl text-xs space-y-0.5">
+                      <div className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">Last Status Update</div>
+                      <div className="text-slate-200 text-[11px]">
+                        Changed by <strong className="text-amber-300">{lastChange.changedBy}</strong> ({lastChange.panel})
+                        {lastChange.timestamp && <span className="text-slate-400"> on {lastChange.timestamp}</span>}
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
 
               {/* Details Specs */}
               <div className="space-y-3 border-t border-border pt-4 text-xs text-slate-300">
