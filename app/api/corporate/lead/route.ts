@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     const where: any = {};
     
     if (status) {
-      where.status = status;
+      where.status = (status === "CONVERTED" || status === "WON") ? "WON" : status;
     }
 
     if (leadType === "pickup_drop") {
@@ -94,6 +94,7 @@ export async function GET(req: NextRequest) {
       }
       return {
         ...lead,
+        status: lead.status === "WON" ? "CONVERTED" : lead.status,
         pickupLocation: lead.pickupLocations || "",
         dropLocation: dropLocation || null,
       };
@@ -113,6 +114,7 @@ export async function GET(req: NextRequest) {
         CONTACTED: contactedCount,
         QUALIFIED: qualifiedCount,
         NEGOTIATION: negotiationCount,
+        CONVERTED: wonCount,
         WON: wonCount,
         LOST: lostCount,
         ARCHIVED: archivedCount,
@@ -158,6 +160,8 @@ export async function POST(req: NextRequest) {
       finalNotes = finalNotes ? `${finalNotes}\nDrop Location: ${dropAddress}` : `Drop Location: ${dropAddress}`;
     }
 
+    const targetStatus = (rawBody.status === "CONVERTED" || rawBody.status === "WON") ? "WON" : (rawBody.status || "NEW");
+
     try {
       const lead = await prisma.corporateLead.create({
         data: {
@@ -170,11 +174,12 @@ export async function POST(req: NextRequest) {
           serviceType: dataToSave.serviceType,
           requirements: finalRequirements,
           notes: finalNotes,
-          status: (rawBody.status as any) || "NEW",
+          status: targetStatus as any,
         },
       });
       return NextResponse.json({
         ...lead,
+        status: lead.status === "WON" ? "CONVERTED" : lead.status,
         pickupLocation: lead.pickupLocations || "",
         dropLocation: dropAddress || null,
       }, { status: 201 });
@@ -187,7 +192,7 @@ export async function POST(req: NextRequest) {
         notes: finalNotes,
         pickupLocation: dataToSave.pickupLocations || "",
         dropLocation: dropAddress || null,
-        status: rawBody.status || "NEW",
+        status: (rawBody.status === "WON" || rawBody.status === "CONVERTED") ? "CONVERTED" : (rawBody.status || "NEW"),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };

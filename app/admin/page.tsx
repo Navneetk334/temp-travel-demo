@@ -132,16 +132,16 @@ export default async function AdminDashboardPage() {
     // 1. Process Corporate Leads
     pickupDropCount = corpLeads.filter(l => l.serviceType?.toLowerCase().includes("pickup & drop")).length;
     corporateInquiryCount = corpLeads.filter(l => !l.serviceType?.toLowerCase().includes("pickup & drop")).length;
-    pickupDropConverted = corpLeads.filter(l => l.serviceType?.toLowerCase().includes("pickup & drop") && ["QUALIFIED", "NEGOTIATION", "WON"].includes(l.status)).length;
-    corpInquiryConverted = corpLeads.filter(l => !l.serviceType?.toLowerCase().includes("pickup & drop") && ["QUALIFIED", "NEGOTIATION", "WON"].includes(l.status)).length;
+    pickupDropConverted = corpLeads.filter(l => l.serviceType?.toLowerCase().includes("pickup & drop") && ["QUALIFIED", "NEGOTIATION", "WON", "CONVERTED"].includes(l.status)).length;
+    corpInquiryConverted = corpLeads.filter(l => !l.serviceType?.toLowerCase().includes("pickup & drop") && ["QUALIFIED", "NEGOTIATION", "WON", "CONVERTED"].includes(l.status)).length;
     recentPickupDropLeads = corpLeads.filter(l => l.serviceType?.toLowerCase().includes("pickup & drop")).slice(0, 2);
     recentCorporateInquiryLeads = corpLeads.filter(l => !l.serviceType?.toLowerCase().includes("pickup & drop")).slice(0, 2);
 
     // 2. Process Rental Leads
     localRentalCount = rentLeads.filter(l => l.tripType?.toLowerCase().includes("local")).length;
     outstationCount = rentLeads.filter(l => l.tripType?.toLowerCase().includes("outstation")).length;
-    localConverted = rentLeads.filter(l => l.tripType?.toLowerCase().includes("local") && ["CONTACTED", "QUALIFIED", "WON"].includes(l.status)).length;
-    outstationConverted = rentLeads.filter(l => l.tripType?.toLowerCase().includes("outstation") && ["CONTACTED", "QUALIFIED", "WON"].includes(l.status)).length;
+    localConverted = rentLeads.filter(l => l.tripType?.toLowerCase().includes("local") && ["CONTACTED", "QUALIFIED", "WON", "CONVERTED"].includes(l.status)).length;
+    outstationConverted = rentLeads.filter(l => l.tripType?.toLowerCase().includes("outstation") && ["CONTACTED", "QUALIFIED", "WON", "CONVERTED"].includes(l.status)).length;
     recentLocalLeads = rentLeads.filter(l => l.tripType?.toLowerCase().includes("local")).slice(0, 2);
     recentOutstationLeads = rentLeads.filter(l => l.tripType?.toLowerCase().includes("outstation")).slice(0, 2);
 

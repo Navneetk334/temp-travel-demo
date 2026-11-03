@@ -399,7 +399,7 @@ export default function LeadDispatchModal({
     const { userName, panel } = getCurrentAdminUser("Admin Panel");
     const { updatedNotes } = createLeadStatusAuditLog({
       oldStatus: lead.status,
-      newStatus: "WON",
+      newStatus: "CONVERTED",
       userName,
       panel,
       existingNotes: lead.notes,
@@ -415,7 +415,7 @@ export default function LeadDispatchModal({
             (l.id === lead.id || l.bookingRef === lead.bookingRef || (l.phone && lead.phone && l.phone === lead.phone))
               ? { 
                   ...l, 
-                  status: "WON",
+                  status: "CONVERTED",
                   notes: updatedNotes,
                   lastChangedBy: userName,
                   lastChangedPanel: panel,
@@ -437,12 +437,12 @@ export default function LeadDispatchModal({
         fetch(`/api/rental/lead`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: lead.id, status: "WON", notes: updatedNotes }),
+          body: JSON.stringify({ id: lead.id, status: "CONVERTED", notes: updatedNotes }),
         }),
         fetch(`/api/corporate/lead/${lead.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: "WON", notes: updatedNotes }),
+          body: JSON.stringify({ status: "CONVERTED", notes: updatedNotes }),
         })
       ]);
     } catch (e) {}

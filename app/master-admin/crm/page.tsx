@@ -619,8 +619,8 @@ export default function MasterOmnichannelCRMPage() {
       console.error("Failed to dispatch to live API:", err);
     }
 
-    // 2. Mark Lead as WON in CRM (bidirectionally synced)
-    updateLeadStatus(dispatchModalLead.id, "WON");
+    // 2. Mark Lead as CONVERTED in CRM (bidirectionally synced)
+    updateLeadStatus(dispatchModalLead.id, "CONVERTED");
 
     // 3. Show Dispatched Dossier Confirmation
     setDispatchedSuccess({
@@ -1022,7 +1022,7 @@ export default function MasterOmnichannelCRMPage() {
                           value={normalizeLeadStatus(lead.status)}
                           onChange={(e) => updateLeadStatus(lead.id, e.target.value)}
                           className={`border rounded-lg px-2.5 py-1 text-[11px] font-bold focus:outline-none cursor-pointer ${
-                            normalizeLeadStatus(lead.status) === "WON"
+                            normalizeLeadStatus(lead.status) === "CONVERTED"
                               ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30 font-black"
                               : normalizeLeadStatus(lead.status) === "LOST"
                               ? "bg-rose-500/10 text-rose-400 border-rose-500/30 font-bold"

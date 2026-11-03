@@ -26,7 +26,10 @@ export async function GET(
       return NextResponse.json({ error: "Contact message not found" }, { status: 404 });
     }
 
-    return NextResponse.json(lead, { status: 200 });
+    return NextResponse.json({
+      ...lead,
+      status: lead.status === "WON" ? "CONVERTED" : lead.status,
+    }, { status: 200 });
   } catch (error) {
     console.error(`GET /api/contact/${id} error:`, error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -51,12 +54,17 @@ export async function PUT(
       return NextResponse.json({ error: result.error.flatten() }, { status: 400 });
     }
 
+    const targetStatus = result.data.status === "CONVERTED" ? "WON" : result.data.status;
+
     const updatedLead = await prisma.contactLead.update({
       where: { id: id },
-      data: { status: result.data.status as any },
+      data: { status: targetStatus as any },
     });
 
-    return NextResponse.json(updatedLead, { status: 200 });
+    return NextResponse.json({
+      ...updatedLead,
+      status: updatedLead.status === "WON" ? "CONVERTED" : updatedLead.status,
+    }, { status: 200 });
   } catch (error) {
     console.error(`PUT /api/contact/${id} error:`, error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

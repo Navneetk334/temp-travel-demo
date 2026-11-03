@@ -38,7 +38,7 @@ import {
   normalizeLeadStatus 
 } from "@/lib/lead-sync";
 
-export type LeadStatus = "NEW" | "CONTACTED" | "QUALIFIED" | "NEGOTIATION" | "WON" | "LOST" | "ARCHIVED";
+export type LeadStatus = "NEW" | "CONTACTED" | "QUALIFIED" | "NEGOTIATION" | "CONVERTED" | "WON" | "LOST" | "ARCHIVED";
 
 interface Lead {
   id: string;
@@ -63,7 +63,8 @@ interface Stats {
   CONTACTED: number;
   QUALIFIED: number;
   NEGOTIATION: number;
-  WON: number;
+  CONVERTED: number;
+  WON?: number;
   LOST: number;
   ARCHIVED: number;
 }
@@ -86,7 +87,7 @@ export default function AdminCorporateLeadsPage() {
     CONTACTED: 0,
     QUALIFIED: 0,
     NEGOTIATION: 0,
-    WON: 0,
+    CONVERTED: 0,
     LOST: 0,
     ARCHIVED: 0,
   });
@@ -119,7 +120,7 @@ export default function AdminCorporateLeadsPage() {
           fetchedLeads = data;
         } else if (data.leads) {
           fetchedLeads = data.leads;
-          if (data.stats) setStats(data.stats);
+          if (data.stats) setStats({ ...data.stats, CONVERTED: data.stats.CONVERTED ?? (data.stats as any).WON ?? 0 });
         }
       }
 
@@ -390,6 +391,7 @@ export default function AdminCorporateLeadsPage() {
         return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
       case "NEGOTIATION":
         return "bg-purple-500/10 text-purple-400 border-purple-500/20";
+      case "CONVERTED":
       case "WON":
         return "bg-green-500/20 text-green-300 border-green-500/40 shadow-sm font-black";
       case "LOST":
@@ -476,13 +478,13 @@ export default function AdminCorporateLeadsPage() {
         </div>
 
         <div 
-          onClick={() => { setStatusFilter("WON"); setCurrentPage(1); }}
+          onClick={() => { setStatusFilter("CONVERTED"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
-            statusFilter === "WON" ? "border-green-400 bg-green-500/10" : "border-border hover:border-white/20"
+            (statusFilter === "CONVERTED" || statusFilter === "WON") ? "border-green-400 bg-green-500/10" : "border-border hover:border-white/20"
           }`}
         >
-          <div className="text-[10px] text-green-400 uppercase font-bold tracking-wider">WON</div>
-          <div className="text-xl font-black text-green-400 mt-1">{stats.WON}</div>
+          <div className="text-[10px] text-green-400 uppercase font-bold tracking-wider">CONVERTED</div>
+          <div className="text-xl font-black text-green-400 mt-1">{stats.CONVERTED ?? (stats as any).WON ?? 0}</div>
         </div>
 
         <div 
@@ -524,7 +526,7 @@ export default function AdminCorporateLeadsPage() {
             <option value="CONTACTED" className="bg-surface text-blue-400">CONTACTED</option>
             <option value="QUALIFIED" className="bg-surface text-emerald-400">QUALIFIED</option>
             <option value="NEGOTIATION" className="bg-surface text-purple-400">NEGOTIATION</option>
-            <option value="WON" className="bg-surface text-green-400">WON</option>
+            <option value="CONVERTED" className="bg-surface text-green-400">CONVERTED</option>
             <option value="LOST" className="bg-surface text-rose-400">LOST</option>
             <option value="ARCHIVED" className="bg-surface text-slate-400">ARCHIVED</option>
           </select>
@@ -646,7 +648,7 @@ export default function AdminCorporateLeadsPage() {
                             })()}
                           </td>
                           <td className="p-4 text-right space-x-1" onClick={(e) => e.stopPropagation()}>
-                            {lead.status === "WON" ? (
+                            {(lead.status === "CONVERTED" || lead.status === "WON") ? (
                               <Link
                                 href="/admin/bookings-dispatch"
                                 title="Ride already dispatched — View in Dispatch CRM"
@@ -752,7 +754,7 @@ export default function AdminCorporateLeadsPage() {
                   <span className={`text-[10px] font-extrabold py-1 px-3 rounded-full border uppercase ${getStatusBadge(activeLead.status)}`}>
                     {activeLead.status}
                   </span>
-                  {activeLead.status === "WON" ? (
+                  {(activeLead.status === "CONVERTED" || activeLead.status === "WON") ? (
                     <Link
                       href="/admin/bookings-dispatch"
                       className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 font-bold px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-sm cursor-pointer"
@@ -782,7 +784,7 @@ export default function AdminCorporateLeadsPage() {
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Update Pipeline Status</label>
                 <div className="grid grid-cols-3 gap-1.5">
-                  {(["NEW", "CONTACTED", "QUALIFIED", "NEGOTIATION", "WON", "LOST", "ARCHIVED"] as LeadStatus[]).map((st) => (
+                  {(["NEW", "CONTACTED", "QUALIFIED", "NEGOTIATION", "CONVERTED", "LOST", "ARCHIVED"] as LeadStatus[]).map((st) => (
                     <button
                       key={st}
                       type="button"

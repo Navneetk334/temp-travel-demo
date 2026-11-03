@@ -32,7 +32,10 @@ export async function GET(
       return NextResponse.json({ error: "Rental lead not found" }, { status: 404 });
     }
 
-    return NextResponse.json(lead, { status: 200 });
+    return NextResponse.json({
+      ...lead,
+      status: lead.status === "WON" ? "CONVERTED" : lead.status,
+    }, { status: 200 });
   } catch (error) {
     console.error(`GET /api/rental/lead/${id} error:`, error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -57,9 +60,15 @@ export async function PUT(
       return NextResponse.json({ error: result.error.flatten() }, { status: 400 });
     }
 
+    const { status, ...restData } = result.data;
+    const dbStatus = status === "CONVERTED" ? "WON" : status;
+
     const updated = await prisma.rentalLead.update({
       where: { id: id },
-      data: result.data,
+      data: {
+        ...restData,
+        ...(dbStatus ? { status: dbStatus as any } : {}),
+      },
       include: {
         vehicleCategory: {
           select: { id: true, name: true, slug: true }
@@ -67,7 +76,10 @@ export async function PUT(
       }
     });
 
-    return NextResponse.json(updated, { status: 200 });
+    return NextResponse.json({
+      ...updated,
+      status: updated.status === "WON" ? "CONVERTED" : updated.status,
+    }, { status: 200 });
   } catch (error) {
     console.error(`PUT /api/rental/lead/${id} error:`, error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

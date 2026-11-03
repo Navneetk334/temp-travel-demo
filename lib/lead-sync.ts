@@ -38,7 +38,7 @@ export async function syncDispatchToLeads(dispatch: any) {
         serviceType: tripType,
         requirements: `[Ref: ${dispatch.id}] Quick Dispatch: ${dispatch.vehicleCategory || "Sedan"} ${dispatch.vehicleClass || "Executive"} (${dispatch.vehicleModel || "Standard"}). Drop: ${dispatch.dropLocation || "Destination"}. Fare: ₹${dispatch.fare || "2800"}. Advance: ₹${dispatch.advance || "500"}.${dispatch.regNumber && !dispatch.regNumber.includes("Pending") ? ` Assigned Car: ${dispatch.regNumber}.` : ""}${dispatch.driverName && !dispatch.driverName.includes("Pending") ? ` Chauffeur: ${dispatch.driverName}.` : ""}`,
         notes: `[Ref: ${dispatch.id}] Quick Dispatch`,
-        status: dispatch.status === "COMPLETED" ? "WON" : (dispatch.status === "CANCELLED" ? "LOST" : "NEW")
+        status: dispatch.status === "COMPLETED" ? "CONVERTED" : (dispatch.status === "CANCELLED" ? "LOST" : "NEW")
       };
 
       const res = await fetch("/api/corporate/lead", {
@@ -58,7 +58,7 @@ export async function syncDispatchToLeads(dispatch: any) {
         pickupDateTime: new Date().toISOString(),
         tripType,
         notes: `[Ref: ${dispatch.id}] Quick Dispatch: ${dispatch.vehicleCategory || "Sedan"} ${dispatch.vehicleClass || "Executive"} (${dispatch.vehicleModel || "Standard"}). Fare: ₹${dispatch.fare || "2800"}. Advance: ₹${dispatch.advance || "500"}.${dispatch.regNumber && !dispatch.regNumber.includes("Pending") ? ` Assigned Car: ${dispatch.regNumber}.` : ""}${dispatch.driverName && !dispatch.driverName.includes("Pending") ? ` Chauffeur: ${dispatch.driverName}.` : ""}`,
-        status: dispatch.status === "COMPLETED" ? "WON" : (dispatch.status === "CANCELLED" ? "LOST" : "NEW")
+        status: dispatch.status === "COMPLETED" ? "CONVERTED" : (dispatch.status === "CANCELLED" ? "LOST" : "NEW")
       };
 
       const res = await fetch("/api/rental/lead", {
@@ -88,7 +88,7 @@ export async function syncDispatchToLeads(dispatch: any) {
         tripType,
         pickupLocation: dispatch.pickupLocation || "",
         dropLocation: dispatch.dropLocation || "",
-        status: dispatch.status === "COMPLETED" ? "WON" : (dispatch.status === "CANCELLED" ? "LOST" : "NEW"),
+        status: dispatch.status === "COMPLETED" ? "CONVERTED" : (dispatch.status === "CANCELLED" ? "LOST" : "NEW"),
         notes: `Quick Dispatch: ${dispatch.vehicleCategory || ""} ${dispatch.vehicleClass || ""} (${dispatch.vehicleModel || ""}). Car: ${dispatch.regNumber || "Pending"}, Driver: ${dispatch.driverName || "Pending"}. Fare: ₹${dispatch.fare || "2800"}`,
         createdAt: dispatch.createdAt || new Date().toISOString()
       };
@@ -186,7 +186,7 @@ export const UNIFIED_LEAD_STATUSES = [
   "CONTACTED",
   "QUALIFIED",
   "NEGOTIATION",
-  "WON",
+  "CONVERTED",
   "LOST",
   "ARCHIVED",
 ] as const;
@@ -196,7 +196,7 @@ export type UnifiedLeadStatus = typeof UNIFIED_LEAD_STATUSES[number];
 export function normalizeLeadStatus(status?: string | null): UnifiedLeadStatus {
   if (!status) return "NEW";
   const s = status.trim().toUpperCase();
-  if (s === "CONVERTED") return "WON";
+  if (s === "CONVERTED" || s === "WON") return "CONVERTED";
   if (s === "READ") return "CONTACTED";
   if (UNIFIED_LEAD_STATUSES.includes(s as UnifiedLeadStatus)) {
     return s as UnifiedLeadStatus;

@@ -33,7 +33,7 @@ import {
   normalizeLeadStatus
 } from "@/lib/lead-sync";
 
-export type ContactStatus = "NEW" | "READ" | "CONTACTED" | "QUALIFIED" | "NEGOTIATION" | "WON" | "LOST" | "ARCHIVED";
+export type ContactStatus = "NEW" | "READ" | "CONTACTED" | "QUALIFIED" | "NEGOTIATION" | "CONVERTED" | "WON" | "LOST" | "ARCHIVED";
 
 interface ContactLead {
   id: string;
@@ -103,7 +103,7 @@ export default function AdminContactLeadsPage() {
           fetchedLeads = data;
         } else if (data.leads) {
           fetchedLeads = data.leads;
-          if (data.stats) setStats(data.stats);
+          if (data.stats) setStats({ ...data.stats, CONVERTED: data.stats.CONVERTED ?? (data.stats as any).WON ?? 0 });
         }
       }
 
@@ -535,7 +535,7 @@ export default function AdminContactLeadsPage() {
                             })()}
                           </td>
                           <td className="p-4 text-right space-x-1" onClick={(e) => e.stopPropagation()}>
-                            {lead.status === "WON" ? (
+                            {(lead.status === "CONVERTED" || lead.status === "WON") ? (
                               <Link
                                 href="/admin/bookings-dispatch"
                                 title="Ride already dispatched — View in Dispatch CRM"
@@ -652,7 +652,7 @@ export default function AdminContactLeadsPage() {
                   <span className={`text-[10px] font-extrabold py-1 px-3 rounded-full border uppercase ${getStatusBadge(activeLead.status)}`}>
                     {activeLead.status === "CONTACTED" ? "REPLIED" : activeLead.status}
                   </span>
-                  {activeLead.status === "WON" ? (
+                  {(activeLead.status === "CONVERTED" || activeLead.status === "WON") ? (
                     <Link
                       href="/admin/bookings-dispatch"
                       className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 font-bold px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-sm cursor-pointer"
@@ -676,7 +676,7 @@ export default function AdminContactLeadsPage() {
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Quick Status Actions</label>
                 <div className="grid grid-cols-4 gap-1.5">
-                  {(["NEW", "READ", "CONTACTED", "QUALIFIED", "NEGOTIATION", "WON", "LOST", "ARCHIVED"] as ContactStatus[]).map((st) => (
+                  {(["NEW", "READ", "CONTACTED", "QUALIFIED", "NEGOTIATION", "CONVERTED", "LOST", "ARCHIVED"] as ContactStatus[]).map((st) => (
                     <button
                       key={st}
                       type="button"

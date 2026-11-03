@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
 
     const where: any = {};
     if (status) {
-      where.status = status;
+      where.status = (status === "CONVERTED" || status === "WON") ? "WON" : status;
     }
 
     if (tripType) {
@@ -83,8 +83,13 @@ export async function GET(req: NextRequest) {
 
     const totalPages = Math.ceil(totalCount / limit) || 1;
 
+    const mappedLeads = leads.map((lead: any) => ({
+      ...lead,
+      status: lead.status === "WON" ? "CONVERTED" : lead.status,
+    }));
+
     return NextResponse.json({
-      leads,
+      leads: mappedLeads,
       pagination: {
         totalCount,
         totalPages,
@@ -97,6 +102,7 @@ export async function GET(req: NextRequest) {
         CONTACTED: contactedCount,
         QUALIFIED: qualifiedCount,
         NEGOTIATION: negotiationCount,
+        CONVERTED: wonCount,
         WON: wonCount,
         LOST: lostCount,
         ARCHIVED: archivedCount,
@@ -132,6 +138,7 @@ export async function POST(req: NextRequest) {
 
     const result = rentalLeadSchema.safeParse(sanitizedBody);
     const dataToSave = result.success ? result.data : sanitizedBody;
+    const targetStatus = (rawBody.status === "CONVERTED" || rawBody.status === "WON") ? "WON" : (rawBody.status || "NEW");
 
     try {
       let catId = rawBody.vehicleCategoryId;
@@ -156,10 +163,13 @@ export async function POST(req: NextRequest) {
             vehicleCategoryId: validCat.id,
             tripType: dataToSave.tripType,
             notes: rawBody.notes || rawBody.requirements || null,
-            status: (rawBody.status as any) || "NEW",
+            status: targetStatus as any,
           },
         });
-        return NextResponse.json(lead, { status: 201 });
+        return NextResponse.json({
+          ...lead,
+          status: lead.status === "WON" ? "CONVERTED" : lead.status,
+        }, { status: 201 });
       }
     } catch (dbError) {
       console.warn("Database unavailable for rental lead creation, generating fallback response:", dbError);
@@ -169,7 +179,7 @@ export async function POST(req: NextRequest) {
       id: `rent_${Date.now()}`,
       ...dataToSave,
       vehicleCategoryId: rawBody.vehicleCategoryId || "default",
-      status: (rawBody.status as any) || "NEW",
+      status: (rawBody.status === "WON" || rawBody.status === "CONVERTED") ? "CONVERTED" : (rawBody.status || "NEW"),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
