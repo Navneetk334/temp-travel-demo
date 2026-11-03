@@ -14,7 +14,8 @@ import {
   Phone,
   Sparkles,
   AlertCircle,
-  Trash2
+  Trash2,
+  Loader2
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 
@@ -44,6 +45,7 @@ export default function QuickDispatchAssignmentModal({
   const [advance, setAdvance] = useState("500");
   const [notes, setNotes] = useState("");
   const [isSaved, setIsSaved] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (dispatchItem) {
@@ -86,13 +88,18 @@ export default function QuickDispatchAssignmentModal({
       updatedAt: new Date().toISOString()
     };
 
-    onSave(updated);
-    setIsSaved(true);
+    setIsSubmitting(true);
+    try {
+      onSave(updated);
+      setIsSaved(true);
 
-    setTimeout(() => {
-      setIsSaved(false);
-      onClose();
-    }, 900);
+      setTimeout(() => {
+        setIsSaved(false);
+        onClose();
+      }, 900);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -298,10 +305,20 @@ export default function QuickDispatchAssignmentModal({
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer transition-all flex items-center gap-1.5"
+                    disabled={isSubmitting}
+                    className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 disabled:opacity-50 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer disabled:cursor-not-allowed transition-all flex items-center gap-1.5"
                   >
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Confirm Assignment</span>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>Confirm Assignment</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </div>

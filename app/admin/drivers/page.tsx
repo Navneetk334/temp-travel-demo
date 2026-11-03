@@ -18,7 +18,8 @@ import {
   Calendar,
   CreditCard,
   FileText,
-  User as UserIcon
+  User as UserIcon,
+  Loader2
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 
@@ -685,9 +686,18 @@ export default function AdminDriversPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 rounded-lg text-xs tracking-wider uppercase transition-colors shadow-lg disabled:opacity-50"
+                  className="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 rounded-lg text-xs tracking-wider uppercase transition-colors shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
                 >
-                  {isSubmitting ? "Saving..." : editingDriver ? "Update Driver Profile" : "Register Driver"}
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                      <span>Saving Profile...</span>
+                    </>
+                  ) : editingDriver ? (
+                    "Update Driver Profile"
+                  ) : (
+                    "Register Driver"
+                  )}
                 </button>
               </div>
             </form>

@@ -28,7 +28,8 @@ import {
   UserCheck,
   Navigation,
   FileText,
-  Trash2
+  Trash2,
+  Loader2
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 import LocationInput from "@/components/shared/location-input";
@@ -123,6 +124,7 @@ export default function MasterAdminDashboard() {
   const [driversList, setDriversList] = useState<any[]>([]);
   const [dispatches, setDispatches] = useState<any[]>([]);
   const [assigningDispatch, setAssigningDispatch] = useState<any | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [dispatchForm, setDispatchForm] = useState({
     customerName: "",
@@ -431,6 +433,8 @@ export default function MasterAdminDashboard() {
     if (!dispatchForm.customerName || !dispatchForm.phone || !dispatchForm.pickupLocation || !dispatchForm.dropLocation) {
       return;
     }
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
     const assignedVeh = fleetList.find(
       (v) => v.id === dispatchForm.assignedVehicleId || v.registrationNumber === dispatchForm.assignedVehicleId
@@ -478,6 +482,8 @@ export default function MasterAdminDashboard() {
       localStorage.setItem("master_dispatches", JSON.stringify(updatedList));
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsSubmitting(false);
     }
 
     setDispatchSuccess(true);
@@ -1261,10 +1267,20 @@ export default function MasterAdminDashboard() {
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer hover:from-amber-400 hover:to-amber-500 transition-all flex items-center gap-1.5"
+                    disabled={isSubmitting}
+                    className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer hover:from-amber-400 hover:to-amber-500 transition-all flex items-center gap-1.5"
                   >
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Dispatch Now</span>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                        <span>Dispatching...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>Dispatch Now</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </form>

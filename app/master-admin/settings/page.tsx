@@ -18,7 +18,8 @@ import {
   FileText,
   Key,
   Eye,
-  Edit
+  Edit,
+  Loader2
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 import {
@@ -31,6 +32,10 @@ import {
 export default function MasterSettingsVaultPage() {
   const [activeTab, setActiveTab] = useState<"global" | "users" | "vault">("global");
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [isSavingUser, setIsSavingUser] = useState(false);
+  const [isSavingDoc, setIsSavingDoc] = useState(false);
+  const [isUpdatingDoc, setIsUpdatingDoc] = useState(false);
 
   // Global Site Settings State
   const [globalSettings, setGlobalSettings] = useState({
@@ -102,12 +107,17 @@ export default function MasterSettingsVaultPage() {
 
   const handleGlobalSettingsSave = (e: React.FormEvent) => {
     e.preventDefault();
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 2000);
+    setIsSavingSettings(true);
+    setTimeout(() => {
+      setIsSavingSettings(false);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2000);
+    }, 600);
   };
 
   const handleAddUserSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSavingUser(true);
     try {
       const res = await fetch("/api/admin/users", {
         method: "POST",
@@ -150,6 +160,8 @@ export default function MasterSettingsVaultPage() {
         status: "ACTIVE",
       };
       setUsers([created, ...users]);
+    } finally {
+      setIsSavingUser(false);
     }
     setShowAddUserModal(false);
     setNewUser({ name: "", email: "", password: "", role: "OPERATIONS_DISPATCH" });
@@ -157,56 +169,70 @@ export default function MasterSettingsVaultPage() {
 
   const handleAddDocSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const docId = `doc-${Date.now()}`;
-    const fileName = newDoc.fileName || `${newDoc.title.replace(/\s+/g, "_")}.pdf`;
+    setIsSavingDoc(true);
+    try {
+      const docId = `doc-${Date.now()}`;
+      const fileName = newDoc.fileName || `${newDoc.title.replace(/\s+/g, "_")}.pdf`;
 
-    if (newDoc.dataUrl) {
-      await setVaultFile(`doc_company_${docId}`, newDoc.dataUrl);
+      if (newDoc.dataUrl) {
+        await setVaultFile(`doc_company_${docId}`, newDoc.dataUrl);
+      }
+
+      const created = {
+        id: docId,
+        title: newDoc.title,
+        category: newDoc.category,
+        refNumber: newDoc.refNumber || `REF-${Date.now().toString().slice(-6)}`,
+        expiryDate: docHasExpiry ? (newDoc.expiryDate || "No Expiry") : "No Expiry",
+        fileName: fileName,
+        status: "VALID"
+      };
+
+      const updated = [created, ...vaultDocs];
+      setVaultDocs(updated);
+      saveCompanyDocsToStorage(updated);
+      setShowAddDocModal(false);
+      setDocHasExpiry(false);
+      setNewDoc({ title: "", category: "COMPANY", refNumber: "", expiryDate: "", fileName: "", dataUrl: "" });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSavingDoc(false);
     }
-
-    const created = {
-      id: docId,
-      title: newDoc.title,
-      category: newDoc.category,
-      refNumber: newDoc.refNumber || `REF-${Date.now().toString().slice(-6)}`,
-      expiryDate: docHasExpiry ? (newDoc.expiryDate || "No Expiry") : "No Expiry",
-      fileName: fileName,
-      status: "VALID"
-    };
-
-    const updated = [created, ...vaultDocs];
-    setVaultDocs(updated);
-    saveCompanyDocsToStorage(updated);
-    setShowAddDocModal(false);
-    setDocHasExpiry(false);
-    setNewDoc({ title: "", category: "COMPANY", refNumber: "", expiryDate: "", fileName: "", dataUrl: "" });
   };
 
   const handleUpdateDocSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingDoc) return;
+    setIsUpdatingDoc(true);
 
-    if (editingDoc.dataUrl) {
-      await setVaultFile(`doc_company_${editingDoc.id}`, editingDoc.dataUrl);
-    }
-
-    const updated = vaultDocs.map(d => {
-      if (d.id === editingDoc.id) {
-        return {
-          ...d,
-          title: editingDoc.title,
-          category: editingDoc.category,
-          refNumber: editingDoc.refNumber,
-          expiryDate: editDocHasExpiry ? (editingDoc.expiryDate || "No Expiry") : "No Expiry",
-          fileName: editingDoc.fileName || d.fileName
-        };
+    try {
+      if (editingDoc.dataUrl) {
+        await setVaultFile(`doc_company_${editingDoc.id}`, editingDoc.dataUrl);
       }
-      return d;
-    });
 
-    setVaultDocs(updated);
-    saveCompanyDocsToStorage(updated);
-    setEditingDoc(null);
+      const updated = vaultDocs.map(d => {
+        if (d.id === editingDoc.id) {
+          return {
+            ...d,
+            title: editingDoc.title,
+            category: editingDoc.category,
+            refNumber: editingDoc.refNumber,
+            expiryDate: editDocHasExpiry ? (editingDoc.expiryDate || "No Expiry") : "No Expiry",
+            fileName: editingDoc.fileName || d.fileName
+          };
+        }
+        return d;
+      });
+
+      setVaultDocs(updated);
+      saveCompanyDocsToStorage(updated);
+      setEditingDoc(null);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsUpdatingDoc(false);
+    }
   };
 
   const handleDeleteDoc = async (docId: string, title: string) => {
@@ -372,10 +398,20 @@ export default function MasterSettingsVaultPage() {
           <div className="pt-4 border-t border-border flex justify-end">
             <button
               type="submit"
-              className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-lg shadow-amber-500/20"
+              disabled={isSavingSettings}
+              className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-lg shadow-amber-500/20 cursor-pointer"
             >
-              <Save className="w-4 h-4" />
-              <span>Save System Settings</span>
+              {isSavingSettings ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                  <span>Saving Settings...</span>
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  <span>Save System Settings</span>
+                </>
+              )}
             </button>
           </div>
         </form>
@@ -589,7 +625,20 @@ export default function MasterSettingsVaultPage() {
                 </div>
                 <div className="pt-2 flex justify-end gap-3">
                   <button type="button" onClick={() => setShowAddUserModal(false)} className="px-4 py-2 bg-background text-slate-400 rounded-xl">Cancel</button>
-                  <button type="submit" className="px-5 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl uppercase">Create Account</button>
+                  <button 
+                    type="submit" 
+                    disabled={isSavingUser}
+                    className="px-5 py-2 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-bold rounded-xl uppercase flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+                  >
+                    {isSavingUser ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-950" />
+                        <span>Creating...</span>
+                      </>
+                    ) : (
+                      "Create Account"
+                    )}
+                  </button>
                 </div>
               </form>
             </div>
@@ -731,7 +780,20 @@ export default function MasterSettingsVaultPage() {
 
                 <div className="pt-2 flex justify-end gap-3">
                   <button type="button" onClick={() => setShowAddDocModal(false)} className="px-4 py-2 bg-background hover:bg-white/5 text-slate-400 rounded-xl font-bold cursor-pointer">Cancel</button>
-                  <button type="submit" className="px-5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer">Save & Archive</button>
+                  <button 
+                    type="submit" 
+                    disabled={isSavingDoc}
+                    className="px-5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 disabled:opacity-50 text-slate-950 font-black rounded-xl uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {isSavingDoc ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-950" />
+                        <span>Saving & Archiving...</span>
+                      </>
+                    ) : (
+                      "Save & Archive"
+                    )}
+                  </button>
                 </div>
               </form>
             </div>
@@ -868,7 +930,20 @@ export default function MasterSettingsVaultPage() {
 
                 <div className="pt-2 flex justify-end gap-3">
                   <button type="button" onClick={() => setEditingDoc(null)} className="px-4 py-2 bg-background hover:bg-white/5 text-slate-400 rounded-xl font-bold cursor-pointer">Cancel</button>
-                  <button type="submit" className="px-5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black rounded-xl uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer">Update Document</button>
+                  <button 
+                    type="submit" 
+                    disabled={isUpdatingDoc}
+                    className="px-5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 disabled:opacity-50 text-slate-950 font-black rounded-xl uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {isUpdatingDoc ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-950" />
+                        <span>Updating...</span>
+                      </>
+                    ) : (
+                      "Update Document"
+                    )}
+                  </button>
                 </div>
               </form>
             </div>

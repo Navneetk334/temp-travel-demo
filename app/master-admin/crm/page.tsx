@@ -29,7 +29,8 @@ import {
   Check,
   ArrowRight,
   ShieldCheck,
-  FileText
+  FileText,
+  Loader2
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 import LocationInput from "@/components/shared/location-input";
@@ -57,6 +58,7 @@ export default function MasterOmnichannelCRMPage() {
   const [activeBookings, setActiveBookings] = useState<any[]>([]);
   const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
   const [classFilter, setClassFilter] = useState<string>("ALL");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { showConfirm } = useDialog();
 
@@ -489,6 +491,7 @@ export default function MasterOmnichannelCRMPage() {
       alert(`Chauffeur ${assignedDrv.name} is already assigned to ride #${busy?.bookingNumber}. Please select an available chauffeur.`);
       return;
     }
+    setIsSubmitting(true);
     const finalBookingRef = dispatchModalLead.bookingRef || `TT-${Date.now().toString().slice(-6)}`;
 
     const dispatchedBooking = {
@@ -587,6 +590,7 @@ export default function MasterOmnichannelCRMPage() {
       pickupDateTime: dispatchForm.pickupDateTime
     });
 
+    setIsSubmitting(false);
     setDispatchModalLead(null);
   };
 
@@ -773,10 +777,10 @@ export default function MasterOmnichannelCRMPage() {
           <button
             onClick={fetchLeads}
             disabled={loading}
-            className="flex items-center gap-1.5 bg-surface border border-border hover:border-amber-400/40 text-slate-300 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer"
+            className="flex items-center gap-1.5 bg-surface border border-border hover:border-amber-400/40 text-slate-300 disabled:opacity-50 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer disabled:cursor-not-allowed"
           >
             <RefreshCw className={`w-3.5 h-3.5 text-amber-400 ${loading ? "animate-spin" : ""}`} />
-            <span>Refresh Pipeline</span>
+            <span>{loading ? "Refreshing..." : "Refresh Pipeline"}</span>
           </button>
         </div>
       </div>
@@ -1349,10 +1353,20 @@ export default function MasterOmnichannelCRMPage() {
                 </button>
                 <button
                   type="submit"
-                  className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer"
+                  disabled={isSubmitting}
+                  className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 font-black px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer transition-all"
                 >
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Confirm Dispatch & Generate PNR</span>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                      <span>Dispatching & Generating PNR...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Confirm Dispatch & Generate PNR</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>

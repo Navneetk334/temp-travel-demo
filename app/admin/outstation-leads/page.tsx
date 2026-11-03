@@ -15,7 +15,8 @@ import {
   ChevronRight,
   Truck,
   Car,
-  CheckCircle2
+  CheckCircle2,
+  Loader2
 } from "lucide-react";
 import LeadDispatchModal, { extractLeadVehicleRequirements } from "@/components/admin/lead-dispatch-modal";
 import { syncExistingDispatchesToLeads } from "@/lib/lead-sync";
@@ -81,6 +82,8 @@ export default function AdminOutstationLeadsPage() {
 
   const [activeLead, setActiveLead] = useState<Lead | null>(null);
   const [newNoteInput, setNewNoteInput] = useState("");
+  const [isLoggingNote, setIsLoggingNote] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const loadLeads = async (showSpinner = true) => {
@@ -181,6 +184,7 @@ export default function AdminOutstationLeadsPage() {
   };
 
   const handleStatusChange = async (id: string, newStatus: LeadStatus) => {
+    setUpdatingStatus(newStatus);
     try {
       const res = await fetch(`/api/rental/lead/${id}`, {
         method: "PATCH",
@@ -197,11 +201,14 @@ export default function AdminOutstationLeadsPage() {
       }
     } catch (err) {
       console.error("Failed to update status:", err);
+    } finally {
+      setUpdatingStatus(null);
     }
   };
 
   const handleAddNoteLog = async (id: string) => {
-    if (!newNoteInput.trim()) return;
+    if (!newNoteInput.trim() || isLoggingNote) return;
+    setIsLoggingNote(true);
 
     try {
       const target = leads.find((l) => l.id === id);
@@ -231,6 +238,8 @@ export default function AdminOutstationLeadsPage() {
       }
     } catch (err) {
       console.error("Failed to save note:", err);
+    } finally {
+      setIsLoggingNote(false);
     }
   };
 
@@ -711,14 +720,16 @@ export default function AdminOutstationLeadsPage() {
                     <button
                       key={st}
                       type="button"
+                      disabled={updatingStatus !== null}
                       onClick={() => handleStatusChange(activeLead.id, st)}
-                      className={`py-1.5 px-2 rounded-lg text-[10px] font-extrabold tracking-wider border transition-all ${
+                      className={`py-1.5 px-2 rounded-lg text-[10px] font-extrabold tracking-wider border transition-all flex items-center justify-center gap-1 ${
                         activeLead.status === st
                           ? "bg-accent text-slate-950 border-accent font-black shadow-md"
                           : "bg-background/60 text-slate-400 border-border hover:border-white/20 hover:text-slate-200"
-                      }`}
+                      } disabled:opacity-60 disabled:cursor-not-allowed`}
                     >
-                      {st}
+                      {updatingStatus === st && <Loader2 className="w-2.5 h-2.5 animate-spin" />}
+                      <span>{st}</span>
                     </button>
                   ))}
                 </div>
@@ -806,10 +817,18 @@ export default function AdminOutstationLeadsPage() {
                   />
                   <button
                     type="button"
+                    disabled={isLoggingNote || !newNoteInput.trim()}
                     onClick={() => handleAddNoteLog(activeLead.id)}
-                    className="w-full bg-primary hover:bg-blue-600 text-white font-bold py-2 rounded-lg text-xs tracking-wider uppercase transition-all shadow-md"
+                    className="w-full bg-primary hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-2 rounded-lg text-xs tracking-wider uppercase transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    Log Follow-up Note
+                    {isLoggingNote ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                        <span>Logging Note...</span>
+                      </>
+                    ) : (
+                      "Log Follow-up Note"
+                    )}
                   </button>
                 </div>
               </div>

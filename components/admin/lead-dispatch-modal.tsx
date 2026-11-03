@@ -14,7 +14,8 @@ import {
   Filter,
   Sparkles,
   MapPin,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from "lucide-react";
 import LocationInput from "@/components/shared/location-input";
 import Portal from "@/components/shared/portal";
@@ -106,6 +107,7 @@ export default function LeadDispatchModal({
   const [availableDrivers, setAvailableDrivers] = useState<any[]>([]);
   const [activeBookings, setActiveBookings] = useState<any[]>([]);
   const [dispatchedSuccess, setDispatchedSuccess] = useState<any | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Vehicle Category & Class Filter States for Dispatch Desk
   const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
@@ -331,6 +333,7 @@ export default function LeadDispatchModal({
 
   const handleConfirmDispatch = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
 
     const assignedVeh = availableVehicles.find(v => v.id === dispatchForm.vehicleId) || filteredVehicles.find(v => !getVehicleBusy(v)) || availableVehicles[0];
     const assignedDrv = availableDrivers.find(d => d.id === dispatchForm.driverId) || availableDrivers.find(d => !getDriverBusy(d)) || availableDrivers[0];
@@ -346,6 +349,7 @@ export default function LeadDispatchModal({
       return;
     }
 
+    setIsSubmitting(true);
     const finalBookingRef = lead.bookingRef || lead.bookingNumber || (lead.id ? `TT-${lead.id.slice(-6).toUpperCase()}` : `TT-${Date.now().toString().slice(-6)}`);
     
     const dispatchedBooking = {
@@ -437,6 +441,7 @@ export default function LeadDispatchModal({
 
     if (onSuccess) onSuccess(dispatchedBooking);
 
+    setIsSubmitting(false);
     setDispatchedSuccess({
       bookingRef: finalBookingRef,
       lead: lead,
@@ -845,10 +850,20 @@ export default function LeadDispatchModal({
                 </button>
                 <button
                   type="submit"
-                  className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer"
+                  disabled={isSubmitting}
+                  className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 font-black px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer transition-all"
                 >
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Confirm Dispatch & Generate PNR</span>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                      <span>Dispatching & Generating PNR...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Confirm Dispatch & Generate PNR</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>

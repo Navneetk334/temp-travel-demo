@@ -22,7 +22,8 @@ import {
   MessageSquare,
   ArrowRight,
   UserCheck,
-  Trash2
+  Trash2,
+  Loader2
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 
@@ -133,6 +134,9 @@ export default function BookingDispatchPage() {
   const [selectedVehicleId, setSelectedVehicleId] = useState("");
   const [selectedDriverId, setSelectedDriverId] = useState("");
   const [newNoteInput, setNewNoteInput] = useState("");
+  const [isAssigning, setIsAssigning] = useState(false);
+  const [isLoggingNote, setIsLoggingNote] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
   const loadData = async () => {
     setLoading(true);
@@ -202,6 +206,7 @@ export default function BookingDispatchPage() {
   }, [search, statusFilter, paymentFilter, sortBy, sortOrder, currentPage, pageSize]);
 
   const handleStatusChange = async (id: string, newStatus: BookingStatus) => {
+    setUpdatingStatus(newStatus);
     // 1. Update local storage dispatched bookings
     try {
       const stored = localStorage.getItem("user_uploaded_dispatched_bookings");
@@ -233,11 +238,14 @@ export default function BookingDispatchPage() {
       });
     } catch (err) {
       console.error("Failed to update booking status on backend:", err);
+    } finally {
+      setUpdatingStatus(null);
     }
   };
 
   const handleAssignVehicle = async () => {
-    if (!activeBooking) return;
+    if (!activeBooking || isAssigning) return;
+    setIsAssigning(true);
     const selectedVeh = vehicles.find(v => v.id === selectedVehicleId);
     const selectedDrv = drivers.find(d => d.id === selectedDriverId);
 
@@ -299,13 +307,15 @@ export default function BookingDispatchPage() {
     } catch (err) {
       console.error("Failed to assign vehicle:", err);
     } finally {
+      setIsAssigning(false);
       setAssignModalOpen(false);
       loadData();
     }
   };
 
   const handleAddNoteLog = async (id: string) => {
-    if (!newNoteInput.trim()) return;
+    if (!newNoteInput.trim() || isLoggingNote) return;
+    setIsLoggingNote(true);
 
     try {
       const target = bookings.find((b) => b.id === id);
@@ -337,6 +347,8 @@ export default function BookingDispatchPage() {
       }
     } catch (err) {
       console.error("Failed to save note:", err);
+    } finally {
+      setIsLoggingNote(false);
     }
   };
 
@@ -796,14 +808,16 @@ export default function BookingDispatchPage() {
                     <button
                       key={st}
                       type="button"
+                      disabled={updatingStatus !== null}
                       onClick={() => handleStatusChange(activeBooking.id, st)}
-                      className={`py-1.5 px-2 rounded-lg text-[10px] font-extrabold tracking-wider border transition-all ${
+                      className={`py-1.5 px-2 rounded-lg text-[10px] font-extrabold tracking-wider border transition-all flex items-center justify-center gap-1 ${
                         activeBooking.status === st
                           ? "bg-accent text-slate-950 border-accent font-black shadow-md"
                           : "bg-background/60 text-slate-400 border-border hover:border-white/20 hover:text-slate-200"
                       }`}
                     >
-                      {st === "VEHICLE_ASSIGNED" ? "ASSIGNED" : st}
+                      {updatingStatus === st ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                      <span>{st === "VEHICLE_ASSIGNED" ? "ASSIGNED" : st}</span>
                     </button>
                   ))}
                 </div>
@@ -915,10 +929,18 @@ export default function BookingDispatchPage() {
                   />
                   <button
                     type="button"
+                    disabled={isLoggingNote || !newNoteInput.trim()}
                     onClick={() => handleAddNoteLog(activeBooking.id)}
-                    className="w-full bg-primary hover:bg-blue-600 text-white font-bold py-2 rounded-lg text-xs tracking-wider uppercase transition-all shadow-md"
+                    className="w-full bg-primary hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-2 rounded-lg text-xs tracking-wider uppercase transition-all shadow-md flex items-center justify-center gap-1.5"
                   >
-                    Log Dispatch Note
+                    {isLoggingNote ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Logging Note...</span>
+                      </>
+                    ) : (
+                      <span>Log Dispatch Note</span>
+                    )}
                   </button>
                 </div>
               </div>
@@ -1018,10 +1040,18 @@ export default function BookingDispatchPage() {
                 </button>
                 <button
                   type="button"
+                  disabled={isAssigning}
                   onClick={handleAssignVehicle}
-                  className="flex-1 bg-accent hover:bg-yellow-500 text-slate-950 font-black py-2.5 rounded-lg text-xs tracking-wider uppercase transition-colors shadow-lg"
+                  className="flex-1 bg-accent hover:bg-yellow-500 disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 font-black py-2.5 rounded-lg text-xs tracking-wider uppercase transition-colors shadow-lg flex items-center justify-center gap-1.5"
                 >
-                  Confirm Assignment
+                  {isAssigning ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-950" />
+                      <span>Saving Assignment...</span>
+                    </>
+                  ) : (
+                    <span>Confirm Assignment</span>
+                  )}
                 </button>
               </div>
             </div>

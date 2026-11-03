@@ -23,7 +23,8 @@ import {
   UserCheck,
   Image as ImageIcon,
   Star,
-  Sparkles
+  Sparkles,
+  Loader2
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 
@@ -1281,9 +1282,18 @@ export default function AdminFleetPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 bg-accent hover:bg-yellow-500 text-slate-950 font-black py-2.5 rounded-lg text-xs tracking-wider uppercase transition-colors shadow-lg disabled:opacity-50"
+                  className="flex-1 bg-accent hover:bg-yellow-500 text-slate-950 font-black py-2.5 rounded-lg text-xs tracking-wider uppercase transition-colors shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
                 >
-                  {isSubmitting ? "Saving..." : editingVehicle ? "Update Vehicle" : "Create Vehicle"}
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                      <span>Saving Vehicle...</span>
+                    </>
+                  ) : editingVehicle ? (
+                    "Update Vehicle"
+                  ) : (
+                    "Create Vehicle"
+                  )}
                 </button>
               </div>
 

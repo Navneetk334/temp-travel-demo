@@ -24,7 +24,8 @@ import {
   Moon,
   Layers,
   Maximize2,
-  Trash2
+  Trash2,
+  Loader2
 } from "lucide-react";
 
 declare global {
@@ -82,6 +83,7 @@ export default function MasterDispatchRadarPage() {
   const [activeBookings, setActiveBookings] = useState<any[]>([]);
   const [busyVehiclesMap, setBusyVehiclesMap] = useState<Record<string, string>>({});
   const [busyDriversMap, setBusyDriversMap] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Load saved dispatches, fleet vehicles, and drivers
   useEffect(() => {
@@ -289,6 +291,7 @@ export default function MasterDispatchRadarPage() {
   const handleAssignSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!assignForm.customerName || !assignForm.pickupLocation) return;
+    if (isSubmitting) return;
 
     const assignedDrv = registeredDrivers.find(d => d.id === assignForm.driverId);
     const assignedVeh = fleetVehicles.find(v => v.id === assignForm.vehicleId);
@@ -336,12 +339,14 @@ export default function MasterDispatchRadarPage() {
       lng: 77.0250 + (Math.random() - 0.5) * 0.04
     };
 
+    setIsSubmitting(true);
     const updated = [newDuty, ...drivers];
     setDrivers(updated);
     localStorage.setItem("master_dispatches", JSON.stringify(updated));
     syncDispatchToLeads(newDuty);
     setAssignSuccess(true);
     setTimeout(() => {
+      setIsSubmitting(false);
       setAssignSuccess(false);
       setShowAssignModal(false);
       setAssignForm({
@@ -731,10 +736,20 @@ export default function MasterDispatchRadarPage() {
                     </button>
                     <button
                       type="submit"
-                      className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer flex items-center gap-1.5"
+                      disabled={isSubmitting}
+                      className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 cursor-pointer flex items-center gap-1.5 transition-all"
                     >
-                      <CheckCircle2 className="w-4 h-4" />
-                      <span>Dispatch Duty Now</span>
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                          <span>Dispatching Duty...</span>
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>Dispatch Duty Now</span>
+                        </>
+                      )}
                     </button>
                   </div>
                 </form>
