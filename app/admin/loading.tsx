@@ -1,12 +1,16 @@
 import React from "react";
+import { Loader2 } from "lucide-react";
 
 export default function AdminLoading() {
   return (
-    <div className="space-y-8 animate-pulse">
-      {/* Top Banner Skeleton */}
+    <div className="space-y-8 animate-pulse p-6">
+      {/* Top Banner Skeleton with Active Loading Badge */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="space-y-2">
-          <div className="h-4 w-32 bg-white/10 rounded-full" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/10 border border-amber-400/20 text-accent text-xs font-semibold">
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            <span>Loading Section...</span>
+          </div>
           <div className="h-8 w-64 bg-white/10 rounded-xl" />
         </div>
         <div className="h-9 w-40 bg-white/10 rounded-xl" />

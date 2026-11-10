@@ -469,7 +469,11 @@ export default function BookingDispatchPage() {
           }`}
         >
           <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Total Dispatches</div>
-          <div className="text-xl font-black text-slate-50 mt-1">{stats.total}</div>
+          {loading ? (
+            <div className="h-6 w-12 bg-white/10 rounded animate-pulse mt-1" />
+          ) : (
+            <div className="text-xl font-black text-slate-50 mt-1">{stats.total}</div>
+          )}
         </div>
 
         <div 
@@ -479,7 +483,11 @@ export default function BookingDispatchPage() {
           }`}
         >
           <div className="text-[10px] text-yellow-400 uppercase font-bold tracking-wider">PENDING</div>
-          <div className="text-xl font-black text-yellow-400 mt-1">{stats.PENDING}</div>
+          {loading ? (
+            <div className="h-6 w-10 bg-yellow-400/20 rounded animate-pulse mt-1" />
+          ) : (
+            <div className="text-xl font-black text-yellow-400 mt-1">{stats.PENDING}</div>
+          )}
         </div>
 
         <div 
@@ -489,7 +497,11 @@ export default function BookingDispatchPage() {
           }`}
         >
           <div className="text-[10px] text-blue-400 uppercase font-bold tracking-wider">CONFIRMED</div>
-          <div className="text-xl font-black text-blue-400 mt-1">{stats.CONFIRMED}</div>
+          {loading ? (
+            <div className="h-6 w-10 bg-blue-400/20 rounded animate-pulse mt-1" />
+          ) : (
+            <div className="text-xl font-black text-blue-400 mt-1">{stats.CONFIRMED}</div>
+          )}
         </div>
 
         <div 
@@ -499,7 +511,11 @@ export default function BookingDispatchPage() {
           }`}
         >
           <div className="text-[10px] text-purple-400 uppercase font-bold tracking-wider">ASSIGNED</div>
-          <div className="text-xl font-black text-purple-400 mt-1">{stats.VEHICLE_ASSIGNED + stats.DRIVER_ASSIGNED}</div>
+          {loading ? (
+            <div className="h-6 w-10 bg-purple-400/20 rounded animate-pulse mt-1" />
+          ) : (
+            <div className="text-xl font-black text-purple-400 mt-1">{stats.VEHICLE_ASSIGNED + stats.DRIVER_ASSIGNED}</div>
+          )}
         </div>
 
         <div 
@@ -509,7 +525,11 @@ export default function BookingDispatchPage() {
           }`}
         >
           <div className="text-[10px] text-amber-400 uppercase font-bold tracking-wider">IN PROGRESS</div>
-          <div className="text-xl font-black text-amber-400 mt-1">{stats.IN_PROGRESS}</div>
+          {loading ? (
+            <div className="h-6 w-10 bg-amber-400/20 rounded animate-pulse mt-1" />
+          ) : (
+            <div className="text-xl font-black text-amber-400 mt-1">{stats.IN_PROGRESS}</div>
+          )}
         </div>
 
         <div 
@@ -519,7 +539,11 @@ export default function BookingDispatchPage() {
           }`}
         >
           <div className="text-[10px] text-emerald-400 uppercase font-bold tracking-wider">COMPLETED</div>
-          <div className="text-xl font-black text-emerald-400 mt-1">{stats.COMPLETED}</div>
+          {loading ? (
+            <div className="h-6 w-10 bg-emerald-400/20 rounded animate-pulse mt-1" />
+          ) : (
+            <div className="text-xl font-black text-emerald-400 mt-1">{stats.COMPLETED}</div>
+          )}
         </div>
 
         <div 
@@ -529,7 +553,11 @@ export default function BookingDispatchPage() {
           }`}
         >
           <div className="text-[10px] text-rose-400 uppercase font-bold tracking-wider">CANCELLED</div>
-          <div className="text-xl font-black text-rose-400 mt-1">{stats.CANCELLED}</div>
+          {loading ? (
+            <div className="h-6 w-10 bg-rose-400/20 rounded animate-pulse mt-1" />
+          ) : (
+            <div className="text-xl font-black text-rose-400 mt-1">{stats.CANCELLED}</div>
+          )}
         </div>
       </div>
 
@@ -606,7 +634,30 @@ export default function BookingDispatchPage() {
         {/* Bookings Table */}
         <div className="lg:col-span-7 glassmorphism rounded-xl border border-border overflow-hidden flex flex-col">
           {loading ? (
-            <div className="text-center py-16 text-slate-400 text-xs">Loading dispatch bookings...</div>
+            <div className="flex flex-col items-center justify-center py-20 px-6 space-y-4">
+              <div className="relative flex items-center justify-center">
+                <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shadow-lg shadow-amber-500/10">
+                  <Truck className="w-8 h-8 text-accent animate-pulse" />
+                </div>
+                <Loader2 className="w-6 h-6 text-amber-400 animate-spin absolute -top-1 -right-1" />
+              </div>
+              <div className="text-center space-y-1">
+                <div className="text-sm font-bold text-slate-100 flex items-center justify-center gap-2">
+                  <span>Loading Booking & Fleet Dispatch CRM</span>
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                </div>
+                <p className="text-xs text-slate-400 max-w-sm">
+                  Synchronizing active dispatches, fleet allocations, driver rosters, and payment statuses...
+                </p>
+              </div>
+
+              {/* Shimmering Table Row Skeletons */}
+              <div className="w-full max-w-md space-y-2.5 pt-2">
+                <div className="h-10 bg-white/5 border border-white/5 rounded-xl animate-pulse" />
+                <div className="h-10 bg-white/5 border border-white/5 rounded-xl animate-pulse delay-75" />
+                <div className="h-10 bg-white/5 border border-white/5 rounded-xl animate-pulse delay-150" />
+              </div>
+            </div>
           ) : (
             <>
               <div className="overflow-x-auto">

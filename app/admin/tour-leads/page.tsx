@@ -14,7 +14,8 @@ import {
   ChevronLeft, 
   ChevronRight,
   Truck,
-  CheckCircle2
+  CheckCircle2,
+  Loader2
 } from "lucide-react";
 import LeadDispatchModal from "@/components/admin/lead-dispatch-modal";
 
@@ -420,7 +421,13 @@ export default function AdminTourLeadsPage() {
           )}
 
           {loading ? (
-            <div className="text-center py-16 text-slate-400 text-xs">Loading tour package leads...</div>
+            <div className="flex flex-col items-center justify-center py-20 px-6 space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center">
+                <Loader2 className="w-6 h-6 text-accent animate-spin" />
+              </div>
+              <div className="text-sm font-bold text-slate-200">Loading Tour Package Inquiries...</div>
+              <p className="text-xs text-slate-400">Fetching curated itineraries, holiday requests, and passenger details</p>
+            </div>
           ) : (
             <>
               <div className="overflow-x-auto">

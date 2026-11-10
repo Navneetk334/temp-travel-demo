@@ -25,7 +25,9 @@ import {
   Clock,
   Briefcase,
   MapPin,
-  FileText
+  FileText,
+  Loader2,
+  Sparkles
 } from "lucide-react";
 
 interface SidebarItem {
@@ -42,6 +44,7 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
 
   const [adminSession, setAdminSession] = useState<{
     name: string;
@@ -52,6 +55,20 @@ export default function AdminLayout({
     email: "admin@temptravel.in",
     role: "SUPER_ADMIN",
   });
+
+  // Reset navigating indicator when route changes
+  useEffect(() => {
+    setNavigatingTo(null);
+  }, [pathname]);
+
+  // Safety fallback: if navigation takes longer than 6s, clear the loading state
+  useEffect(() => {
+    if (!navigatingTo) return;
+    const timer = setTimeout(() => {
+      setNavigatingTo(null);
+    }, 6000);
+    return () => clearTimeout(timer);
+  }, [navigatingTo]);
 
   // Fetch admin session details (or mock)
   useEffect(() => {
@@ -98,7 +115,14 @@ export default function AdminLayout({
   );
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex relative">
+      {/* Top Global Loading Progress Bar during navigation */}
+      {navigatingTo && (
+        <div className="fixed top-0 left-0 right-0 z-[100] h-1 bg-slate-900/60 overflow-hidden pointer-events-none">
+          <div className="h-full bg-gradient-to-r from-amber-500 via-amber-300 to-amber-600 shadow-[0_0_12px_rgba(245,158,11,0.9)] animate-pulse w-full" />
+        </div>
+      )}
+
       {/* 1. Sidebar Panel for Desktop (Fixed) */}
       <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-surface border-r border-border z-40 shrink-0">
         {/* Brand identity */}
@@ -117,20 +141,40 @@ export default function AdminLayout({
           {visibleNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
+            const isNavigatingThis = navigatingTo === item.href;
+
             return (
               <Link
                 key={item.name}
                 href={item.href}
+                onClick={() => {
+                  if (item.href !== pathname) {
+                    setNavigatingTo(item.href);
+                  }
+                }}
                 className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                  isActive
+                  isNavigatingThis
+                    ? "bg-amber-500/15 text-amber-300 border border-amber-500/40 shadow-md shadow-amber-500/10"
+                    : isActive
                     ? "bg-accent text-slate-950 font-bold shadow-md shadow-accent/20"
                     : "text-slate-400 hover:text-slate-100 hover:bg-white/5"
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <Icon className={`w-4 h-4 ${isActive ? "text-slate-950" : "text-accent"}`} />
-                  <span>{item.name}</span>
+                <div className="flex items-center gap-3 min-w-0">
+                  {isNavigatingThis ? (
+                    <Loader2 className="w-4 h-4 text-accent animate-spin shrink-0" />
+                  ) : (
+                    <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-slate-950" : "text-accent"}`} />
+                  )}
+                  <span className="truncate">{item.name}</span>
                 </div>
+
+                {isNavigatingThis && (
+                  <span className="inline-flex items-center gap-1 text-[9px] font-bold text-accent bg-amber-400/15 border border-amber-400/30 px-1.5 py-0.5 rounded-md animate-pulse uppercase tracking-wider shrink-0 ml-2">
+                    <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                    <span>Loading</span>
+                  </span>
+                )}
               </Link>
             );
           })}
@@ -169,10 +213,17 @@ export default function AdminLayout({
             <Menu className="w-6 h-6" />
           </button>
 
-          {/* Active section title */}
-          <div className="hidden sm:block text-slate-400 text-xs font-semibold tracking-wider uppercase">
-            Temp Travel Car Rentals &bull; Operational Dashboard
-          </div>
+          {/* Active section title / Navigation loading indicator */}
+          {navigatingTo ? (
+            <div className="flex items-center gap-2 px-3 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-full text-xs font-semibold animate-pulse shadow-sm">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              <span>Opening {visibleNavItems.find(i => i.href === navigatingTo)?.name || "Section"}...</span>
+            </div>
+          ) : (
+            <div className="hidden sm:block text-slate-400 text-xs font-semibold tracking-wider uppercase">
+              Temp Travel Car Rentals &bull; Operational Dashboard
+            </div>
+          )}
 
           {/* Controls */}
           <div className="flex items-center gap-4 ml-auto">
@@ -190,8 +241,8 @@ export default function AdminLayout({
           </div>
         </header>
 
-        {/* Main Content Body */}
-        <main className="flex-1 overflow-y-auto">
+        {/* Main Content Body with subtle transition overlay */}
+        <main className="flex-1 overflow-y-auto relative">
           {children}
         </main>
       </div>
@@ -220,18 +271,40 @@ export default function AdminLayout({
                 {visibleNavItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = pathname === item.href;
+                  const isNavigatingThis = navigatingTo === item.href;
+
                   return (
                     <Link
                       key={item.name}
                       href={item.href}
-                      onClick={() => setMobileOpen(false)}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all ${isActive
+                      onClick={() => {
+                        if (item.href !== pathname) {
+                          setNavigatingTo(item.href);
+                        }
+                        setMobileOpen(false);
+                      }}
+                      className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all ${
+                        isNavigatingThis
+                          ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                          : isActive
                           ? "bg-primary text-primary-foreground border-l-2 border-accent"
                           : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
-                        }`}
+                      }`}
                     >
-                      <Icon className="w-4.5 h-4.5" />
-                      <span>{item.name}</span>
+                      <div className="flex items-center gap-3">
+                        {isNavigatingThis ? (
+                          <Loader2 className="w-4.5 h-4.5 text-accent animate-spin" />
+                        ) : (
+                          <Icon className="w-4.5 h-4.5" />
+                        )}
+                        <span>{item.name}</span>
+                      </div>
+
+                      {isNavigatingThis && (
+                        <span className="inline-flex items-center gap-1 text-[9px] font-bold text-accent bg-amber-400/20 px-1.5 py-0.5 rounded animate-pulse">
+                          <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                        </span>
+                      )}
                     </Link>
                   );
                 })}
