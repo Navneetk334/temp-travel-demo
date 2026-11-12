@@ -79,8 +79,47 @@ export async function GET(req: NextRequest) {
       return `"${stringified}"`;
     };
 
+    const formatISTDateTime = (dateVal: any) => {
+      if (!dateVal) return "N/A";
+      try {
+        const d = new Date(dateVal);
+        if (isNaN(d.getTime())) return String(dateVal);
+        return d.toLocaleString("en-IN", {
+          timeZone: "Asia/Kolkata",
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true
+        });
+      } catch (e) {
+        return String(dateVal);
+      }
+    };
+
     const rows = bookings.map(b => {
       const mainPayment = b.payments?.[0];
+
+      // Resolve driver from vehicle relation or fallback to [AssignedDriver: Name|Phone|Id] in notes
+      let driverDisplay = "Unassigned";
+      if (b.vehicle?.driver?.name) {
+        driverDisplay = `${b.vehicle.driver.name} (${b.vehicle.driver.phone || "N/A"})`;
+      } else if (b.notes) {
+        const match = b.notes.match(/\[AssignedDriver:\s*([^|\]]+)\|([^|\]]+)(?:\|([^\]]+))?\]/);
+        if (match) {
+          driverDisplay = `${match[1].trim()} (${match[2].trim()})`;
+        }
+      }
+
+      // Clean internal audit logs & system tags from notes
+      let cleanedNotes = (b.notes || "")
+        .replace(/\[AssignedDriver:[^\]]+\]/g, "")
+        .replace(/\[\d{1,2}\s+[A-Za-z]+\s+\d{4},?\s+[^\]]+\]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+      if (!cleanedNotes) cleanedNotes = "None";
+
       return [
         escapeCSV(b.bookingNumber),
         escapeCSV(b.customer?.name),
@@ -89,16 +128,16 @@ export async function GET(req: NextRequest) {
         escapeCSV(b.type),
         escapeCSV(b.pickupLocation),
         escapeCSV(b.dropLocation),
-        escapeCSV(b.pickupDateTime.toISOString()),
+        escapeCSV(formatISTDateTime(b.pickupDateTime)),
         escapeCSV(b.vehicleCategory?.name),
         escapeCSV(b.vehicle ? `${b.vehicle.model} (${b.vehicle.registrationNumber})` : "Unassigned"),
-        escapeCSV(b.vehicle?.driver ? `${b.vehicle.driver.name} (${b.vehicle.driver.phone})` : "Unassigned"),
+        escapeCSV(driverDisplay),
         escapeCSV(b.status),
         escapeCSV(Number(b.netAmount).toFixed(2)),
         escapeCSV(mainPayment?.status || "PENDING"),
         escapeCSV(mainPayment?.razorpayOrderId || "N/A"),
-        escapeCSV(b.notes),
-        escapeCSV(b.createdAt.toISOString())
+        escapeCSV(cleanedNotes),
+        escapeCSV(formatISTDateTime(b.createdAt))
       ];
     });
 

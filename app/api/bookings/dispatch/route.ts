@@ -84,6 +84,16 @@ export async function POST(req: NextRequest) {
     const finalNotes = [notes || "Dispatched via Admin", driverTag].filter(Boolean).join(" ");
 
     // 3. Create Booking
+    let parsedPickupDateTime = new Date();
+    if (pickupDateTime) {
+      if (typeof pickupDateTime === "string" && !pickupDateTime.includes("Z") && !pickupDateTime.includes("+")) {
+        const withSec = pickupDateTime.length === 16 ? `${pickupDateTime}:00` : pickupDateTime;
+        parsedPickupDateTime = new Date(`${withSec}+05:30`);
+      } else {
+        parsedPickupDateTime = new Date(pickupDateTime);
+      }
+    }
+
     const booking = await prisma.booking.create({
       data: {
         bookingNumber: bookingRef || `TT-${Date.now().toString().slice(-6)}`,
@@ -92,7 +102,7 @@ export async function POST(req: NextRequest) {
         vehicleCategoryId: vehicleCategoryId,
         type: bType as any,
         status: "CONFIRMED",
-        pickupDateTime: new Date(pickupDateTime),
+        pickupDateTime: parsedPickupDateTime,
         pickupLocation: pickupLocation || "TBD",
         dropLocation: dropLocation || null,
         totalAmount: totalAmount - taxAmount,

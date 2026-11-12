@@ -98,6 +98,89 @@ export function extractDropLocation(lead: any): string {
   return match && match[1] ? match[1].trim() : "";
 }
 
+export function extractPickupTime(lead: any): string {
+  if (!lead) return "";
+  if (lead.pickupTime && typeof lead.pickupTime === "string" && lead.pickupTime.trim()) {
+    return lead.pickupTime.trim();
+  }
+  const text = `${lead.requirements || ""} ${lead.notes || ""}`;
+  const match = text.match(/(?:Pickup Time|Pickup at|Time):\s*([0-9]{1,2}:[0-9]{2}(?:\s*[APap][Mm])?)/i);
+  if (match && match[1]) return match[1].trim();
+
+  if (lead.pickupDateTime) {
+    try {
+      const d = new Date(lead.pickupDateTime);
+      if (!isNaN(d.getTime())) {
+        return d.toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", hour12: true });
+      }
+    } catch (e) {}
+  }
+  return "";
+}
+
+export function extractPickupDate(lead: any): string {
+  if (!lead) return "";
+  if (lead.pickupDate && typeof lead.pickupDate === "string" && lead.pickupDate.trim()) {
+    return lead.pickupDate.trim();
+  }
+  if (lead.date && typeof lead.date === "string" && lead.date.trim()) {
+    return lead.date.trim();
+  }
+  const text = `${lead.requirements || ""} ${lead.notes || ""}`;
+  const match = text.match(/(?:Pickup Date|Travel Date|Date):\s*([0-9]{4}-[0-9]{2}-[0-9]{2}|[0-9]{1,2}[/-][0-9]{1,2}[/-][0-9]{2,4})/i);
+  if (match && match[1]) return match[1].trim();
+
+  if (lead.pickupDateTime) {
+    try {
+      const d = new Date(lead.pickupDateTime);
+      if (!isNaN(d.getTime())) {
+        return d.toISOString().slice(0, 10);
+      }
+    } catch (e) {}
+  }
+  if (lead.createdAt) {
+    try {
+      const d = new Date(lead.createdAt);
+      if (!isNaN(d.getTime())) {
+        return d.toISOString().slice(0, 10);
+      }
+    } catch (e) {}
+  }
+  return new Date().toISOString().slice(0, 10);
+}
+
+export function formatToDateTimeLocal(dateStr?: string, timeStr?: string): string {
+  let yyyyMmDd = "";
+  if (dateStr && /^\d{4}-\d{2}-\d{2}$/.test(dateStr.trim())) {
+    yyyyMmDd = dateStr.trim();
+  } else {
+    const now = new Date();
+    const istYear = new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Kolkata", year: "numeric" }).format(now);
+    const istMonth = new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Kolkata", month: "2-digit" }).format(now);
+    const istDay = new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Kolkata", day: "2-digit" }).format(now);
+    yyyyMmDd = `${istYear}-${istMonth}-${istDay}`;
+  }
+
+  if (timeStr) {
+    const t = timeStr.trim();
+    const ampmMatch = t.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+    if (ampmMatch) {
+      let hours = parseInt(ampmMatch[1], 10);
+      const minutes = ampmMatch[2];
+      const meridiem = (ampmMatch[3] || "").toUpperCase();
+      if (meridiem === "PM" && hours < 12) hours += 12;
+      if (meridiem === "AM" && hours === 12) hours = 0;
+      const hh = hours.toString().padStart(2, "0");
+      return `${yyyyMmDd}T${hh}:${minutes}`;
+    }
+  }
+
+  const now = new Date();
+  const istHour = new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Kolkata", hour: "2-digit", hour12: false }).format(now);
+  const istMin = new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Kolkata", minute: "2-digit" }).format(now);
+  return `${yyyyMmDd}T${istHour.padStart(2, "0")}:${istMin.padStart(2, "0")}`;
+}
+
 export default function LeadDispatchModal({
   isOpen,
   onClose,
@@ -296,6 +379,12 @@ export default function LeadDispatchModal({
       const availableDList = dList.filter((d: any) => !getDriverBusy(d));
       const chosenDrvId = availableDList[0]?.id || dList[0]?.id || "";
 
+      const extractedDate = extractPickupDate(lead);
+      const extractedTime = extractPickupTime(lead);
+      const initialPickupDateTime = lead.pickupDateTime
+        ? (lead.pickupDateTime.length === 16 ? lead.pickupDateTime : lead.pickupDateTime.slice(0, 16))
+        : formatToDateTimeLocal(extractedDate, extractedTime);
+
       setDispatchForm({
         vehicleId: chosenVehId,
         driverId: chosenDrvId,
@@ -304,7 +393,7 @@ export default function LeadDispatchModal({
         paymentMode: "Cash Collection",
         pickupLocation: extractPickupLocation(lead),
         dropLocation: extractDropLocation(lead),
-        pickupDateTime: lead.pickupDateTime || new Date().toISOString().slice(0, 16),
+        pickupDateTime: initialPickupDateTime,
         notes: lead.notes || `Dispatched via Website Admin for ${lead.customerName || lead.name || "Customer"}`
       });
     }
@@ -353,6 +442,12 @@ export default function LeadDispatchModal({
     setIsSubmitting(true);
     const finalBookingRef = lead.bookingRef || lead.bookingNumber || (lead.id ? `TT-${lead.id.slice(-6).toUpperCase()}` : `TT-${Date.now().toString().slice(-6)}`);
     
+    let finalPickupDateTime = dispatchForm.pickupDateTime;
+    if (finalPickupDateTime && !finalPickupDateTime.includes("Z") && !finalPickupDateTime.includes("+")) {
+      const withSec = finalPickupDateTime.length === 16 ? `${finalPickupDateTime}:00` : finalPickupDateTime;
+      finalPickupDateTime = `${withSec}+05:30`;
+    }
+
     const dispatchedBooking = {
       id: `booking_${Date.now()}`,
       bookingNumber: finalBookingRef,
@@ -360,7 +455,7 @@ export default function LeadDispatchModal({
       status: "CONFIRMED",
       pickupLocation: dispatchForm.pickupLocation,
       dropLocation: dispatchForm.dropLocation,
-      pickupDateTime: dispatchForm.pickupDateTime,
+      pickupDateTime: finalPickupDateTime,
       netAmount: dispatchForm.fare,
       totalAmount: dispatchForm.fare,
       advanceAmount: dispatchForm.advance,
@@ -460,7 +555,7 @@ export default function LeadDispatchModal({
           paymentMode: dispatchForm.paymentMode,
           pickupLocation: dispatchForm.pickupLocation,
           dropLocation: dispatchForm.dropLocation,
-          pickupDateTime: dispatchForm.pickupDateTime,
+          pickupDateTime: finalPickupDateTime,
           notes: dispatchForm.notes,
           customerName: lead.customerName || lead.contactName || lead.name || lead.companyName || "Customer Lead",
           customerPhone: lead.phone,
@@ -486,9 +581,28 @@ export default function LeadDispatchModal({
       paymentMode: dispatchForm.paymentMode,
       pickupLocation: dispatchForm.pickupLocation,
       dropLocation: dispatchForm.dropLocation,
-      pickupDateTime: dispatchForm.pickupDateTime
+      pickupDateTime: finalPickupDateTime
     });
   };
+
+  const formattedSuccessPickupTime = (() => {
+    if (!dispatchedSuccess?.pickupDateTime) return "As Scheduled";
+    try {
+      const d = new Date(dispatchedSuccess.pickupDateTime);
+      if (!isNaN(d.getTime())) {
+        return d.toLocaleString("en-IN", {
+          timeZone: "Asia/Kolkata",
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true
+        });
+      }
+    } catch (e) {}
+    return dispatchedSuccess.pickupDateTime;
+  })();
 
   return (
     <Portal>
@@ -544,6 +658,19 @@ export default function LeadDispatchModal({
                   <span className="font-black text-emerald-400 font-mono text-sm">₹{dispatchedSuccess.fare}</span>
                   <div className="text-[10px] text-slate-400">{dispatchedSuccess.paymentMode}</div>
                 </div>
+
+                <div className="col-span-2 pt-2 border-t border-white/10 flex flex-wrap justify-between items-center text-xs">
+                  <div>
+                    <span className="text-slate-400 block text-[10px] uppercase font-bold">Pickup Date & Time</span>
+                    <span className="font-semibold text-amber-400 font-mono">{formattedSuccessPickupTime}</span>
+                  </div>
+                  {dispatchedSuccess.pickupLocation && (
+                    <div className="text-right max-w-[240px]">
+                      <span className="text-slate-400 block text-[10px] uppercase font-bold">Pickup Hub</span>
+                      <span className="text-slate-200 truncate block" title={dispatchedSuccess.pickupLocation}>{dispatchedSuccess.pickupLocation}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -551,7 +678,7 @@ export default function LeadDispatchModal({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               <a
                 href={`https://wa.me/91${(dispatchedSuccess.lead?.phone || "").replace(/\D/g, "").slice(-10)}?text=${encodeURIComponent(
-                  `*TEMP TRAVEL CAR RENTALS - RIDE CONFIRMATION*\n\nDear ${dispatchedSuccess.lead?.customerName || dispatchedSuccess.lead?.name},\nYour cab has been confirmed and dispatched.\n\n*Booking Number (PNR):* ${dispatchedSuccess.bookingRef}\n*Vehicle:* ${dispatchedSuccess.vehicle?.make} ${dispatchedSuccess.vehicle?.model} (${dispatchedSuccess.vehicle?.registrationNumber})\n*Driver / Chauffeur:* ${dispatchedSuccess.driver?.name} (📞 +91-${dispatchedSuccess.driver?.phone})\n*Pickup Location:* ${dispatchedSuccess.pickupLocation}\n*Agreed Fare:* ₹${dispatchedSuccess.fare}\n\nThank you for choosing Temp Travel! For assistance call +91-7011729639.`
+                  `*TEMP TRAVEL CAR RENTALS - RIDE CONFIRMATION*\n\nDear ${dispatchedSuccess.lead?.customerName || dispatchedSuccess.lead?.name || "Customer"},\nYour cab has been confirmed and dispatched.\n\n*Booking Number (PNR):* ${dispatchedSuccess.bookingRef}\n*Pickup Date & Time:* ${formattedSuccessPickupTime}\n*Pickup Location:* ${dispatchedSuccess.pickupLocation || "As scheduled"}\n*Drop Location:* ${dispatchedSuccess.dropLocation || "As directed"}\n*Vehicle:* ${dispatchedSuccess.vehicle?.make || ""} ${dispatchedSuccess.vehicle?.model || ""} (${dispatchedSuccess.vehicle?.registrationNumber || "Assigned"})\n*Driver / Chauffeur:* ${dispatchedSuccess.driver?.name || "Assigned Driver"} (📞 +91-${dispatchedSuccess.driver?.phone || "Office"})\n*Agreed Fare:* ₹${dispatchedSuccess.fare}\n*Payment Mode:* ${dispatchedSuccess.paymentMode || "Cash Collection"}\n\nThank you for choosing Temp Travel! For assistance call +91-7011729639.`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"

@@ -27,7 +27,12 @@ import {
   Truck,
   Loader2
 } from "lucide-react";
-import LeadDispatchModal, { extractPickupLocation, extractDropLocation } from "@/components/admin/lead-dispatch-modal";
+import LeadDispatchModal, { 
+  extractPickupLocation, 
+  extractDropLocation,
+  extractPickupTime,
+  extractPickupDate 
+} from "@/components/admin/lead-dispatch-modal";
 import { 
   syncExistingDispatchesToLeads, 
   getCurrentAdminUser, 
@@ -151,13 +156,15 @@ export default function AdminCorporateLeadsPage() {
             }).map((l: any) => ({
               id: l.id || `lead_${Date.now()}`,
               companyName: l.companyName || "Individual",
-              contactName: l.customerName || "Customer",
+              contactName: l.customerName || l.contactName || "Customer",
               email: l.email || "",
               phone: l.phone || "",
-              employeeCount: 1,
-              pickupLocations: l.pickupLocation || "",
-              serviceType: l.tripType || "Pickup & Drop",
-              requirements: l.notes || "",
+              employeeCount: l.employeeCount || 1,
+              pickupLocations: l.pickupLocation || l.pickupLocations || "",
+              pickupLocation: l.pickupLocation || l.pickupLocations || "",
+              dropLocation: l.dropLocation || "",
+              serviceType: l.tripType || l.serviceType || "Pickup & Drop",
+              requirements: l.requirements || l.notes || "",
               notes: l.notes || "",
               status: (l.status || "NEW") as LeadStatus,
               createdAt: l.createdAt || new Date().toISOString()
@@ -633,6 +640,19 @@ export default function AdminCorporateLeadsPage() {
                           <td className="p-4">
                             <div className="font-bold text-slate-200 text-sm">{lead.companyName}</div>
                             <div className="text-slate-400 mt-0.5">{lead.contactName} &bull; <span className="font-mono text-slate-500">{lead.phone}</span></div>
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-[11px]">
+                              {extractPickupTime(lead) && (
+                                <span className="inline-flex items-center gap-1 font-semibold text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+                                  <Clock className="w-3 h-3 text-amber-400" />
+                                  <span>Pickup: {extractPickupTime(lead)}</span>
+                                </span>
+                              )}
+                              {(extractPickupLocation(lead) || lead.pickupLocations) && (
+                                <span className="text-slate-400 truncate max-w-[220px]" title={extractPickupLocation(lead) || lead.pickupLocations || ""}>
+                                  📍 {extractPickupLocation(lead) || lead.pickupLocations}
+                                </span>
+                              )}
+                            </div>
                           </td>
                           <td className="p-4 font-mono font-bold text-slate-300">
                             {lead.employeeCount ? `${lead.employeeCount} pax` : "—"}
@@ -848,6 +868,18 @@ export default function AdminCorporateLeadsPage() {
                   <span className="text-slate-400">Service Required:</span>
                   <span className="font-bold text-amber-400">{activeLead.serviceType}</span>
                 </div>
+
+                {extractPickupTime(activeLead) && (
+                  <div className="flex justify-between items-center bg-background/40 p-2.5 rounded-lg border border-border">
+                    <span className="text-slate-400 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Pickup Time:</span>
+                    </span>
+                    <span className="font-bold font-mono text-amber-400 text-xs px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">
+                      {extractPickupTime(activeLead)}
+                    </span>
+                  </div>
+                )}
 
                 {(activeLead.pickupLocations || extractPickupLocation(activeLead)) && (
                   <div className="bg-background/40 p-3 rounded-lg border border-border space-y-1">

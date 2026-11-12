@@ -34,7 +34,14 @@ import {
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 import LocationInput from "@/components/shared/location-input";
-import { extractLeadVehicleRequirements, extractPickupLocation, extractDropLocation } from "@/components/admin/lead-dispatch-modal";
+import { 
+  extractLeadVehicleRequirements, 
+  extractPickupLocation, 
+  extractDropLocation,
+  extractPickupTime,
+  extractPickupDate,
+  formatToDateTimeLocal
+} from "@/components/admin/lead-dispatch-modal";
 import { useDialog } from "@/app/components/DialogProvider";
 import { 
   syncExistingDispatchesToLeads,
@@ -489,6 +496,12 @@ export default function MasterOmnichannelCRMPage() {
     const availableD = availableDrivers.filter(d => !getDriverBusy(d));
     const chosenDrvId = availableD[0]?.id || availableDrivers[0]?.id || "";
 
+    const extractedDate = extractPickupDate(lead);
+    const extractedTime = extractPickupTime(lead);
+    const initialPickupDateTime = lead.pickupDateTime
+      ? (lead.pickupDateTime.length === 16 ? lead.pickupDateTime : lead.pickupDateTime.slice(0, 16))
+      : formatToDateTimeLocal(extractedDate, extractedTime);
+
     setDispatchForm({
       vehicleId: chosenVehId,
       driverId: chosenDrvId,
@@ -497,7 +510,7 @@ export default function MasterOmnichannelCRMPage() {
       paymentMode: "Cash Collection",
       pickupLocation: extractPickupLocation(lead) || (lead.pickupLocation !== "-" ? lead.pickupLocation : "") || "",
       dropLocation: extractDropLocation(lead) || (lead.dropLocation !== "-" ? lead.dropLocation : "") || "",
-      pickupDateTime: new Date().toISOString().slice(0, 16),
+      pickupDateTime: initialPickupDateTime,
       notes: lead.notes || `Dispatched via Master CRM for ${lead.customerName}`
     });
   };
@@ -540,6 +553,12 @@ export default function MasterOmnichannelCRMPage() {
     setIsSubmitting(true);
     const finalBookingRef = dispatchModalLead.bookingRef || `TT-${Date.now().toString().slice(-6)}`;
 
+    let finalPickupDateTime = dispatchForm.pickupDateTime;
+    if (finalPickupDateTime && !finalPickupDateTime.includes("Z") && !finalPickupDateTime.includes("+")) {
+      const withSec = finalPickupDateTime.length === 16 ? `${finalPickupDateTime}:00` : finalPickupDateTime;
+      finalPickupDateTime = `${withSec}+05:30`;
+    }
+
     const dispatchedBooking = {
       id: `booking_${Date.now()}`,
       bookingNumber: finalBookingRef,
@@ -547,7 +566,7 @@ export default function MasterOmnichannelCRMPage() {
       status: "CONFIRMED",
       pickupLocation: dispatchForm.pickupLocation || dispatchModalLead.pickupLocation,
       dropLocation: dispatchForm.dropLocation || dispatchModalLead.dropLocation,
-      pickupDateTime: dispatchForm.pickupDateTime || new Date().toISOString(),
+      pickupDateTime: finalPickupDateTime || new Date().toISOString(),
       netAmount: dispatchForm.fare,
       totalAmount: dispatchForm.fare,
       advanceAmount: dispatchForm.advance,
@@ -606,7 +625,7 @@ export default function MasterOmnichannelCRMPage() {
           paymentMode: dispatchForm.paymentMode,
           pickupLocation: dispatchForm.pickupLocation || dispatchModalLead.pickupLocation,
           dropLocation: dispatchForm.dropLocation || dispatchModalLead.dropLocation,
-          pickupDateTime: dispatchForm.pickupDateTime || new Date().toISOString(),
+          pickupDateTime: finalPickupDateTime || new Date().toISOString(),
           notes: dispatchForm.notes,
           customerName: dispatchModalLead.customerName,
           customerEmail: dispatchModalLead.email,
@@ -633,7 +652,7 @@ export default function MasterOmnichannelCRMPage() {
       paymentMode: dispatchForm.paymentMode,
       pickupLocation: dispatchForm.pickupLocation,
       dropLocation: dispatchForm.dropLocation,
-      pickupDateTime: dispatchForm.pickupDateTime
+      pickupDateTime: finalPickupDateTime
     });
 
     setIsSubmitting(false);
@@ -1503,6 +1522,37 @@ export default function MasterOmnichannelCRMPage() {
                     <span className="font-black text-emerald-400 font-mono text-sm">₹{dispatchedSuccess.fare}</span>
                     <div className="text-[10px] text-slate-400">{dispatchedSuccess.paymentMode}</div>
                   </div>
+
+                  <div className="col-span-2 pt-2 border-t border-white/10 flex flex-wrap justify-between items-center text-xs">
+                    <div>
+                      <span className="text-slate-400 block text-[10px] uppercase font-bold">Pickup Date & Time</span>
+                      <span className="font-semibold text-amber-400 font-mono">
+                        {(() => {
+                          try {
+                            const d = new Date(dispatchedSuccess.pickupDateTime);
+                            if (!isNaN(d.getTime())) {
+                              return d.toLocaleString("en-IN", {
+                                timeZone: "Asia/Kolkata",
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: true
+                              });
+                            }
+                          } catch (e) {}
+                          return dispatchedSuccess.pickupDateTime || "As Scheduled";
+                        })()}
+                      </span>
+                    </div>
+                    {dispatchedSuccess.pickupLocation && (
+                      <div className="text-right max-w-[240px]">
+                        <span className="text-slate-400 block text-[10px] uppercase font-bold">Pickup Hub</span>
+                        <span className="text-slate-200 truncate block" title={dispatchedSuccess.pickupLocation}>{dispatchedSuccess.pickupLocation}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -1510,7 +1560,26 @@ export default function MasterOmnichannelCRMPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 <a
                   href={`https://wa.me/91${(dispatchedSuccess.lead?.phone || "").replace(/\D/g, "").slice(-10)}?text=${encodeURIComponent(
-                    `*TEMP TRAVEL CAR RENTALS - RIDE CONFIRMATION*\n\nDear ${dispatchedSuccess.lead?.customerName},\nYour cab has been confirmed and dispatched.\n\n*Booking Number (PNR):* ${dispatchedSuccess.bookingRef}\n*Vehicle:* ${dispatchedSuccess.vehicle?.make} ${dispatchedSuccess.vehicle?.model} (${dispatchedSuccess.vehicle?.registrationNumber})\n*Driver / Chauffeur:* ${dispatchedSuccess.driver?.name} (📞 +91-${dispatchedSuccess.driver?.phone})\n*Pickup Location:* ${dispatchedSuccess.pickupLocation}\n*Agreed Fare:* ₹${dispatchedSuccess.fare}\n\nThank you for choosing Temp Travel! For assistance call +91-7011729639.`
+                    (() => {
+                      const formattedPickup = (() => {
+                        try {
+                          const d = new Date(dispatchedSuccess.pickupDateTime);
+                          if (!isNaN(d.getTime())) {
+                            return d.toLocaleString("en-IN", {
+                              timeZone: "Asia/Kolkata",
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: true
+                            });
+                          }
+                        } catch (e) {}
+                        return dispatchedSuccess.pickupDateTime || "As Scheduled";
+                      })();
+                      return `*TEMP TRAVEL CAR RENTALS - RIDE CONFIRMATION*\n\nDear ${dispatchedSuccess.lead?.customerName || "Customer"},\nYour cab has been confirmed and dispatched.\n\n*Booking Number (PNR):* ${dispatchedSuccess.bookingRef}\n*Pickup Date & Time:* ${formattedPickup}\n*Pickup Location:* ${dispatchedSuccess.pickupLocation || "As scheduled"}\n*Drop Location:* ${dispatchedSuccess.dropLocation || "As directed"}\n*Vehicle:* ${dispatchedSuccess.vehicle?.make || ""} ${dispatchedSuccess.vehicle?.model || ""} (${dispatchedSuccess.vehicle?.registrationNumber || "Assigned"})\n*Driver / Chauffeur:* ${dispatchedSuccess.driver?.name || "Assigned Driver"} (📞 +91-${dispatchedSuccess.driver?.phone || "Office"})\n*Agreed Fare:* ₹${dispatchedSuccess.fare}\n*Payment Mode:* ${dispatchedSuccess.paymentMode || "Cash Collection"}\n\nThank you for choosing Temp Travel! For assistance call +91-7011729639.`;
+                    })()
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
