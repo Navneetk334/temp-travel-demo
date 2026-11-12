@@ -87,20 +87,7 @@ export default function MasterDispatchRadarPage() {
 
   // Load saved dispatches, fleet vehicles, and drivers
   useEffect(() => {
-    // 1. Load active dispatches from localStorage
-    const saved = localStorage.getItem("master_dispatches");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setDrivers(parsed);
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    // 2. Load fleet vehicles
+    // 1. Load fleet vehicles
     try {
       const savedFleet = localStorage.getItem("user_uploaded_fleet_vehicles") || localStorage.getItem("user_uploaded_fleet");
       if (savedFleet) {
@@ -120,7 +107,7 @@ export default function MasterDispatchRadarPage() {
       })
       .catch(e => console.error(e));
 
-    // 3. Load registered drivers
+    // 2. Load registered drivers
     try {
       const savedDrivers = localStorage.getItem("user_uploaded_drivers");
       if (savedDrivers) {
@@ -139,16 +126,41 @@ export default function MasterDispatchRadarPage() {
       })
       .catch(e => console.error(e));
 
-    // 4. Fetch active bookings for driver & vehicle busy tracking
-    fetch("/api/bookings?limit=100")
-      .then(res => res.ok ? res.json() : null)
-      .then(bData => {
-        if (bData) {
-          const list = Array.isArray(bData) ? bData : (bData.bookings || []);
-          setActiveBookings(list);
+    // 3. Load dispatches from Backend Database + Local Storage
+    const loadAllDispatches = async () => {
+      let localMaster: any[] = [];
+      try {
+        const saved = localStorage.getItem("master_dispatches");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) localMaster = parsed;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+
+      let localDispatchedBookings: any[] = [];
+      try {
+        const savedDispatched = localStorage.getItem("user_uploaded_dispatched_bookings");
+        if (savedDispatched) {
+          const parsed = JSON.parse(savedDispatched);
+          if (Array.isArray(parsed)) localDispatchedBookings = parsed;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+
+      try {
+        const bRes = await fetch("/api/bookings?limit=100");
+        let apiBookings: any[] = [];
+        if (bRes.ok) {
+          const bData = await bRes.json();
+          apiBookings = Array.isArray(bData) ? bData : (bData.bookings || []);
+          setActiveBookings(apiBookings);
+
           const vMap: Record<string, string> = {};
           const dMap: Record<string, string> = {};
-          list.forEach((b: any) => {
+          apiBookings.forEach((b: any) => {
             const isActive = b.status !== "COMPLETED" && b.status !== "CANCELLED";
             if (isActive) {
               const ref = b.bookingNumber || `TT-${b.id?.slice(-6) || "RIDE"}`;
@@ -166,9 +178,170 @@ export default function MasterDispatchRadarPage() {
           setBusyVehiclesMap(vMap);
           setBusyDriversMap(dMap);
         }
-      })
-      .catch(e => console.error(e));
 
+        // Convert Live Backend Database Bookings to Radar Dispatches
+        const convertedApiDispatches = apiBookings
+          .filter((b: any) => b.status !== "CANCELLED")
+          .map((b: any) => {
+            let drvName = b.driver?.name || b.vehicle?.driver?.name || "";
+            let drvPhone = b.driver?.phone || b.vehicle?.driver?.phone || "";
+            let drvId = b.driver?.id || b.vehicle?.driver?.id || "";
+
+            if (!drvName && b.notes) {
+              const match = b.notes.match(/\[AssignedDriver:\s*([^|\]]+)\|([^|\]]+)(?:\|([^\]]+))?\]/);
+              if (match) {
+                drvName = match[1].trim();
+                drvPhone = match[2].trim();
+                drvId = match[3]?.trim() || "";
+              }
+            }
+
+            const hasVehicle = Boolean(b.vehicle && b.vehicle.registrationNumber && b.vehicle.registrationNumber !== "Pending Vehicle");
+            const hasDriver = Boolean(drvName && drvName !== "Pending Chauffeur" && drvName !== "Unassigned");
+
+            let status: "IN_TRANSIT" | "ASSIGNED" | "AVAILABLE" = "ASSIGNED";
+            if (b.status === "IN_TRANSIT" || b.status === "IN_PROGRESS") {
+              status = "IN_TRANSIT";
+            } else if (hasVehicle || hasDriver || b.status === "CONFIRMED" || b.status === "DRIVER_ASSIGNED" || b.status === "VEHICLE_ASSIGNED") {
+              status = "ASSIGNED";
+            } else {
+              status = "AVAILABLE";
+            }
+
+            const hash = String(b.bookingNumber || b.id || b.customer?.name || "TT")
+              .split("")
+              .reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
+            const latOffset = ((hash % 100) - 50) * 0.0008;
+            const lngOffset = (((hash * 13) % 100) - 50) * 0.0008;
+
+            const pLoc = b.pickupLocation && b.pickupLocation !== "-" ? b.pickupLocation : "Pickup Hub";
+            const dLoc = b.dropLocation && b.dropLocation !== "-" ? b.dropLocation : "Drop Location TBD";
+
+            return {
+              id: b.id || `DISP-${b.bookingNumber || Date.now()}`,
+              bookingRef: b.bookingNumber || `TT-${(b.id || "").slice(-6).toUpperCase()}`,
+              bookingId: b.id,
+              driverId: drvId,
+              driverName: drvName || "Pending Chauffeur",
+              phone: b.customer?.phone || "+91-9820112233",
+              driverPhone: drvPhone,
+              vehicleId: b.vehicle?.id || "",
+              vehicleModel: b.vehicle?.model || (b.vehicleCategory?.name ? `${b.vehicleCategory.name} Fleet` : "Commercial Fleet"),
+              vehicleCategory: b.vehicleCategory?.name || "Sedan",
+              vehicleClass: b.vehicle?.vehicleClass || "Executive",
+              regNumber: b.vehicle?.registrationNumber || "Pending Vehicle",
+              currentLocation: pLoc,
+              destination: dLoc,
+              pickupLocation: pLoc,
+              dropLocation: dLoc,
+              status: status,
+              speed: status === "IN_TRANSIT" ? `${35 + (hash % 25)} km/h` : "0 km/h",
+              eta: status === "IN_TRANSIT" ? `${10 + (hash % 20)} Mins` : "Scheduled / At Pickup Hub",
+              tripType: b.type ? b.type.replace(/_/g, " ") : "Dispatched Ride",
+              customerName: b.customer?.name || "Customer Lead",
+              fare: b.netAmount ? String(b.netAmount) : (b.totalAmount ? String(b.totalAmount) : "2800"),
+              advance: b.payments?.[0]?.amount ? String(b.payments[0].amount) : "500",
+              lat: 28.5910 + latOffset,
+              lng: 77.0250 + lngOffset,
+              isFromLiveBookings: true
+            };
+          });
+
+        // Convert Local Dispatched Bookings (Fallback)
+        const convertedLocalDispatched = localDispatchedBookings.map((b: any) => {
+          let drvName = b.driver?.name || b.vehicle?.driver?.name || "";
+          let drvPhone = b.driver?.phone || b.vehicle?.driver?.phone || "";
+          let drvId = b.driver?.id || b.vehicle?.driver?.id || "";
+
+          if (!drvName && b.notes) {
+            const match = b.notes.match(/\[AssignedDriver:\s*([^|\]]+)\|([^|\]]+)(?:\|([^\]]+))?\]/);
+            if (match) {
+              drvName = match[1].trim();
+              drvPhone = match[2].trim();
+              drvId = match[3]?.trim() || "";
+            }
+          }
+
+          const hasVehicle = Boolean(b.vehicle && b.vehicle.registrationNumber && b.vehicle.registrationNumber !== "Pending Vehicle");
+          const hasDriver = Boolean(drvName && drvName !== "Pending Chauffeur" && drvName !== "Unassigned");
+
+          let status: "IN_TRANSIT" | "ASSIGNED" | "AVAILABLE" = "ASSIGNED";
+          if (b.status === "IN_TRANSIT" || b.status === "IN_PROGRESS") {
+            status = "IN_TRANSIT";
+          } else if (hasVehicle || hasDriver || b.status === "CONFIRMED") {
+            status = "ASSIGNED";
+          } else {
+            status = "AVAILABLE";
+          }
+
+          const hash = String(b.bookingNumber || b.id || b.customer?.name || "TT")
+            .split("")
+            .reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
+          const latOffset = ((hash % 100) - 50) * 0.0008;
+          const lngOffset = (((hash * 13) % 100) - 50) * 0.0008;
+
+          const pLoc = b.pickupLocation && b.pickupLocation !== "-" ? b.pickupLocation : "Pickup Hub";
+          const dLoc = b.dropLocation && b.dropLocation !== "-" ? b.dropLocation : "Drop Location TBD";
+
+          return {
+            id: b.id || `DISP-${b.bookingNumber || Date.now()}`,
+            bookingRef: b.bookingNumber || `TT-${(b.id || "").slice(-6).toUpperCase()}`,
+            bookingId: b.id,
+            driverId: drvId,
+            driverName: drvName || "Pending Chauffeur",
+            phone: b.customer?.phone || "+91-9820112233",
+            driverPhone: drvPhone,
+            vehicleId: b.vehicle?.id || "",
+            vehicleModel: b.vehicle?.model || (b.vehicleCategory?.name ? `${b.vehicleCategory.name} Fleet` : "Commercial Fleet"),
+            vehicleCategory: b.vehicleCategory?.name || "Sedan",
+            vehicleClass: b.vehicle?.vehicleClass || "Executive",
+            regNumber: b.vehicle?.registrationNumber || "Pending Vehicle",
+            currentLocation: pLoc,
+            destination: dLoc,
+            pickupLocation: pLoc,
+            dropLocation: dLoc,
+            status: status,
+            speed: status === "IN_TRANSIT" ? `${35 + (hash % 25)} km/h` : "0 km/h",
+            eta: status === "IN_TRANSIT" ? `${10 + (hash % 20)} Mins` : "Scheduled / At Pickup Hub",
+            tripType: b.type || "Dispatched Ride",
+            customerName: b.customer?.name || "Customer Lead",
+            fare: b.netAmount ? String(b.netAmount) : (b.totalAmount ? String(b.totalAmount) : "2800"),
+            advance: b.advanceAmount || "500",
+            lat: 28.5910 + latOffset,
+            lng: 77.0250 + lngOffset
+          };
+        });
+
+        // Merge all sources deduplicated
+        const dispatchesMap = new Map<string, any>();
+        convertedApiDispatches.forEach(d => dispatchesMap.set(d.bookingRef || d.id, d));
+        convertedLocalDispatched.forEach(d => {
+          const key = d.bookingRef || d.id;
+          if (!dispatchesMap.has(key)) dispatchesMap.set(key, d);
+        });
+        localMaster.forEach(d => {
+          const key = d.bookingRef || d.id;
+          if (!dispatchesMap.has(key)) {
+            dispatchesMap.set(key, d);
+          } else {
+            const existing = dispatchesMap.get(key);
+            dispatchesMap.set(key, { ...existing, ...d });
+          }
+        });
+
+        const mergedDrivers = Array.from(dispatchesMap.values());
+        if (mergedDrivers.length > 0) {
+          setDrivers(mergedDrivers);
+        } else if (localMaster.length > 0) {
+          setDrivers(localMaster);
+        }
+      } catch (err) {
+        console.error("Failed to load live dispatches for radar:", err);
+        if (localMaster.length > 0) setDrivers(localMaster);
+      }
+    };
+
+    loadAllDispatches();
     syncExistingDispatchesToLeads();
   }, []);
 
@@ -203,10 +376,20 @@ export default function MasterDispatchRadarPage() {
   const handleDeleteDispatch = (id: string) => {
     if (!window.confirm("Are you sure you want to permanently delete this quick dispatch entry?")) return;
     setDrivers((prev) => {
-      const next = prev.filter((d) => d.id !== id);
+      const next = prev.filter((d) => d.id !== id && d.bookingRef !== id && d.bookingId !== id);
       localStorage.setItem("master_dispatches", JSON.stringify(next));
       return next;
     });
+    try {
+      const savedDispatched = localStorage.getItem("user_uploaded_dispatched_bookings");
+      if (savedDispatched) {
+        const parsed = JSON.parse(savedDispatched);
+        if (Array.isArray(parsed)) {
+          const next = parsed.filter((b: any) => b.id !== id && b.bookingNumber !== id);
+          localStorage.setItem("user_uploaded_dispatched_bookings", JSON.stringify(next));
+        }
+      }
+    } catch (e) {}
     removeDispatchFromLeads(id);
     if (selectedDriver?.id === id) {
       setSelectedDriver(null);
@@ -364,10 +547,16 @@ export default function MasterDispatchRadarPage() {
   };
 
   const filtered = drivers.filter((drv) => {
+    const s = search.toLowerCase();
     const matchesSearch =
-      drv.driverName.toLowerCase().includes(search.toLowerCase()) ||
-      drv.vehicleModel.toLowerCase().includes(search.toLowerCase()) ||
-      drv.currentLocation.toLowerCase().includes(search.toLowerCase());
+      (drv.driverName || "").toLowerCase().includes(s) ||
+      (drv.vehicleModel || "").toLowerCase().includes(s) ||
+      (drv.currentLocation || "").toLowerCase().includes(s) ||
+      (drv.destination || "").toLowerCase().includes(s) ||
+      (drv.customerName || "").toLowerCase().includes(s) ||
+      (drv.regNumber || "").toLowerCase().includes(s) ||
+      (drv.bookingRef || "").toLowerCase().includes(s) ||
+      (drv.tripType || "").toLowerCase().includes(s);
     const matchesStatus = filterStatus === "ALL" || drv.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
@@ -525,7 +714,14 @@ export default function MasterDispatchRadarPage() {
               </div>
 
               <div>
-                <h3 className="font-extrabold text-slate-100 text-sm">{drv.driverName}</h3>
+                <div className="flex items-center justify-between gap-1.5">
+                  <h3 className="font-extrabold text-slate-100 text-sm truncate">{drv.driverName}</h3>
+                  {drv.bookingRef && (
+                    <span className="text-[10px] font-mono text-amber-400 font-bold bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 shrink-0">
+                      {drv.bookingRef}
+                    </span>
+                  )}
+                </div>
                 <div className="text-xs text-amber-400/90 font-semibold">{drv.vehicleModel}</div>
                 <div className="text-[10px] font-mono text-slate-400 mt-0.5">{drv.regNumber}</div>
               </div>
