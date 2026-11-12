@@ -120,7 +120,9 @@ export default function QuickDispatchAssignmentModal({
               <span>Chauffeur & Fleet Allocation Desk</span>
             </div>
             <h3 className="text-xl sm:text-2xl font-black text-slate-50">
-              Assign Vehicle & Chauffeur
+              {dispatchItem.vehicleModel || (dispatchItem.driverName && dispatchItem.driverName !== "Unassigned" && dispatchItem.driverName !== "Pending Chauffeur")
+                ? "Reassign Vehicle & Chauffeur"
+                : "Assign Vehicle & Chauffeur"}
             </h3>
             <div className="text-xs text-slate-400 flex items-center gap-2 font-mono">
               <span>Ref ID: <strong className="text-amber-400">{dispatchItem.id}</strong></span>
@@ -316,7 +318,11 @@ export default function QuickDispatchAssignmentModal({
                     ) : (
                       <>
                         <CheckCircle2 className="w-4 h-4" />
-                        <span>Confirm Assignment</span>
+                        <span>
+                          {dispatchItem.vehicleModel || (dispatchItem.driverName && dispatchItem.driverName !== "Unassigned" && dispatchItem.driverName !== "Pending Chauffeur")
+                            ? "Update Assignment"
+                            : "Confirm Assignment"}
+                        </span>
                       </>
                     )}
                   </button>

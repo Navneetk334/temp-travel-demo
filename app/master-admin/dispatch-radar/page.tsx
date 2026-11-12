@@ -756,15 +756,24 @@ export default function MasterDispatchRadarPage() {
             </div>
 
             <div className="pt-3 border-t border-border flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setAssigningDispatch(drv)}
-                className="flex-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                title="Assign or Reassign Vehicle & Chauffeur"
-              >
-                <UserCheck className="w-3.5 h-3.5" />
-                <span>Assign</span>
-              </button>
+              {(() => {
+                const isAssigned = Boolean(drv.driverName && drv.driverName !== "Unassigned" && drv.driverName !== "Pending Chauffeur" && drv.vehicleModel);
+                return (
+                  <button
+                    type="button"
+                    onClick={() => setAssigningDispatch(drv)}
+                    className={`flex-1 border py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      isAssigned
+                        ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                        : "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/30"
+                    }`}
+                    title={isAssigned ? "Driver & Vehicle Assigned (Click to Reassign)" : "Assign Vehicle & Chauffeur"}
+                  >
+                    <UserCheck className="w-3.5 h-3.5" />
+                    <span>{isAssigned ? "Reassign" : "Assign Duty"}</span>
+                  </button>
+                );
+              })()}
 
               <a
                 href={buildWhatsAppShareUrl({

@@ -1077,8 +1077,19 @@ export default function AdminCorporateLeadsPage() {
           isOpen={Boolean(dispatchLead)}
           onClose={() => setDispatchLead(null)}
           lead={dispatchLead}
-          onSuccess={() => {
+          onSuccess={(dispatchedBooking: any) => {
             loadLeads(false);
+            if (activeLead && dispatchLead && activeLead.id === dispatchLead.id) {
+              setActiveLead((prev: any) => prev ? {
+                ...prev,
+                status: "CONVERTED",
+                bookingRef: dispatchedBooking?.bookingNumber,
+                vehicleModel: dispatchedBooking?.vehicle?.model,
+                vehicleRegistration: dispatchedBooking?.vehicle?.registrationNumber,
+                driverName: dispatchedBooking?.vehicle?.driver?.name,
+                driverPhone: dispatchedBooking?.vehicle?.driver?.phone,
+              } : null);
+            }
           }}
         />
       )}

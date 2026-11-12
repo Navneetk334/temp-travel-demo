@@ -1701,28 +1701,22 @@ export default function MasterOmnichannelCRMPage() {
               {/* 1-Click Action Buttons: WhatsApp Share & Print Slip */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 <a
-                  href={`https://wa.me/91${(dispatchedSuccess.lead?.phone || "").replace(/\D/g, "").slice(-10)}?text=${encodeURIComponent(
-                    (() => {
-                      const formattedPickup = (() => {
-                        try {
-                          const d = new Date(dispatchedSuccess.pickupDateTime);
-                          if (!isNaN(d.getTime())) {
-                            return d.toLocaleString("en-IN", {
-                              timeZone: "Asia/Kolkata",
-                              day: "2-digit",
-                              month: "short",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              hour12: true
-                            });
-                          }
-                        } catch (e) {}
-                        return dispatchedSuccess.pickupDateTime || "As Scheduled";
-                      })();
-                      return `*TEMP TRAVEL CAR RENTALS - RIDE CONFIRMATION*\n\nDear ${dispatchedSuccess.lead?.customerName || "Customer"},\nYour cab has been confirmed and dispatched.\n\n*Booking Number (PNR):* ${dispatchedSuccess.bookingRef}\n*Pickup Date & Time:* ${formattedPickup}\n*Pickup Location:* ${dispatchedSuccess.pickupLocation || "As scheduled"}\n*Drop Location:* ${dispatchedSuccess.dropLocation || "As directed"}\n*Vehicle:* ${dispatchedSuccess.vehicle?.make || ""} ${dispatchedSuccess.vehicle?.model || ""} (${dispatchedSuccess.vehicle?.registrationNumber || "Assigned"})\n*Driver / Chauffeur:* ${dispatchedSuccess.driver?.name || "Assigned Driver"} (📞 +91-${dispatchedSuccess.driver?.phone || "Office"})\n*Agreed Fare:* ₹${dispatchedSuccess.fare}\n*Payment Mode:* ${dispatchedSuccess.paymentMode || "Cash Collection"}\n\nThank you for choosing Temp Travel! For assistance call +91-7011729639.`;
-                    })()
-                  )}`}
+                  href={buildWhatsAppShareUrl({
+                    customerName: dispatchedSuccess.lead?.customerName || dispatchedSuccess.lead?.contactName || dispatchedSuccess.lead?.name || "Customer",
+                    customerPhone: dispatchedSuccess.lead?.phone,
+                    bookingRef: dispatchedSuccess.bookingRef,
+                    bookingType: dispatchedSuccess.lead?.tripType || dispatchedSuccess.lead?.serviceType,
+                    tripType: dispatchedSuccess.lead?.tripType || dispatchedSuccess.lead?.serviceType,
+                    pickupDateTime: dispatchedSuccess.pickupDateTime,
+                    pickupLocation: dispatchedSuccess.pickupLocation,
+                    dropLocation: dispatchedSuccess.dropLocation,
+                    vehicleMake: dispatchedSuccess.vehicle?.make,
+                    vehicleModel: dispatchedSuccess.vehicle?.model,
+                    vehicleRegistration: dispatchedSuccess.vehicle?.registrationNumber,
+                    driverName: dispatchedSuccess.driver?.name,
+                    driverPhone: dispatchedSuccess.driver?.phone,
+                    notes: dispatchedSuccess.lead?.notes,
+                  })}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider shadow-lg transition-all"

@@ -62,7 +62,9 @@ export async function POST(req: NextRequest) {
     let bType = "LOCAL_RENTAL";
     const tripTypeLower = (tripType || "").toLowerCase();
     if (tripTypeLower.includes("outstation")) bType = "OUTSTATION";
-    else if (tripTypeLower.includes("airport")) bType = "AIRPORT_TRANSFER";
+    else if (tripTypeLower.includes("airport") || tripTypeLower.includes("pickup") || tripTypeLower.includes("drop") || tripTypeLower.includes("transfer")) {
+      bType = "AIRPORT_TRANSFER";
+    }
     else if (tripTypeLower.includes("tour")) bType = "TOUR_PACKAGE";
 
     // 2.5 Resolve explicitly assigned chauffeur if provided
@@ -81,7 +83,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const finalNotes = [notes || "Dispatched via Admin", driverTag].filter(Boolean).join(" ");
+    const tripTypeTag = tripType && !notes?.includes("[TripType:") ? `[TripType: ${tripType}]` : "";
+    const resolvedDriverTag = driverTag && !notes?.includes("[AssignedDriver:") ? driverTag : "";
+    const finalNotes = [tripTypeTag, notes || "Dispatched via Admin", resolvedDriverTag].filter(Boolean).join(" ");
 
     // 3. Create Booking
     let parsedPickupDateTime = new Date();
@@ -126,13 +130,31 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 5. Update Lead Status to WON
+    // 5. Update Lead Status to WON and persist assigned notes & tripType
     if (leadId) {
       try {
-        // We attempt to update all 3 types since we don't know the exact type
-        await prisma.rentalLead.update({ where: { id: leadId }, data: { status: "WON" } }).catch(() => null);
-        await prisma.corporateLead.update({ where: { id: leadId }, data: { status: "WON" } }).catch(() => null);
-        await prisma.contactLead.update({ where: { id: leadId }, data: { status: "WON" } }).catch(() => null);
+        await prisma.rentalLead.update({ 
+          where: { id: leadId }, 
+          data: { 
+            status: "WON",
+            notes: finalNotes,
+            ...(tripType ? { tripType } : {})
+          } 
+        }).catch(() => null);
+        await prisma.corporateLead.update({ 
+          where: { id: leadId }, 
+          data: { 
+            status: "WON",
+            notes: finalNotes,
+            ...(tripType ? { serviceType: tripType } : {})
+          } 
+        }).catch(() => null);
+        await prisma.contactLead.update({ 
+          where: { id: leadId }, 
+          data: { 
+            status: "WON"
+          } 
+        }).catch(() => null);
       } catch (err) {
         console.warn("Could not update lead status", err);
       }

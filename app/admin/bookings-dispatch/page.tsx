@@ -724,39 +724,54 @@ export default function BookingDispatchPage() {
                               </div>
                             </td>
                             <td className="p-4 text-right space-x-1" onClick={(e) => e.stopPropagation()}>
-                              <a
-                                href={buildWhatsAppShareUrl({
-                                  customerName: booking.customer?.name,
-                                  customerPhone: booking.customer?.phone,
-                                  bookingRef: booking.bookingNumber,
-                                  bookingType: (booking as any).tripType || booking.type,
-                                  tripType: (booking as any).tripType || booking.type,
-                                  pickupDateTime: booking.pickupDateTime,
-                                  pickupLocation: booking.pickupLocation,
-                                  dropLocation: booking.dropLocation,
-                                  vehicleModel: booking.vehicle?.model,
-                                  vehicleRegistration: booking.vehicle?.registrationNumber,
-                                  driverName: booking.vehicle?.driver?.name || (booking as any).driver?.name,
-                                  driverPhone: booking.vehicle?.driver?.phone || (booking as any).driver?.phone,
-                                  notes: booking.notes,
-                                })}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                title="Share Ride Confirmation on WhatsApp"
-                                className="inline-flex p-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 transition-colors"
-                              >
-                                <Share2 className="w-4 h-4" />
-                              </a>
-                              <button
-                                onClick={() => {
-                                  openBookingInspector(booking);
-                                  setAssignModalOpen(true);
-                                }}
-                                title="Assign Vehicle & Driver"
-                                className="inline-flex p-1.5 bg-surface border border-border rounded-lg text-slate-400 hover:text-accent transition-colors"
-                              >
-                                <UserCheck className="w-4 h-4" />
-                              </button>
+                              {(() => {
+                                const notesStr = booking.notes || "";
+                                const tripTypeMatch = notesStr.match(/\[TripType:\s*([^\]]+)\]/i);
+                                const resolvedTrip = tripTypeMatch ? tripTypeMatch[1].trim() : (booking.type === "AIRPORT_TRANSFER" ? "Pickup & Drop" : (booking.type === "LOCAL_RENTAL" ? "Local Rental" : (booking.type === "OUTSTATION" ? "Outstation" : (booking as any).tripType || booking.type)));
+                                const isAssigned = Boolean(booking.vehicle && (booking.vehicle?.driver || (booking as any).driver));
+
+                                return (
+                                  <>
+                                    <a
+                                      href={buildWhatsAppShareUrl({
+                                        customerName: booking.customer?.name,
+                                        customerPhone: booking.customer?.phone,
+                                        bookingRef: booking.bookingNumber,
+                                        bookingType: resolvedTrip,
+                                        tripType: resolvedTrip,
+                                        pickupDateTime: booking.pickupDateTime,
+                                        pickupLocation: booking.pickupLocation,
+                                        dropLocation: booking.dropLocation,
+                                        vehicleModel: booking.vehicle?.model,
+                                        vehicleRegistration: booking.vehicle?.registrationNumber,
+                                        driverName: booking.vehicle?.driver?.name || (booking as any).driver?.name,
+                                        driverPhone: booking.vehicle?.driver?.phone || (booking as any).driver?.phone,
+                                        notes: booking.notes,
+                                      })}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      title="Share Ride Confirmation on WhatsApp"
+                                      className="inline-flex p-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 transition-colors"
+                                    >
+                                      <Share2 className="w-4 h-4" />
+                                    </a>
+                                    <button
+                                      onClick={() => {
+                                        openBookingInspector(booking);
+                                        setAssignModalOpen(true);
+                                      }}
+                                      title={isAssigned ? "Driver & Vehicle Assigned (Click to Reassign / Change)" : "Assign Vehicle & Driver"}
+                                      className={`inline-flex p-1.5 border rounded-lg transition-colors ${
+                                        isAssigned
+                                          ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300"
+                                          : "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 hover:text-amber-300 animate-pulse"
+                                      }`}
+                                    >
+                                      <UserCheck className="w-4 h-4" />
+                                    </button>
+                                  </>
+                                );
+                              })()}
                               <button
                                 onClick={() => handleDelete(booking.id)}
                                 title="Delete Dispatch Booking"
@@ -843,29 +858,37 @@ export default function BookingDispatchPage() {
               </div>
 
               {/* 1-Click WhatsApp Share Action */}
-              <a
-                href={buildWhatsAppShareUrl({
-                  customerName: activeBooking.customer?.name,
-                  customerPhone: activeBooking.customer?.phone,
-                  bookingRef: activeBooking.bookingNumber,
-                  bookingType: (activeBooking as any).tripType || activeBooking.type,
-                  tripType: (activeBooking as any).tripType || activeBooking.type,
-                  pickupDateTime: activeBooking.pickupDateTime,
-                  pickupLocation: activeBooking.pickupLocation,
-                  dropLocation: activeBooking.dropLocation,
-                  vehicleModel: activeBooking.vehicle?.model,
-                  vehicleRegistration: activeBooking.vehicle?.registrationNumber,
-                  driverName: activeBooking.vehicle?.driver?.name || (activeBooking as any).driver?.name,
-                  driverPhone: activeBooking.vehicle?.driver?.phone || (activeBooking as any).driver?.phone,
-                  notes: activeBooking.notes,
-                })}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-emerald-600/20 transition-all cursor-pointer"
-              >
-                <Share2 className="w-4 h-4" />
-                <span>Share Ride Confirmation on WhatsApp</span>
-              </a>
+              {(() => {
+                const notesStr = activeBooking.notes || "";
+                const tripTypeMatch = notesStr.match(/\[TripType:\s*([^\]]+)\]/i);
+                const resolvedTrip = tripTypeMatch ? tripTypeMatch[1].trim() : (activeBooking.type === "AIRPORT_TRANSFER" ? "Pickup & Drop" : (activeBooking.type === "LOCAL_RENTAL" ? "Local Rental" : (activeBooking.type === "OUTSTATION" ? "Outstation" : (activeBooking as any).tripType || activeBooking.type)));
+
+                return (
+                  <a
+                    href={buildWhatsAppShareUrl({
+                      customerName: activeBooking.customer?.name,
+                      customerPhone: activeBooking.customer?.phone,
+                      bookingRef: activeBooking.bookingNumber,
+                      bookingType: resolvedTrip,
+                      tripType: resolvedTrip,
+                      pickupDateTime: activeBooking.pickupDateTime,
+                      pickupLocation: activeBooking.pickupLocation,
+                      dropLocation: activeBooking.dropLocation,
+                      vehicleModel: activeBooking.vehicle?.model,
+                      vehicleRegistration: activeBooking.vehicle?.registrationNumber,
+                      driverName: activeBooking.vehicle?.driver?.name || (activeBooking as any).driver?.name,
+                      driverPhone: activeBooking.vehicle?.driver?.phone || (activeBooking as any).driver?.phone,
+                      notes: activeBooking.notes,
+                    })}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-emerald-600/20 transition-all cursor-pointer"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    <span>Share Ride Confirmation on WhatsApp</span>
+                  </a>
+                );
+              })()}
 
               {/* Visual Booking Lifecycle Timeline */}
               <div className="space-y-2 border-b border-border pb-5">
@@ -1064,7 +1087,9 @@ export default function BookingDispatchPage() {
             <div className="bg-surface border border-border rounded-2xl max-w-md w-full p-6 space-y-6 shadow-2xl">
               <div className="flex justify-between items-center border-b border-border pb-4">
                 <div>
-                  <h3 className="text-lg font-bold text-slate-50">Assign Fleet Vehicle & Driver</h3>
+                  <h3 className="text-lg font-bold text-slate-50">
+                    {activeBooking.vehicle || (activeBooking as any).driver ? "Reassign Fleet Vehicle & Driver" : "Assign Fleet Vehicle & Driver"}
+                  </h3>
                   <p className="text-xs text-slate-400 font-mono mt-0.5">{activeBooking.bookingNumber}</p>
                 </div>
                 <button
@@ -1151,7 +1176,7 @@ export default function BookingDispatchPage() {
                       <span>Saving Assignment...</span>
                     </>
                   ) : (
-                    <span>Confirm Assignment</span>
+                    <span>{activeBooking.vehicle || (activeBooking as any).driver ? "Update Assignment" : "Confirm Assignment"}</span>
                   )}
                 </button>
               </div>

@@ -19,26 +19,50 @@ export interface WhatsAppDispatchData {
 }
 
 export function isPickupAndDropBooking(data: WhatsAppDispatchData): boolean {
-  const typeStr = [data.bookingType, data.tripType, data.serviceType].filter(Boolean).join(" ").toLowerCase();
-
-  if (typeStr) {
-    if (typeStr.includes("point") || typeStr.includes("local") || typeStr.includes("outstation") || typeStr.includes("tour")) {
-      return false;
-    }
-    if (typeStr.includes("pickup") || typeStr.includes("drop") || typeStr.includes("airport") || typeStr.includes("transfer")) {
+  // 1. First priority: explicit tripType or serviceType specified by user/lead
+  const userTripType = [data.tripType, data.serviceType].filter(Boolean).join(" ").toLowerCase();
+  if (userTripType) {
+    // If user explicitly chose Pickup & Drop (even if sub-type says individual/working)
+    if (userTripType.includes("pickup") || userTripType.includes("drop") || userTripType.includes("airport") || userTripType.includes("transfer")) {
+      if (userTripType.includes("point")) return false;
       return true;
     }
-    return false;
+    if (userTripType.includes("local") || userTripType.includes("outstation") || userTripType.includes("tour") || userTripType.includes("point")) {
+      return false;
+    }
   }
 
-  // Fallback to notes inspection
+  // 2. Second priority: tagged [TripType: ...] in notes
   if (data.notes) {
-    const notesLower = data.notes.toLowerCase();
-    if (notesLower.includes("point-to-point") || notesLower.includes("point to point") || notesLower.includes("local rental") || notesLower.includes("outstation")) {
-      return false;
+    const tripMatch = data.notes.match(/\[TripType:\s*([^\]]+)\]/i);
+    if (tripMatch) {
+      const tagged = tripMatch[1].toLowerCase();
+      if (tagged.includes("pickup") || tagged.includes("drop") || tagged.includes("airport") || tagged.includes("transfer")) {
+        if (tagged.includes("point")) return false;
+        return true;
+      }
+      if (tagged.includes("local") || tagged.includes("outstation") || tagged.includes("tour") || tagged.includes("point")) {
+        return false;
+      }
     }
+    const notesLower = data.notes.toLowerCase();
     if (notesLower.includes("pickup & drop") || notesLower.includes("pickup and drop") || notesLower.includes("airport transfer")) {
+      if (notesLower.includes("point-to-point") || notesLower.includes("point to point") || notesLower.includes("local rental") || notesLower.includes("outstation")) {
+        if (notesLower.includes("pickup & drop") || notesLower.includes("pickup and drop")) return true;
+        return false;
+      }
       return true;
+    }
+  }
+
+  // 3. Third priority: Prisma BookingType enum
+  if (data.bookingType) {
+    const bt = data.bookingType.toUpperCase();
+    if (bt.includes("AIRPORT") || bt.includes("TRANSFER") || bt.includes("PICKUP") || bt.includes("DROP")) {
+      return true;
+    }
+    if (bt.includes("LOCAL") || bt.includes("OUTSTATION") || bt.includes("TOUR") || bt.includes("POINT")) {
+      return false;
     }
   }
 
@@ -155,7 +179,7 @@ export function buildWhatsAppShareMessage(data: WhatsAppDispatchData): string {
 
   const driverPhone = data.driverPhone || noteDetails.driverPhone;
   const driverDisplay = driverPhone
-    ? `${driverName} (📞 +91-${driverPhone.replace(/\D/g, "").slice(-10)})`
+    ? `${driverName} (+91-${driverPhone.replace(/\D/g, "").slice(-10)})`
     : driverName;
 
   const isPickupDrop = isPickupAndDropBooking(data);
