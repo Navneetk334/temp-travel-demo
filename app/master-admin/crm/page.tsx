@@ -1132,9 +1132,9 @@ export default function MasterOmnichannelCRMPage() {
                         <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
                           {lead.status === "CONVERTED" || lead.status === "WON" ? (
                             <Link
-                              href="/admin/bookings-dispatch"
+                              href="/master-admin/dispatch-radar"
                               className="inline-flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 px-2.5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer"
-                              title="Ride already dispatched — View in Dispatch CRM"
+                              title="Ride already dispatched — View in Dispatch Radar"
                             >
                               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                               <span>Dispatched</span>
@@ -1637,13 +1637,13 @@ export default function MasterOmnichannelCRMPage() {
                   <span>Share On WhatsApp</span>
                 </a>
 
-                <a
-                  href="/admin/bookings-dispatch"
+                <Link
+                  href="/master-admin/dispatch-radar"
                   className="flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider shadow-lg transition-all"
                 >
-                  <span>View In Dispatch Desk</span>
+                  <span>View In Dispatch Radar</span>
                   <ArrowRight className="w-4 h-4" />
-                </a>
+                </Link>
               </div>
             </div>
           </div>
@@ -1753,11 +1753,11 @@ export default function MasterOmnichannelCRMPage() {
               <div className="pt-2 flex justify-between items-center">
                 {selectedLead.status === "CONVERTED" || selectedLead.status === "WON" ? (
                   <Link
-                    href="/admin/bookings-dispatch"
+                    href="/master-admin/dispatch-radar"
                     className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 font-bold px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition-all cursor-pointer"
                   >
                     <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    <span>View Dispatched Booking</span>
+                    <span>View In Dispatch Radar</span>
                   </Link>
                 ) : (
                   <button
