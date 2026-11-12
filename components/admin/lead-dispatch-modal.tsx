@@ -199,6 +199,7 @@ export default function LeadDispatchModal({
   const [classFilter, setClassFilter] = useState<string>("ALL");
 
   const [dispatchForm, setDispatchForm] = useState({
+    tripType: "Pickup & Drop",
     vehicleId: "",
     driverId: "",
     fare: "2800",
@@ -395,6 +396,7 @@ export default function LeadDispatchModal({
         : formatToDateTimeLocal(extractedDate, extractedTime);
 
       setDispatchForm({
+        tripType: lead.serviceType || lead.tripType || "Pickup & Drop",
         vehicleId: chosenVehId,
         driverId: chosenDrvId,
         fare: "2800",
@@ -450,6 +452,7 @@ export default function LeadDispatchModal({
 
     setIsSubmitting(true);
     const finalBookingRef = lead.bookingRef || lead.bookingNumber || (lead.id ? `TT-${lead.id.slice(-6).toUpperCase()}` : `TT-${Date.now().toString().slice(-6)}`);
+    const finalTripType = dispatchForm.tripType || lead.serviceType || lead.tripType || "Pickup & Drop";
     
     let finalPickupDateTime = dispatchForm.pickupDateTime;
     if (finalPickupDateTime && !finalPickupDateTime.includes("Z") && !finalPickupDateTime.includes("+")) {
@@ -460,7 +463,7 @@ export default function LeadDispatchModal({
     const dispatchedBooking = {
       id: `booking_${Date.now()}`,
       bookingNumber: finalBookingRef,
-      type: lead.tripType || "Dispatched Ride",
+      type: finalTripType,
       status: "CONFIRMED",
       pickupLocation: dispatchForm.pickupLocation,
       dropLocation: dispatchForm.dropLocation,
@@ -511,6 +514,7 @@ export default function LeadDispatchModal({
 
     const dispatchDetailsTag = [
       `[BookingRef: ${finalBookingRef}]`,
+      `[TripType: ${finalTripType}]`,
       assignedVeh ? `[Vehicle: ${assignedVeh.make || ""} ${assignedVeh.model || ""} | ${assignedVeh.registrationNumber || ""}]` : null,
       assignedDrv ? `[AssignedDriver: ${assignedDrv.name || ""}|${assignedDrv.phone || ""}|${assignedDrv.id || ""}]` : null,
       finalPickupDateTime ? `[PickupTime: ${formattedSuccessPickupTime}]` : null,
@@ -530,6 +534,8 @@ export default function LeadDispatchModal({
                   ...l, 
                   status: "CONVERTED",
                   bookingRef: finalBookingRef,
+                  tripType: finalTripType,
+                  serviceType: finalTripType,
                   assignedVehicle: assignedVeh,
                   assignedDriver: assignedDrv,
                   vehicleModel: `${assignedVeh?.make || ""} ${assignedVeh?.model || ""}`.trim(),
@@ -558,12 +564,12 @@ export default function LeadDispatchModal({
         fetch(`/api/rental/lead`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: lead.id, status: "CONVERTED", notes: fullUpdatedNotes }),
+          body: JSON.stringify({ id: lead.id, status: "CONVERTED", tripType: finalTripType, serviceType: finalTripType, notes: fullUpdatedNotes }),
         }),
         fetch(`/api/corporate/lead/${lead.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: "CONVERTED", notes: fullUpdatedNotes }),
+          body: JSON.stringify({ status: "CONVERTED", tripType: finalTripType, serviceType: finalTripType, notes: fullUpdatedNotes }),
         })
       ]);
     } catch (e) {}
@@ -586,7 +592,7 @@ export default function LeadDispatchModal({
           customerName: lead.customerName || lead.contactName || lead.name || lead.companyName || "Customer Lead",
           customerPhone: lead.phone,
           customerEmail: lead.email,
-          tripType: lead.tripType,
+          tripType: finalTripType,
           bookingRef: finalBookingRef
         }),
       });
@@ -600,6 +606,7 @@ export default function LeadDispatchModal({
     setDispatchedSuccess({
       bookingRef: finalBookingRef,
       lead: lead,
+      tripType: finalTripType,
       vehicle: assignedVeh,
       driver: assignedDrv,
       fare: dispatchForm.fare,
@@ -708,6 +715,8 @@ export default function LeadDispatchModal({
                   customerName: dispatchedSuccess.lead?.customerName || dispatchedSuccess.lead?.name || dispatchedSuccess.lead?.contactName || dispatchedSuccess.lead?.companyName || "Valued Customer",
                   customerPhone: dispatchedSuccess.lead?.phone,
                   bookingRef: dispatchedSuccess.bookingRef,
+                  bookingType: dispatchedSuccess.tripType,
+                  tripType: dispatchedSuccess.tripType,
                   pickupDateTime: dispatchedSuccess.pickupDateTime,
                   pickupLocation: dispatchedSuccess.pickupLocation,
                   dropLocation: dispatchedSuccess.dropLocation,
@@ -765,8 +774,19 @@ export default function LeadDispatchModal({
                     <div className="text-slate-400 font-mono text-[11px]">{lead.phone}</div>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-400 block uppercase font-bold">Trip Type</span>
-                    <span className="font-bold text-amber-400">{lead.tripType || "Rental Lead"}</span>
+                    <label className="text-[10px] text-slate-400 block uppercase font-bold mb-1">
+                      Trip / Booking Type *
+                    </label>
+                    <select
+                      value={dispatchForm.tripType}
+                      onChange={(e) => setDispatchForm((prev) => ({ ...prev, tripType: e.target.value }))}
+                      className="w-full bg-slate-900 border border-amber-500/40 rounded-lg px-2 py-1 text-xs font-bold text-amber-300 focus:outline-none focus:border-amber-400 cursor-pointer"
+                    >
+                      <option value="Pickup & Drop">Pickup & Drop</option>
+                      <option value="Point to Point">Point to Point</option>
+                      <option value="Local Rental">Local Rental</option>
+                      <option value="Outstation">Outstation</option>
+                    </select>
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-400 block uppercase font-bold">Lead Ingested</span>

@@ -2,6 +2,9 @@ export interface WhatsAppDispatchData {
   customerName?: string | null;
   customerPhone?: string | null;
   bookingRef?: string | null;
+  bookingType?: string | null;
+  tripType?: string | null;
+  serviceType?: string | null;
   pickupDateTime?: string | Date | null;
   pickupLocation?: string | null;
   dropLocation?: string | null;
@@ -13,6 +16,33 @@ export interface WhatsAppDispatchData {
   fare?: number | string | null;
   paymentMode?: string | null;
   notes?: string | null;
+}
+
+export function isPickupAndDropBooking(data: WhatsAppDispatchData): boolean {
+  const typeStr = [data.bookingType, data.tripType, data.serviceType].filter(Boolean).join(" ").toLowerCase();
+
+  if (typeStr) {
+    if (typeStr.includes("point") || typeStr.includes("local") || typeStr.includes("outstation") || typeStr.includes("tour")) {
+      return false;
+    }
+    if (typeStr.includes("pickup") || typeStr.includes("drop") || typeStr.includes("airport") || typeStr.includes("transfer")) {
+      return true;
+    }
+    return false;
+  }
+
+  // Fallback to notes inspection
+  if (data.notes) {
+    const notesLower = data.notes.toLowerCase();
+    if (notesLower.includes("point-to-point") || notesLower.includes("point to point") || notesLower.includes("local rental") || notesLower.includes("outstation")) {
+      return false;
+    }
+    if (notesLower.includes("pickup & drop") || notesLower.includes("pickup and drop") || notesLower.includes("airport transfer")) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 export function formatIndianDateTime(dt?: string | Date | null): string {
@@ -128,19 +158,34 @@ export function buildWhatsAppShareMessage(data: WhatsAppDispatchData): string {
     ? `${driverName} (📞 +91-${driverPhone.replace(/\D/g, "").slice(-10)})`
     : driverName;
 
-  return `*TEMP TRAVEL CAR RENTALS - RIDE CONFIRMATION*
+  const isPickupDrop = isPickupAndDropBooking(data);
 
-Dear ${customerName},
-Your cab has been confirmed and dispatched.
+  const lines: string[] = [
+    "*TEMP TRAVEL CAR RENTALS - RIDE CONFIRMATION*",
+    "",
+    `Dear ${customerName},`,
+    "Your cab has been confirmed and dispatched.",
+    "",
+    `*Booking Number (PNR):* ${pnr}`,
+    `*Pickup Date & Time:* ${pickupTime}`,
+  ];
 
-*Booking Number (PNR):* ${pnr}
-*Pickup Date & Time:* ${pickupTime}
-*Pickup Location:* ${pickupLoc}
-*Drop Location:* ${dropLoc}
-*Vehicle:* ${vehicleDisplay}
-*Driver / Chauffeur:* ${driverDisplay}
+  // Pickup address is ONLY visible when the booking is Pickup & Drop (omitted for Local Rental, Outstation, Point-to-Point)
+  if (isPickupDrop && pickupLoc && pickupLoc !== "-") {
+    lines.push(`*Pickup Location:* ${pickupLoc}`);
+  }
 
-Thank you for choosing Temp Travel! For assistance call +91-7011729639.`;
+  // Drop location
+  if (dropLoc && dropLoc !== "-" && dropLoc !== "Drop Location TBD" && dropLoc !== "As directed") {
+    lines.push(`*Drop Location:* ${dropLoc}`);
+  }
+
+  lines.push(`*Vehicle:* ${vehicleDisplay}`);
+  lines.push(`*Driver / Chauffeur:* ${driverDisplay}`);
+  lines.push("");
+  lines.push("Thank you for choosing Temp Travel! For assistance call +91-7011729639.");
+
+  return lines.join("\n");
 }
 
 export function buildWhatsAppShareUrl(data: WhatsAppDispatchData): string {

@@ -471,6 +471,73 @@ export default function MasterOmnichannelCRMPage() {
     }
   };
 
+  // Change Booking / Trip Type for a Lead (Office Staff Override)
+  const updateBookingType = async (id: string, newType: string) => {
+    const { userName, panel } = getCurrentAdminUser("Master Admin Panel");
+    const timestamp = new Date().toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true
+    });
+    const logTag = `[${timestamp}] Booking type updated to "${newType}" by ${userName} (${panel})`;
+
+    const updated = leads.map((l) => {
+      if (l.id === id) {
+        return {
+          ...l,
+          tripType: newType,
+          serviceType: newType,
+          notes: [logTag, l.notes].filter(Boolean).join("\n"),
+          lastChangedBy: userName,
+          lastChangedPanel: panel,
+          lastChangedAt: timestamp
+        };
+      }
+      return l;
+    });
+    setLeads(updated);
+
+    if (selectedLead && selectedLead.id === id) {
+      setSelectedLead({
+        ...selectedLead,
+        tripType: newType,
+        serviceType: newType,
+        notes: [logTag, selectedLead.notes].filter(Boolean).join("\n"),
+        lastChangedBy: userName,
+        lastChangedPanel: panel,
+        lastChangedAt: timestamp
+      });
+    }
+
+    try {
+      localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(updated));
+      window.dispatchEvent(new Event("crm_leads_updated"));
+    } catch (e) {
+      console.error("Error saving updated booking type:", e);
+    }
+
+    try {
+      await Promise.allSettled([
+        fetch(`/api/rental/lead`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, tripType: newType, serviceType: newType }),
+        }),
+        fetch(`/api/corporate/lead/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ serviceType: newType, tripType: newType }),
+        }),
+      ]);
+    } catch (err) {
+      console.error("Failed to persist booking type change:", err);
+    }
+  };
+
   // Open Dispatch Modal with Pre-filled Lead Information
   const openDispatchModal = (lead: any) => {
     setDispatchModalLead(lead);
@@ -1138,6 +1205,8 @@ export default function MasterOmnichannelCRMPage() {
                                   customerName: lead.customerName || lead.name || lead.contactName || lead.companyName,
                                   customerPhone: lead.phone,
                                   bookingRef: lead.bookingRef,
+                                  bookingType: lead.tripType || lead.serviceType,
+                                  tripType: lead.tripType || lead.serviceType,
                                   pickupDateTime: lead.pickupDateTime || lead.createdAt,
                                   pickupLocation: extractPickupLocation(lead) || lead.pickupLocations,
                                   dropLocation: extractDropLocation(lead) || lead.dropLocations,
@@ -1700,7 +1769,19 @@ export default function MasterOmnichannelCRMPage() {
               <div className="space-y-2 bg-background p-4 rounded-xl border border-border text-xs font-mono">
                 <div>Phone: <strong className="text-slate-200">{selectedLead.phone}</strong></div>
                 <div>Email: <strong className="text-slate-200">{selectedLead.email}</strong></div>
-                <div>Trip Type: <strong className="text-amber-400">{selectedLead.tripType}</strong></div>
+                <div className="flex items-center justify-between py-1.5 border-y border-white/5">
+                  <span className="text-slate-400 uppercase font-bold text-[10px]">Booking / Trip Type:</span>
+                  <select
+                    value={selectedLead.tripType || selectedLead.serviceType || "Pickup & Drop"}
+                    onChange={(e) => updateBookingType(selectedLead.id, e.target.value)}
+                    className="bg-surface border border-amber-500/40 rounded-lg px-2.5 py-1 text-xs font-bold text-amber-400 focus:outline-none focus:border-amber-400 cursor-pointer font-sans"
+                  >
+                    <option value="Pickup & Drop" className="bg-slate-900 text-slate-100">Pickup & Drop</option>
+                    <option value="Point to Point" className="bg-slate-900 text-slate-100">Point to Point</option>
+                    <option value="Local Rental" className="bg-slate-900 text-slate-100">Local Rental</option>
+                    <option value="Outstation" className="bg-slate-900 text-slate-100">Outstation</option>
+                  </select>
+                </div>
                 {(() => {
                   const req = extractLeadVehicleRequirements(selectedLead);
                   if (req.isVehiclePreSelected) {
@@ -1786,6 +1867,8 @@ export default function MasterOmnichannelCRMPage() {
                       customerName: selectedLead.customerName || selectedLead.name || selectedLead.contactName || selectedLead.companyName,
                       customerPhone: selectedLead.phone,
                       bookingRef: selectedLead.bookingRef,
+                      bookingType: selectedLead.tripType || selectedLead.serviceType,
+                      tripType: selectedLead.tripType || selectedLead.serviceType,
                       pickupDateTime: selectedLead.pickupDateTime || selectedLead.createdAt,
                       pickupLocation: extractPickupLocation(selectedLead) || selectedLead.pickupLocations,
                       dropLocation: extractDropLocation(selectedLead) || selectedLead.dropLocations,

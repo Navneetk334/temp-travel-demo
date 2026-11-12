@@ -12,8 +12,16 @@ export const corporateLeadSchema = z.object({
   requirements: z.string().min(10, "Please describe requirements in at least 10 characters").optional().nullable(),
 });
 
-// Validates Admin updates to B2B leads (Status & Notes)
+// Validates Admin updates to B2B leads (Status, Service Type & Notes)
 export const leadAdminUpdateSchema = z.object({
-  status: z.enum(["NEW", "CONTACTED", "QUALIFIED", "NEGOTIATION", "CONVERTED", "WON", "LOST", "ARCHIVED"]),
+  status: z.enum(["NEW", "CONTACTED", "QUALIFIED", "NEGOTIATION", "CONVERTED", "WON", "LOST", "ARCHIVED"]).optional(),
   notes: z.string().optional().nullable(),
+  serviceType: z.string().optional().nullable(),
+  tripType: z.string().optional().nullable(),
+  requirements: z.string().optional().nullable(),
+  pickupLocations: z.string().optional().nullable(),
+  companyName: z.string().optional(),
+  contactName: z.string().optional(),
+  phone: z.string().optional(),
+  email: z.string().optional(),
 });

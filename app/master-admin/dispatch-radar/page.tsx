@@ -771,6 +771,8 @@ export default function MasterDispatchRadarPage() {
                   customerName: drv.customerName,
                   customerPhone: drv.phone,
                   bookingRef: drv.bookingRef,
+                  bookingType: drv.tripType,
+                  tripType: drv.tripType,
                   pickupDateTime: drv.pickupDateTime,
                   pickupLocation: drv.pickupLocation || drv.currentLocation,
                   dropLocation: drv.dropLocation || drv.destination,
@@ -778,7 +780,6 @@ export default function MasterDispatchRadarPage() {
                   vehicleRegistration: drv.regNumber,
                   driverName: drv.driverName,
                   driverPhone: drv.driverPhone,
-                  fare: drv.fare,
                   notes: drv.notes,
                 })}
                 target="_blank"
@@ -1038,6 +1039,8 @@ export default function MasterDispatchRadarPage() {
                   customerName: selectedDriver.customerName,
                   customerPhone: selectedDriver.phone,
                   bookingRef: selectedDriver.bookingRef,
+                  bookingType: selectedDriver.tripType,
+                  tripType: selectedDriver.tripType,
                   pickupDateTime: selectedDriver.pickupDateTime,
                   pickupLocation: selectedDriver.pickupLocation || selectedDriver.currentLocation,
                   dropLocation: selectedDriver.dropLocation || selectedDriver.destination,
@@ -1045,7 +1048,6 @@ export default function MasterDispatchRadarPage() {
                   vehicleRegistration: selectedDriver.regNumber,
                   driverName: selectedDriver.driverName,
                   driverPhone: selectedDriver.driverPhone,
-                  fare: selectedDriver.fare,
                   notes: selectedDriver.notes,
                 })}
                 target="_blank"

@@ -189,3 +189,35 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Failed to process rental inquiry." }, { status: 500 });
   }
 }
+
+export async function PUT(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { id, status, notes, tripType, serviceType } = body;
+    if (!id) {
+      return NextResponse.json({ error: "Missing lead id" }, { status: 400 });
+    }
+
+    const dbStatus = (status === "CONVERTED" || status === "WON") ? "WON" : status;
+    const finalTripType = tripType || serviceType;
+
+    const updated = await prisma.rentalLead.update({
+      where: { id },
+      data: {
+        ...(dbStatus ? { status: dbStatus as any } : {}),
+        ...(notes !== undefined ? { notes } : {}),
+        ...(finalTripType ? { tripType: finalTripType } : {}),
+      }
+    });
+
+    return NextResponse.json({
+      ...updated,
+      status: updated.status === "WON" ? "CONVERTED" : updated.status
+    });
+  } catch (err: any) {
+    console.error("PUT /api/rental/lead error:", err);
+    return NextResponse.json({ error: err.message || "Failed to update rental lead" }, { status: 500 });
+  }
+}
+
+export const PATCH = PUT;

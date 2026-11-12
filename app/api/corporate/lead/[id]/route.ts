@@ -55,13 +55,15 @@ export async function PUT(
       return NextResponse.json({ error: result.error.flatten() }, { status: 400 });
     }
 
-    const { status, ...restData } = result.data;
+    const { status, tripType, serviceType, ...restData } = result.data;
     const dbStatus = status === "CONVERTED" ? "WON" : status;
+    const resolvedServiceType = serviceType || tripType;
 
     const updatedLead = await prisma.corporateLead.update({
       where: { id: id },
       data: {
         ...restData,
+        ...(resolvedServiceType !== undefined ? { serviceType: resolvedServiceType } : {}),
         ...(dbStatus ? { status: dbStatus as any } : {}),
       },
     });

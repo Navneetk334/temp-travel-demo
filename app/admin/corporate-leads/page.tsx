@@ -261,6 +261,56 @@ export default function AdminCorporateLeadsPage() {
     }
   };
 
+  const handleServiceTypeChange = async (id: string, newType: string) => {
+    const { userName, panel } = getCurrentAdminUser("Admin Panel");
+    const timestamp = new Date().toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true
+    });
+    const logTag = `[${timestamp}] Booking type updated to "${newType}" by ${userName} (${panel})`;
+
+    const target = leads.find((l) => l.id === id);
+    const updatedNotes = [logTag, target?.notes].filter(Boolean).join("\n");
+
+    setLeads((prev) =>
+      prev.map((l) => (l.id === id ? { ...l, serviceType: newType, notes: updatedNotes } : l))
+    );
+    if (activeLead && activeLead.id === id) {
+      setActiveLead({ ...activeLead, serviceType: newType, notes: updatedNotes });
+    }
+
+    try {
+      const crmStored = localStorage.getItem("user_uploaded_crm_leads");
+      if (crmStored) {
+        const crmList = JSON.parse(crmStored);
+        if (Array.isArray(crmList)) {
+          const updatedCRM = crmList.map((l: any) =>
+            l.id === id ? { ...l, serviceType: newType, tripType: newType, notes: updatedNotes } : l
+          );
+          localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(updatedCRM));
+          window.dispatchEvent(new Event("crm_leads_updated"));
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    try {
+      await fetch(`/api/corporate/lead/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ serviceType: newType, tripType: newType, notes: updatedNotes }),
+      });
+    } catch (err) {
+      console.error("Failed to update service type:", err);
+    }
+  };
+
   const handleAddNoteLog = async (id: string) => {
     if (!newNoteInput.trim() || isLoggingNote) return;
     setIsLoggingNote(true);
@@ -683,6 +733,8 @@ export default function AdminCorporateLeadsPage() {
                                     customerName: lead.contactName || lead.companyName,
                                     customerPhone: lead.phone,
                                     bookingRef: (lead as any).bookingRef,
+                                    bookingType: (lead as any).serviceType || (lead as any).tripType,
+                                    tripType: (lead as any).serviceType || (lead as any).tripType,
                                     pickupDateTime: (lead as any).pickupDateTime || lead.createdAt,
                                     pickupLocation: extractPickupLocation(lead) || lead.pickupLocations,
                                     dropLocation: extractDropLocation(lead),
@@ -813,6 +865,8 @@ export default function AdminCorporateLeadsPage() {
                           customerName: activeLead.contactName || activeLead.companyName,
                           customerPhone: activeLead.phone,
                           bookingRef: (activeLead as any).bookingRef,
+                          bookingType: (activeLead as any).serviceType || (activeLead as any).tripType,
+                          tripType: (activeLead as any).serviceType || (activeLead as any).tripType,
                           pickupDateTime: (activeLead as any).pickupDateTime || activeLead.createdAt,
                           pickupLocation: extractPickupLocation(activeLead) || activeLead.pickupLocations,
                           dropLocation: extractDropLocation(activeLead),
@@ -916,8 +970,17 @@ export default function AdminCorporateLeadsPage() {
                   <span className="font-mono font-bold text-slate-100">{activeLead.phone}</span>
                 </div>
                 <div className="flex justify-between items-center bg-background/40 p-2.5 rounded-lg border border-border">
-                  <span className="text-slate-400">Service Required:</span>
-                  <span className="font-bold text-amber-400">{activeLead.serviceType}</span>
+                  <span className="text-slate-400 font-bold uppercase text-[10px]">Booking / Trip Type:</span>
+                  <select
+                    value={activeLead.serviceType || "Pickup & Drop"}
+                    onChange={(e) => handleServiceTypeChange(activeLead.id, e.target.value)}
+                    className="bg-surface border border-amber-500/40 rounded-lg px-2.5 py-1 text-xs font-bold text-amber-400 focus:outline-none focus:border-amber-400 cursor-pointer font-sans"
+                  >
+                    <option value="Pickup & Drop" className="bg-slate-900 text-slate-100">Pickup & Drop</option>
+                    <option value="Point to Point" className="bg-slate-900 text-slate-100">Point to Point</option>
+                    <option value="Local Rental" className="bg-slate-900 text-slate-100">Local Rental</option>
+                    <option value="Outstation" className="bg-slate-900 text-slate-100">Outstation</option>
+                  </select>
                 </div>
 
                 {extractPickupTime(activeLead) && (

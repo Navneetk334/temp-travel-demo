@@ -729,6 +729,8 @@ export default function BookingDispatchPage() {
                                   customerName: booking.customer?.name,
                                   customerPhone: booking.customer?.phone,
                                   bookingRef: booking.bookingNumber,
+                                  bookingType: (booking as any).tripType || booking.type,
+                                  tripType: (booking as any).tripType || booking.type,
                                   pickupDateTime: booking.pickupDateTime,
                                   pickupLocation: booking.pickupLocation,
                                   dropLocation: booking.dropLocation,
@@ -736,8 +738,6 @@ export default function BookingDispatchPage() {
                                   vehicleRegistration: booking.vehicle?.registrationNumber,
                                   driverName: booking.vehicle?.driver?.name || (booking as any).driver?.name,
                                   driverPhone: booking.vehicle?.driver?.phone || (booking as any).driver?.phone,
-                                  fare: booking.netAmount || booking.totalAmount,
-                                  paymentMode: booking.payments?.[0]?.status === "captured" ? "Online Paid (Razorpay)" : "Cash / Invoice",
                                   notes: booking.notes,
                                 })}
                                 target="_blank"
@@ -848,6 +848,8 @@ export default function BookingDispatchPage() {
                   customerName: activeBooking.customer?.name,
                   customerPhone: activeBooking.customer?.phone,
                   bookingRef: activeBooking.bookingNumber,
+                  bookingType: (activeBooking as any).tripType || activeBooking.type,
+                  tripType: (activeBooking as any).tripType || activeBooking.type,
                   pickupDateTime: activeBooking.pickupDateTime,
                   pickupLocation: activeBooking.pickupLocation,
                   dropLocation: activeBooking.dropLocation,
@@ -855,8 +857,6 @@ export default function BookingDispatchPage() {
                   vehicleRegistration: activeBooking.vehicle?.registrationNumber,
                   driverName: activeBooking.vehicle?.driver?.name || (activeBooking as any).driver?.name,
                   driverPhone: activeBooking.vehicle?.driver?.phone || (activeBooking as any).driver?.phone,
-                  fare: activeBooking.netAmount || activeBooking.totalAmount,
-                  paymentMode: activeBooking.payments?.[0]?.status === "captured" ? "Online Paid (Razorpay)" : "Cash / Invoice",
                   notes: activeBooking.notes,
                 })}
                 target="_blank"
