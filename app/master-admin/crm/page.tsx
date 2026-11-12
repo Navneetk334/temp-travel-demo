@@ -236,6 +236,8 @@ export default function MasterOmnichannelCRMPage() {
 
     const pLoc = extractPickupLocation(raw);
     const dLoc = extractDropLocation(raw);
+    const pTime = extractPickupTime(raw);
+    const pDate = extractPickupDate(raw);
 
     return {
       id: raw.id || `lead_${Math.random().toString(36).substring(2, 9)}`,
@@ -247,6 +249,10 @@ export default function MasterOmnichannelCRMPage() {
       tripType,
       pickupLocation: pLoc || raw.pickupLocation || raw.pickupLocations || raw.pickup || "-",
       dropLocation: dLoc || raw.dropLocation || raw.drop || "-",
+      pickupTime: pTime || raw.pickupTime || "",
+      pickupDate: pDate || raw.pickupDate || "",
+      pickupDateTime: raw.pickupDateTime || null,
+      requirements: raw.requirements || raw.notes || "",
       status: normalizeLeadStatus(raw.status),
       lastChangedBy: raw.lastChangedBy || null,
       lastChangedPanel: raw.lastChangedPanel || null,
@@ -713,7 +719,38 @@ export default function MasterOmnichannelCRMPage() {
   const exportSelectedCSV = () => {
     const subset = selectedLeadIds.length > 0 ? leads.filter(l => selectedLeadIds.includes(l.id)) : displayLeads;
     if (subset.length === 0) return;
-    const headers = ["Booking Ref", "Customer Name", "Phone", "Email", "Trip Type", "Pickup", "Drop", "Status", "Date"];
+
+    const formatISTDateTime = (dateVal: any) => {
+      if (!dateVal) return "N/A";
+      try {
+        const d = new Date(dateVal);
+        if (isNaN(d.getTime())) return String(dateVal);
+        return d.toLocaleString("en-IN", {
+          timeZone: "Asia/Kolkata",
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true
+        });
+      } catch (e) {
+        return String(dateVal);
+      }
+    };
+
+    const headers = [
+      "Booking Ref",
+      "Customer Name",
+      "Phone",
+      "Email",
+      "Trip Type",
+      "Pickup Location",
+      "Pickup Time",
+      "Drop Location",
+      "Status",
+      "Created At"
+    ];
     const rows = subset.map(l => [
       l.bookingRef,
       l.customerName,
@@ -721,9 +758,10 @@ export default function MasterOmnichannelCRMPage() {
       l.email,
       l.tripType,
       l.pickupLocation,
+      extractPickupTime(l) || l.pickupTime || "N/A",
       l.dropLocation,
-      l.status,
-      l.createdAt
+      normalizeLeadStatus(l.status),
+      formatISTDateTime(l.createdAt)
     ]);
     const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.map(x => `"${(x || "").toString().replace(/"/g, '""')}"`).join(","))].join("\n");
     const encodedUri = encodeURI(csvContent);
@@ -1031,10 +1069,20 @@ export default function MasterOmnichannelCRMPage() {
                         </span>
                       </td>
                       <td className="py-4 px-4">
-                        <div className="text-slate-200 text-[11px] truncate max-w-[150px]" title={lead.pickupLocation}>
-                          {lead.pickupLocation || "N/A"}
+                        {extractPickupTime(lead) && (
+                          <div className="mb-1">
+                            <span className="inline-flex items-center gap-1 font-semibold text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 text-[10px]">
+                              <Clock className="w-3 h-3 text-amber-400" />
+                              <span>{extractPickupTime(lead)}</span>
+                            </span>
+                          </div>
+                        )}
+                        <div className="text-slate-200 text-[11px] truncate max-w-[170px]" title={lead.pickupLocation}>
+                          📍 {lead.pickupLocation || "N/A"}
                         </div>
-                        <div className="text-[10px] text-slate-500 italic mt-0.5">to {lead.dropLocation || "N/A"}</div>
+                        <div className="text-[10px] text-slate-500 italic mt-0.5 truncate max-w-[170px]" title={lead.dropLocation}>
+                          to {lead.dropLocation || "N/A"}
+                        </div>
                       </td>
                       <td className="py-4 px-4">
                         <select
@@ -1647,6 +1695,12 @@ export default function MasterOmnichannelCRMPage() {
                 <div>Pickup Address: <strong className="text-slate-200">{selectedLead.pickupLocation}</strong></div>
                 {selectedLead.dropLocation && (
                   <div>Drop Address: <strong className="text-slate-200">{selectedLead.dropLocation}</strong></div>
+                )}
+                {extractPickupTime(selectedLead) && (
+                  <div>Pickup Time: <strong className="text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">{extractPickupTime(selectedLead)}</strong></div>
+                )}
+                {extractPickupDate(selectedLead) && (
+                  <div>Pickup Date: <strong className="text-slate-200">{extractPickupDate(selectedLead)}</strong></div>
                 )}
               </div>
 
