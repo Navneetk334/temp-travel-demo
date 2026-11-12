@@ -686,7 +686,11 @@ export default function AdminCorporateLeadsPage() {
                                     pickupDateTime: (lead as any).pickupDateTime || lead.createdAt,
                                     pickupLocation: extractPickupLocation(lead) || lead.pickupLocations,
                                     dropLocation: extractDropLocation(lead),
-                                    vehicleModel: lead.requirements || lead.serviceType,
+                                    vehicleModel: (lead as any).vehicleModel || (lead as any).assignedVehicle?.model,
+                                    vehicleMake: (lead as any).vehicleMake || (lead as any).assignedVehicle?.make,
+                                    vehicleRegistration: (lead as any).vehicleRegistration || (lead as any).assignedVehicle?.registrationNumber,
+                                    driverName: (lead as any).driverName || (lead as any).assignedDriver?.name,
+                                    driverPhone: (lead as any).driverPhone || (lead as any).assignedDriver?.phone,
                                     notes: lead.notes,
                                   })}
                                   target="_blank"
@@ -812,7 +816,11 @@ export default function AdminCorporateLeadsPage() {
                           pickupDateTime: (activeLead as any).pickupDateTime || activeLead.createdAt,
                           pickupLocation: extractPickupLocation(activeLead) || activeLead.pickupLocations,
                           dropLocation: extractDropLocation(activeLead),
-                          vehicleModel: activeLead.requirements || activeLead.serviceType,
+                          vehicleModel: (activeLead as any).vehicleModel || (activeLead as any).assignedVehicle?.model,
+                          vehicleMake: (activeLead as any).vehicleMake || (activeLead as any).assignedVehicle?.make,
+                          vehicleRegistration: (activeLead as any).vehicleRegistration || (activeLead as any).assignedVehicle?.registrationNumber,
+                          driverName: (activeLead as any).driverName || (activeLead as any).assignedDriver?.name,
+                          driverPhone: (activeLead as any).driverPhone || (activeLead as any).assignedDriver?.phone,
                           notes: activeLead.notes,
                         })}
                         target="_blank"

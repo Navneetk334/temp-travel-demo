@@ -20,6 +20,7 @@ import {
 import LocationInput from "@/components/shared/location-input";
 import Portal from "@/components/shared/portal";
 import { getCurrentAdminUser, createLeadStatusAuditLog } from "@/lib/lead-sync";
+import { buildWhatsAppShareUrl } from "@/lib/whatsapp-share";
 
 export interface LeadDispatchModalProps {
   isOpen: boolean;
@@ -337,6 +338,14 @@ export default function LeadDispatchModal({
           const activeOnly = bList.filter((b: any) => b.status !== "COMPLETED" && b.status !== "CANCELLED");
           setActiveBookings(activeOnly);
         }
+
+        if (vList.length > 0 || dList.length > 0) {
+          setDispatchForm(prev => ({
+            ...prev,
+            vehicleId: prev.vehicleId || (vList.find((v: any) => !getVehicleBusy(v))?.id || vList[0]?.id || ""),
+            driverId: prev.driverId || (dList.find((d: any) => !getDriverBusy(d))?.id || dList[0]?.id || "")
+          }));
+        }
       } catch (err) {
         console.error("Live dispatch sync error:", err);
       }
@@ -499,6 +508,15 @@ export default function LeadDispatchModal({
       panel,
       existingNotes: lead.notes,
     });
+
+    const dispatchDetailsTag = [
+      `[BookingRef: ${finalBookingRef}]`,
+      assignedVeh ? `[Vehicle: ${assignedVeh.make || ""} ${assignedVeh.model || ""} | ${assignedVeh.registrationNumber || ""}]` : null,
+      assignedDrv ? `[AssignedDriver: ${assignedDrv.name || ""}|${assignedDrv.phone || ""}|${assignedDrv.id || ""}]` : null,
+      finalPickupDateTime ? `[PickupTime: ${formattedSuccessPickupTime}]` : null,
+    ].filter(Boolean).join(" ");
+
+    const fullUpdatedNotes = [dispatchDetailsTag, updatedNotes].filter(Boolean).join("\n");
     const nowIso = new Date().toISOString();
 
     try {
@@ -511,7 +529,15 @@ export default function LeadDispatchModal({
               ? { 
                   ...l, 
                   status: "CONVERTED",
-                  notes: updatedNotes,
+                  bookingRef: finalBookingRef,
+                  assignedVehicle: assignedVeh,
+                  assignedDriver: assignedDrv,
+                  vehicleModel: `${assignedVeh?.make || ""} ${assignedVeh?.model || ""}`.trim(),
+                  vehicleRegistration: assignedVeh?.registrationNumber,
+                  driverName: assignedDrv?.name,
+                  driverPhone: assignedDrv?.phone,
+                  pickupDateTime: finalPickupDateTime,
+                  notes: fullUpdatedNotes,
                   lastChangedBy: userName,
                   lastChangedPanel: panel,
                   lastChangedAt: nowIso,
@@ -532,12 +558,12 @@ export default function LeadDispatchModal({
         fetch(`/api/rental/lead`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: lead.id, status: "CONVERTED", notes: updatedNotes }),
+          body: JSON.stringify({ id: lead.id, status: "CONVERTED", notes: fullUpdatedNotes }),
         }),
         fetch(`/api/corporate/lead/${lead.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: "CONVERTED", notes: updatedNotes }),
+          body: JSON.stringify({ status: "CONVERTED", notes: fullUpdatedNotes }),
         })
       ]);
     } catch (e) {}
@@ -556,7 +582,7 @@ export default function LeadDispatchModal({
           pickupLocation: dispatchForm.pickupLocation,
           dropLocation: dispatchForm.dropLocation,
           pickupDateTime: finalPickupDateTime,
-          notes: dispatchForm.notes,
+          notes: fullUpdatedNotes,
           customerName: lead.customerName || lead.contactName || lead.name || lead.companyName || "Customer Lead",
           customerPhone: lead.phone,
           customerEmail: lead.email,
@@ -581,7 +607,8 @@ export default function LeadDispatchModal({
       paymentMode: dispatchForm.paymentMode,
       pickupLocation: dispatchForm.pickupLocation,
       dropLocation: dispatchForm.dropLocation,
-      pickupDateTime: finalPickupDateTime
+      pickupDateTime: finalPickupDateTime,
+      notes: fullUpdatedNotes
     });
   };
 
@@ -677,12 +704,23 @@ export default function LeadDispatchModal({
             {/* 1-Click Action Buttons: WhatsApp Share & Dispatch View */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               <a
-                href={`https://wa.me/91${(dispatchedSuccess.lead?.phone || "").replace(/\D/g, "").slice(-10)}?text=${encodeURIComponent(
-                  `*TEMP TRAVEL CAR RENTALS - RIDE CONFIRMATION*\n\nDear ${dispatchedSuccess.lead?.customerName || dispatchedSuccess.lead?.name || "Customer"},\nYour cab has been confirmed and dispatched.\n\n*Booking Number (PNR):* ${dispatchedSuccess.bookingRef}\n*Pickup Date & Time:* ${formattedSuccessPickupTime}\n*Pickup Location:* ${dispatchedSuccess.pickupLocation || "As scheduled"}\n*Drop Location:* ${dispatchedSuccess.dropLocation || "As directed"}\n*Vehicle:* ${dispatchedSuccess.vehicle?.make || ""} ${dispatchedSuccess.vehicle?.model || ""} (${dispatchedSuccess.vehicle?.registrationNumber || "Assigned"})\n*Driver / Chauffeur:* ${dispatchedSuccess.driver?.name || "Assigned Driver"} (📞 +91-${dispatchedSuccess.driver?.phone || "Office"})\n*Agreed Fare:* ₹${dispatchedSuccess.fare}\n*Payment Mode:* ${dispatchedSuccess.paymentMode || "Cash Collection"}\n\nThank you for choosing Temp Travel! For assistance call +91-7011729639.`
-                )}`}
+                href={buildWhatsAppShareUrl({
+                  customerName: dispatchedSuccess.lead?.customerName || dispatchedSuccess.lead?.name || dispatchedSuccess.lead?.contactName || dispatchedSuccess.lead?.companyName || "Valued Customer",
+                  customerPhone: dispatchedSuccess.lead?.phone,
+                  bookingRef: dispatchedSuccess.bookingRef,
+                  pickupDateTime: dispatchedSuccess.pickupDateTime,
+                  pickupLocation: dispatchedSuccess.pickupLocation,
+                  dropLocation: dispatchedSuccess.dropLocation,
+                  vehicleMake: dispatchedSuccess.vehicle?.make,
+                  vehicleModel: dispatchedSuccess.vehicle?.model,
+                  vehicleRegistration: dispatchedSuccess.vehicle?.registrationNumber,
+                  driverName: dispatchedSuccess.driver?.name,
+                  driverPhone: dispatchedSuccess.driver?.phone,
+                  notes: dispatchedSuccess.notes,
+                })}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider shadow-lg transition-all"
+                className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider shadow-lg transition-all cursor-pointer"
               >
                 <Share2 className="w-4 h-4" />
                 <span>Share On WhatsApp</span>

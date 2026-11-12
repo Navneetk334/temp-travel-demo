@@ -81,24 +81,52 @@ export function buildWhatsAppShareMessage(data: WhatsAppDispatchData): string {
 
   const customerName = data.customerName || "Valued Customer";
   const pnr = data.bookingRef || noteDetails.bookingRef || "CONFIRMED";
-  const pickupTime = noteDetails.pickupTime || formatIndianDateTime(data.pickupDateTime);
+
+  // Pickup Time Resolution
+  let pickupTime = noteDetails.pickupTime;
+  if (!pickupTime && data.pickupDateTime) {
+    pickupTime = formatIndianDateTime(data.pickupDateTime);
+  }
+  if (!pickupTime || pickupTime === "As Scheduled") {
+    if (data.notes) {
+      const timeMatch = data.notes.match(/Pickup Time:\s*([^,\n\.]+)/i);
+      const dateMatch = data.notes.match(/Pickup Date:\s*([^,\n\.]+)/i);
+      if (timeMatch) {
+        pickupTime = dateMatch ? `${dateMatch[1].trim()}, ${timeMatch[1].trim()}` : timeMatch[1].trim();
+      }
+    }
+  }
+  if (!pickupTime) {
+    pickupTime = "As scheduled";
+  }
+
   const pickupLoc = data.pickupLocation || "As scheduled";
   const dropLoc = data.dropLocation || "As directed";
 
-  const vehicleName = [data.vehicleMake, data.vehicleModel].filter(Boolean).join(" ").trim() ||
-    noteDetails.vehicleInfo ||
-    data.vehicleModel ||
-    "Executive Sedan / SUV";
+  // Vehicle Display Resolution
+  let vehicleName = "";
+  if (noteDetails.vehicleInfo) {
+    vehicleName = noteDetails.vehicleInfo;
+  } else if (data.vehicleMake || (data.vehicleModel && !data.vehicleModel.toLowerCase().includes("pickup") && !data.vehicleModel.toLowerCase().includes("rental") && !data.vehicleModel.toLowerCase().includes("transfer") && !data.vehicleModel.toLowerCase().includes("drop"))) {
+    vehicleName = [data.vehicleMake, data.vehicleModel].filter(Boolean).join(" ").trim();
+  } else if (data.vehicleModel) {
+    vehicleName = data.vehicleModel;
+  } else {
+    vehicleName = "Executive Commercial Fleet";
+  }
 
-  const regNum = data.vehicleRegistration || noteDetails.vehicleReg || "Assigned Commercial";
-  const vehicleDisplay = `${vehicleName} (${regNum})`;
+  const regNum = data.vehicleRegistration || noteDetails.vehicleReg || "";
+  const vehicleDisplay = regNum ? `${vehicleName} (${regNum})` : vehicleName;
 
-  const driverName = data.driverName || noteDetails.driverName || "Assigned Chauffeur";
+  // Driver Display Resolution
+  const driverName = (data.driverName && data.driverName !== "Assigned Chauffeur" && data.driverName !== "Pending Chauffeur" && data.driverName !== "Unassigned")
+    ? data.driverName
+    : (noteDetails.driverName || data.driverName || "Assigned Chauffeur");
+
   const driverPhone = data.driverPhone || noteDetails.driverPhone;
-  const driverDisplay = driverPhone ? `${driverName} (📞 +91-${driverPhone.replace(/\D/g, "").slice(-10)})` : driverName;
-
-  const fareDisplay = data.fare ? `₹${data.fare}` : "As agreed";
-  const paymentModeDisplay = data.paymentMode || "Direct / Cash Collection";
+  const driverDisplay = driverPhone
+    ? `${driverName} (📞 +91-${driverPhone.replace(/\D/g, "").slice(-10)})`
+    : driverName;
 
   return `*TEMP TRAVEL CAR RENTALS - RIDE CONFIRMATION*
 
@@ -111,8 +139,6 @@ Your cab has been confirmed and dispatched.
 *Drop Location:* ${dropLoc}
 *Vehicle:* ${vehicleDisplay}
 *Driver / Chauffeur:* ${driverDisplay}
-*Agreed Fare:* ${fareDisplay}
-*Payment Mode:* ${paymentModeDisplay}
 
 Thank you for choosing Temp Travel! For assistance call +91-7011729639.`;
 }

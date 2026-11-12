@@ -1141,7 +1141,11 @@ export default function MasterOmnichannelCRMPage() {
                                   pickupDateTime: lead.pickupDateTime || lead.createdAt,
                                   pickupLocation: extractPickupLocation(lead) || lead.pickupLocations,
                                   dropLocation: extractDropLocation(lead) || lead.dropLocations,
-                                  vehicleModel: lead.vehicleRequirements || lead.serviceType,
+                                  vehicleModel: lead.vehicleModel || lead.assignedVehicle?.model,
+                                  vehicleMake: lead.vehicleMake || lead.assignedVehicle?.make,
+                                  vehicleRegistration: lead.vehicleRegistration || lead.assignedVehicle?.registrationNumber,
+                                  driverName: lead.driverName || lead.assignedDriver?.name,
+                                  driverPhone: lead.driverPhone || lead.assignedDriver?.phone,
                                   notes: lead.notes,
                                 })}
                                 target="_blank"
@@ -1785,7 +1789,11 @@ export default function MasterOmnichannelCRMPage() {
                       pickupDateTime: selectedLead.pickupDateTime || selectedLead.createdAt,
                       pickupLocation: extractPickupLocation(selectedLead) || selectedLead.pickupLocations,
                       dropLocation: extractDropLocation(selectedLead) || selectedLead.dropLocations,
-                      vehicleModel: selectedLead.vehicleRequirements || selectedLead.serviceType,
+                      vehicleModel: selectedLead.vehicleModel || selectedLead.assignedVehicle?.model,
+                      vehicleMake: selectedLead.vehicleMake || selectedLead.assignedVehicle?.make,
+                      vehicleRegistration: selectedLead.vehicleRegistration || selectedLead.assignedVehicle?.registrationNumber,
+                      driverName: selectedLead.driverName || selectedLead.assignedDriver?.name,
+                      driverPhone: selectedLead.driverPhone || selectedLead.assignedDriver?.phone,
                       notes: selectedLead.notes,
                     })}
                     target="_blank"
