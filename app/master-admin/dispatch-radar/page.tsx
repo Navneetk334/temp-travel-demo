@@ -25,7 +25,8 @@ import {
   Layers,
   Maximize2,
   Trash2,
-  Loader2
+  Loader2,
+  Share2
 } from "lucide-react";
 
 declare global {
@@ -38,6 +39,7 @@ import Portal from "@/components/shared/portal";
 import LocationInput from "@/components/shared/location-input";
 import QuickDispatchAssignmentModal from "@/components/admin/quick-dispatch-assignment-modal";
 import { syncDispatchToLeads, removeDispatchFromLeads, syncExistingDispatchesToLeads } from "@/lib/lead-sync";
+import { buildWhatsAppShareUrl } from "@/lib/whatsapp-share";
 
 const TRIP_TYPES = [
   "Airport Transfer / Pickup & Drop",
@@ -241,6 +243,8 @@ export default function MasterDispatchRadarPage() {
               customerName: b.customer?.name || "Customer Lead",
               fare: b.netAmount ? String(b.netAmount) : (b.totalAmount ? String(b.totalAmount) : "2800"),
               advance: b.payments?.[0]?.amount ? String(b.payments[0].amount) : "500",
+              pickupDateTime: b.pickupDateTime || b.createdAt,
+              notes: b.notes || "",
               lat: 28.5910 + latOffset,
               lng: 77.0250 + lngOffset,
               isFromLiveBookings: true
@@ -307,6 +311,8 @@ export default function MasterDispatchRadarPage() {
             customerName: b.customer?.name || "Customer Lead",
             fare: b.netAmount ? String(b.netAmount) : (b.totalAmount ? String(b.totalAmount) : "2800"),
             advance: b.advanceAmount || "500",
+            pickupDateTime: b.pickupDateTime || b.createdAt,
+            notes: b.notes || "",
             lat: 28.5910 + latOffset,
             lng: 77.0250 + lngOffset
           };
@@ -757,8 +763,31 @@ export default function MasterDispatchRadarPage() {
                 title="Assign or Reassign Vehicle & Chauffeur"
               >
                 <UserCheck className="w-3.5 h-3.5" />
-                <span>Assign Car & Driver</span>
+                <span>Assign</span>
               </button>
+
+              <a
+                href={buildWhatsAppShareUrl({
+                  customerName: drv.customerName,
+                  customerPhone: drv.phone,
+                  bookingRef: drv.bookingRef,
+                  pickupDateTime: drv.pickupDateTime,
+                  pickupLocation: drv.pickupLocation || drv.currentLocation,
+                  dropLocation: drv.dropLocation || drv.destination,
+                  vehicleModel: drv.vehicleModel,
+                  vehicleRegistration: drv.regNumber,
+                  driverName: drv.driverName,
+                  driverPhone: drv.driverPhone,
+                  fare: drv.fare,
+                  notes: drv.notes,
+                })}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold transition-all flex items-center justify-center cursor-pointer"
+                title="Share Ride Confirmation on WhatsApp"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+              </a>
 
               <button
                 type="button"
@@ -1002,6 +1031,30 @@ export default function MasterDispatchRadarPage() {
                   <strong className="text-slate-200 truncate max-w-[180px]">{selectedDriver.currentLocation}</strong>
                 </div>
               </div>
+
+              {/* 1-Click WhatsApp Share Action */}
+              <a
+                href={buildWhatsAppShareUrl({
+                  customerName: selectedDriver.customerName,
+                  customerPhone: selectedDriver.phone,
+                  bookingRef: selectedDriver.bookingRef,
+                  pickupDateTime: selectedDriver.pickupDateTime,
+                  pickupLocation: selectedDriver.pickupLocation || selectedDriver.currentLocation,
+                  dropLocation: selectedDriver.dropLocation || selectedDriver.destination,
+                  vehicleModel: selectedDriver.vehicleModel,
+                  vehicleRegistration: selectedDriver.regNumber,
+                  driverName: selectedDriver.driverName,
+                  driverPhone: selectedDriver.driverPhone,
+                  fare: selectedDriver.fare,
+                  notes: selectedDriver.notes,
+                })}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-emerald-600/20 transition-all cursor-pointer"
+              >
+                <Share2 className="w-4 h-4" />
+                <span>Share Ride Confirmation on WhatsApp</span>
+              </a>
 
               <div className="pt-2 flex justify-between items-center">
                 <button

@@ -25,7 +25,8 @@ import {
   XCircle,
   HelpCircle,
   Truck,
-  Loader2
+  Loader2,
+  Share2
 } from "lucide-react";
 import LeadDispatchModal, { 
   extractPickupLocation, 
@@ -33,6 +34,7 @@ import LeadDispatchModal, {
   extractPickupTime,
   extractPickupDate 
 } from "@/components/admin/lead-dispatch-modal";
+import { buildWhatsAppShareUrl } from "@/lib/whatsapp-share";
 import { 
   syncExistingDispatchesToLeads, 
   getCurrentAdminUser, 
@@ -675,14 +677,34 @@ export default function AdminCorporateLeadsPage() {
                           </td>
                           <td className="p-4 text-right space-x-1" onClick={(e) => e.stopPropagation()}>
                             {(lead.status === "CONVERTED" || lead.status === "WON") ? (
-                              <Link
-                                href="/admin/bookings-dispatch"
-                                title="Ride already dispatched — View in Dispatch CRM"
-                                className="inline-flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 font-bold px-2.5 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all shadow-sm cursor-pointer"
-                              >
-                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                                <span>Dispatched</span>
-                              </Link>
+                              <>
+                                <a
+                                  href={buildWhatsAppShareUrl({
+                                    customerName: lead.contactName || lead.companyName,
+                                    customerPhone: lead.phone,
+                                    bookingRef: (lead as any).bookingRef,
+                                    pickupDateTime: (lead as any).pickupDateTime || lead.createdAt,
+                                    pickupLocation: extractPickupLocation(lead) || lead.pickupLocations,
+                                    dropLocation: extractDropLocation(lead),
+                                    vehicleModel: lead.requirements || lead.serviceType,
+                                    notes: lead.notes,
+                                  })}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  title="Share Ride Confirmation on WhatsApp"
+                                  className="inline-flex items-center justify-center p-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 rounded-lg text-[10px] font-bold transition-all cursor-pointer"
+                                >
+                                  <Share2 className="w-3.5 h-3.5" />
+                                </a>
+                                <Link
+                                  href="/admin/bookings-dispatch"
+                                  title="Ride already dispatched — View in Dispatch CRM"
+                                  className="inline-flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 font-bold px-2.5 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all shadow-sm cursor-pointer"
+                                >
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                                  <span>Dispatched</span>
+                                </Link>
+                              </>
                             ) : (
                               <button
                                 onClick={() => setDispatchLead({
@@ -781,13 +803,34 @@ export default function AdminCorporateLeadsPage() {
                     {activeLead.status}
                   </span>
                   {(activeLead.status === "CONVERTED" || activeLead.status === "WON") ? (
-                    <Link
-                      href="/admin/bookings-dispatch"
-                      className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 font-bold px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-sm cursor-pointer"
-                    >
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                      <span>View Dispatched Booking</span>
-                    </Link>
+                    <div className="flex flex-col items-end gap-1.5">
+                      <a
+                        href={buildWhatsAppShareUrl({
+                          customerName: activeLead.contactName || activeLead.companyName,
+                          customerPhone: activeLead.phone,
+                          bookingRef: (activeLead as any).bookingRef,
+                          pickupDateTime: (activeLead as any).pickupDateTime || activeLead.createdAt,
+                          pickupLocation: extractPickupLocation(activeLead) || activeLead.pickupLocations,
+                          dropLocation: extractDropLocation(activeLead),
+                          vehicleModel: activeLead.requirements || activeLead.serviceType,
+                          notes: activeLead.notes,
+                        })}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-sm cursor-pointer"
+                        title="Share Ride Confirmation on WhatsApp"
+                      >
+                        <Share2 className="w-3.5 h-3.5" />
+                        <span>Share On WhatsApp</span>
+                      </a>
+                      <Link
+                        href="/admin/bookings-dispatch"
+                        className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 font-bold px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-sm cursor-pointer"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>View Dispatched Booking</span>
+                      </Link>
+                    </div>
                   ) : (
                     <button
                       onClick={() => setDispatchLead({

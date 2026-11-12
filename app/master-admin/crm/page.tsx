@@ -33,6 +33,7 @@ import {
   Loader2
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
+import { buildWhatsAppShareUrl } from "@/lib/whatsapp-share";
 import LocationInput from "@/components/shared/location-input";
 import { 
   extractLeadVehicleRequirements, 
@@ -1131,14 +1132,34 @@ export default function MasterOmnichannelCRMPage() {
                       <td className="py-4 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
                           {lead.status === "CONVERTED" || lead.status === "WON" ? (
-                            <Link
-                              href="/master-admin/dispatch-radar"
-                              className="inline-flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 px-2.5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer"
-                              title="Ride already dispatched — View in Dispatch Radar"
-                            >
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                              <span>Dispatched</span>
-                            </Link>
+                            <>
+                              <a
+                                href={buildWhatsAppShareUrl({
+                                  customerName: lead.customerName || lead.name || lead.contactName || lead.companyName,
+                                  customerPhone: lead.phone,
+                                  bookingRef: lead.bookingRef,
+                                  pickupDateTime: lead.pickupDateTime || lead.createdAt,
+                                  pickupLocation: extractPickupLocation(lead) || lead.pickupLocations,
+                                  dropLocation: extractDropLocation(lead) || lead.dropLocations,
+                                  vehicleModel: lead.vehicleRequirements || lead.serviceType,
+                                  notes: lead.notes,
+                                })}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-center p-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 rounded-lg text-[11px] font-bold transition-all cursor-pointer"
+                                title="Share Ride Confirmation on WhatsApp"
+                              >
+                                <Share2 className="w-3.5 h-3.5" />
+                              </a>
+                              <Link
+                                href="/master-admin/dispatch-radar"
+                                className="inline-flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 px-2.5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer"
+                                title="Ride already dispatched — View in Dispatch Radar"
+                              >
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                                <span>Dispatched</span>
+                              </Link>
+                            </>
                           ) : (
                             <button
                               onClick={() => openDispatchModal(lead)}
@@ -1741,6 +1762,41 @@ export default function MasterOmnichannelCRMPage() {
                 }
                 return null;
               })()}
+
+              {/* Converted / Dispatched Booking & WhatsApp Share Banner */}
+              {(selectedLead.status === "CONVERTED" || selectedLead.status === "WON") && (
+                <div className="bg-emerald-500/10 border border-emerald-500/30 p-3.5 rounded-xl space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                      <span className="text-xs font-bold text-emerald-300">Ride Dispatched & Confirmed</span>
+                    </div>
+                    {selectedLead.bookingRef && (
+                      <span className="text-xs font-mono font-bold bg-slate-950 px-2.5 py-0.5 rounded border border-emerald-500/30 text-amber-400">
+                        {selectedLead.bookingRef}
+                      </span>
+                    )}
+                  </div>
+                  <a
+                    href={buildWhatsAppShareUrl({
+                      customerName: selectedLead.customerName || selectedLead.name || selectedLead.contactName || selectedLead.companyName,
+                      customerPhone: selectedLead.phone,
+                      bookingRef: selectedLead.bookingRef,
+                      pickupDateTime: selectedLead.pickupDateTime || selectedLead.createdAt,
+                      pickupLocation: extractPickupLocation(selectedLead) || selectedLead.pickupLocations,
+                      dropLocation: extractDropLocation(selectedLead) || selectedLead.dropLocations,
+                      vehicleModel: selectedLead.vehicleRequirements || selectedLead.serviceType,
+                      notes: selectedLead.notes,
+                    })}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2 rounded-lg text-xs uppercase tracking-wider shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    <span>Share Ride Confirmation on WhatsApp</span>
+                  </a>
+                </div>
+              )}
 
               {/* Follow-up / Audit History Trail */}
               <div className="space-y-1.5 border-t border-border pt-3">

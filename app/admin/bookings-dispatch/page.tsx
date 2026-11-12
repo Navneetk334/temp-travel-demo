@@ -23,9 +23,11 @@ import {
   ArrowRight,
   UserCheck,
   Trash2,
-  Loader2
+  Loader2,
+  Share2
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
+import { buildWhatsAppShareUrl } from "@/lib/whatsapp-share";
 
 export type BookingStatus = 
   | "PENDING" 
@@ -722,6 +724,29 @@ export default function BookingDispatchPage() {
                               </div>
                             </td>
                             <td className="p-4 text-right space-x-1" onClick={(e) => e.stopPropagation()}>
+                              <a
+                                href={buildWhatsAppShareUrl({
+                                  customerName: booking.customer?.name,
+                                  customerPhone: booking.customer?.phone,
+                                  bookingRef: booking.bookingNumber,
+                                  pickupDateTime: booking.pickupDateTime,
+                                  pickupLocation: booking.pickupLocation,
+                                  dropLocation: booking.dropLocation,
+                                  vehicleModel: booking.vehicle?.model,
+                                  vehicleRegistration: booking.vehicle?.registrationNumber,
+                                  driverName: booking.vehicle?.driver?.name || (booking as any).driver?.name,
+                                  driverPhone: booking.vehicle?.driver?.phone || (booking as any).driver?.phone,
+                                  fare: booking.netAmount || booking.totalAmount,
+                                  paymentMode: booking.payments?.[0]?.status === "captured" ? "Online Paid (Razorpay)" : "Cash / Invoice",
+                                  notes: booking.notes,
+                                })}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title="Share Ride Confirmation on WhatsApp"
+                                className="inline-flex p-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 transition-colors"
+                              >
+                                <Share2 className="w-4 h-4" />
+                              </a>
                               <button
                                 onClick={() => {
                                   openBookingInspector(booking);
@@ -816,6 +841,31 @@ export default function BookingDispatchPage() {
                   </button>
                 </div>
               </div>
+
+              {/* 1-Click WhatsApp Share Action */}
+              <a
+                href={buildWhatsAppShareUrl({
+                  customerName: activeBooking.customer?.name,
+                  customerPhone: activeBooking.customer?.phone,
+                  bookingRef: activeBooking.bookingNumber,
+                  pickupDateTime: activeBooking.pickupDateTime,
+                  pickupLocation: activeBooking.pickupLocation,
+                  dropLocation: activeBooking.dropLocation,
+                  vehicleModel: activeBooking.vehicle?.model,
+                  vehicleRegistration: activeBooking.vehicle?.registrationNumber,
+                  driverName: activeBooking.vehicle?.driver?.name || (activeBooking as any).driver?.name,
+                  driverPhone: activeBooking.vehicle?.driver?.phone || (activeBooking as any).driver?.phone,
+                  fare: activeBooking.netAmount || activeBooking.totalAmount,
+                  paymentMode: activeBooking.payments?.[0]?.status === "captured" ? "Online Paid (Razorpay)" : "Cash / Invoice",
+                  notes: activeBooking.notes,
+                })}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-emerald-600/20 transition-all cursor-pointer"
+              >
+                <Share2 className="w-4 h-4" />
+                <span>Share Ride Confirmation on WhatsApp</span>
+              </a>
 
               {/* Visual Booking Lifecycle Timeline */}
               <div className="space-y-2 border-b border-border pb-5">

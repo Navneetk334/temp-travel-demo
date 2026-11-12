@@ -166,16 +166,8 @@ export function syncExistingDispatchesToLeads() {
       window.dispatchEvent(new Event("crm_leads_updated"));
     }
 
-    if (!Array.isArray(dispatches) || dispatches.length === 0) return;
-
-    const leadIds = new Set(cleanedLeads.map((l: any) => l.id));
-    const leadRefs = new Set(cleanedLeads.map((l: any) => l.bookingRef));
-
-    for (const d of dispatches) {
-      if (!leadIds.has(d.id) && !leadRefs.has(d.id)) {
-        syncDispatchToLeads(d);
-      }
-    }
+    // Do NOT auto-create leads from dispatches on page refresh:
+    // Dispatches are generated FROM leads, so auto-creating leads from dispatches causes ghost duplicate leads.
   } catch (e) {
     console.error("syncExistingDispatchesToLeads error:", e);
   }
