@@ -60,6 +60,7 @@ export default function ContactPage() {
             <Breadcrumbs items={breadcrumbsList} />
           </div>
 
+
           <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 text-center space-y-6 relative z-10 pt-4">
             <span className="text-xs font-bold text-accent uppercase tracking-widest bg-background/5 border border-border px-3 py-1 rounded-full">
               Get In Touch
