@@ -42,39 +42,31 @@ export default function BookingsDispatchLoading() {
         </div>
       </div>
 
-      {/* Main Split: Dispatch Table vs Inspector */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Table Container Skeleton */}
-        <div className="lg:col-span-7 glassmorphism rounded-xl border border-border overflow-hidden p-8 flex flex-col items-center justify-center min-h-[420px] space-y-4">
-          <div className="relative flex items-center justify-center">
-            <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shadow-lg shadow-amber-500/10">
-              <Truck className="w-8 h-8 text-accent animate-pulse" />
-            </div>
-            <Loader2 className="w-6 h-6 text-amber-400 animate-spin absolute -top-1 -right-1" />
-          </div>
-          <div className="text-center space-y-1">
-            <div className="text-sm font-bold text-slate-100 flex items-center justify-center gap-2">
-              <span>Loading Booking & Fleet Dispatch CRM</span>
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-            </div>
-            <p className="text-xs text-slate-400 max-w-sm">
-              Connecting live fleet dispatches, driver allocations, and payment statuses...
-            </p>
-          </div>
-          <div className="w-full max-w-md space-y-2.5 pt-2">
-            <div className="h-10 bg-white/5 border border-white/5 rounded-xl" />
-            <div className="h-10 bg-white/5 border border-white/5 rounded-xl" />
-            <div className="h-10 bg-white/5 border border-white/5 rounded-xl" />
+      {/* Main Content: Full-Width Centered Loading Container */}
+      <div className="w-full glassmorphism rounded-2xl border border-border p-12 sm:p-16 flex flex-col items-center justify-center min-h-[460px] space-y-6 text-center shadow-xl">
+        {/* Symmetrical Concentric Glowing & Spinning Ring around Fleet Badge */}
+        <div className="relative flex items-center justify-center w-20 h-20">
+          <div className="absolute inset-0 rounded-full border-2 border-amber-500/20 border-t-amber-400 animate-spin" />
+          <div className="w-14 h-14 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shadow-lg shadow-amber-500/15">
+            <Truck className="w-7 h-7 text-accent animate-pulse" />
           </div>
         </div>
 
-        {/* Inspector Panel Skeleton */}
-        <div className="lg:col-span-5 glassmorphism border border-border rounded-2xl p-8 min-h-[420px] flex flex-col items-center justify-center text-center space-y-3">
-          <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center">
-            <Loader2 className="w-6 h-6 text-slate-500 animate-spin" />
+        <div className="space-y-1.5 max-w-md">
+          <div className="text-base font-bold text-slate-100 flex items-center justify-center gap-2">
+            <span>Loading Booking & Fleet Dispatch CRM</span>
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
           </div>
-          <div className="h-4 w-48 bg-white/10 rounded" />
-          <div className="h-3 w-64 bg-white/5 rounded" />
+          <p className="text-xs text-slate-400 leading-relaxed">
+            Synchronizing active dispatches, fleet allocations, driver rosters, and payment statuses...
+          </p>
+        </div>
+
+        {/* Shimmering Table Row Skeletons Centered */}
+        <div className="w-full max-w-lg space-y-3 pt-2">
+          <div className="h-11 bg-white/5 border border-white/5 rounded-xl animate-pulse" />
+          <div className="h-11 bg-white/5 border border-white/5 rounded-xl animate-pulse delay-75" />
+          <div className="h-11 bg-white/5 border border-white/5 rounded-xl animate-pulse delay-150" />
         </div>
       </div>
     </div>

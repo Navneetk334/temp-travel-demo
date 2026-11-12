@@ -628,56 +628,57 @@ export default function BookingDispatchPage() {
 
       </div>
 
-      {/* Main Split: Bookings Table vs Lifecycle Inspector */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
-        {/* Bookings Table */}
-        <div className="lg:col-span-7 glassmorphism rounded-xl border border-border overflow-hidden flex flex-col">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 px-6 space-y-4">
-              <div className="relative flex items-center justify-center">
-                <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shadow-lg shadow-amber-500/10">
-                  <Truck className="w-8 h-8 text-accent animate-pulse" />
-                </div>
-                <Loader2 className="w-6 h-6 text-amber-400 animate-spin absolute -top-1 -right-1" />
-              </div>
-              <div className="text-center space-y-1">
-                <div className="text-sm font-bold text-slate-100 flex items-center justify-center gap-2">
-                  <span>Loading Booking & Fleet Dispatch CRM</span>
-                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-                </div>
-                <p className="text-xs text-slate-400 max-w-sm">
-                  Synchronizing active dispatches, fleet allocations, driver rosters, and payment statuses...
-                </p>
-              </div>
-
-              {/* Shimmering Table Row Skeletons */}
-              <div className="w-full max-w-md space-y-2.5 pt-2">
-                <div className="h-10 bg-white/5 border border-white/5 rounded-xl animate-pulse" />
-                <div className="h-10 bg-white/5 border border-white/5 rounded-xl animate-pulse delay-75" />
-                <div className="h-10 bg-white/5 border border-white/5 rounded-xl animate-pulse delay-150" />
-              </div>
+      {/* Main Content: Full-Width Centered Loading State OR Split Table & Inspector Layout */}
+      {loading ? (
+        <div className="w-full glassmorphism rounded-2xl border border-border p-12 sm:p-16 flex flex-col items-center justify-center min-h-[460px] space-y-6 text-center shadow-xl">
+          {/* Symmetrical Concentric Glowing & Spinning Ring around Fleet Badge */}
+          <div className="relative flex items-center justify-center w-20 h-20">
+            <div className="absolute inset-0 rounded-full border-2 border-amber-500/20 border-t-amber-400 animate-spin" />
+            <div className="w-14 h-14 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shadow-lg shadow-amber-500/15">
+              <Truck className="w-7 h-7 text-accent animate-pulse" />
             </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="bg-surface border-b border-border text-slate-400 font-semibold uppercase tracking-wider">
-                      <th className="p-4">PNR & Customer</th>
-                      <th className="p-4">Vehicle & Driver</th>
-                      <th className="p-4">Amount & Status</th>
-                      <th className="p-4 text-right">Actions</th>
+          </div>
+
+          <div className="space-y-1.5 max-w-md">
+            <div className="text-base font-bold text-slate-100 flex items-center justify-center gap-2">
+              <span>Loading Booking & Fleet Dispatch CRM</span>
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+            </div>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Synchronizing active dispatches, fleet allocations, driver rosters, and payment statuses...
+            </p>
+          </div>
+
+          {/* Shimmering Table Row Skeletons Centered */}
+          <div className="w-full max-w-lg space-y-3 pt-2">
+            <div className="h-11 bg-white/5 border border-white/5 rounded-xl animate-pulse" />
+            <div className="h-11 bg-white/5 border border-white/5 rounded-xl animate-pulse delay-75" />
+            <div className="h-11 bg-white/5 border border-white/5 rounded-xl animate-pulse delay-150" />
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Bookings Table */}
+          <div className="lg:col-span-7 glassmorphism rounded-xl border border-border overflow-hidden flex flex-col">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="bg-surface border-b border-border text-slate-400 font-semibold uppercase tracking-wider">
+                    <th className="p-4">PNR & Customer</th>
+                    <th className="p-4">Vehicle & Driver</th>
+                    <th className="p-4">Amount & Status</th>
+                    <th className="p-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {bookings.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="text-center py-16 text-slate-500 italic">
+                        No dispatch bookings matching selected criteria found.
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {bookings.length === 0 ? (
-                      <tr>
-                        <td colSpan={4} className="text-center py-16 text-slate-500 italic">
-                          No dispatch bookings matching selected criteria found.
-                        </td>
-                      </tr>
-                    ) : (
+                  ) : (
                       bookings.map((booking) => {
                         const isPaid = booking.payments?.some((p) => p.status === "SUCCESS");
                         return (
@@ -787,9 +788,7 @@ export default function BookingDispatchPage() {
                   </div>
                 </div>
               </div>
-            </>
-          )}
-        </div>
+            </div>
 
         {/* Dispatch & Lifecycle Inspection Dashboard Panel */}
         <div className="lg:col-span-5">
@@ -1006,6 +1005,7 @@ export default function BookingDispatchPage() {
         </div>
 
       </div>
+      )}
 
       {/* Driver & Vehicle Assignment Modal */}
       {assignModalOpen && activeBooking && (
