@@ -68,6 +68,51 @@ export async function PUT(
       },
     });
 
+    if (resolvedServiceType && updatedLead.phone) {
+      try {
+        const cleanPhone = updatedLead.phone.replace(/\D/g, "").slice(-10);
+        const matchingCustomers = await prisma.user.findMany({
+          where: { phone: { contains: cleanPhone } },
+          select: { id: true }
+        });
+        const customerIds = matchingCustomers.map((c) => c.id);
+
+        let newBookingType = "LOCAL_RENTAL";
+        const stLower = resolvedServiceType.toLowerCase();
+        if (stLower.includes("outstation")) newBookingType = "OUTSTATION";
+        else if (stLower.includes("airport") || stLower.includes("pickup") || stLower.includes("drop") || stLower.includes("transfer")) {
+          newBookingType = "AIRPORT_TRANSFER";
+        } else if (stLower.includes("tour")) newBookingType = "TOUR_PACKAGE";
+
+        const bookingsToUpdate = await prisma.booking.findMany({
+          where: {
+            OR: [
+              { customerId: { in: customerIds } },
+              { notes: { contains: id } }
+            ]
+          }
+        });
+
+        for (const b of bookingsToUpdate) {
+          let updatedNotes = b.notes || "";
+          if (updatedNotes.includes("[TripType:")) {
+            updatedNotes = updatedNotes.replace(/\[TripType:\s*([^\]]+)\]/i, `[TripType: ${resolvedServiceType}]`);
+          } else {
+            updatedNotes = `[TripType: ${resolvedServiceType}] ${updatedNotes}`.trim();
+          }
+          await prisma.booking.update({
+            where: { id: b.id },
+            data: {
+              type: newBookingType as any,
+              notes: updatedNotes
+            }
+          });
+        }
+      } catch (syncErr) {
+        console.warn("Could not sync booking type to active bookings:", syncErr);
+      }
+    }
+
     return NextResponse.json({
       ...updatedLead,
       status: updatedLead.status === "WON" ? "CONVERTED" : updatedLead.status,

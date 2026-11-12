@@ -91,18 +91,36 @@ export async function PUT(
     }
 
     const body = await req.json();
-    const { status, vehicleId, driverId, notes } = body;
+    const { status, vehicleId, driverId, notes, tripType, type } = body;
 
     const currentBooking = await prisma.booking.findUnique({
       where: { id },
-      select: { notes: true, status: true }
+      select: { notes: true, status: true, type: true }
     });
 
     const updateData: any = {};
     if (status) updateData.status = status;
+
+    const finalTripType = tripType || type;
+    if (finalTripType) {
+      let bType = "LOCAL_RENTAL";
+      const tripLower = finalTripType.toLowerCase();
+      if (tripLower.includes("outstation")) bType = "OUTSTATION";
+      else if (tripLower.includes("airport") || tripLower.includes("pickup") || tripLower.includes("drop") || tripLower.includes("transfer")) {
+        bType = "AIRPORT_TRANSFER";
+      } else if (tripLower.includes("tour")) bType = "TOUR_PACKAGE";
+      updateData.type = bType;
+    }
     
-    // Resolve notes with assigned driver tag
+    // Resolve notes with assigned driver tag and trip type tag
     let effectiveNotes = notes !== undefined ? notes : (currentBooking?.notes || "");
+    if (finalTripType) {
+      if (effectiveNotes.includes("[TripType:")) {
+        effectiveNotes = effectiveNotes.replace(/\[TripType:\s*([^\]]+)\]/i, `[TripType: ${finalTripType}]`);
+      } else {
+        effectiveNotes = `[TripType: ${finalTripType}] ${effectiveNotes}`.trim();
+      }
+    }
     if (driverId !== undefined) {
       // Strip any existing driver tag first
       effectiveNotes = effectiveNotes.replace(/\[AssignedDriver:\s*[^\]]+\]/g, "").trim();
@@ -116,8 +134,8 @@ export async function PUT(
         }
       }
       updateData.notes = effectiveNotes;
-    } else if (notes !== undefined) {
-      updateData.notes = notes;
+    } else if (notes !== undefined || finalTripType) {
+      updateData.notes = effectiveNotes;
     }
     
     if (vehicleId !== undefined) {

@@ -19,50 +19,40 @@ export interface WhatsAppDispatchData {
 }
 
 export function isPickupAndDropBooking(data: WhatsAppDispatchData): boolean {
-  // 1. First priority: explicit tripType or serviceType specified by user/lead
-  const userTripType = [data.tripType, data.serviceType].filter(Boolean).join(" ").toLowerCase();
-  if (userTripType) {
-    // If user explicitly chose Pickup & Drop (even if sub-type says individual/working)
-    if (userTripType.includes("pickup") || userTripType.includes("drop") || userTripType.includes("airport") || userTripType.includes("transfer")) {
-      if (userTripType.includes("point")) return false;
-      return true;
-    }
-    if (userTripType.includes("local") || userTripType.includes("outstation") || userTripType.includes("tour") || userTripType.includes("point")) {
-      return false;
-    }
+  const currentType = [data.tripType, data.serviceType, data.bookingType].filter(Boolean).join(" ").toLowerCase();
+
+  // If currently marked as Local Rental, Outstation, Point to Point, or Tour -> STRICT FALSE
+  if (
+    currentType.includes("local") || 
+    currentType.includes("outstation") || 
+    currentType.includes("point") || 
+    currentType.includes("tour") ||
+    currentType.includes("hourly")
+  ) {
+    return false;
   }
 
-  // 2. Second priority: tagged [TripType: ...] in notes
+  // If explicitly marked as Pickup & Drop or Airport Transfer -> TRUE
+  if (
+    currentType.includes("pickup") || 
+    currentType.includes("drop") || 
+    currentType.includes("transfer") || 
+    currentType.includes("airport")
+  ) {
+    return true;
+  }
+
+  // If notes specifically specify the active TripType tag [TripType: ...]
   if (data.notes) {
     const tripMatch = data.notes.match(/\[TripType:\s*([^\]]+)\]/i);
     if (tripMatch) {
       const tagged = tripMatch[1].toLowerCase();
-      if (tagged.includes("pickup") || tagged.includes("drop") || tagged.includes("airport") || tagged.includes("transfer")) {
-        if (tagged.includes("point")) return false;
+      if (tagged.includes("local") || tagged.includes("outstation") || tagged.includes("point") || tagged.includes("tour") || tagged.includes("hourly")) {
+        return false;
+      }
+      if (tagged.includes("pickup") || tagged.includes("drop") || tagged.includes("transfer") || tagged.includes("airport")) {
         return true;
       }
-      if (tagged.includes("local") || tagged.includes("outstation") || tagged.includes("tour") || tagged.includes("point")) {
-        return false;
-      }
-    }
-    const notesLower = data.notes.toLowerCase();
-    if (notesLower.includes("pickup & drop") || notesLower.includes("pickup and drop") || notesLower.includes("airport transfer")) {
-      if (notesLower.includes("point-to-point") || notesLower.includes("point to point") || notesLower.includes("local rental") || notesLower.includes("outstation")) {
-        if (notesLower.includes("pickup & drop") || notesLower.includes("pickup and drop")) return true;
-        return false;
-      }
-      return true;
-    }
-  }
-
-  // 3. Third priority: Prisma BookingType enum
-  if (data.bookingType) {
-    const bt = data.bookingType.toUpperCase();
-    if (bt.includes("AIRPORT") || bt.includes("TRANSFER") || bt.includes("PICKUP") || bt.includes("DROP")) {
-      return true;
-    }
-    if (bt.includes("LOCAL") || bt.includes("OUTSTATION") || bt.includes("TOUR") || bt.includes("POINT")) {
-      return false;
     }
   }
 

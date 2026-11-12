@@ -245,6 +245,53 @@ export default function BookingDispatchPage() {
     }
   };
 
+  const handleTripTypeChange = async (id: string, newTripType: string) => {
+    let prismaType = "LOCAL_RENTAL";
+    const lower = newTripType.toLowerCase();
+    if (lower.includes("outstation")) prismaType = "OUTSTATION";
+    else if (lower.includes("pickup") || lower.includes("drop") || lower.includes("airport") || lower.includes("transfer")) prismaType = "AIRPORT_TRANSFER";
+    else if (lower.includes("tour")) prismaType = "TOUR_PACKAGE";
+
+    setBookings(prev => prev.map(b => {
+      if (b.id === id || b.bookingNumber === id) {
+        let updatedNotes = b.notes || "";
+        if (updatedNotes.includes("[TripType:")) {
+          updatedNotes = updatedNotes.replace(/\[TripType:\s*([^\]]+)\]/i, `[TripType: ${newTripType}]`);
+        } else {
+          updatedNotes = `[TripType: ${newTripType}] ${updatedNotes}`.trim();
+        }
+        return { ...b, type: prismaType, notes: updatedNotes, tripType: newTripType } as any;
+      }
+      return b;
+    }));
+
+    if (activeBooking && (activeBooking.id === id || activeBooking.bookingNumber === id)) {
+      setActiveBooking(prev => {
+        if (!prev) return null;
+        let updatedNotes = prev.notes || "";
+        if (updatedNotes.includes("[TripType:")) {
+          updatedNotes = updatedNotes.replace(/\[TripType:\s*([^\]]+)\]/i, `[TripType: ${newTripType}]`);
+        } else {
+          updatedNotes = `[TripType: ${newTripType}] ${updatedNotes}`.trim();
+        }
+        return { ...prev, type: prismaType, notes: updatedNotes, tripType: newTripType } as any;
+      });
+    }
+
+    try {
+      await fetch(`/api/bookings/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tripType: newTripType,
+          type: prismaType
+        })
+      });
+    } catch (err) {
+      console.error("Failed to update booking trip type:", err);
+    }
+  };
+
   const handleAssignVehicle = async () => {
     if (!activeBooking || isAssigning) return;
     setIsAssigning(true);
@@ -996,6 +1043,32 @@ export default function BookingDispatchPage() {
 
               {/* Financial & Payment Breakdown */}
               <div className="space-y-2 border-t border-border pt-4 text-xs text-slate-300">
+                {/* Interactive Booking / Trip Type Selector */}
+                <div className="flex justify-between items-center bg-background/40 p-2.5 rounded-lg border border-border">
+                  <span className="text-slate-400 font-bold">Trip / Booking Type:</span>
+                  <select
+                    value={(() => {
+                      const notesStr = activeBooking.notes || "";
+                      const tripMatch = notesStr.match(/\[TripType:\s*([^\]]+)\]/i);
+                      if (tripMatch) return tripMatch[1].trim();
+                      if (activeBooking.type === "AIRPORT_TRANSFER") return "Pickup & Drop";
+                      if (activeBooking.type === "LOCAL_RENTAL") return "Local Rental";
+                      if (activeBooking.type === "OUTSTATION") return "Outstation";
+                      return (activeBooking as any).tripType || "Local Rental";
+                    })()}
+                    onChange={async (e) => {
+                      const newType = e.target.value;
+                      await handleTripTypeChange(activeBooking.id, newType);
+                    }}
+                    className="bg-surface text-amber-300 font-bold border border-border rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:border-accent cursor-pointer shadow-sm"
+                  >
+                    <option value="Pickup & Drop" className="bg-surface text-slate-100">Pickup & Drop</option>
+                    <option value="Local Rental" className="bg-surface text-slate-100">Local Rental</option>
+                    <option value="Outstation" className="bg-surface text-slate-100">Outstation</option>
+                    <option value="Point to Point" className="bg-surface text-slate-100">Point to Point</option>
+                  </select>
+                </div>
+
                 <div className="flex justify-between items-center bg-background/40 p-2.5 rounded-lg border border-border">
                   <span className="text-slate-400">Pickup Location:</span>
                   <span className="font-medium text-slate-100">{activeBooking.pickupLocation}</span>
