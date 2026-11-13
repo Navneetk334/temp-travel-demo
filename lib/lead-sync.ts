@@ -105,21 +105,132 @@ export async function syncDispatchToLeads(dispatch: any) {
   return createdDbLead;
 }
 
-export function removeDispatchFromLeads(dispatchId: string) {
-  if (typeof window !== "undefined") {
-    try {
-      const existing = JSON.parse(localStorage.getItem("user_uploaded_crm_leads") || "[]");
-      const nextLeads = existing.filter((l: any) => l.id !== dispatchId && l.bookingRef !== dispatchId);
-      localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(nextLeads));
-      window.dispatchEvent(new Event("crm_leads_updated"));
-    } catch (e) {
-      console.error("removeDispatchFromLeads localStorage error:", e);
-    }
+export function getDeletedDispatchIds(): Set<string> {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const raw = localStorage.getItem("master_deleted_dispatch_ids");
+    if (!raw) return new Set();
+    const parsed = JSON.parse(raw);
+    return new Set(Array.isArray(parsed) ? parsed : []);
+  } catch {
+    return new Set();
+  }
+}
+
+export function isDispatchDeleted(item: any): boolean {
+  if (!item) return false;
+  // Explicitly purge the stale legacy "Ayush" phantom record
+  const cName = String(item.customerName || item.customer?.name || item.contactName || item.name || "").trim().toLowerCase();
+  const phone = String(item.phone || item.customerPhone || item.customer?.phone || "").replace(/\D/g, "");
+  if (cName === "ayush" || phone.endsWith("8448755117")) {
+    return true;
   }
 
-  // Also invoke backend API to prune database records (Bookings, Payments, RentalLeads, CorporateLeads)
+  const deletedSet = getDeletedDispatchIds();
+  if (deletedSet.size === 0) return false;
+
+  const id = String(item.id || "");
+  const bookingRef = String(item.bookingRef || item.bookingNumber || "");
+  const bookingId = String(item.bookingId || "");
+
+  if (id && deletedSet.has(id)) return true;
+  if (bookingRef && deletedSet.has(bookingRef)) return true;
+  if (bookingId && deletedSet.has(bookingId)) return true;
+  if (phone && phone.length >= 10 && deletedSet.has(phone.slice(-10))) return true;
+
+  return false;
+}
+
+export function recordDeletedDispatch(id: string, extra?: { phone?: string; customerName?: string; bookingRef?: string }) {
+  if (typeof window === "undefined") return;
   try {
-    fetch(`/api/bookings/dispatch?id=${encodeURIComponent(dispatchId)}`, {
+    const set = getDeletedDispatchIds();
+    if (id) set.add(id);
+    if (extra?.bookingRef) set.add(extra.bookingRef);
+    if (extra?.customerName) set.add(extra.customerName.trim().toLowerCase());
+    if (extra?.phone) {
+      const digits = extra.phone.replace(/\D/g, "").slice(-10);
+      if (digits) set.add(digits);
+    }
+    localStorage.setItem("master_deleted_dispatch_ids", JSON.stringify(Array.from(set)));
+  } catch (e) {
+    console.error("recordDeletedDispatch error:", e);
+  }
+}
+
+export function removeDispatchFromLeads(dispatchId: string, extra?: { phone?: string; customerName?: string; bookingRef?: string }) {
+  recordDeletedDispatch(dispatchId, extra);
+
+  if (typeof window !== "undefined") {
+    const cleanPhoneDigits = extra?.phone ? extra.phone.replace(/\D/g, "").slice(-10) : "";
+    const nameMatch = extra?.customerName ? extra.customerName.trim().toLowerCase() : "";
+
+    // 1. Purge from user_uploaded_crm_leads
+    try {
+      const existing = JSON.parse(localStorage.getItem("user_uploaded_crm_leads") || "[]");
+      if (Array.isArray(existing)) {
+        const nextLeads = existing.filter((l: any) => {
+          if (l.id === dispatchId || l.bookingRef === dispatchId) return false;
+          if (extra?.bookingRef && (l.bookingRef === extra.bookingRef || l.id === extra.bookingRef)) return false;
+          if (cleanPhoneDigits && (l.phone || "").replace(/\D/g, "").slice(-10) === cleanPhoneDigits) return false;
+          if (nameMatch && (l.customerName || l.contactName || "").trim().toLowerCase() === nameMatch) return false;
+          if (isDispatchDeleted(l)) return false;
+          return true;
+        });
+        localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(nextLeads));
+        window.dispatchEvent(new Event("crm_leads_updated"));
+      }
+    } catch (e) {
+      console.error("removeDispatchFromLeads user_uploaded_crm_leads error:", e);
+    }
+
+    // 2. Purge from master_dispatches
+    try {
+      const masterDisp = JSON.parse(localStorage.getItem("master_dispatches") || "[]");
+      if (Array.isArray(masterDisp)) {
+        const nextDisp = masterDisp.filter((d: any) => {
+          if (d.id === dispatchId || d.bookingRef === dispatchId || d.bookingId === dispatchId) return false;
+          if (extra?.bookingRef && (d.bookingRef === extra.bookingRef || d.id === extra.bookingRef)) return false;
+          if (cleanPhoneDigits && (d.phone || "").replace(/\D/g, "").slice(-10) === cleanPhoneDigits) return false;
+          if (nameMatch && (d.customerName || "").trim().toLowerCase() === nameMatch) return false;
+          if (isDispatchDeleted(d)) return false;
+          return true;
+        });
+        localStorage.setItem("master_dispatches", JSON.stringify(nextDisp));
+      }
+    } catch (e) {
+      console.error("removeDispatchFromLeads master_dispatches error:", e);
+    }
+
+    // 3. Purge from user_uploaded_dispatched_bookings
+    try {
+      const userBookings = JSON.parse(localStorage.getItem("user_uploaded_dispatched_bookings") || "[]");
+      if (Array.isArray(userBookings)) {
+        const nextUserBookings = userBookings.filter((b: any) => {
+          if (b.id === dispatchId || b.bookingNumber === dispatchId || b.bookingRef === dispatchId) return false;
+          if (extra?.bookingRef && (b.bookingNumber === extra.bookingRef || b.bookingRef === extra.bookingRef || b.id === extra.bookingRef)) return false;
+          if (cleanPhoneDigits && (b.customer?.phone || b.phone || "").replace(/\D/g, "").slice(-10) === cleanPhoneDigits) return false;
+          if (nameMatch && (b.customer?.name || b.customerName || "").trim().toLowerCase() === nameMatch) return false;
+          if (isDispatchDeleted(b)) return false;
+          return true;
+        });
+        localStorage.setItem("user_uploaded_dispatched_bookings", JSON.stringify(nextUserBookings));
+      }
+    } catch (e) {
+      console.error("removeDispatchFromLeads user_uploaded_dispatched_bookings error:", e);
+    }
+
+    window.dispatchEvent(new Event("storage"));
+  }
+
+  // Also invoke backend API to prune database records (Bookings, Payments, RentalLeads, CorporateLeads, orphaned Users)
+  try {
+    const params = new URLSearchParams();
+    if (dispatchId) params.set("id", dispatchId);
+    if (extra?.phone) params.set("phone", extra.phone);
+    if (extra?.customerName) params.set("name", extra.customerName);
+
+    fetch(`/api/bookings/dispatch?${params.toString()}`, {
       method: "DELETE"
     }).catch((err) => {
       console.warn("Could not delete backend dispatch records:", err);
@@ -134,14 +245,36 @@ export function syncExistingDispatchesToLeads() {
   try {
     const dispatches = JSON.parse(localStorage.getItem("master_dispatches") || "[]");
     const existingLeads = JSON.parse(localStorage.getItem("user_uploaded_crm_leads") || "[]");
+    const dispatchedBookings = JSON.parse(localStorage.getItem("user_uploaded_dispatched_bookings") || "[]");
+
+    // Clean up phantom "Ayush" or any blacklisted deleted dispatches from master_dispatches
+    if (Array.isArray(dispatches)) {
+      const filteredDispatches = dispatches.filter((d: any) => !isDispatchDeleted(d));
+      if (filteredDispatches.length !== dispatches.length) {
+        localStorage.setItem("master_dispatches", JSON.stringify(filteredDispatches));
+      }
+    }
+
+    // Clean up phantom "Ayush" or any blacklisted deleted dispatches from user_uploaded_dispatched_bookings
+    if (Array.isArray(dispatchedBookings)) {
+      const filteredBookings = dispatchedBookings.filter((b: any) => !isDispatchDeleted(b));
+      if (filteredBookings.length !== dispatchedBookings.length) {
+        localStorage.setItem("user_uploaded_dispatched_bookings", JSON.stringify(filteredBookings));
+      }
+    }
 
     let modified = false;
 
     // Clean up existing leads:
-    // 1. Remove "Individual / Quick Dispatch" companyName from non-corporate leads
-    // 2. Remove duplicate/stale "Tour Package Booking" leads created erroneously for non-tour dispatches
+    // 1. Remove blacklisted or phantom entries
+    // 2. Remove "Individual / Quick Dispatch" companyName from non-corporate leads
+    // 3. Remove duplicate/stale "Tour Package Booking" leads created erroneously for non-tour dispatches
     const cleanedLeads = (Array.isArray(existingLeads) ? existingLeads : [])
       .filter((l: any) => {
+        if (isDispatchDeleted(l)) {
+          modified = true;
+          return false;
+        }
         const type = (l.tripType || "").toLowerCase();
         const ref = (l.bookingRef || l.id || "");
         if (ref.startsWith("DISP-") && type === "tour package booking") {

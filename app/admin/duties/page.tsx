@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 import { DutySlipRecord } from "@/lib/duties";
+import { isDispatchDeleted } from "@/lib/lead-sync";
 
 export default function AdminDutiesPage() {
   const [duties, setDuties] = useState<DutySlipRecord[]>([]);
@@ -211,6 +212,9 @@ export default function AdminDutiesPage() {
       const seen = new Set<string>();
       const filtered = combined.filter((d) => {
         if (!d || !d.id) return false;
+        if (isDispatchDeleted(d) || isDispatchDeleted({ customerName: d.reportedTo })) {
+          return false;
+        }
         if (deletedIds.includes(d.id) || (d.tripSheetNo && deletedIds.includes(d.tripSheetNo))) {
           return false;
         }

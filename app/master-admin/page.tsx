@@ -34,7 +34,7 @@ import {
 import Portal from "@/components/shared/portal";
 import LocationInput from "@/components/shared/location-input";
 import QuickDispatchAssignmentModal from "@/components/admin/quick-dispatch-assignment-modal";
-import { syncDispatchToLeads, removeDispatchFromLeads, syncExistingDispatchesToLeads } from "@/lib/lead-sync";
+import { syncDispatchToLeads, removeDispatchFromLeads, syncExistingDispatchesToLeads, isDispatchDeleted } from "@/lib/lead-sync";
 
 // Trip Types matching the website's booking engine
 const TRIP_TYPES = [
@@ -241,13 +241,13 @@ export default function MasterAdminDashboard() {
           const seenDisp = new Set<string>();
           const allDispatches: any[] = [];
 
-          mappedBookings.forEach((d: any) => {
+          mappedBookings.filter((d: any) => !isDispatchDeleted(d)).forEach((d: any) => {
             seenDisp.add(d.id);
             allDispatches.push(d);
           });
 
           if (Array.isArray(localDisp)) {
-            localDisp.forEach((d: any) => {
+            localDisp.filter((d: any) => !isDispatchDeleted(d)).forEach((d: any) => {
               if (d && !seenDisp.has(d.id)) {
                 seenDisp.add(d.id);
                 allDispatches.push(d);
@@ -316,8 +316,9 @@ export default function MasterAdminDashboard() {
       if (savedDispatches) {
         const parsed = JSON.parse(savedDispatches);
         if (Array.isArray(parsed)) {
-          setDispatches(parsed);
-          const activeCount = parsed.filter((d: any) => d.status === "IN_TRANSIT" || d.status === "ASSIGNED").length;
+          const valid = parsed.filter((d: any) => !isDispatchDeleted(d));
+          setDispatches(valid);
+          const activeCount = valid.filter((d: any) => d.status === "IN_TRANSIT" || d.status === "ASSIGNED").length;
           setStats(prev => ({ ...prev, activeRides: activeCount }));
         }
       }
@@ -560,14 +561,28 @@ export default function MasterAdminDashboard() {
 
   const handleDeleteDispatch = (id: string) => {
     if (!window.confirm("Are you sure you want to permanently delete this quick dispatch entry?")) return;
+    const target = dispatches.find((d: any) => d.id === id || d.bookingRef === id || d.bookingId === id);
+    const extraInfo = {
+      phone: target?.phone || target?.driverPhone,
+      customerName: target?.customerName,
+      bookingRef: target?.bookingRef || target?.id
+    };
+
+    removeDispatchFromLeads(id, extraInfo);
+
     setDispatches(prev => {
-      const next = prev.filter(d => d.id !== id);
+      const next = prev.filter(d => 
+        !isDispatchDeleted(d) && 
+        d.id !== id && 
+        d.bookingRef !== id && 
+        d.bookingId !== id &&
+        (!target?.phone || d.phone !== target.phone)
+      );
       localStorage.setItem("master_dispatches", JSON.stringify(next));
       const activeCount = next.filter((d: any) => d.status === "IN_TRANSIT" || d.status === "ASSIGNED").length;
       setStats(s => ({ ...s, activeRides: activeCount }));
       return next;
     });
-    removeDispatchFromLeads(id);
     setRecentLogs(prev => [
       {
         id: String(Date.now()),

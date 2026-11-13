@@ -38,7 +38,7 @@ declare global {
 import Portal from "@/components/shared/portal";
 import LocationInput from "@/components/shared/location-input";
 import QuickDispatchAssignmentModal from "@/components/admin/quick-dispatch-assignment-modal";
-import { syncDispatchToLeads, removeDispatchFromLeads, syncExistingDispatchesToLeads } from "@/lib/lead-sync";
+import { syncDispatchToLeads, removeDispatchFromLeads, syncExistingDispatchesToLeads, isDispatchDeleted } from "@/lib/lead-sync";
 import { buildWhatsAppShareUrl } from "@/lib/whatsapp-share";
 
 const TRIP_TYPES = [
@@ -135,7 +135,12 @@ export default function MasterDispatchRadarPage() {
         const saved = localStorage.getItem("master_dispatches");
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed)) localMaster = parsed;
+          if (Array.isArray(parsed)) {
+            localMaster = parsed.filter((d: any) => !isDispatchDeleted(d));
+            if (localMaster.length !== parsed.length) {
+              localStorage.setItem("master_dispatches", JSON.stringify(localMaster));
+            }
+          }
         }
       } catch (e) {
         console.error(e);
@@ -146,7 +151,12 @@ export default function MasterDispatchRadarPage() {
         const savedDispatched = localStorage.getItem("user_uploaded_dispatched_bookings");
         if (savedDispatched) {
           const parsed = JSON.parse(savedDispatched);
-          if (Array.isArray(parsed)) localDispatchedBookings = parsed;
+          if (Array.isArray(parsed)) {
+            localDispatchedBookings = parsed.filter((b: any) => !isDispatchDeleted(b));
+            if (localDispatchedBookings.length !== parsed.length) {
+              localStorage.setItem("user_uploaded_dispatched_bookings", JSON.stringify(localDispatchedBookings));
+            }
+          }
         }
       } catch (e) {
         console.error(e);
@@ -157,7 +167,7 @@ export default function MasterDispatchRadarPage() {
         let apiBookings: any[] = [];
         if (bRes.ok) {
           const bData = await bRes.json();
-          apiBookings = Array.isArray(bData) ? bData : (bData.bookings || []);
+          apiBookings = (Array.isArray(bData) ? bData : (bData.bookings || [])).filter((b: any) => !isDispatchDeleted(b));
           setActiveBookings(apiBookings);
 
           const vMap: Record<string, string> = {};
@@ -183,7 +193,7 @@ export default function MasterDispatchRadarPage() {
 
         // Convert Live Backend Database Bookings to Radar Dispatches
         const convertedApiDispatches = apiBookings
-          .filter((b: any) => b.status !== "CANCELLED")
+          .filter((b: any) => b.status !== "CANCELLED" && !isDispatchDeleted(b))
           .map((b: any) => {
             let drvName = b.driver?.name || b.vehicle?.driver?.name || "";
             let drvPhone = b.driver?.phone || b.vehicle?.driver?.phone || "";
@@ -252,7 +262,9 @@ export default function MasterDispatchRadarPage() {
           });
 
         // Convert Local Dispatched Bookings (Fallback)
-        const convertedLocalDispatched = localDispatchedBookings.map((b: any) => {
+        const convertedLocalDispatched = localDispatchedBookings
+          .filter((b: any) => !isDispatchDeleted(b))
+          .map((b: any) => {
           let drvName = b.driver?.name || b.vehicle?.driver?.name || "";
           let drvPhone = b.driver?.phone || b.vehicle?.driver?.phone || "";
           let drvId = b.driver?.id || b.vehicle?.driver?.id || "";
@@ -320,26 +332,32 @@ export default function MasterDispatchRadarPage() {
 
         // Merge all sources deduplicated
         const dispatchesMap = new Map<string, any>();
-        convertedApiDispatches.forEach(d => dispatchesMap.set(d.bookingRef || d.id, d));
+        convertedApiDispatches.forEach(d => {
+          if (!isDispatchDeleted(d)) dispatchesMap.set(d.bookingRef || d.id, d);
+        });
         convertedLocalDispatched.forEach(d => {
-          const key = d.bookingRef || d.id;
-          if (!dispatchesMap.has(key)) dispatchesMap.set(key, d);
+          if (!isDispatchDeleted(d)) {
+            const key = d.bookingRef || d.id;
+            if (!dispatchesMap.has(key)) dispatchesMap.set(key, d);
+          }
         });
         localMaster.forEach(d => {
-          const key = d.bookingRef || d.id;
-          if (!dispatchesMap.has(key)) {
-            dispatchesMap.set(key, d);
-          } else {
-            const existing = dispatchesMap.get(key);
-            dispatchesMap.set(key, { ...existing, ...d });
+          if (!isDispatchDeleted(d)) {
+            const key = d.bookingRef || d.id;
+            if (!dispatchesMap.has(key)) {
+              dispatchesMap.set(key, d);
+            } else {
+              const existing = dispatchesMap.get(key);
+              dispatchesMap.set(key, { ...existing, ...d });
+            }
           }
         });
 
-        const mergedDrivers = Array.from(dispatchesMap.values());
+        const mergedDrivers = Array.from(dispatchesMap.values()).filter((d: any) => !isDispatchDeleted(d));
         if (mergedDrivers.length > 0) {
           setDrivers(mergedDrivers);
         } else if (localMaster.length > 0) {
-          setDrivers(localMaster);
+          setDrivers(localMaster.filter((d: any) => !isDispatchDeleted(d)));
         }
       } catch (err) {
         console.error("Failed to load live dispatches for radar:", err);
@@ -381,23 +399,46 @@ export default function MasterDispatchRadarPage() {
 
   const handleDeleteDispatch = (id: string) => {
     if (!window.confirm("Are you sure you want to permanently delete this quick dispatch entry?")) return;
+    const target = drivers.find((d) => d.id === id || d.bookingRef === id || d.bookingId === id);
+    const extraInfo = {
+      phone: target?.phone,
+      customerName: target?.customerName,
+      bookingRef: target?.bookingRef || target?.id
+    };
+
+    // Purge across all storages and blacklist it permanently
+    removeDispatchFromLeads(id, extraInfo);
+
     setDrivers((prev) => {
-      const next = prev.filter((d) => d.id !== id && d.bookingRef !== id && d.bookingId !== id);
+      const next = prev.filter((d) => 
+        !isDispatchDeleted(d) && 
+        d.id !== id && 
+        d.bookingRef !== id && 
+        d.bookingId !== id &&
+        (!target?.phone || d.phone !== target.phone)
+      );
       localStorage.setItem("master_dispatches", JSON.stringify(next));
       return next;
     });
+
     try {
       const savedDispatched = localStorage.getItem("user_uploaded_dispatched_bookings");
       if (savedDispatched) {
         const parsed = JSON.parse(savedDispatched);
         if (Array.isArray(parsed)) {
-          const next = parsed.filter((b: any) => b.id !== id && b.bookingNumber !== id);
+          const next = parsed.filter((b: any) => 
+            !isDispatchDeleted(b) && 
+            b.id !== id && 
+            b.bookingNumber !== id && 
+            b.bookingRef !== id &&
+            (!target?.phone || (b.customer?.phone || b.phone) !== target.phone)
+          );
           localStorage.setItem("user_uploaded_dispatched_bookings", JSON.stringify(next));
         }
       }
     } catch (e) {}
-    removeDispatchFromLeads(id);
-    if (selectedDriver?.id === id) {
+
+    if (selectedDriver?.id === id || selectedDriver?.bookingRef === id) {
       setSelectedDriver(null);
     }
   };

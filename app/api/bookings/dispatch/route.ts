@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -171,23 +174,39 @@ export async function DELETE(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
-    if (!id) {
+    const phone = searchParams.get("phone");
+    const name = searchParams.get("name");
+
+    if (!id && !phone && !name) {
       return NextResponse.json({ error: "Missing dispatch id parameter" }, { status: 400 });
     }
 
+    const cleanPhone = phone ? phone.replace(/\D/g, "").slice(-10) : "";
+
     // 1. Delete associated Razorpay payments and Bookings
+    const bookingOrConditions: any[] = [];
+    if (id) {
+      bookingOrConditions.push({ id: id });
+      bookingOrConditions.push({ bookingNumber: id });
+      bookingOrConditions.push({ notes: { contains: id } });
+    }
+    if (cleanPhone) {
+      bookingOrConditions.push({ customer: { phone: { contains: cleanPhone } } });
+    }
+    if (name) {
+      bookingOrConditions.push({ customer: { name: { equals: name, mode: "insensitive" } } });
+    }
+
     const matchingBookings = await prisma.booking.findMany({
       where: {
-        OR: [
-          { id: id },
-          { bookingNumber: id },
-          { notes: { contains: id } }
-        ]
+        OR: bookingOrConditions
       },
-      select: { id: true }
+      select: { id: true, customerId: true }
     });
 
     const bookingIds = matchingBookings.map((b) => b.id);
+    const customerIds = matchingBookings.map((b) => b.customerId).filter(Boolean);
+
     if (bookingIds.length > 0) {
       await prisma.razorpayPayment.deleteMany({
         where: { bookingId: { in: bookingIds } }
@@ -198,27 +217,71 @@ export async function DELETE(req: NextRequest) {
     }
 
     // 2. Delete associated Rental Leads
-    await prisma.rentalLead.deleteMany({
-      where: {
-        OR: [
-          { id: id },
-          { notes: { contains: id } }
-        ]
-      }
-    });
+    const rentalOrConditions: any[] = [];
+    if (id) {
+      rentalOrConditions.push({ id: id });
+      rentalOrConditions.push({ notes: { contains: id } });
+    }
+    if (cleanPhone) {
+      rentalOrConditions.push({ phone: { contains: cleanPhone } });
+    }
+    if (name) {
+      rentalOrConditions.push({ customerName: { equals: name, mode: "insensitive" } });
+    }
+
+    if (rentalOrConditions.length > 0) {
+      await prisma.rentalLead.deleteMany({
+        where: {
+          OR: rentalOrConditions
+        }
+      });
+    }
 
     // 3. Delete associated Corporate Leads
-    await prisma.corporateLead.deleteMany({
-      where: {
-        OR: [
-          { id: id },
-          { notes: { contains: id } },
-          { requirements: { contains: id } }
-        ]
-      }
-    });
+    const corpOrConditions: any[] = [];
+    if (id) {
+      corpOrConditions.push({ id: id });
+      corpOrConditions.push({ notes: { contains: id } });
+      corpOrConditions.push({ requirements: { contains: id } });
+    }
+    if (cleanPhone) {
+      corpOrConditions.push({ phone: { contains: cleanPhone } });
+    }
+    if (name) {
+      corpOrConditions.push({ contactName: { equals: name, mode: "insensitive" } });
+    }
 
-    // 4. Invalidate relevant caches immediately
+    if (corpOrConditions.length > 0) {
+      await prisma.corporateLead.deleteMany({
+        where: {
+          OR: corpOrConditions
+        }
+      });
+    }
+
+    // 4. Delete orphaned dispatch-generated users
+    const userOrConditions: any[] = [];
+    if (customerIds.length > 0) {
+      userOrConditions.push({ id: { in: customerIds } });
+    }
+    if (cleanPhone) {
+      userOrConditions.push({ phone: { contains: cleanPhone } });
+    }
+    if (name) {
+      userOrConditions.push({ name: { equals: name, mode: "insensitive" } });
+    }
+
+    if (userOrConditions.length > 0) {
+      await prisma.user.deleteMany({
+        where: {
+          passwordHash: "dispatch-generated",
+          bookings: { none: {} },
+          OR: userOrConditions
+        }
+      });
+    }
+
+    // 5. Invalidate relevant caches immediately
     try {
       revalidatePath("/admin");
       revalidatePath("/admin/bookings-dispatch");
@@ -234,7 +297,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { success: true, message: `Dispatch ${id} and associated lead/booking records removed successfully.` },
+      { success: true, message: `Dispatch records removed successfully.` },
       { status: 200 }
     );
   } catch (error: any) {
