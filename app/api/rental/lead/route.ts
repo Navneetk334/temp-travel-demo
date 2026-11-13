@@ -25,8 +25,54 @@ export async function GET(req: NextRequest) {
       where.status = (status === "CONVERTED" || status === "WON") ? "WON" : status;
     }
 
+    const buildRentalTripCondition = (tType: string) => {
+      if (tType.toLowerCase() === "local") {
+        return {
+          AND: [
+            {
+              OR: [
+                { tripType: { contains: "Local", mode: "insensitive" } },
+                { tripType: { contains: "Hourly", mode: "insensitive" } },
+              ]
+            },
+            {
+              NOT: [
+                { tripType: { contains: "Outstation", mode: "insensitive" } },
+                { tripType: { contains: "Pickup", mode: "insensitive" } },
+                { tripType: { contains: "Airport", mode: "insensitive" } },
+                { tripType: { contains: "Tour", mode: "insensitive" } },
+              ]
+            }
+          ]
+        };
+      }
+      if (tType.toLowerCase() === "outstation") {
+        return {
+          AND: [
+            {
+              OR: [
+                { tripType: { contains: "Outstation", mode: "insensitive" } },
+                { tripType: { contains: "One Way", mode: "insensitive" } },
+                { tripType: { contains: "Round Trip", mode: "insensitive" } },
+              ]
+            },
+            {
+              NOT: [
+                { tripType: { contains: "Local", mode: "insensitive" } },
+                { tripType: { contains: "Hourly", mode: "insensitive" } },
+                { tripType: { contains: "Pickup", mode: "insensitive" } },
+                { tripType: { contains: "Airport", mode: "insensitive" } },
+                { tripType: { contains: "Tour", mode: "insensitive" } },
+              ]
+            }
+          ]
+        };
+      }
+      return { tripType: { contains: tType, mode: "insensitive" } };
+    };
+
     if (tripType) {
-      where.tripType = { contains: tripType, mode: "insensitive" };
+      Object.assign(where, buildRentalTripCondition(tripType));
     }
 
     if (search) {
@@ -68,7 +114,7 @@ export async function GET(req: NextRequest) {
     // Pipeline counts for stats header (filtered by tripType if specified)
     const countWhere: any = {};
     if (tripType) {
-      countWhere.tripType = { contains: tripType, mode: "insensitive" };
+      Object.assign(countWhere, buildRentalTripCondition(tripType));
     }
 
     const [newCount, contactedCount, qualifiedCount, negotiationCount, wonCount, lostCount, archivedCount] = await Promise.all([
@@ -201,18 +247,126 @@ export async function PUT(req: NextRequest) {
     const dbStatus = (status === "CONVERTED" || status === "WON") ? "WON" : status;
     const finalTripType = tripType || serviceType;
 
-    const updated = await prisma.rentalLead.update({
-      where: { id },
-      data: {
-        ...(dbStatus ? { status: dbStatus as any } : {}),
-        ...(notes !== undefined ? { notes } : {}),
-        ...(finalTripType ? { tripType: finalTripType } : {}),
-      }
-    });
+    let updatedResult: any = null;
 
-    if (finalTripType && updated.phone) {
+    // Check if lead exists in RentalLead
+    const existingRental = await prisma.rentalLead.findUnique({ where: { id } });
+
+    if (existingRental) {
+      const isSwitchingToPickupOrCorp = finalTripType && (
+        finalTripType.toLowerCase().includes("pickup") ||
+        finalTripType.toLowerCase().includes("drop") ||
+        finalTripType.toLowerCase().includes("airport") ||
+        finalTripType.toLowerCase().includes("transfer") ||
+        finalTripType.toLowerCase().includes("point") ||
+        finalTripType.toLowerCase().includes("corporate")
+      );
+
+      if (isSwitchingToPickupOrCorp) {
+        // Migrate from RentalLead to CorporateLead
+        const isCorp = finalTripType.toLowerCase().includes("corporate") || finalTripType.toLowerCase().includes("working");
+        const migratedCorp = await prisma.corporateLead.create({
+          data: {
+            id,
+            companyName: isCorp ? "Corporate Client" : "Individual",
+            contactName: existingRental.customerName,
+            email: existingRental.email,
+            phone: existingRental.phone,
+            pickupLocations: existingRental.pickupLocation,
+            serviceType: finalTripType,
+            requirements: `Pickup Address: ${existingRental.pickupLocation}. Drop Address: ${existingRental.dropLocation || "N/A"}.`,
+            notes: notes !== undefined ? notes : existingRental.notes,
+            status: (dbStatus || existingRental.status) as any,
+            createdAt: existingRental.createdAt,
+          }
+        });
+
+        await prisma.rentalLead.delete({ where: { id } });
+        updatedResult = {
+          ...migratedCorp,
+          customerName: migratedCorp.contactName,
+          tripType: migratedCorp.serviceType,
+          status: migratedCorp.status === "WON" ? "CONVERTED" : migratedCorp.status
+        };
+      } else {
+        const updated = await prisma.rentalLead.update({
+          where: { id },
+          data: {
+            ...(dbStatus ? { status: dbStatus as any } : {}),
+            ...(notes !== undefined ? { notes } : {}),
+            ...(finalTripType ? { tripType: finalTripType } : {}),
+          }
+        });
+        updatedResult = {
+          ...updated,
+          status: updated.status === "WON" ? "CONVERTED" : updated.status
+        };
+      }
+    } else {
+      // Check if lead exists in CorporateLead
+      const existingCorp = await prisma.corporateLead.findUnique({ where: { id } });
+      if (existingCorp) {
+        const isSwitchingToRental = finalTripType && (
+          finalTripType.toLowerCase().includes("local") ||
+          finalTripType.toLowerCase().includes("hourly") ||
+          finalTripType.toLowerCase().includes("outstation")
+        );
+
+        if (isSwitchingToRental) {
+          // Migrate from CorporateLead to RentalLead
+          const defaultCat = await prisma.vehicleCategory.findFirst();
+          let dropLoc = null;
+          if (existingCorp.requirements) {
+            const dropMatch = existingCorp.requirements.match(/(?:Drop Address|Drop Location|Drop):\s*([^.\n]+(?:\.[^.\n]+)*?)(?=\.\s*(?:Pickup Time|Drop Time|Fare|Advance|Car|Chauffeur|Notes|$)|$|\n)/i);
+            if (dropMatch && dropMatch[1]) dropLoc = dropMatch[1].trim();
+          }
+
+          const migratedRental = await prisma.rentalLead.create({
+            data: {
+              id,
+              customerName: existingCorp.contactName,
+              email: existingCorp.email,
+              phone: existingCorp.phone,
+              pickupLocation: existingCorp.pickupLocations || "Pickup Location",
+              dropLocation: dropLoc,
+              pickupDateTime: existingCorp.createdAt || new Date(),
+              vehicleCategoryId: defaultCat?.id || "default",
+              tripType: finalTripType,
+              notes: notes !== undefined ? notes : existingCorp.notes,
+              status: (dbStatus || existingCorp.status) as any,
+              createdAt: existingCorp.createdAt,
+            }
+          });
+
+          await prisma.corporateLead.delete({ where: { id } });
+          updatedResult = {
+            ...migratedRental,
+            status: migratedRental.status === "WON" ? "CONVERTED" : migratedRental.status
+          };
+        } else {
+          const updatedCorp = await prisma.corporateLead.update({
+            where: { id },
+            data: {
+              ...(dbStatus ? { status: dbStatus as any } : {}),
+              ...(notes !== undefined ? { notes } : {}),
+              ...(finalTripType ? { serviceType: finalTripType } : {}),
+            }
+          });
+          updatedResult = {
+            ...updatedCorp,
+            customerName: updatedCorp.contactName,
+            tripType: updatedCorp.serviceType,
+            status: updatedCorp.status === "WON" ? "CONVERTED" : updatedCorp.status
+          };
+        }
+      } else {
+        return NextResponse.json({ error: "Lead not found in database" }, { status: 404 });
+      }
+    }
+
+    if (finalTripType && updatedResult?.phone) {
       try {
-        const cleanPhone = updated.phone.replace(/\D/g, "").slice(-10);
+        const cleanPhone = updatedResult.phone.replace(/\D/g, "").slice(-10);
         const matchingCustomers = await prisma.user.findMany({
           where: { phone: { contains: cleanPhone } },
           select: { id: true }
@@ -255,10 +409,7 @@ export async function PUT(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({
-      ...updated,
-      status: updated.status === "WON" ? "CONVERTED" : updated.status
-    });
+    return NextResponse.json(updatedResult);
   } catch (err: any) {
     console.error("PUT /api/rental/lead error:", err);
     return NextResponse.json({ error: err.message || "Failed to update rental lead" }, { status: 500 });
@@ -266,3 +417,24 @@ export async function PUT(req: NextRequest) {
 }
 
 export const PATCH = PUT;
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+    if (!id) {
+      return NextResponse.json({ error: "Missing lead id" }, { status: 400 });
+    }
+
+    try {
+      await prisma.rentalLead.delete({ where: { id } });
+    } catch (e) {
+      await prisma.corporateLead.delete({ where: { id } }).catch(() => null);
+    }
+
+    return NextResponse.json({ message: "Lead deleted successfully" });
+  } catch (err: any) {
+    console.error("DELETE /api/rental/lead error:", err);
+    return NextResponse.json({ error: "Failed to delete lead" }, { status: 500 });
+  }
+}

@@ -183,6 +183,28 @@ export default function AdminCorporateLeadsPage() {
         console.error(e);
       }
 
+      // Strictly enforce pickup & drop classification only (exclude local, outstation, tour)
+      fetchedLeads = fetchedLeads.filter((l) => {
+        const type = (l.serviceType || (l as any).tripType || "").toLowerCase();
+        if (
+          type.includes("local") ||
+          type.includes("hourly") ||
+          type.includes("outstation") ||
+          type.includes("round trip") ||
+          type.includes("one way") ||
+          type.includes("tour")
+        ) {
+          return false;
+        }
+        return (
+          type.includes("pickup") ||
+          type.includes("drop") ||
+          type.includes("airport") ||
+          type.includes("transfer") ||
+          type.includes("point")
+        );
+      });
+
       setLeads(fetchedLeads);
       setTotalCount(fetchedLeads.length);
       setTotalPages(Math.ceil(fetchedLeads.length / pageSize) || 1);
@@ -277,11 +299,25 @@ export default function AdminCorporateLeadsPage() {
     const target = leads.find((l) => l.id === id);
     const updatedNotes = [logTag, target?.notes].filter(Boolean).join("\n");
 
-    setLeads((prev) =>
-      prev.map((l) => (l.id === id ? { ...l, serviceType: newType, notes: updatedNotes } : l))
-    );
-    if (activeLead && activeLead.id === id) {
-      setActiveLead({ ...activeLead, serviceType: newType, notes: updatedNotes });
+    const isStillPickup =
+      newType.toLowerCase().includes("pickup") ||
+      newType.toLowerCase().includes("drop") ||
+      newType.toLowerCase().includes("airport") ||
+      newType.toLowerCase().includes("transfer") ||
+      newType.toLowerCase().includes("point");
+
+    if (!isStillPickup) {
+      setLeads((prev) => prev.filter((l) => l.id !== id));
+      if (activeLead && activeLead.id === id) {
+        setActiveLead(null);
+      }
+    } else {
+      setLeads((prev) =>
+        prev.map((l) => (l.id === id ? { ...l, serviceType: newType, notes: updatedNotes } : l))
+      );
+      if (activeLead && activeLead.id === id) {
+        setActiveLead({ ...activeLead, serviceType: newType, notes: updatedNotes });
+      }
     }
 
     try {

@@ -23,14 +23,38 @@ export async function GET(
       where: { id },
     });
 
-    if (!lead) {
-      return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+    if (lead) {
+      return NextResponse.json({
+        ...lead,
+        status: lead.status === "WON" ? "CONVERTED" : lead.status,
+      }, { status: 200 });
     }
 
-    return NextResponse.json({
-      ...lead,
-      status: lead.status === "WON" ? "CONVERTED" : lead.status,
-    }, { status: 200 });
+    // Fallback: check if lead exists in RentalLead
+    const rentalLead = await prisma.rentalLead.findUnique({
+      where: { id },
+    });
+
+    if (rentalLead) {
+      return NextResponse.json({
+        id: rentalLead.id,
+        companyName: "Individual",
+        contactName: rentalLead.customerName,
+        email: rentalLead.email,
+        phone: rentalLead.phone,
+        pickupLocations: rentalLead.pickupLocation,
+        pickupLocation: rentalLead.pickupLocation,
+        dropLocation: rentalLead.dropLocation,
+        serviceType: rentalLead.tripType || "Local Rental",
+        requirements: rentalLead.notes || "",
+        notes: rentalLead.notes || "",
+        status: rentalLead.status === "WON" ? "CONVERTED" : rentalLead.status,
+        createdAt: rentalLead.createdAt,
+        updatedAt: rentalLead.updatedAt,
+      }, { status: 200 });
+    }
+
+    return NextResponse.json({ error: "Lead not found" }, { status: 404 });
   } catch (error) {
     console.error(`GET /api/corporate/lead/${id} error:`, error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -59,18 +83,127 @@ export async function PUT(
     const dbStatus = status === "CONVERTED" ? "WON" : status;
     const resolvedServiceType = serviceType || tripType;
 
-    const updatedLead = await prisma.corporateLead.update({
-      where: { id: id },
-      data: {
-        ...restData,
-        ...(resolvedServiceType !== undefined ? { serviceType: resolvedServiceType } : {}),
-        ...(dbStatus ? { status: dbStatus as any } : {}),
-      },
-    });
+    // Check if lead currently exists in CorporateLead
+    const existingCorp = await prisma.corporateLead.findUnique({ where: { id } });
+    let updatedLeadResult: any = null;
 
-    if (resolvedServiceType && updatedLead.phone) {
+    if (existingCorp) {
+      const isSwitchingToRental = resolvedServiceType && (
+        resolvedServiceType.toLowerCase().includes("local") ||
+        resolvedServiceType.toLowerCase().includes("hourly") ||
+        resolvedServiceType.toLowerCase().includes("outstation")
+      );
+
+      if (isSwitchingToRental) {
+        // Automatically migrate from CorporateLead to RentalLead table
+        const defaultCat = await prisma.vehicleCategory.findFirst();
+        let dropLocation = null;
+        if (existingCorp.requirements) {
+          const dropMatch = existingCorp.requirements.match(/(?:Drop Address|Drop Location|Drop):\s*([^.\n]+(?:\.[^.\n]+)*?)(?=\.\s*(?:Pickup Time|Drop Time|Fare|Advance|Car|Chauffeur|Notes|$)|$|\n)/i);
+          if (dropMatch && dropMatch[1]) dropLocation = dropMatch[1].trim();
+        }
+
+        const migratedRental = await prisma.rentalLead.create({
+          data: {
+            id,
+            customerName: existingCorp.contactName,
+            email: existingCorp.email,
+            phone: existingCorp.phone,
+            pickupLocation: existingCorp.pickupLocations || "Pickup Location",
+            dropLocation,
+            pickupDateTime: existingCorp.createdAt || new Date(),
+            vehicleCategoryId: defaultCat?.id || "default",
+            tripType: resolvedServiceType,
+            notes: restData.notes !== undefined ? restData.notes : existingCorp.notes,
+            status: (dbStatus || existingCorp.status) as any,
+            createdAt: existingCorp.createdAt,
+          }
+        });
+
+        await prisma.corporateLead.delete({ where: { id } });
+        updatedLeadResult = {
+          ...migratedRental,
+          companyName: existingCorp.companyName,
+          contactName: migratedRental.customerName,
+          serviceType: migratedRental.tripType,
+          status: migratedRental.status === "WON" ? "CONVERTED" : migratedRental.status
+        };
+      } else {
+        const updatedCorp = await prisma.corporateLead.update({
+          where: { id },
+          data: {
+            ...restData,
+            ...(resolvedServiceType !== undefined ? { serviceType: resolvedServiceType } : {}),
+            ...(dbStatus ? { status: dbStatus as any } : {}),
+          },
+        });
+        updatedLeadResult = {
+          ...updatedCorp,
+          status: updatedCorp.status === "WON" ? "CONVERTED" : updatedCorp.status
+        };
+      }
+    } else {
+      // Check if lead exists in RentalLead (previously migrated or created as rental)
+      const existingRental = await prisma.rentalLead.findUnique({ where: { id } });
+      if (existingRental) {
+        const isSwitchingToCorpOrPickup = resolvedServiceType && (
+          resolvedServiceType.toLowerCase().includes("pickup") ||
+          resolvedServiceType.toLowerCase().includes("drop") ||
+          resolvedServiceType.toLowerCase().includes("airport") ||
+          resolvedServiceType.toLowerCase().includes("transfer") ||
+          resolvedServiceType.toLowerCase().includes("corporate") ||
+          resolvedServiceType.toLowerCase().includes("point")
+        );
+
+        if (isSwitchingToCorpOrPickup) {
+          // Migrate back to CorporateLead table
+          const isCorp = resolvedServiceType.toLowerCase().includes("corporate") || resolvedServiceType.toLowerCase().includes("working");
+          const migratedCorp = await prisma.corporateLead.create({
+            data: {
+              id,
+              companyName: isCorp ? "Corporate Client" : "Individual",
+              contactName: existingRental.customerName,
+              email: existingRental.email,
+              phone: existingRental.phone,
+              pickupLocations: existingRental.pickupLocation,
+              serviceType: resolvedServiceType,
+              requirements: `Pickup Address: ${existingRental.pickupLocation}. Drop Address: ${existingRental.dropLocation || "N/A"}.`,
+              notes: restData.notes !== undefined ? restData.notes : existingRental.notes,
+              status: (dbStatus || existingRental.status) as any,
+              createdAt: existingRental.createdAt,
+            }
+          });
+
+          await prisma.rentalLead.delete({ where: { id } });
+          updatedLeadResult = {
+            ...migratedCorp,
+            status: migratedCorp.status === "WON" ? "CONVERTED" : migratedCorp.status
+          };
+        } else {
+          const updatedRental = await prisma.rentalLead.update({
+            where: { id },
+            data: {
+              ...(dbStatus ? { status: dbStatus as any } : {}),
+              ...(restData.notes !== undefined ? { notes: restData.notes } : {}),
+              ...(resolvedServiceType ? { tripType: resolvedServiceType } : {}),
+            }
+          });
+          updatedLeadResult = {
+            ...updatedRental,
+            companyName: "Individual",
+            contactName: updatedRental.customerName,
+            serviceType: updatedRental.tripType,
+            status: updatedRental.status === "WON" ? "CONVERTED" : updatedRental.status
+          };
+        }
+      } else {
+        return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+      }
+    }
+
+    if (resolvedServiceType && updatedLeadResult?.phone) {
       try {
-        const cleanPhone = updatedLead.phone.replace(/\D/g, "").slice(-10);
+        const cleanPhone = updatedLeadResult.phone.replace(/\D/g, "").slice(-10);
         const matchingCustomers = await prisma.user.findMany({
           where: { phone: { contains: cleanPhone } },
           select: { id: true }
@@ -113,10 +246,7 @@ export async function PUT(
       }
     }
 
-    return NextResponse.json({
-      ...updatedLead,
-      status: updatedLead.status === "WON" ? "CONVERTED" : updatedLead.status,
-    }, { status: 200 });
+    return NextResponse.json(updatedLeadResult, { status: 200 });
   } catch (error) {
     console.error(`PUT /api/corporate/lead/${id} error:`, error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -136,14 +266,24 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
     }
 
-    await prisma.corporateLead.delete({
-      where: { id: id },
-    });
+    // Delete from whichever table contains the record
+    try {
+      await prisma.corporateLead.delete({
+        where: { id: id },
+      });
+    } catch (e) {
+      // not in corporateLead, try rentalLead
+      await prisma.rentalLead.delete({
+        where: { id: id },
+      }).catch(() => null);
+    }
 
     try {
       revalidatePath("/admin");
       revalidatePath("/admin/corporate-leads");
       revalidatePath("/admin/corporate-inquiry-leads");
+      revalidatePath("/admin/local-rental-leads");
+      revalidatePath("/admin/outstation-leads");
     } catch (e) {
       console.warn("revalidatePath error in DELETE /api/corporate/lead/[id]:", e);
     }

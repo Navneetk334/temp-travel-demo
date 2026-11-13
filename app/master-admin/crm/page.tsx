@@ -841,77 +841,106 @@ export default function MasterOmnichannelCRMPage() {
     document.body.removeChild(link);
   };
 
+  // Authoritative Single Source of Truth for Omnichannel Tab Categorization
+  const isLeadInTab = (lead: any, tabKey: string): boolean => {
+    const type = (lead.tripType || lead.serviceType || "").toLowerCase();
+    const comp = (lead.companyName || "").trim().toLowerCase();
+    const isIndividual = !comp || comp === "individual" || comp.includes("individual");
+
+    switch (tabKey) {
+      case "pickup":
+        if (
+          type.includes("local") || 
+          type.includes("hourly") || 
+          type.includes("outstation") || 
+          type.includes("round trip") || 
+          type.includes("one way") || 
+          type.includes("tour")
+        ) {
+          return false;
+        }
+        return (
+          type.includes("pickup") || 
+          type.includes("drop") || 
+          type.includes("airport") || 
+          type.includes("transfer") || 
+          type.includes("point")
+        );
+
+      case "local":
+        if (
+          type.includes("outstation") || 
+          type.includes("round trip") || 
+          type.includes("one way") || 
+          type.includes("tour")
+        ) {
+          return false;
+        }
+        if (type.includes("pickup") || type.includes("drop") || type.includes("airport") || type.includes("transfer")) {
+          if (!type.includes("local") && !type.includes("hourly")) return false;
+        }
+        return type.includes("local") || type.includes("hourly");
+
+      case "outstation":
+        if (
+          type.includes("local") || 
+          type.includes("hourly") || 
+          type.includes("tour")
+        ) {
+          return false;
+        }
+        if (type.includes("pickup") || type.includes("drop") || type.includes("airport") || type.includes("transfer")) {
+          if (!type.includes("outstation")) return false;
+        }
+        return type.includes("outstation") || type.includes("round trip") || type.includes("one way");
+
+      case "corporate":
+        if (isIndividual) {
+          return false;
+        }
+        if (
+          type.includes("local") || 
+          type.includes("hourly") || 
+          type.includes("outstation") || 
+          type.includes("tour") || 
+          type.includes("pickup") || 
+          type.includes("drop") || 
+          type.includes("airport")
+        ) {
+          return false;
+        }
+        return (
+          type.includes("corporate") || 
+          type.includes("working") || 
+          type.includes("employee") || 
+          type.includes("b2b") || 
+          type.includes("contract") ||
+          !isIndividual
+        );
+
+      case "tour":
+        if (
+          type.includes("local") || 
+          type.includes("hourly") || 
+          type.includes("outstation") || 
+          type.includes("pickup") || 
+          type.includes("drop")
+        ) {
+          return false;
+        }
+        return type.includes("tour");
+
+      case "contact":
+        return type.includes("contact") || type.includes("inquiry") || Boolean(lead.subject);
+
+      default:
+        return true;
+    }
+  };
+
   // Filter Leads by Active Tab
   const getFilteredByTab = () => {
-    switch (activeLeadTab) {
-      case "pickup":
-        return leads.filter(l => {
-          const type = (l.tripType || "").toLowerCase();
-          const notes = (l.notes || "").toLowerCase();
-          if (type.includes("local") || type.includes("hourly") || type.includes("outstation") || type.includes("round trip") || type.includes("one way")) {
-            return false;
-          }
-          return type.includes("pickup") || type.includes("airport") || notes.includes("pickup") || type.includes("drop");
-        });
-      case "local":
-        return leads.filter(l => {
-          const type = (l.tripType || "").toLowerCase();
-          const notes = (l.notes || "").toLowerCase();
-          return type.includes("local") || type.includes("hourly") || notes.includes("local");
-        });
-      case "outstation":
-        return leads.filter(l => {
-          const type = (l.tripType || "").toLowerCase();
-          const notes = (l.notes || "").toLowerCase();
-          return type.includes("outstation") || type.includes("round trip") || type.includes("one way") || notes.includes("outstation");
-        });
-      case "corporate":
-        return leads.filter(l => {
-          const type = (l.tripType || "").toLowerCase();
-          const comp = (l.companyName || "").trim().toLowerCase();
-
-          // Exclude any Local Rentals, Outstation Trips, or Airport Pickup & Drop
-          if (
-            type.includes("local") ||
-            type.includes("hourly") ||
-            type.includes("outstation") ||
-            type.includes("round trip") ||
-            type.includes("one way") ||
-            type.includes("pickup") ||
-            type.includes("airport")
-          ) {
-            return false;
-          }
-
-          const hasRealCompany = comp !== "" && comp !== "individual" && !comp.includes("individual");
-          const isCorp = type.includes("corporate") || type.includes("working") || type.includes("employee") || type.includes("transit") || type.includes("b2b");
-          return hasRealCompany || isCorp;
-        });
-      case "tour":
-        return leads.filter(l => {
-          const type = (l.tripType || "").toLowerCase();
-          // Strictly exclude local rentals, outstation trips, airport pickup & drop, and corporate
-          if (
-            type.includes("local") ||
-            type.includes("hourly") ||
-            type.includes("outstation") ||
-            type.includes("round trip") ||
-            type.includes("one way") ||
-            type.includes("pickup") ||
-            type.includes("airport") ||
-            type.includes("transit") ||
-            type.includes("shuttle") ||
-            type.includes("working")
-          ) {
-            return false;
-          }
-          return type.includes("tour");
-        });
-      case "contact":
-        return leads.filter(l => (l.tripType || "").toLowerCase().includes("contact") || (l.tripType || "").toLowerCase().includes("inquiry"));
-      default:
-        return leads;
-    }
+    return leads.filter((l) => isLeadInTab(l, activeLeadTab));
   };
 
   const tabFiltered = getFilteredByTab();
@@ -961,12 +990,12 @@ export default function MasterOmnichannelCRMPage() {
       {/* Omnichannel Segmented Lead Source Tabs */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
         {[
-          { key: "pickup", label: "Pickup & Drop", icon: Building2, count: leads.filter(l => (l.tripType || "").toLowerCase().includes("pickup") || (l.notes || "").toLowerCase().includes("pickup") || (l.tripType || "").toLowerCase().includes("drop")).length },
-          { key: "local", label: "Local Rentals", icon: Clock, count: leads.filter(l => (l.tripType || "").toLowerCase().includes("local") || (l.tripType || "").toLowerCase().includes("hourly") || (l.notes || "").toLowerCase().includes("local")).length },
-          { key: "outstation", label: "Outstation", icon: Compass, count: leads.filter(l => (l.tripType || "").toLowerCase().includes("outstation") || (l.tripType || "").toLowerCase().includes("round trip") || (l.tripType || "").toLowerCase().includes("one way")).length },
-          { key: "corporate", label: "Corporate B2B", icon: Users, count: leads.filter(l => (l.companyName && l.companyName.trim() !== "") || (l.tripType || "").toLowerCase().includes("corporate") || (l.tripType || "").toLowerCase().includes("working")).length },
-          { key: "tour", label: "Tour Packages", icon: Sparkles, count: leads.filter(l => (l.tripType || "").toLowerCase().includes("tour")).length },
-          { key: "contact", label: "Web Inquiries", icon: Mail, count: leads.filter(l => (l.tripType || "").toLowerCase().includes("contact") || (l.tripType || "").toLowerCase().includes("inquiry")).length },
+          { key: "pickup", label: "Pickup & Drop", icon: Building2, count: leads.filter(l => isLeadInTab(l, "pickup")).length },
+          { key: "local", label: "Local Rentals", icon: Clock, count: leads.filter(l => isLeadInTab(l, "local")).length },
+          { key: "outstation", label: "Outstation", icon: Compass, count: leads.filter(l => isLeadInTab(l, "outstation")).length },
+          { key: "corporate", label: "Corporate B2B", icon: Users, count: leads.filter(l => isLeadInTab(l, "corporate")).length },
+          { key: "tour", label: "Tour Packages", icon: Sparkles, count: leads.filter(l => isLeadInTab(l, "tour")).length },
+          { key: "contact", label: "Web Inquiries", icon: Mail, count: leads.filter(l => isLeadInTab(l, "contact")).length },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeLeadTab === tab.key;

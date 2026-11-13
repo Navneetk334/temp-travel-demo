@@ -126,11 +126,21 @@ export default function AdminLocalRentalLeadsPage() {
         if (local) {
           const parsed = JSON.parse(local);
           if (Array.isArray(parsed)) {
-            const matching = parsed.filter((l: any) => 
-              (l.tripType || "").toLowerCase().includes("local") || 
-              (l.tripType || "").toLowerCase().includes("hourly") ||
-              (l.notes || "").toLowerCase().includes("local")
-            ).map((l: any) => ({
+            const matching = parsed.filter((l: any) => {
+              const type = (l.tripType || l.serviceType || "").toLowerCase();
+              if (
+                type.includes("outstation") ||
+                type.includes("round trip") ||
+                type.includes("one way") ||
+                type.includes("tour")
+              ) {
+                return false;
+              }
+              if (type.includes("pickup") || type.includes("airport") || type.includes("drop") || type.includes("transfer")) {
+                if (!type.includes("local") && !type.includes("hourly")) return false;
+              }
+              return type.includes("local") || type.includes("hourly");
+            }).map((l: any) => ({
               id: l.id || `lead_${Date.now()}`,
               customerName: l.customerName || "Customer",
               email: l.email || "",
@@ -156,6 +166,18 @@ export default function AdminLocalRentalLeadsPage() {
       } catch (e) {
         console.error(e);
       }
+
+      // Strictly enforce Local Hourly Rental classification (exclude outstation, pickup/drop, tour)
+      fetchedLeads = fetchedLeads.filter((l) => {
+        const type = (l.tripType || (l as any).serviceType || "").toLowerCase();
+        if (type.includes("outstation") || type.includes("round trip") || type.includes("one way") || type.includes("tour")) {
+          return false;
+        }
+        if (type.includes("pickup") || type.includes("airport") || type.includes("drop") || type.includes("transfer")) {
+          if (!type.includes("local") && !type.includes("hourly")) return false;
+        }
+        return type.includes("local") || type.includes("hourly");
+      });
 
       setLeads(fetchedLeads);
       setTotalCount(fetchedLeads.length);
@@ -232,6 +254,65 @@ export default function AdminLocalRentalLeadsPage() {
       console.error("Failed to update status:", err);
     } finally {
       setUpdatingStatus(null);
+    }
+  };
+
+  const handleTripTypeChange = async (id: string, newType: string) => {
+    const { userName, panel } = getCurrentAdminUser("Admin Panel");
+    const timestamp = new Date().toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true
+    });
+    const logTag = `[${timestamp}] Booking type updated to "${newType}" by ${userName} (${panel})`;
+
+    const target = leads.find((l) => l.id === id);
+    const updatedNotes = [logTag, target?.notes].filter(Boolean).join("\n");
+
+    const isStillLocal = newType.toLowerCase().includes("local") || newType.toLowerCase().includes("hourly");
+
+    if (!isStillLocal) {
+      setLeads((prev) => prev.filter((l) => l.id !== id));
+      if (activeLead && activeLead.id === id) {
+        setActiveLead(null);
+      }
+    } else {
+      setLeads((prev) =>
+        prev.map((l) => (l.id === id ? { ...l, tripType: newType, notes: updatedNotes } : l))
+      );
+      if (activeLead && activeLead.id === id) {
+        setActiveLead({ ...activeLead, tripType: newType, notes: updatedNotes });
+      }
+    }
+
+    try {
+      const crmStored = localStorage.getItem("user_uploaded_crm_leads");
+      if (crmStored) {
+        const crmList = JSON.parse(crmStored);
+        if (Array.isArray(crmList)) {
+          const updatedCRM = crmList.map((l: any) =>
+            l.id === id ? { ...l, tripType: newType, serviceType: newType, notes: updatedNotes } : l
+          );
+          localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(updatedCRM));
+          window.dispatchEvent(new Event("crm_leads_updated"));
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    try {
+      await fetch(`/api/rental/lead`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, tripType: newType, serviceType: newType, notes: updatedNotes }),
+      });
+    } catch (err) {
+      console.error("Failed to update trip type:", err);
     }
   };
 
@@ -826,8 +907,17 @@ export default function AdminLocalRentalLeadsPage() {
                   <span className="font-mono font-bold text-slate-100">{activeLead.phone}</span>
                 </div>
                 <div className="flex justify-between items-center bg-background/40 p-2.5 rounded-lg border border-border">
-                  <span className="text-slate-400">Rental Package:</span>
-                  <span className="font-bold text-amber-400">{activeLead.tripType || "Local Rental"}</span>
+                  <span className="text-slate-400 font-bold uppercase text-[10px]">Booking / Trip Type:</span>
+                  <select
+                    value={activeLead.tripType || "Local Rental"}
+                    onChange={(e) => handleTripTypeChange(activeLead.id, e.target.value)}
+                    className="bg-surface border border-amber-500/40 rounded-lg px-2.5 py-1 text-xs font-bold text-amber-400 focus:outline-none focus:border-amber-400 cursor-pointer font-sans"
+                  >
+                    <option value="Local Rental" className="bg-slate-900 text-slate-100">Local Rental</option>
+                    <option value="Pickup & Drop" className="bg-slate-900 text-slate-100">Pickup & Drop</option>
+                    <option value="Point to Point" className="bg-slate-900 text-slate-100">Point to Point</option>
+                    <option value="Outstation" className="bg-slate-900 text-slate-100">Outstation</option>
+                  </select>
                 </div>
 
                 {(() => {

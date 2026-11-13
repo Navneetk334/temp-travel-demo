@@ -159,6 +159,34 @@ export default function AdminCorporateInquiryLeadsPage() {
         console.error(e);
       }
 
+      // Strictly enforce corporate inquiry requirements:
+      // Must have real company name (not "Individual" / empty) OR serviceType is Corporate B2B/Working/Employee
+      // Never show retail individual leads (Local Rental, Outstation, Pickup/Drop)
+      fetchedLeads = fetchedLeads.filter((l) => {
+        const type = (l.serviceType || (l as any).tripType || "").toLowerCase();
+        const comp = (l.companyName || "").trim().toLowerCase();
+        const isIndividual = !comp || comp === "individual" || comp.includes("individual");
+
+        if (isIndividual) {
+          if (
+            type.includes("local") ||
+            type.includes("hourly") ||
+            type.includes("outstation") ||
+            type.includes("round trip") ||
+            type.includes("one way") ||
+            type.includes("pickup") ||
+            type.includes("drop") ||
+            type.includes("airport") ||
+            type.includes("tour")
+          ) {
+            return false;
+          }
+        }
+
+        const isCorpType = type.includes("corporate") || type.includes("working") || type.includes("employee") || type.includes("b2b") || type.includes("contract");
+        return (!isIndividual || isCorpType) && !isIndividual;
+      });
+
       setLeads(fetchedLeads);
       setTotalCount(fetchedLeads.length);
       setTotalPages(Math.ceil(fetchedLeads.length / pageSize) || 1);

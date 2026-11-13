@@ -26,10 +26,77 @@ export async function GET(req: NextRequest) {
       where.status = (status === "CONVERTED" || status === "WON") ? "WON" : status;
     }
 
-    if (leadType === "pickup_drop") {
-      where.serviceType = { contains: "Pickup & Drop", mode: "insensitive" };
-    } else if (leadType === "corporate_inquiry") {
-      where.NOT = { serviceType: { contains: "Pickup & Drop", mode: "insensitive" } };
+    const buildTypeCondition = (type: string) => {
+      if (type === "pickup_drop") {
+        return {
+          AND: [
+            {
+              OR: [
+                { serviceType: { contains: "Pickup", mode: "insensitive" } },
+                { serviceType: { contains: "Drop", mode: "insensitive" } },
+                { serviceType: { contains: "Airport", mode: "insensitive" } },
+                { serviceType: { contains: "Transfer", mode: "insensitive" } },
+                { serviceType: { contains: "Point to Point", mode: "insensitive" } },
+                { serviceType: { contains: "Point-to-Point", mode: "insensitive" } },
+              ]
+            },
+            {
+              NOT: [
+                { serviceType: { contains: "Local", mode: "insensitive" } },
+                { serviceType: { contains: "Hourly", mode: "insensitive" } },
+                { serviceType: { contains: "Outstation", mode: "insensitive" } },
+                { serviceType: { contains: "Tour", mode: "insensitive" } },
+              ]
+            }
+          ]
+        };
+      }
+      if (type === "corporate_inquiry") {
+        return {
+          AND: [
+            {
+              OR: [
+                {
+                  AND: [
+                    { companyName: { notIn: ["Individual", "individual", ""] } },
+                    { NOT: { companyName: { contains: "individual", mode: "insensitive" } } }
+                  ]
+                },
+                { serviceType: { contains: "Corporate", mode: "insensitive" } },
+                { serviceType: { contains: "B2B", mode: "insensitive" } },
+                { serviceType: { contains: "Working", mode: "insensitive" } },
+                { serviceType: { contains: "Employee", mode: "insensitive" } },
+                { serviceType: { contains: "Contract", mode: "insensitive" } },
+              ]
+            },
+            {
+              NOT: [
+                {
+                  AND: [
+                    { companyName: { in: ["Individual", "individual", ""] } },
+                    {
+                      OR: [
+                        { serviceType: { contains: "Local", mode: "insensitive" } },
+                        { serviceType: { contains: "Hourly", mode: "insensitive" } },
+                        { serviceType: { contains: "Outstation", mode: "insensitive" } },
+                        { serviceType: { contains: "Pickup", mode: "insensitive" } },
+                        { serviceType: { contains: "Drop", mode: "insensitive" } },
+                        { serviceType: { contains: "Airport", mode: "insensitive" } },
+                        { serviceType: { contains: "Point", mode: "insensitive" } },
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        };
+      }
+      return {};
+    };
+
+    if (leadType) {
+      Object.assign(where, buildTypeCondition(leadType));
     }
 
     if (search) {
@@ -64,10 +131,8 @@ export async function GET(req: NextRequest) {
 
     // Pipeline counts for stats header (filtered by leadType if specified)
     const countWhere: any = {};
-    if (leadType === "pickup_drop") {
-      countWhere.serviceType = { contains: "Pickup & Drop", mode: "insensitive" };
-    } else if (leadType === "corporate_inquiry") {
-      countWhere.NOT = { serviceType: { contains: "Pickup & Drop", mode: "insensitive" } };
+    if (leadType) {
+      Object.assign(countWhere, buildTypeCondition(leadType));
     }
 
     const [newCount, contactedCount, qualifiedCount, negotiationCount, wonCount, lostCount, archivedCount] = await Promise.all([
