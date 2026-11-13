@@ -337,6 +337,7 @@ export default function MasterOmnichannelCRMPage() {
         items.forEach((item: any) => fetchedList.push(normalizeLead(item, "Contact Inquiry")));
       }
 
+      const cleanDigits = (p?: string) => (p || "").replace(/\D/g, "").slice(-10);
       const seen = new Set<string>();
       const merged: any[] = [];
 
@@ -344,12 +345,16 @@ export default function MasterOmnichannelCRMPage() {
         if (!item) return;
         const idKey = item.id ? `id_${item.id}` : null;
         const refKey = item.bookingRef ? `ref_${item.bookingRef}` : null;
+        const phoneDigits = cleanDigits(item.phone);
+        const phoneKey = phoneDigits.length === 10 ? `phone_${phoneDigits}` : null;
 
         if (idKey && seen.has(idKey)) return;
         if (refKey && seen.has(refKey)) return;
+        if (phoneKey && seen.has(phoneKey)) return;
 
         if (idKey) seen.add(idKey);
         if (refKey) seen.add(refKey);
+        if (phoneKey) seen.add(phoneKey);
         merged.push(item);
       };
 
@@ -357,7 +362,7 @@ export default function MasterOmnichannelCRMPage() {
       fetchedList.forEach(addIfUnique);
       combinedLeads.forEach(addIfUnique);
 
-      // Keep user_uploaded_crm_leads updated with the latest live status
+      // Keep user_uploaded_crm_leads updated with the latest live status and unify IDs
       try {
         const localCRM = localStorage.getItem("user_uploaded_crm_leads");
         if (localCRM) {
@@ -365,10 +370,25 @@ export default function MasterOmnichannelCRMPage() {
           if (Array.isArray(parsed)) {
             let updated = false;
             const syncedLocal = parsed.map((l: any) => {
-              const liveMatch = fetchedList.find((f: any) => f.id === l.id || f.bookingRef === l.bookingRef || (f.phone === l.phone && f.email === l.email));
-              if (liveMatch && liveMatch.status && liveMatch.status !== l.status) {
-                updated = true;
-                return { ...l, status: liveMatch.status };
+              const lPhone = cleanDigits(l.phone);
+              const liveMatch = fetchedList.find((f: any) => 
+                f.id === l.id || 
+                f.bookingRef === l.bookingRef || 
+                (lPhone.length === 10 && cleanDigits(f.phone) === lPhone) ||
+                (f.email && l.email && f.email.toLowerCase() === l.email.toLowerCase())
+              );
+              if (liveMatch) {
+                if (liveMatch.status !== l.status || l.id !== liveMatch.id) {
+                  updated = true;
+                  return { 
+                    ...l, 
+                    id: liveMatch.id, // Unify ID with database
+                    status: liveMatch.status,
+                    notes: liveMatch.notes || l.notes,
+                    tripType: liveMatch.tripType || l.tripType,
+                    serviceType: liveMatch.serviceType || l.serviceType,
+                  };
+                }
               }
               return l;
             });
@@ -426,17 +446,48 @@ export default function MasterOmnichannelCRMPage() {
     });
 
     const timestamp = new Date().toISOString();
-    const updated = leads.map(l => l.id === id ? { 
-      ...l, 
-      status: normStatus, 
-      notes: updatedNotes,
-      lastChangedBy: userName,
-      lastChangedPanel: panel,
-      lastChangedAt: timestamp
-    } : l);
+
+    // 1. Await database updates first so PostgreSQL transaction commits
+    try {
+      await Promise.allSettled([
+        fetch(`/api/rental/lead`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, status: normStatus, notes: updatedNotes, phone: target?.phone }),
+        }),
+        fetch(`/api/corporate/lead/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: normStatus, notes: updatedNotes, phone: target?.phone }),
+        }),
+        fetch(`/api/contact/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: normStatus }),
+        })
+      ]);
+    } catch (e) {
+      console.error("Backend status update error:", e);
+    }
+
+    // 2. Update local state and matching records
+    const cleanDigits = (p?: string) => (p || "").replace(/\D/g, "").slice(-10);
+    const targetPhone = cleanDigits(target?.phone);
+
+    const updated = leads.map(l => {
+      const isMatch = l.id === id || (targetPhone.length === 10 && cleanDigits(l.phone) === targetPhone);
+      return isMatch ? { 
+        ...l, 
+        status: normStatus, 
+        notes: updatedNotes,
+        lastChangedBy: userName,
+        lastChangedPanel: panel,
+        lastChangedAt: timestamp
+      } : l;
+    });
     setLeads(updated);
 
-    if (selectedLead && selectedLead.id === id) {
+    if (selectedLead && (selectedLead.id === id || (targetPhone.length === 10 && cleanDigits(selectedLead.phone) === targetPhone))) {
       setSelectedLead({
         ...selectedLead,
         status: normStatus,
@@ -447,6 +498,7 @@ export default function MasterOmnichannelCRMPage() {
       });
     }
 
+    // 3. Persist to localStorage and broadcast across panels
     try {
       localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(updated));
       syncLeadStatusUpdateAcrossPanels({
@@ -459,28 +511,6 @@ export default function MasterOmnichannelCRMPage() {
       window.dispatchEvent(new Event("crm_leads_updated"));
     } catch (e) {
       console.error("Error saving updated lead status:", e);
-    }
-
-    try {
-      await Promise.allSettled([
-        fetch(`/api/rental/lead`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id, status: normStatus, notes: updatedNotes }),
-        }),
-        fetch(`/api/corporate/lead/${id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: normStatus, notes: updatedNotes }),
-        }),
-        fetch(`/api/contact/${id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: normStatus }),
-        })
-      ]);
-    } catch (e) {
-      console.error(e);
     }
   };
 
@@ -497,14 +527,39 @@ export default function MasterOmnichannelCRMPage() {
       hour12: true
     });
     const logTag = `[${timestamp}] Booking type updated to "${newType}" by ${userName} (${panel})`;
+    const target = leads.find((l) => l.id === id);
+    const updatedNotes = [logTag, target?.notes].filter(Boolean).join("\n");
+
+    // 1. Await database update first
+    try {
+      await Promise.allSettled([
+        fetch(`/api/rental/lead`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, tripType: newType, serviceType: newType, phone: target?.phone, notes: updatedNotes }),
+        }),
+        fetch(`/api/corporate/lead/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ serviceType: newType, tripType: newType, phone: target?.phone, notes: updatedNotes }),
+        }),
+      ]);
+    } catch (err) {
+      console.error("Failed to persist booking type change:", err);
+    }
+
+    // 2. Update local state
+    const cleanDigits = (p?: string) => (p || "").replace(/\D/g, "").slice(-10);
+    const targetPhone = cleanDigits(target?.phone);
 
     const updated = leads.map((l) => {
-      if (l.id === id) {
+      const isMatch = l.id === id || (targetPhone.length === 10 && cleanDigits(l.phone) === targetPhone);
+      if (isMatch) {
         return {
           ...l,
           tripType: newType,
           serviceType: newType,
-          notes: [logTag, l.notes].filter(Boolean).join("\n"),
+          notes: updatedNotes,
           lastChangedBy: userName,
           lastChangedPanel: panel,
           lastChangedAt: timestamp
@@ -514,40 +569,24 @@ export default function MasterOmnichannelCRMPage() {
     });
     setLeads(updated);
 
-    if (selectedLead && selectedLead.id === id) {
+    if (selectedLead && (selectedLead.id === id || (targetPhone.length === 10 && cleanDigits(selectedLead.phone) === targetPhone))) {
       setSelectedLead({
         ...selectedLead,
         tripType: newType,
         serviceType: newType,
-        notes: [logTag, selectedLead.notes].filter(Boolean).join("\n"),
+        notes: updatedNotes,
         lastChangedBy: userName,
         lastChangedPanel: panel,
         lastChangedAt: timestamp
       });
     }
 
+    // 3. Persist and broadcast
     try {
       localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(updated));
       window.dispatchEvent(new Event("crm_leads_updated"));
     } catch (e) {
       console.error("Error saving updated booking type:", e);
-    }
-
-    try {
-      await Promise.allSettled([
-        fetch(`/api/rental/lead`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id, tripType: newType, serviceType: newType }),
-        }),
-        fetch(`/api/corporate/lead/${id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ serviceType: newType, tripType: newType }),
-        }),
-      ]);
-    } catch (err) {
-      console.error("Failed to persist booking type change:", err);
     }
   };
 
@@ -725,8 +764,8 @@ export default function MasterOmnichannelCRMPage() {
       console.error("Failed to dispatch to live API:", err);
     }
 
-    // 2. Mark Lead as CONVERTED in CRM (bidirectionally synced)
-    updateLeadStatus(dispatchModalLead.id, "CONVERTED");
+    // 2. Mark Lead as DISPATCHED in CRM (bidirectionally synced)
+    updateLeadStatus(dispatchModalLead.id, "DISPATCHED");
 
     // 3. Show Dispatched Dossier Confirmation
     setDispatchedSuccess({
@@ -1199,7 +1238,9 @@ export default function MasterOmnichannelCRMPage() {
                           value={normalizeLeadStatus(lead.status)}
                           onChange={(e) => updateLeadStatus(lead.id, e.target.value)}
                           className={`border rounded-lg px-2.5 py-1 text-[11px] font-bold focus:outline-none cursor-pointer ${
-                            normalizeLeadStatus(lead.status) === "CONVERTED"
+                            normalizeLeadStatus(lead.status) === "DISPATCHED"
+                              ? "bg-purple-500/10 text-purple-400 border-purple-500/30 font-black"
+                              : normalizeLeadStatus(lead.status) === "CONVERTED"
                               ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30 font-black"
                               : normalizeLeadStatus(lead.status) === "LOST"
                               ? "bg-rose-500/10 text-rose-400 border-rose-500/30 font-bold"
@@ -1240,7 +1281,7 @@ export default function MasterOmnichannelCRMPage() {
                       </td>
                       <td className="py-4 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
-                          {lead.status === "CONVERTED" || lead.status === "WON" ? (
+                          {lead.status === "DISPATCHED" ? (
                             <>
                               <a
                                 href={buildWhatsAppShareUrl({
@@ -1884,16 +1925,16 @@ export default function MasterOmnichannelCRMPage() {
                 return null;
               })()}
 
-              {/* Converted / Dispatched Booking & WhatsApp Share Banner */}
-              {(selectedLead.status === "CONVERTED" || selectedLead.status === "WON") && (
-                <div className="bg-emerald-500/10 border border-emerald-500/30 p-3.5 rounded-xl space-y-2.5">
+              {/* Dispatched Booking & WhatsApp Share Banner */}
+              {(selectedLead.status === "DISPATCHED") && (
+                <div className="bg-purple-500/10 border border-purple-500/30 p-3.5 rounded-xl space-y-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                      <span className="text-xs font-bold text-emerald-300">Ride Dispatched & Confirmed</span>
+                      <CheckCircle2 className="w-4 h-4 text-purple-400" />
+                      <span className="text-xs font-bold text-purple-300">Ride Dispatched & Confirmed</span>
                     </div>
                     {selectedLead.bookingRef && (
-                      <span className="text-xs font-mono font-bold bg-slate-950 px-2.5 py-0.5 rounded border border-emerald-500/30 text-amber-400">
+                      <span className="text-xs font-mono font-bold bg-slate-950 px-2.5 py-0.5 rounded border border-purple-500/30 text-amber-400">
                         {selectedLead.bookingRef}
                       </span>
                     )}
@@ -1934,12 +1975,12 @@ export default function MasterOmnichannelCRMPage() {
               </div>
 
               <div className="pt-2 flex justify-between items-center">
-                {selectedLead.status === "CONVERTED" || selectedLead.status === "WON" ? (
+                {selectedLead.status === "DISPATCHED" ? (
                   <Link
                     href="/master-admin/dispatch-radar"
-                    className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 font-bold px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition-all cursor-pointer"
+                    className="flex items-center gap-1.5 bg-purple-500/10 border border-purple-500/30 text-purple-400 hover:bg-purple-500/20 font-bold px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition-all cursor-pointer"
                   >
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <CheckCircle2 className="w-4 h-4 text-purple-400" />
                     <span>View In Dispatch Radar</span>
                   </Link>
                 ) : (

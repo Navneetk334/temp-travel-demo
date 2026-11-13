@@ -15,6 +15,6 @@ export const rentalLeadSchema = z.object({
 
 // Validates Admin Updates to Rental Inquiries
 export const rentalLeadAdminUpdateSchema = z.object({
-  status: z.enum(["NEW", "CONTACTED", "QUALIFIED", "NEGOTIATION", "CONVERTED", "WON", "LOST", "ARCHIVED"]),
+  status: z.enum(["NEW", "CONTACTED", "QUALIFIED", "NEGOTIATION", "CONVERTED", "DISPATCHED", "WON", "LOST", "ARCHIVED"]),
   notes: z.string().optional().nullable(),
 });

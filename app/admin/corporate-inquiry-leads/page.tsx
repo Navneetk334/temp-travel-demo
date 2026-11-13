@@ -28,7 +28,7 @@ import {
   normalizeLeadStatus
 } from "@/lib/lead-sync";
 
-export type LeadStatus = "NEW" | "CONTACTED" | "QUALIFIED" | "NEGOTIATION" | "CONVERTED" | "WON" | "LOST" | "ARCHIVED";
+export type LeadStatus = "NEW" | "CONTACTED" | "QUALIFIED" | "NEGOTIATION" | "CONVERTED" | "DISPATCHED" | "WON" | "LOST" | "ARCHIVED";
 
 interface Lead {
   id: string;
@@ -52,6 +52,7 @@ interface Stats {
   QUALIFIED: number;
   NEGOTIATION: number;
   CONVERTED: number;
+  DISPATCHED: number;
   WON?: number;
   LOST: number;
   ARCHIVED: number;
@@ -76,6 +77,7 @@ export default function AdminCorporateInquiryLeadsPage() {
     QUALIFIED: 0,
     NEGOTIATION: 0,
     CONVERTED: 0,
+    DISPATCHED: 0,
     LOST: 0,
     ARCHIVED: 0,
   });
@@ -118,21 +120,24 @@ export default function AdminCorporateInquiryLeadsPage() {
           const parsed = JSON.parse(local);
           if (Array.isArray(parsed)) {
             const matching = parsed.filter((l: any) => {
-              const type = (l.tripType || "").toLowerCase();
               const comp = (l.companyName || "").trim().toLowerCase();
+              const type = (l.tripType || l.serviceType || "").toLowerCase();
               if (
+                type.includes("tour") ||
                 type.includes("local") ||
                 type.includes("hourly") ||
                 type.includes("outstation") ||
                 type.includes("round trip") ||
                 type.includes("one way") ||
                 type.includes("pickup") ||
-                type.includes("airport")
+                type.includes("airport") ||
+                type.includes("drop") ||
+                type.includes("transfer")
               ) {
                 return false;
               }
               const hasCompany = comp !== "" && comp !== "individual" && !comp.includes("individual");
-              const isCorp = type.includes("corporate") || type.includes("working") || (l.notes || "").toLowerCase().includes("corporate");
+              const isCorp = type.includes("corporate") || type.includes("working") || type.includes("employee") || type.includes("b2b") || type.includes("contract");
               return hasCompany || isCorp;
             }).map((l: any) => ({
               id: l.id || `lead_${Date.now()}`,
@@ -142,7 +147,7 @@ export default function AdminCorporateInquiryLeadsPage() {
               phone: l.phone || "",
               employeeCount: 1,
               pickupLocations: l.pickupLocation || "",
-              serviceType: l.tripType || "Corporate Inquiry",
+              serviceType: l.tripType || l.serviceType || "Corporate Inquiry",
               requirements: l.notes || "",
               notes: l.notes || "",
               status: (l.status || "NEW") as LeadStatus,
@@ -150,23 +155,58 @@ export default function AdminCorporateInquiryLeadsPage() {
             }));
 
             // Merge deduplicated: Database leads ALWAYS take precedence over local storage
-            const map = new Map<string, Lead>();
-            matching.forEach(m => map.set(m.id, m));
-            fetchedLeads.forEach(f => map.set(f.id, f));
-            fetchedLeads = Array.from(map.values());
+            const cleanPhone = (p?: string) => (p || "").replace(/\D/g, "").slice(-10);
+            const seenKeys = new Set<string>();
+            const deduplicatedLeads: Lead[] = [];
 
-            // Sync user_uploaded_crm_leads in localStorage with fresh DB status & notes
+            // 1. Live database leads take absolute priority
+            fetchedLeads.forEach((f) => {
+              if (f.id) seenKeys.add(`id_${f.id}`);
+              if ((f as any).bookingRef) seenKeys.add(`ref_${(f as any).bookingRef}`);
+              const phone = cleanPhone(f.phone);
+              if (phone.length === 10) seenKeys.add(`phone_${phone}`);
+              deduplicatedLeads.push(f);
+            });
+
+            // 2. Local storage leads added ONLY if not matching any database lead
+            matching.forEach((m) => {
+              const idKey = m.id ? `id_${m.id}` : null;
+              const refKey = (m as any).bookingRef ? `ref_${(m as any).bookingRef}` : null;
+              const phone = cleanPhone(m.phone);
+              const phoneKey = phone.length === 10 ? `phone_${phone}` : null;
+
+              if (idKey && seenKeys.has(idKey)) return;
+              if (refKey && seenKeys.has(refKey)) return;
+              if (phoneKey && seenKeys.has(phoneKey)) return;
+
+              if (idKey) seenKeys.add(idKey);
+              if (refKey) seenKeys.add(refKey);
+              if (phoneKey) seenKeys.add(phoneKey);
+              deduplicatedLeads.push(m);
+            });
+
+            fetchedLeads = deduplicatedLeads;
+
+            // Sync user_uploaded_crm_leads in localStorage with fresh DB status & notes & unified ID
             try {
               let updated = false;
               const syncedLocal = parsed.map((item: any) => {
-                const live = fetchedLeads.find((f) => f.id === item.id);
-                if (live && (item.status !== live.status || item.notes !== live.notes)) {
-                  updated = true;
-                  return {
-                    ...item,
-                    status: live.status,
-                    notes: live.notes || item.notes,
-                  };
+                const itemPhone = cleanPhone(item.phone);
+                const live = fetchedLeads.find((f) => 
+                  f.id === item.id || 
+                  ((f as any).bookingRef && item.bookingRef && (f as any).bookingRef === item.bookingRef) ||
+                  (itemPhone.length === 10 && cleanPhone(f.phone) === itemPhone)
+                );
+                if (live) {
+                  if (item.status !== live.status || item.notes !== live.notes || item.id !== live.id) {
+                    updated = true;
+                    return {
+                      ...item,
+                      id: live.id,
+                      status: live.status,
+                      notes: live.notes || item.notes,
+                    };
+                  }
                 }
                 return item;
               });
@@ -434,6 +474,8 @@ export default function AdminCorporateInquiryLeadsPage() {
       case "CONVERTED":
       case "WON":
         return "bg-green-500/20 text-green-300 border-green-500/40 shadow-sm font-black";
+      case "DISPATCHED":
+        return "bg-purple-500/20 text-purple-300 border-purple-500/40 shadow-sm font-black";
       case "LOST":
         return "bg-rose-500/10 text-rose-400 border-rose-500/20";
       case "ARCHIVED":
@@ -528,6 +570,16 @@ export default function AdminCorporateInquiryLeadsPage() {
         </div>
 
         <div 
+          onClick={() => { setStatusFilter("DISPATCHED"); setCurrentPage(1); }}
+          className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
+            statusFilter === "DISPATCHED" ? "border-purple-400 bg-purple-500/10" : "border-border hover:border-white/20"
+          }`}
+        >
+          <div className="text-[10px] text-purple-400 uppercase font-bold tracking-wider">DISPATCHED</div>
+          <div className="text-xl font-black text-purple-400 mt-1">{stats.DISPATCHED ?? 0}</div>
+        </div>
+
+        <div 
           onClick={() => { setStatusFilter("LOST"); setCurrentPage(1); }}
           className={`glassmorphism p-3 rounded-xl border cursor-pointer transition-all ${
             statusFilter === "LOST" ? "border-rose-400 bg-rose-500/10" : "border-border hover:border-white/20"
@@ -567,6 +619,7 @@ export default function AdminCorporateInquiryLeadsPage() {
             <option value="QUALIFIED" className="bg-surface text-emerald-400">QUALIFIED</option>
             <option value="NEGOTIATION" className="bg-surface text-purple-400">NEGOTIATION</option>
             <option value="CONVERTED" className="bg-surface text-green-400">CONVERTED</option>
+            <option value="DISPATCHED" className="bg-surface text-purple-400">DISPATCHED</option>
             <option value="LOST" className="bg-surface text-rose-400">LOST</option>
             <option value="ARCHIVED" className="bg-surface text-slate-400">ARCHIVED</option>
           </select>
@@ -694,7 +747,7 @@ export default function AdminCorporateInquiryLeadsPage() {
                             })()}
                           </td>
                           <td className="p-4 text-right space-x-1" onClick={(e) => e.stopPropagation()}>
-                            {(lead.status === "CONVERTED" || lead.status === "WON") ? (
+                            {(lead.status === "DISPATCHED" || (lead as any).bookingRef) ? (
                               <Link
                                 href="/admin/bookings-dispatch"
                                 title="Ride already dispatched — View in Dispatch CRM"
@@ -795,12 +848,12 @@ export default function AdminCorporateInquiryLeadsPage() {
                   <span className={`text-[10px] font-extrabold py-1 px-3 rounded-full border uppercase ${getStatusBadge(activeLead.status)}`}>
                     {activeLead.status}
                   </span>
-                  {(activeLead.status === "CONVERTED" || activeLead.status === "WON") ? (
+                  {(activeLead.status === "DISPATCHED" || (activeLead as any).bookingRef) ? (
                     <Link
                       href="/admin/bookings-dispatch"
-                      className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 font-bold px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-sm cursor-pointer"
+                      className="flex items-center gap-1.5 bg-purple-500/10 border border-purple-500/30 text-purple-400 hover:bg-purple-500/20 font-bold px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-sm cursor-pointer"
                     >
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />
                       <span>View Dispatched Booking</span>
                     </Link>
                   ) : (
@@ -818,8 +871,8 @@ export default function AdminCorporateInquiryLeadsPage() {
               {/* Status Update Pipeline Selector */}
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Update Pipeline Status</label>
-                <div className="grid grid-cols-3 gap-1.5">
-                  {(["NEW", "CONTACTED", "QUALIFIED", "NEGOTIATION", "CONVERTED", "LOST", "ARCHIVED"] as LeadStatus[]).map((st) => (
+                <div className="grid grid-cols-4 gap-1.5">
+                  {(["NEW", "CONTACTED", "QUALIFIED", "NEGOTIATION", "CONVERTED", "DISPATCHED", "LOST", "ARCHIVED"] as LeadStatus[]).map((st) => (
                     <button
                       key={st}
                       type="button"

@@ -117,12 +117,13 @@ export async function GET(req: NextRequest) {
       Object.assign(countWhere, buildRentalTripCondition(tripType));
     }
 
-    const [newCount, contactedCount, qualifiedCount, negotiationCount, wonCount, lostCount, archivedCount] = await Promise.all([
+    const [newCount, contactedCount, qualifiedCount, negotiationCount, wonCount, dispatchedCount, lostCount, archivedCount] = await Promise.all([
       prisma.rentalLead.count({ where: { ...countWhere, status: "NEW" } }),
       prisma.rentalLead.count({ where: { ...countWhere, status: "CONTACTED" } }),
       prisma.rentalLead.count({ where: { ...countWhere, status: "QUALIFIED" } }),
       prisma.rentalLead.count({ where: { ...countWhere, status: "NEGOTIATION" } }),
       prisma.rentalLead.count({ where: { ...countWhere, status: "WON" } }),
+      prisma.rentalLead.count({ where: { ...countWhere, status: "DISPATCHED" } }),
       prisma.rentalLead.count({ where: { ...countWhere, status: "LOST" } }),
       prisma.rentalLead.count({ where: { ...countWhere, status: "ARCHIVED" } }),
     ]);
@@ -143,12 +144,13 @@ export async function GET(req: NextRequest) {
         limit,
       },
       stats: {
-        total: newCount + contactedCount + qualifiedCount + negotiationCount + wonCount + lostCount + archivedCount,
+        total: newCount + contactedCount + qualifiedCount + negotiationCount + wonCount + dispatchedCount + lostCount + archivedCount,
         NEW: newCount,
         CONTACTED: contactedCount,
         QUALIFIED: qualifiedCount,
         NEGOTIATION: negotiationCount,
         CONVERTED: wonCount,
+        DISPATCHED: dispatchedCount,
         WON: wonCount,
         LOST: lostCount,
         ARCHIVED: archivedCount,
@@ -249,10 +251,20 @@ export async function PUT(req: NextRequest) {
 
     let updatedResult: any = null;
 
-    // Check if lead exists in RentalLead
-    const existingRental = await prisma.rentalLead.findUnique({ where: { id } });
+    const rawPhone = (body.phone || "").toString();
+    const cleanPhoneDigits = rawPhone.replace(/\D/g, "").slice(-10);
+
+    // Check if lead exists in RentalLead (by id, fallback by phone)
+    let existingRental = await prisma.rentalLead.findUnique({ where: { id } });
+    if (!existingRental && cleanPhoneDigits.length === 10) {
+      existingRental = await prisma.rentalLead.findFirst({
+        where: { phone: { contains: cleanPhoneDigits } },
+        orderBy: { createdAt: "desc" },
+      });
+    }
 
     if (existingRental) {
+      const targetRentalId = existingRental.id;
       const isSwitchingToPickupOrCorp = finalTripType && (
         finalTripType.toLowerCase().includes("pickup") ||
         finalTripType.toLowerCase().includes("drop") ||
@@ -267,7 +279,7 @@ export async function PUT(req: NextRequest) {
         const isCorp = finalTripType.toLowerCase().includes("corporate") || finalTripType.toLowerCase().includes("working");
         const migratedCorp = await prisma.corporateLead.create({
           data: {
-            id,
+            id: targetRentalId,
             companyName: isCorp ? "Corporate Client" : "Individual",
             contactName: existingRental.customerName,
             email: existingRental.email,
@@ -281,7 +293,7 @@ export async function PUT(req: NextRequest) {
           }
         });
 
-        await prisma.rentalLead.delete({ where: { id } });
+        await prisma.rentalLead.delete({ where: { id: targetRentalId } });
         updatedResult = {
           ...migratedCorp,
           customerName: migratedCorp.contactName,
@@ -290,7 +302,7 @@ export async function PUT(req: NextRequest) {
         };
       } else {
         const updated = await prisma.rentalLead.update({
-          where: { id },
+          where: { id: targetRentalId },
           data: {
             ...(dbStatus ? { status: dbStatus as any } : {}),
             ...(notes !== undefined ? { notes } : {}),
@@ -303,9 +315,17 @@ export async function PUT(req: NextRequest) {
         };
       }
     } else {
-      // Check if lead exists in CorporateLead
-      const existingCorp = await prisma.corporateLead.findUnique({ where: { id } });
+      // Check if lead exists in CorporateLead (by id, fallback by phone)
+      let existingCorp = await prisma.corporateLead.findUnique({ where: { id } });
+      if (!existingCorp && cleanPhoneDigits.length === 10) {
+        existingCorp = await prisma.corporateLead.findFirst({
+          where: { phone: { contains: cleanPhoneDigits } },
+          orderBy: { createdAt: "desc" },
+        });
+      }
+
       if (existingCorp) {
+        const targetCorpId = existingCorp.id;
         const isSwitchingToRental = finalTripType && (
           finalTripType.toLowerCase().includes("local") ||
           finalTripType.toLowerCase().includes("hourly") ||
@@ -323,7 +343,7 @@ export async function PUT(req: NextRequest) {
 
           const migratedRental = await prisma.rentalLead.create({
             data: {
-              id,
+              id: targetCorpId,
               customerName: existingCorp.contactName,
               email: existingCorp.email,
               phone: existingCorp.phone,
@@ -338,14 +358,14 @@ export async function PUT(req: NextRequest) {
             }
           });
 
-          await prisma.corporateLead.delete({ where: { id } });
+          await prisma.corporateLead.delete({ where: { id: targetCorpId } });
           updatedResult = {
             ...migratedRental,
             status: migratedRental.status === "WON" ? "CONVERTED" : migratedRental.status
           };
         } else {
           const updatedCorp = await prisma.corporateLead.update({
-            where: { id },
+            where: { id: targetCorpId },
             data: {
               ...(dbStatus ? { status: dbStatus as any } : {}),
               ...(notes !== undefined ? { notes } : {}),

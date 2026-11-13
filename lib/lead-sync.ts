@@ -179,6 +179,7 @@ export const UNIFIED_LEAD_STATUSES = [
   "QUALIFIED",
   "NEGOTIATION",
   "CONVERTED",
+  "DISPATCHED",
   "LOST",
   "ARCHIVED",
 ] as const;
@@ -188,6 +189,7 @@ export type UnifiedLeadStatus = typeof UNIFIED_LEAD_STATUSES[number];
 export function normalizeLeadStatus(status?: string | null): UnifiedLeadStatus {
   if (!status) return "NEW";
   const s = status.trim().toUpperCase();
+  if (s === "DISPATCHED") return "DISPATCHED";
   if (s === "CONVERTED" || s === "WON") return "CONVERTED";
   if (s === "READ") return "CONTACTED";
   if (UNIFIED_LEAD_STATUSES.includes(s as UnifiedLeadStatus)) {

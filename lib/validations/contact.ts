@@ -11,5 +11,5 @@ export const contactLeadSchema = z.object({
 
 // Validates Admin Updates to Contact Leads (Mark Read / Replied / Status)
 export const contactLeadAdminUpdateSchema = z.object({
-  status: z.enum(["NEW", "READ", "CONTACTED", "QUALIFIED", "NEGOTIATION", "CONVERTED", "WON", "LOST", "ARCHIVED"]),
+  status: z.enum(["NEW", "READ", "CONTACTED", "QUALIFIED", "NEGOTIATION", "CONVERTED", "DISPATCHED", "WON", "LOST", "ARCHIVED"]),
 });

@@ -33,7 +33,7 @@ import {
   normalizeLeadStatus
 } from "@/lib/lead-sync";
 
-export type ContactStatus = "NEW" | "READ" | "CONTACTED" | "QUALIFIED" | "NEGOTIATION" | "CONVERTED" | "WON" | "LOST" | "ARCHIVED";
+export type ContactStatus = "NEW" | "READ" | "CONTACTED" | "QUALIFIED" | "NEGOTIATION" | "CONVERTED" | "DISPATCHED" | "WON" | "LOST" | "ARCHIVED";
 
 interface ContactLead {
   id: string;
@@ -129,22 +129,57 @@ export default function AdminContactLeadsPage() {
             }));
 
             // Merge deduplicated: Database leads ALWAYS take precedence over local storage
-            const map = new Map<string, ContactLead>();
-            matching.forEach(m => map.set(m.id, m));
-            fetchedLeads.forEach(f => map.set(f.id, f));
-            fetchedLeads = Array.from(map.values());
+            const cleanPhone = (p?: string | null) => (p || "").replace(/\D/g, "").slice(-10);
+            const seenKeys = new Set<string>();
+            const deduplicatedLeads: ContactLead[] = [];
 
-            // Sync user_uploaded_crm_leads in localStorage with fresh DB status
+            // 1. Live database leads take absolute priority
+            fetchedLeads.forEach((f) => {
+              if (f.id) seenKeys.add(`id_${f.id}`);
+              const phone = cleanPhone(f.phone);
+              if (phone.length === 10) seenKeys.add(`phone_${phone}`);
+              if (f.email) seenKeys.add(`email_${f.email.toLowerCase()}`);
+              deduplicatedLeads.push(f);
+            });
+
+            // 2. Local storage leads added ONLY if not matching any database lead
+            matching.forEach((m) => {
+              const idKey = m.id ? `id_${m.id}` : null;
+              const phone = cleanPhone(m.phone);
+              const phoneKey = phone.length === 10 ? `phone_${phone}` : null;
+              const emailKey = m.email ? `email_${m.email.toLowerCase()}` : null;
+
+              if (idKey && seenKeys.has(idKey)) return;
+              if (phoneKey && seenKeys.has(phoneKey)) return;
+              if (emailKey && seenKeys.has(emailKey)) return;
+
+              if (idKey) seenKeys.add(idKey);
+              if (phoneKey) seenKeys.add(phoneKey);
+              if (emailKey) seenKeys.add(emailKey);
+              deduplicatedLeads.push(m);
+            });
+
+            fetchedLeads = deduplicatedLeads;
+
+            // Sync user_uploaded_crm_leads in localStorage with fresh DB status & unified ID
             try {
               let updated = false;
               const syncedLocal = parsed.map((item: any) => {
-                const live = fetchedLeads.find((f) => f.id === item.id);
-                if (live && item.status !== live.status) {
-                  updated = true;
-                  return {
-                    ...item,
-                    status: live.status,
-                  };
+                const itemPhone = cleanPhone(item.phone);
+                const live = fetchedLeads.find((f) => 
+                  f.id === item.id || 
+                  (itemPhone.length === 10 && cleanPhone(f.phone) === itemPhone) ||
+                  (item.email && f.email && item.email.toLowerCase() === f.email.toLowerCase())
+                );
+                if (live) {
+                  if (item.status !== live.status || item.id !== live.id) {
+                    updated = true;
+                    return {
+                      ...item,
+                      id: live.id,
+                      status: live.status,
+                    };
+                  }
                 }
                 return item;
               });
@@ -311,7 +346,10 @@ export default function AdminContactLeadsPage() {
       case "QUALIFIED":
         return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
       case "WON":
+      case "CONVERTED":
         return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+      case "DISPATCHED":
+        return "bg-purple-500/20 text-purple-300 border-purple-500/40 shadow-sm font-black";
       case "LOST":
         return "bg-rose-500/10 text-rose-400 border-rose-500/20";
       case "ARCHIVED":
@@ -572,13 +610,13 @@ export default function AdminContactLeadsPage() {
                             })()}
                           </td>
                           <td className="p-4 text-right space-x-1" onClick={(e) => e.stopPropagation()}>
-                            {(lead.status === "CONVERTED" || lead.status === "WON") ? (
+                            {(lead.status === "DISPATCHED" || (lead as any).bookingRef) ? (
                               <Link
                                 href="/admin/bookings-dispatch"
                                 title="Ride already dispatched — View in Dispatch CRM"
-                                className="inline-flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 font-bold px-2.5 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all shadow-sm cursor-pointer"
+                                className="inline-flex items-center gap-1 bg-purple-500/10 border border-purple-500/30 text-purple-400 hover:bg-purple-500/20 font-bold px-2.5 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all shadow-sm cursor-pointer"
                               >
-                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                                <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />
                                 <span>Dispatched</span>
                               </Link>
                             ) : (
@@ -689,12 +727,12 @@ export default function AdminContactLeadsPage() {
                   <span className={`text-[10px] font-extrabold py-1 px-3 rounded-full border uppercase ${getStatusBadge(activeLead.status)}`}>
                     {activeLead.status === "CONTACTED" ? "REPLIED" : activeLead.status}
                   </span>
-                  {(activeLead.status === "CONVERTED" || activeLead.status === "WON") ? (
+                  {(activeLead.status === "DISPATCHED" || (activeLead as any).bookingRef) ? (
                     <Link
                       href="/admin/bookings-dispatch"
-                      className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 font-bold px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-sm cursor-pointer"
+                      className="flex items-center gap-1.5 bg-purple-500/10 border border-purple-500/30 text-purple-400 hover:bg-purple-500/20 font-bold px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-sm cursor-pointer"
                     >
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />
                       <span>View Dispatched Booking</span>
                     </Link>
                   ) : (
@@ -713,7 +751,7 @@ export default function AdminContactLeadsPage() {
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Quick Status Actions</label>
                 <div className="grid grid-cols-4 gap-1.5">
-                  {(["NEW", "READ", "CONTACTED", "QUALIFIED", "NEGOTIATION", "CONVERTED", "LOST", "ARCHIVED"] as ContactStatus[]).map((st) => (
+                  {(["NEW", "READ", "CONTACTED", "QUALIFIED", "NEGOTIATION", "CONVERTED", "DISPATCHED", "LOST", "ARCHIVED"] as ContactStatus[]).map((st) => (
                     <button
                       key={st}
                       type="button"

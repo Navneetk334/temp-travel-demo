@@ -113,23 +113,58 @@ export default function AdminTourLeadsPage() {
             }));
 
             // Merge deduplicated: Database leads ALWAYS take precedence over local storage
-            const map = new Map<string, BookingLead>();
-            matching.forEach(m => map.set(m.id, m));
-            bookingsList.forEach(f => map.set(f.id, f));
-            bookingsList = Array.from(map.values());
+            const cleanPhone = (p?: string) => (p || "").replace(/\D/g, "").slice(-10);
+            const seenKeys = new Set<string>();
+            const deduplicatedLeads: BookingLead[] = [];
 
-            // Sync user_uploaded_crm_leads in localStorage with fresh DB status & notes
+            // 1. Live database leads take absolute priority
+            bookingsList.forEach((f) => {
+              if (f.id) seenKeys.add(`id_${f.id}`);
+              if (f.bookingNumber) seenKeys.add(`ref_${f.bookingNumber}`);
+              const phone = cleanPhone(f.phone);
+              if (phone.length === 10) seenKeys.add(`phone_${phone}`);
+              deduplicatedLeads.push(f);
+            });
+
+            // 2. Local storage leads added ONLY if not matching any database lead
+            matching.forEach((m) => {
+              const idKey = m.id ? `id_${m.id}` : null;
+              const refKey = (m as any).bookingNumber ? `ref_${(m as any).bookingNumber}` : null;
+              const phone = cleanPhone(m.phone);
+              const phoneKey = phone.length === 10 ? `phone_${phone}` : null;
+
+              if (idKey && seenKeys.has(idKey)) return;
+              if (refKey && seenKeys.has(refKey)) return;
+              if (phoneKey && seenKeys.has(phoneKey)) return;
+
+              if (idKey) seenKeys.add(idKey);
+              if (refKey) seenKeys.add(refKey);
+              if (phoneKey) seenKeys.add(phoneKey);
+              deduplicatedLeads.push(m);
+            });
+
+            bookingsList = deduplicatedLeads;
+
+            // Sync user_uploaded_crm_leads in localStorage with fresh DB status & notes & unified ID
             try {
               let updated = false;
               const syncedLocal = parsed.map((item: any) => {
-                const live = bookingsList.find((f) => f.id === item.id);
-                if (live && (item.status !== live.status || item.notes !== live.notes)) {
-                  updated = true;
-                  return {
-                    ...item,
-                    status: live.status,
-                    notes: live.notes || item.notes,
-                  };
+                const itemPhone = cleanPhone(item.phone);
+                const live = bookingsList.find((f) => 
+                  f.id === item.id || 
+                  (item.bookingRef && f.bookingNumber && item.bookingRef === f.bookingNumber) ||
+                  (itemPhone.length === 10 && cleanPhone(f.phone) === itemPhone)
+                );
+                if (live) {
+                  if (item.status !== live.status || item.notes !== live.notes || item.id !== live.id) {
+                    updated = true;
+                    return {
+                      ...item,
+                      id: live.id,
+                      status: live.status,
+                      notes: live.notes || item.notes,
+                    };
+                  }
                 }
                 return item;
               });

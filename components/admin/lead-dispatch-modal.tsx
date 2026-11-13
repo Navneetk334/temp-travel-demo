@@ -506,7 +506,7 @@ export default function LeadDispatchModal({
     const { userName, panel } = getCurrentAdminUser("Admin Panel");
     const { updatedNotes } = createLeadStatusAuditLog({
       oldStatus: lead.status,
-      newStatus: "CONVERTED",
+      newStatus: "DISPATCHED",
       userName,
       panel,
       existingNotes: lead.notes,
@@ -523,16 +523,38 @@ export default function LeadDispatchModal({
     const fullUpdatedNotes = [dispatchDetailsTag, updatedNotes].filter(Boolean).join("\n");
     const nowIso = new Date().toISOString();
 
+    // 1. Await database status update first so PostgreSQL transaction commits
+    try {
+      await Promise.allSettled([
+        fetch(`/api/rental/lead`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: lead.id, status: "DISPATCHED", tripType: finalTripType, serviceType: finalTripType, notes: fullUpdatedNotes, phone: lead.phone }),
+        }),
+        fetch(`/api/corporate/lead/${lead.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "DISPATCHED", tripType: finalTripType, serviceType: finalTripType, notes: fullUpdatedNotes, phone: lead.phone }),
+        })
+      ]);
+    } catch (e) {
+      console.error("Backend status update error:", e);
+    }
+
+    // 2. Persist to localStorage and notify across panels
     try {
       const crmStored = localStorage.getItem("user_uploaded_crm_leads");
       if (crmStored) {
         const crmList = JSON.parse(crmStored);
         if (Array.isArray(crmList)) {
+          const cleanDigits = (p?: string) => (p || "").replace(/\D/g, "").slice(-10);
+          const leadPhone = cleanDigits(lead.phone);
+
           const updatedCRM = crmList.map((l: any) =>
-            (l.id === lead.id || l.bookingRef === lead.bookingRef || (l.phone && lead.phone && l.phone === lead.phone))
+            (l.id === lead.id || l.bookingRef === lead.bookingRef || (leadPhone.length === 10 && cleanDigits(l.phone) === leadPhone))
               ? { 
                   ...l, 
-                  status: "CONVERTED",
+                  status: "DISPATCHED",
                   bookingRef: finalBookingRef,
                   tripType: finalTripType,
                   serviceType: finalTripType,
@@ -558,21 +580,6 @@ export default function LeadDispatchModal({
     } catch (e) {
       console.error(e);
     }
-
-    try {
-      await Promise.allSettled([
-        fetch(`/api/rental/lead`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: lead.id, status: "CONVERTED", tripType: finalTripType, serviceType: finalTripType, notes: fullUpdatedNotes }),
-        }),
-        fetch(`/api/corporate/lead/${lead.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: "CONVERTED", tripType: finalTripType, serviceType: finalTripType, notes: fullUpdatedNotes }),
-        })
-      ]);
-    } catch (e) {}
 
     try {
       await fetch(`/api/bookings/dispatch`, {
@@ -819,14 +826,14 @@ export default function LeadDispatchModal({
                   </div>
                 ) : null}
 
-                {/* Warning if lead is already marked WON / DISPATCHED */}
-                {(lead.status === "WON" || lead.status === "CONVERTED" || lead.status === "COMPLETED") && (
+                {/* Warning if lead is already marked DISPATCHED */}
+                {(lead.status === "DISPATCHED") && (
                   <div className="mt-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex items-start gap-2.5">
                     <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                     <div>
-                      <span className="font-extrabold uppercase tracking-wider block text-amber-300">Caution: Lead Already Dispatched ({lead.status})</span>
+                      <span className="font-extrabold uppercase tracking-wider block text-amber-300">Caution: Lead Already Dispatched</span>
                       <p className="text-[11px] text-slate-300 mt-0.5">
-                        This lead is already converted. Dispatching again will assign another chauffeur/car and create an additional booking record.
+                        This ride has already been dispatched with an assigned chauffeur and vehicle. Dispatching again will assign another chauffeur/car and create an additional booking record.
                       </p>
                     </div>
                   </div>

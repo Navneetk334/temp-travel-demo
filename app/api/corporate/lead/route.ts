@@ -135,12 +135,13 @@ export async function GET(req: NextRequest) {
       Object.assign(countWhere, buildTypeCondition(leadType));
     }
 
-    const [newCount, contactedCount, qualifiedCount, negotiationCount, wonCount, lostCount, archivedCount] = await Promise.all([
+    const [newCount, contactedCount, qualifiedCount, negotiationCount, wonCount, dispatchedCount, lostCount, archivedCount] = await Promise.all([
       prisma.corporateLead.count({ where: { ...countWhere, status: "NEW" } }),
       prisma.corporateLead.count({ where: { ...countWhere, status: "CONTACTED" } }),
       prisma.corporateLead.count({ where: { ...countWhere, status: "QUALIFIED" } }),
       prisma.corporateLead.count({ where: { ...countWhere, status: "NEGOTIATION" } }),
       prisma.corporateLead.count({ where: { ...countWhere, status: "WON" } }),
+      prisma.corporateLead.count({ where: { ...countWhere, status: "DISPATCHED" } }),
       prisma.corporateLead.count({ where: { ...countWhere, status: "LOST" } }),
       prisma.corporateLead.count({ where: { ...countWhere, status: "ARCHIVED" } }),
     ]);
@@ -174,12 +175,13 @@ export async function GET(req: NextRequest) {
         limit,
       },
       stats: {
-        total: newCount + contactedCount + qualifiedCount + negotiationCount + wonCount + lostCount + archivedCount,
+        total: newCount + contactedCount + qualifiedCount + negotiationCount + wonCount + dispatchedCount + lostCount + archivedCount,
         NEW: newCount,
         CONTACTED: contactedCount,
         QUALIFIED: qualifiedCount,
         NEGOTIATION: negotiationCount,
         CONVERTED: wonCount,
+        DISPATCHED: dispatchedCount,
         WON: wonCount,
         LOST: lostCount,
         ARCHIVED: archivedCount,

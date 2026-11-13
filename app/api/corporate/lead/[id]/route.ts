@@ -83,11 +83,22 @@ export async function PUT(
     const dbStatus = status === "CONVERTED" ? "WON" : status;
     const resolvedServiceType = serviceType || tripType;
 
-    // Check if lead currently exists in CorporateLead
-    const existingCorp = await prisma.corporateLead.findUnique({ where: { id } });
+    // Check if lead currently exists in CorporateLead (lookup by id, fallback by phone)
+    let existingCorp = await prisma.corporateLead.findUnique({ where: { id } });
+    const rawPhone = (body.phone || restData.phone || "").toString();
+    const cleanPhoneDigits = rawPhone.replace(/\D/g, "").slice(-10);
+
+    if (!existingCorp && cleanPhoneDigits.length === 10) {
+      existingCorp = await prisma.corporateLead.findFirst({
+        where: { phone: { contains: cleanPhoneDigits } },
+        orderBy: { createdAt: "desc" }
+      });
+    }
+
     let updatedLeadResult: any = null;
 
     if (existingCorp) {
+      const targetCorpId = existingCorp.id;
       const isSwitchingToRental = resolvedServiceType && (
         resolvedServiceType.toLowerCase().includes("local") ||
         resolvedServiceType.toLowerCase().includes("hourly") ||
@@ -105,7 +116,7 @@ export async function PUT(
 
         const migratedRental = await prisma.rentalLead.create({
           data: {
-            id,
+            id: targetCorpId,
             customerName: existingCorp.contactName,
             email: existingCorp.email,
             phone: existingCorp.phone,
@@ -120,7 +131,7 @@ export async function PUT(
           }
         });
 
-        await prisma.corporateLead.delete({ where: { id } });
+        await prisma.corporateLead.delete({ where: { id: targetCorpId } });
         updatedLeadResult = {
           ...migratedRental,
           companyName: existingCorp.companyName,
@@ -130,7 +141,7 @@ export async function PUT(
         };
       } else {
         const updatedCorp = await prisma.corporateLead.update({
-          where: { id },
+          where: { id: targetCorpId },
           data: {
             ...restData,
             ...(resolvedServiceType !== undefined ? { serviceType: resolvedServiceType } : {}),
@@ -144,8 +155,16 @@ export async function PUT(
       }
     } else {
       // Check if lead exists in RentalLead (previously migrated or created as rental)
-      const existingRental = await prisma.rentalLead.findUnique({ where: { id } });
+      let existingRental = await prisma.rentalLead.findUnique({ where: { id } });
+      if (!existingRental && cleanPhoneDigits.length === 10) {
+        existingRental = await prisma.rentalLead.findFirst({
+          where: { phone: { contains: cleanPhoneDigits } },
+          orderBy: { createdAt: "desc" }
+        });
+      }
+
       if (existingRental) {
+        const targetRentalId = existingRental.id;
         const isSwitchingToCorpOrPickup = resolvedServiceType && (
           resolvedServiceType.toLowerCase().includes("pickup") ||
           resolvedServiceType.toLowerCase().includes("drop") ||
@@ -160,7 +179,7 @@ export async function PUT(
           const isCorp = resolvedServiceType.toLowerCase().includes("corporate") || resolvedServiceType.toLowerCase().includes("working");
           const migratedCorp = await prisma.corporateLead.create({
             data: {
-              id,
+              id: targetRentalId,
               companyName: isCorp ? "Corporate Client" : "Individual",
               contactName: existingRental.customerName,
               email: existingRental.email,
@@ -174,14 +193,14 @@ export async function PUT(
             }
           });
 
-          await prisma.rentalLead.delete({ where: { id } });
+          await prisma.rentalLead.delete({ where: { id: targetRentalId } });
           updatedLeadResult = {
             ...migratedCorp,
             status: migratedCorp.status === "WON" ? "CONVERTED" : migratedCorp.status
           };
         } else {
           const updatedRental = await prisma.rentalLead.update({
-            where: { id },
+            where: { id: targetRentalId },
             data: {
               ...(dbStatus ? { status: dbStatus as any } : {}),
               ...(restData.notes !== undefined ? { notes: restData.notes } : {}),
