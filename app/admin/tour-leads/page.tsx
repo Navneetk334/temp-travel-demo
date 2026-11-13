@@ -58,7 +58,7 @@ export default function AdminTourLeadsPage() {
     if (showSpinner) setLoading(true);
     try {
       let bookingsList: BookingLead[] = [];
-      const res = await fetch(`/api/bookings?bookingType=TOUR_PACKAGE`);
+      const res = await fetch(`/api/bookings?bookingType=TOUR_PACKAGE&_t=${Date.now()}`, { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         bookingsList = Array.isArray(data) ? data : data.bookings || [];
@@ -185,7 +185,13 @@ export default function AdminTourLeadsPage() {
       setTotalPages(Math.ceil(bookingsList.length / pageSize) || 1);
       setActiveLead((prev) => {
         if (!prev) return null;
-        const fresh = bookingsList.find((l) => l.id === prev.id);
+        const cleanDigits = (p?: string) => (p || "").replace(/\D/g, "").slice(-10);
+        const prevPhone = cleanDigits(prev.phone);
+        const fresh = bookingsList.find((l) => 
+          l.id === prev.id || 
+          (l.bookingNumber && prev.bookingNumber && l.bookingNumber === prev.bookingNumber) ||
+          (prevPhone.length === 10 && cleanDigits(l.phone) === prevPhone)
+        );
         return fresh || prev;
       });
     } catch (err) {

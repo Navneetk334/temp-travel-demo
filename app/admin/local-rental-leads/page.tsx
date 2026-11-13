@@ -26,7 +26,8 @@ import {
   parseLastLeadChange,
   syncLeadStatusUpdateAcrossPanels,
   UNIFIED_LEAD_STATUSES,
-  normalizeLeadStatus
+  normalizeLeadStatus,
+  isLeadAlreadyDispatched
 } from "@/lib/lead-sync";
 
 export type LeadStatus = "NEW" | "CONTACTED" | "QUALIFIED" | "NEGOTIATION" | "CONVERTED" | "DISPATCHED" | "WON" | "LOST" | "ARCHIVED";
@@ -111,7 +112,7 @@ export default function AdminLocalRentalLeadsPage() {
       });
 
       let fetchedLeads: Lead[] = [];
-      const res = await fetch(`/api/rental/lead?${queryParams.toString()}`);
+      const res = await fetch(`/api/rental/lead?${queryParams.toString()}&_t=${Date.now()}`, { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {
@@ -244,7 +245,13 @@ export default function AdminLocalRentalLeadsPage() {
       setTotalPages(Math.ceil(fetchedLeads.length / pageSize) || 1);
       setActiveLead((prev) => {
         if (!prev) return null;
-        const fresh = fetchedLeads.find((l) => l.id === prev.id);
+        const cleanDigits = (p?: string) => (p || "").replace(/\D/g, "").slice(-10);
+        const prevPhone = cleanDigits(prev.phone);
+        const fresh = fetchedLeads.find((l) => 
+          l.id === prev.id || 
+          ((l as any).bookingRef && (prev as any).bookingRef && (l as any).bookingRef === (prev as any).bookingRef) ||
+          (prevPhone.length === 10 && cleanDigits(l.phone) === prevPhone)
+        );
         return fresh || prev;
       });
     } catch (err) {
@@ -283,9 +290,26 @@ export default function AdminLocalRentalLeadsPage() {
   };
 
   const handleStatusChange = async (id: string, newStatus: LeadStatus) => {
+    const target = leads.find((l) => l.id === id);
+
+    // If changing status to DISPATCHED, verify if vehicle & chauffeur have already been dispatched
+    if (newStatus === "DISPATCHED") {
+      const alreadyDispatched = isLeadAlreadyDispatched(target);
+      if (!alreadyDispatched) {
+        if (target) {
+          setDispatchLead({
+            ...target,
+            customerName: target.customerName || "Customer Lead",
+            pickupLocation: target.pickupLocation || "",
+            dropLocation: target.dropLocation || "",
+          });
+        }
+        return;
+      }
+    }
+
     setUpdatingStatus(newStatus);
     try {
-      const target = leads.find((l) => l.id === id);
       const { userName, panel } = getCurrentAdminUser("Admin Panel");
       const { updatedNotes } = createLeadStatusAuditLog({
         oldStatus: target?.status,
@@ -301,6 +325,7 @@ export default function AdminLocalRentalLeadsPage() {
         body: JSON.stringify({
           status: newStatus,
           notes: updatedNotes,
+          phone: target?.phone,
         }),
       });
 
@@ -312,6 +337,7 @@ export default function AdminLocalRentalLeadsPage() {
         }
         syncLeadStatusUpdateAcrossPanels({
           leadId: id,
+          phone: target?.phone,
           newStatus,
           updatedNotes,
           userName,

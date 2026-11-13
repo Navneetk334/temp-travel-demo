@@ -3,6 +3,9 @@ import prisma from "@/lib/prisma";
 import { contactLeadSchema } from "@/lib/validations/contact";
 import { verifyAdmin } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET(req: NextRequest) {
   try {
     const isAdmin = await verifyAdmin(req);
@@ -78,7 +81,14 @@ export async function GET(req: NextRequest) {
         LOST: lostCount,
         ARCHIVED: archivedCount,
       }
-    }, { status: 200 });
+    }, { 
+      status: 200,
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0"
+      }
+    });
   } catch (error) {
     console.error("GET /api/contact error:", error);
     return NextResponse.json({ error: "Failed to fetch contact leads" }, { status: 500 });

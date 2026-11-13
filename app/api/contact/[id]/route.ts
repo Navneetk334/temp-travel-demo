@@ -3,6 +3,9 @@ import prisma from "@/lib/prisma";
 import { contactLeadAdminUpdateSchema } from "@/lib/validations/contact";
 import { verifyAdmin } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 interface RouteParams {
   params: Promise<{ id: string }>;
 }

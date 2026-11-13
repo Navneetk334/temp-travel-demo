@@ -49,6 +49,7 @@ import {
   syncLeadStatusUpdateAcrossPanels,
   UNIFIED_LEAD_STATUSES,
   normalizeLeadStatus,
+  isLeadAlreadyDispatched,
   getCurrentAdminUser,
   createLeadStatusAuditLog,
   parseLastLeadChange
@@ -302,11 +303,12 @@ export default function MasterOmnichannelCRMPage() {
 
     // 2. Concurrently fetch all live CRM sources from backend
     try {
+      const ts = Date.now();
       const [rentalRes, corpRes, toursRes, contactRes] = await Promise.allSettled([
-        fetch("/api/rental/lead"),
-        fetch("/api/corporate/lead"),
-        fetch("/api/bookings?bookingType=TOUR_PACKAGE"),
-        fetch("/api/contact")
+        fetch(`/api/rental/lead?_t=${ts}`, { cache: "no-store" }),
+        fetch(`/api/corporate/lead?_t=${ts}`, { cache: "no-store" }),
+        fetch(`/api/bookings?bookingType=TOUR_PACKAGE&_t=${ts}`, { cache: "no-store" }),
+        fetch(`/api/contact?_t=${ts}`, { cache: "no-store" })
       ]);
 
       const fetchedList: any[] = [];
@@ -433,8 +435,20 @@ export default function MasterOmnichannelCRMPage() {
 
   const updateLeadStatus = async (id: string, newStatus: string) => {
     const normStatus = normalizeLeadStatus(newStatus);
-    const { userName, panel } = getCurrentAdminUser("Master Admin Panel");
     const target = leads.find(l => l.id === id);
+
+    // If changing status to DISPATCHED, verify if vehicle & chauffeur have already been dispatched
+    if (normStatus === "DISPATCHED") {
+      const alreadyDispatched = isLeadAlreadyDispatched(target);
+      if (!alreadyDispatched) {
+        if (target) {
+          openDispatchModal(target);
+        }
+        return;
+      }
+    }
+
+    const { userName, panel } = getCurrentAdminUser("Master Admin Panel");
     const existingNotes = target?.notes || "";
 
     const { updatedNotes } = createLeadStatusAuditLog({
@@ -503,6 +517,7 @@ export default function MasterOmnichannelCRMPage() {
       localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(updated));
       syncLeadStatusUpdateAcrossPanels({
         leadId: id,
+        phone: target?.phone,
         newStatus: normStatus,
         updatedNotes,
         userName,

@@ -198,6 +198,94 @@ export function normalizeLeadStatus(status?: string | null): UnifiedLeadStatus {
   return "NEW";
 }
 
+/**
+ * Check if driver & vehicle have already been assigned/dispatched for a given lead.
+ * Used before permitting status transition to 'DISPATCHED'.
+ */
+export function isLeadAlreadyDispatched(lead: any): boolean {
+  if (!lead) return false;
+
+  // 1. Direct object properties (assignedVehicle & assignedDriver)
+  const hasVehicleObj = Boolean(
+    lead.assignedVehicle ||
+    (lead.vehicleRegistration && !lead.vehicleRegistration.toLowerCase().includes("pending")) ||
+    (lead.vehicleModel && !lead.vehicleModel.toLowerCase().includes("pending") && !lead.vehicleModel.toLowerCase().includes("default"))
+  );
+
+  const hasDriverObj = Boolean(
+    lead.assignedDriver ||
+    (lead.driverName && !lead.driverName.toLowerCase().includes("pending") && !lead.driverName.toLowerCase().includes("unassigned")) ||
+    lead.driverPhone
+  );
+
+  if (hasVehicleObj && hasDriverObj) {
+    return true;
+  }
+
+  // 2. Check dispatch tags in lead notes: e.g. [Vehicle: ...], [AssignedDriver: ...], Assigned Car:, Chauffeur:
+  const notesStr = (lead.notes || "").toString();
+  const hasVehicleInNotes = /\[Vehicle:\s*[^\]]+\]/i.test(notesStr) || /Assigned Car:\s*[^\.\n]+/i.test(notesStr);
+  const hasDriverInNotes = /\[AssignedDriver:\s*[^\]]+\]/i.test(notesStr) || /Chauffeur:\s*[^\.\n]+/i.test(notesStr);
+
+  if (hasVehicleInNotes && hasDriverInNotes) {
+    return true;
+  }
+
+  // 3. Check client-side stored dispatches / active bookings if in browser
+  if (typeof window !== "undefined") {
+    try {
+      const cleanDigits = (p?: string) => (p || "").replace(/\D/g, "").slice(-10);
+      const leadPhone = cleanDigits(lead.phone);
+      const leadRef = lead.bookingRef || lead.bookingNumber || (lead.id && lead.id.length < 15 ? lead.id : "");
+
+      // Check master_dispatches
+      const dispatches = JSON.parse(localStorage.getItem("master_dispatches") || "[]");
+      if (Array.isArray(dispatches)) {
+        const found = dispatches.find((d: any) => {
+          const matchRef = leadRef && (d.id === leadRef || d.bookingRef === leadRef);
+          const matchLeadId = lead.id && (d.leadId === lead.id || d.id === lead.id);
+          const matchPhone = leadPhone.length === 10 && cleanDigits(d.phone) === leadPhone;
+          return matchRef || matchLeadId || matchPhone;
+        });
+
+        if (found) {
+          const hasV = Boolean(found.vehicleId || (found.regNumber && !found.regNumber.includes("Pending") && !found.regNumber.includes("Car")));
+          const hasD = Boolean(found.driverId || (found.driverName && !found.driverName.includes("Pending") && !found.driverName.includes("Driver")));
+          if (hasV && hasD) {
+            return true;
+          }
+        }
+      }
+
+      // Check user_uploaded_crm_leads for assigned vehicle/driver
+      const localCrm = JSON.parse(localStorage.getItem("user_uploaded_crm_leads") || "[]");
+      if (Array.isArray(localCrm)) {
+        const foundCrm = localCrm.find((c: any) => {
+          const matchId = c.id === lead.id;
+          const matchRef = leadRef && (c.bookingRef === leadRef || c.id === leadRef);
+          const matchPhone = leadPhone.length === 10 && cleanDigits(c.phone) === leadPhone;
+          return matchId || matchRef || matchPhone;
+        });
+        if (foundCrm) {
+          const v = foundCrm.assignedVehicle || foundCrm.vehicleRegistration;
+          const d = foundCrm.assignedDriver || foundCrm.driverName;
+          if (v && d && !String(v).toLowerCase().includes("pending") && !String(d).toLowerCase().includes("pending")) {
+            return true;
+          }
+          const cNotes = (foundCrm.notes || "").toString();
+          if (/\[Vehicle:\s*[^\]]+\]/i.test(cNotes) && /\[AssignedDriver:\s*[^\]]+\]/i.test(cNotes)) {
+            return true;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("isLeadAlreadyDispatched local check warning:", e);
+    }
+  }
+
+  return false;
+}
+
 export function getCurrentAdminUser(defaultPanel: "Admin Panel" | "Master Admin Panel" = "Admin Panel"): {
   userName: string;
   panel: "Admin Panel" | "Master Admin Panel";
@@ -315,31 +403,38 @@ export function parseLastLeadChange(lead: {
 
 export function syncLeadStatusUpdateAcrossPanels({
   leadId,
+  phone,
   newStatus,
   updatedNotes,
   userName,
   panel,
 }: {
   leadId: string;
+  phone?: string | null;
   newStatus: string;
   updatedNotes: string;
-  userName: string;
-  panel: "Admin Panel" | "Master Admin Panel";
+  userName?: string;
+  panel?: "Admin Panel" | "Master Admin Panel";
 }) {
   if (typeof window === "undefined") return;
   try {
     const existing = JSON.parse(localStorage.getItem("user_uploaded_crm_leads") || "[]");
     const normalized = normalizeLeadStatus(newStatus);
     const timestamp = new Date().toISOString();
+    const cleanDigits = (p?: string | null) => (p || "").replace(/\D/g, "").slice(-10);
+    const targetPhone = cleanDigits(phone);
 
-    const updated = existing.map((l: any) => {
-      if (l.id === leadId || l.bookingRef === leadId) {
+    const updated = (Array.isArray(existing) ? existing : []).map((l: any) => {
+      const isMatch = l.id === leadId || 
+                      l.bookingRef === leadId || 
+                      (targetPhone.length === 10 && cleanDigits(l.phone) === targetPhone);
+      if (isMatch) {
         return {
           ...l,
           status: normalized,
-          notes: updatedNotes,
-          lastChangedBy: userName,
-          lastChangedPanel: panel,
+          notes: updatedNotes || l.notes,
+          lastChangedBy: userName || l.lastChangedBy,
+          lastChangedPanel: panel || l.lastChangedPanel,
           lastChangedAt: timestamp,
           updatedAt: timestamp,
         };

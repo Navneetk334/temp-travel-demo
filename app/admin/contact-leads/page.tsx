@@ -30,7 +30,8 @@ import {
   parseLastLeadChange,
   syncLeadStatusUpdateAcrossPanels,
   UNIFIED_LEAD_STATUSES,
-  normalizeLeadStatus
+  normalizeLeadStatus,
+  isLeadAlreadyDispatched
 } from "@/lib/lead-sync";
 
 export type ContactStatus = "NEW" | "READ" | "CONTACTED" | "QUALIFIED" | "NEGOTIATION" | "CONVERTED" | "DISPATCHED" | "WON" | "LOST" | "ARCHIVED";
@@ -96,7 +97,7 @@ export default function AdminContactLeadsPage() {
       });
 
       let fetchedLeads: ContactLead[] = [];
-      const res = await fetch(`/api/contact?${queryParams.toString()}`);
+      const res = await fetch(`/api/contact?${queryParams.toString()}&_t=${Date.now()}`, { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {
@@ -200,7 +201,12 @@ export default function AdminContactLeadsPage() {
       setTotalPages(Math.ceil(fetchedLeads.length / pageSize) || 1);
       setActiveLead((prev) => {
         if (!prev) return null;
-        const fresh = fetchedLeads.find((l) => l.id === prev.id);
+        const cleanDigits = (p?: string) => (p || "").replace(/\D/g, "").slice(-10);
+        const prevPhone = cleanDigits(prev.phone || "");
+        const fresh = fetchedLeads.find((l) => 
+          l.id === prev.id || 
+          (prevPhone.length === 10 && cleanDigits(l.phone || "") === prevPhone)
+        );
         return fresh || prev;
       });
     } catch (err) {
@@ -238,9 +244,27 @@ export default function AdminContactLeadsPage() {
   };
 
   const handleStatusChange = async (id: string, newStatus: ContactStatus) => {
+    const target = leads.find((l) => l.id === id);
+
+    // If changing status to DISPATCHED, verify if vehicle & chauffeur have already been dispatched
+    if (newStatus === "DISPATCHED") {
+      const alreadyDispatched = isLeadAlreadyDispatched(target);
+      if (!alreadyDispatched) {
+        if (target) {
+          setDispatchLead({
+            ...target,
+            customerName: target.name || "Customer Lead",
+            tripType: `Contact Inquiry (${target.subject || "General"})`,
+            phone: target.phone || "",
+            email: target.email || "",
+          });
+        }
+        return;
+      }
+    }
+
     setUpdatingStatus(newStatus);
     try {
-      const target = leads.find((l) => l.id === id);
       const { userName, panel } = getCurrentAdminUser("Admin Panel");
       const { updatedNotes } = createLeadStatusAuditLog({
         oldStatus: target?.status,
@@ -264,6 +288,7 @@ export default function AdminContactLeadsPage() {
         }
         syncLeadStatusUpdateAcrossPanels({
           leadId: id,
+          phone: target?.phone,
           newStatus,
           updatedNotes,
           userName,
