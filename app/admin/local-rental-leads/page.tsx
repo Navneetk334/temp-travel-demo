@@ -157,10 +157,33 @@ export default function AdminLocalRentalLeadsPage() {
               createdAt: l.createdAt || new Date().toISOString()
             }));
 
+            // Merge deduplicated: Database leads ALWAYS take precedence over local storage
             const map = new Map<string, Lead>();
-            fetchedLeads.forEach(f => map.set(f.id, f));
             matching.forEach(m => map.set(m.id, m));
+            fetchedLeads.forEach(f => map.set(f.id, f));
             fetchedLeads = Array.from(map.values());
+
+            // Sync user_uploaded_crm_leads in localStorage with fresh DB status & notes
+            try {
+              let updated = false;
+              const syncedLocal = parsed.map((item: any) => {
+                const live = fetchedLeads.find((f) => f.id === item.id);
+                if (live && (item.status !== live.status || item.notes !== live.notes)) {
+                  updated = true;
+                  return {
+                    ...item,
+                    status: live.status,
+                    notes: live.notes || item.notes,
+                  };
+                }
+                return item;
+              });
+              if (updated) {
+                localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(syncedLocal));
+              }
+            } catch (syncErr) {
+              console.error("Local sync error:", syncErr);
+            }
           }
         }
       } catch (e) {
@@ -182,6 +205,11 @@ export default function AdminLocalRentalLeadsPage() {
       setLeads(fetchedLeads);
       setTotalCount(fetchedLeads.length);
       setTotalPages(Math.ceil(fetchedLeads.length / pageSize) || 1);
+      setActiveLead((prev) => {
+        if (!prev) return null;
+        const fresh = fetchedLeads.find((l) => l.id === prev.id);
+        return fresh || prev;
+      });
     } catch (err) {
       console.error("Failed to load local rental leads:", err);
     } finally {
@@ -196,7 +224,11 @@ export default function AdminLocalRentalLeadsPage() {
 
     const handleUpdate = () => loadLeads(false);
     window.addEventListener("crm_leads_updated", handleUpdate);
-    return () => window.removeEventListener("crm_leads_updated", handleUpdate);
+    window.addEventListener("storage", handleUpdate);
+    return () => {
+      window.removeEventListener("crm_leads_updated", handleUpdate);
+      window.removeEventListener("storage", handleUpdate);
+    };
   }, [search, statusFilter, sortBy, sortOrder, currentPage, pageSize]);
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -46,6 +46,7 @@ import {
 import { useDialog } from "@/app/components/DialogProvider";
 import { 
   syncExistingDispatchesToLeads,
+  syncLeadStatusUpdateAcrossPanels,
   UNIFIED_LEAD_STATUSES,
   normalizeLeadStatus,
   getCurrentAdminUser,
@@ -385,6 +386,11 @@ export default function MasterOmnichannelCRMPage() {
       );
 
       setLeads(merged);
+      setSelectedLead((prev: any) => {
+        if (!prev) return null;
+        const fresh = merged.find((l: any) => l.id === prev.id);
+        return fresh || prev;
+      });
     } catch (err) {
       console.error("Error fetching live leads:", err);
     } finally {
@@ -443,6 +449,13 @@ export default function MasterOmnichannelCRMPage() {
 
     try {
       localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(updated));
+      syncLeadStatusUpdateAcrossPanels({
+        leadId: id,
+        newStatus: normStatus,
+        updatedNotes,
+        userName,
+        panel,
+      });
       window.dispatchEvent(new Event("crm_leads_updated"));
     } catch (e) {
       console.error("Error saving updated lead status:", e);
