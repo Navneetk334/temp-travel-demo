@@ -434,6 +434,18 @@ export default function MasterOmnichannelCRMPage() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (selectedLead) setSelectedLead(null);
+        if (dispatchModalLead) setDispatchModalLead(null);
+        if (dispatchedSuccess) setDispatchedSuccess(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedLead, dispatchModalLead, dispatchedSuccess]);
+
   const updateLeadStatus = async (id: string, newStatus: string) => {
     const normStatus = normalizeLeadStatus(newStatus);
     const target = leads.find(l => l.id === id);
@@ -1375,8 +1387,14 @@ export default function MasterOmnichannelCRMPage() {
       {/* Ride Dispatch & Fleet Assignment Modal */}
       {dispatchModalLead && (
         <Portal>
-          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-          <div className="bg-surface border border-amber-500/40 rounded-3xl p-6 sm:p-8 w-full max-w-2xl shadow-2xl space-y-6 relative text-slate-100 max-h-[90vh] overflow-y-auto">
+          <div 
+            className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto"
+            onClick={() => setDispatchModalLead(null)}
+          >
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="bg-surface border border-amber-500/40 rounded-3xl p-6 sm:p-8 w-full max-w-2xl shadow-2xl space-y-6 relative text-slate-100 max-h-[90vh] overflow-y-auto my-auto scrollbar-thin"
+            >
             <button
               onClick={() => setDispatchModalLead(null)}
               className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
@@ -1713,8 +1731,14 @@ export default function MasterOmnichannelCRMPage() {
       {/* Dispatched Success & Booking Reference Card */}
       {dispatchedSuccess && (
         <Portal>
-          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-            <div className="bg-surface border border-emerald-500/40 rounded-3xl p-6 sm:p-8 w-full max-w-xl shadow-2xl space-y-6 relative text-slate-100">
+          <div 
+            className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto"
+            onClick={() => setDispatchedSuccess(null)}
+          >
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="bg-surface border border-emerald-500/40 rounded-3xl p-6 sm:p-8 w-full max-w-xl shadow-2xl space-y-6 relative text-slate-100 max-h-[90vh] overflow-y-auto my-auto scrollbar-thin"
+            >
               <button
                 onClick={() => setDispatchedSuccess(null)}
                 className="absolute top-5 right-5 text-slate-400 hover:text-white cursor-pointer"
@@ -1840,157 +1864,170 @@ export default function MasterOmnichannelCRMPage() {
       {/* Lead Inspection Modal */}
       {selectedLead && (
         <Portal>
-          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-            <div className="bg-surface border border-amber-500/30 rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative text-slate-100">
-              <button
-                onClick={() => setSelectedLead(null)}
-                className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">Lead Record Dossier</span>
-                  <span className="text-[10px] font-mono text-slate-400 bg-background px-2 py-0.5 rounded border border-border font-bold">
-                    {selectedLead.bookingRef}
-                  </span>
+          <div 
+            className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-4 md:p-6 bg-black/85 backdrop-blur-md overflow-y-auto"
+            onClick={() => setSelectedLead(null)}
+          >
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="bg-surface border border-amber-500/30 rounded-2xl w-full max-w-lg shadow-2xl relative text-slate-100 max-h-[90vh] flex flex-col my-auto overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+            >
+              {/* Header (Always Visible & Pinned at Top) */}
+              <div className="p-5 sm:p-6 pb-3 border-b border-border/80 flex items-start justify-between gap-4 bg-surface shrink-0">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold uppercase text-amber-400 tracking-wider">Lead Record Dossier</span>
+                    <span className="text-[10px] font-mono text-slate-400 bg-background px-2 py-0.5 rounded border border-border font-bold">
+                      {selectedLead.bookingRef}
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-50">{selectedLead.customerName}</h3>
                 </div>
-                <h3 className="text-xl font-bold text-slate-50">{selectedLead.customerName}</h3>
+                <button
+                  onClick={() => setSelectedLead(null)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer shrink-0"
+                  title="Close inspection"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
 
-              <div className="space-y-2 bg-background p-4 rounded-xl border border-border text-xs font-mono">
-                <div>Phone: <strong className="text-slate-200">{selectedLead.phone}</strong></div>
-                <div>Email: <strong className="text-slate-200">{selectedLead.email}</strong></div>
-                <div className="flex items-center justify-between py-1.5 border-y border-white/5">
-                  <span className="text-slate-400 uppercase font-bold text-[10px]">Booking / Trip Type:</span>
-                  <select
-                    value={selectedLead.tripType || selectedLead.serviceType || "Pickup & Drop"}
-                    onChange={(e) => updateBookingType(selectedLead.id, e.target.value)}
-                    className="bg-surface border border-amber-500/40 rounded-lg px-2.5 py-1 text-xs font-bold text-amber-400 focus:outline-none focus:border-amber-400 cursor-pointer font-sans"
-                  >
-                    <option value="Pickup & Drop" className="bg-slate-900 text-slate-100">Pickup & Drop</option>
-                    <option value="Point to Point" className="bg-slate-900 text-slate-100">Point to Point</option>
-                    <option value="Local Rental" className="bg-slate-900 text-slate-100">Local Rental</option>
-                    <option value="Outstation" className="bg-slate-900 text-slate-100">Outstation</option>
-                  </select>
+              {/* Scrollable Content Body */}
+              <div className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1 scrollbar-thin">
+                <div className="space-y-2 bg-background p-4 rounded-xl border border-border text-xs font-mono">
+                  <div>Phone: <strong className="text-slate-200">{selectedLead.phone}</strong></div>
+                  <div>Email: <strong className="text-slate-200">{selectedLead.email}</strong></div>
+                  <div className="flex items-center justify-between py-1.5 border-y border-white/5">
+                    <span className="text-slate-400 uppercase font-bold text-[10px]">Booking / Trip Type:</span>
+                    <select
+                      value={selectedLead.tripType || selectedLead.serviceType || "Pickup & Drop"}
+                      onChange={(e) => updateBookingType(selectedLead.id, e.target.value)}
+                      className="bg-surface border border-amber-500/40 rounded-lg px-2.5 py-1 text-xs font-bold text-amber-400 focus:outline-none focus:border-amber-400 cursor-pointer font-sans"
+                    >
+                      <option value="Pickup & Drop" className="bg-slate-900 text-slate-100">Pickup & Drop</option>
+                      <option value="Point to Point" className="bg-slate-900 text-slate-100">Point to Point</option>
+                      <option value="Local Rental" className="bg-slate-900 text-slate-100">Local Rental</option>
+                      <option value="Outstation" className="bg-slate-900 text-slate-100">Outstation</option>
+                    </select>
+                  </div>
+                  {(() => {
+                    const req = extractLeadVehicleRequirements(selectedLead);
+                    if (req.isVehiclePreSelected) {
+                      return (
+                        <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 space-y-1 my-1">
+                          <div className="text-[10px] font-bold uppercase text-amber-400">Customer Selected Fleet:</div>
+                          <div className="flex flex-wrap gap-2">
+                            {req.category && <span className="text-slate-200">Category: <strong>{req.category}</strong></span>}
+                            {req.vehicleClass && <span className="text-slate-200">• Class: <strong>{req.vehicleClass}</strong></span>}
+                            {req.model && <span className="text-slate-200">• Model: <strong className="text-emerald-400">{req.model}</strong></span>}
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
+                  <div>Pickup Address: <strong className="text-slate-200">{selectedLead.pickupLocation}</strong></div>
+                  {selectedLead.dropLocation && (
+                    <div>Drop Address: <strong className="text-slate-200">{selectedLead.dropLocation}</strong></div>
+                  )}
+                  {extractPickupTime(selectedLead) && (
+                    <div>Pickup Time: <strong className="text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">{extractPickupTime(selectedLead)}</strong></div>
+                  )}
+                  {extractPickupDate(selectedLead) && (
+                    <div>Pickup Date: <strong className="text-slate-200">{extractPickupDate(selectedLead)}</strong></div>
+                  )}
                 </div>
+
+                {/* Status Update Pipeline Selector */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Update Pipeline Status</label>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {UNIFIED_LEAD_STATUSES.map((st) => (
+                      <button
+                        key={st}
+                        type="button"
+                        onClick={() => updateLeadStatus(selectedLead.id, st)}
+                        className={`py-1.5 px-2 rounded-lg text-[10px] font-extrabold tracking-wider border transition-all cursor-pointer ${
+                          normalizeLeadStatus(selectedLead.status) === st
+                            ? "bg-amber-500 text-slate-950 border-amber-500 font-black shadow-md shadow-amber-500/20"
+                            : "bg-background text-slate-400 border-border hover:border-white/20 hover:text-slate-200"
+                        }`}
+                      >
+                        {st}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Last Changed By Audit Banner */}
                 {(() => {
-                  const req = extractLeadVehicleRequirements(selectedLead);
-                  if (req.isVehiclePreSelected) {
+                  const lastChange = parseLastLeadChange(selectedLead);
+                  if (lastChange.changedBy) {
                     return (
-                      <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 space-y-1 my-1">
-                        <div className="text-[10px] font-bold uppercase text-amber-400">Customer Selected Fleet:</div>
-                        <div className="flex flex-wrap gap-2">
-                          {req.category && <span className="text-slate-200">Category: <strong>{req.category}</strong></span>}
-                          {req.vehicleClass && <span className="text-slate-200">• Class: <strong>{req.vehicleClass}</strong></span>}
-                          {req.model && <span className="text-slate-200">• Model: <strong className="text-emerald-400">{req.model}</strong></span>}
+                      <div className="bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-xl text-xs space-y-0.5">
+                        <div className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">Last Status Update</div>
+                        <div className="text-slate-200 text-[11px]">
+                          Changed by <strong className="text-amber-300">{lastChange.changedBy}</strong> ({lastChange.panel})
+                          {lastChange.timestamp && <span className="text-slate-400"> on {lastChange.timestamp}</span>}
                         </div>
                       </div>
                     );
                   }
                   return null;
                 })()}
-                <div>Pickup Address: <strong className="text-slate-200">{selectedLead.pickupLocation}</strong></div>
-                {selectedLead.dropLocation && (
-                  <div>Drop Address: <strong className="text-slate-200">{selectedLead.dropLocation}</strong></div>
-                )}
-                {extractPickupTime(selectedLead) && (
-                  <div>Pickup Time: <strong className="text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">{extractPickupTime(selectedLead)}</strong></div>
-                )}
-                {extractPickupDate(selectedLead) && (
-                  <div>Pickup Date: <strong className="text-slate-200">{extractPickupDate(selectedLead)}</strong></div>
-                )}
-              </div>
 
-              {/* Status Update Pipeline Selector */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Update Pipeline Status</label>
-                <div className="grid grid-cols-4 gap-1.5">
-                  {UNIFIED_LEAD_STATUSES.map((st) => (
-                    <button
-                      key={st}
-                      type="button"
-                      onClick={() => updateLeadStatus(selectedLead.id, st)}
-                      className={`py-1.5 px-2 rounded-lg text-[10px] font-extrabold tracking-wider border transition-all cursor-pointer ${
-                        normalizeLeadStatus(selectedLead.status) === st
-                          ? "bg-amber-500 text-slate-950 border-amber-500 font-black shadow-md shadow-amber-500/20"
-                          : "bg-background text-slate-400 border-border hover:border-white/20 hover:text-slate-200"
-                      }`}
-                    >
-                      {st}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Last Changed By Audit Banner */}
-              {(() => {
-                const lastChange = parseLastLeadChange(selectedLead);
-                if (lastChange.changedBy) {
-                  return (
-                    <div className="bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-xl text-xs space-y-0.5">
-                      <div className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">Last Status Update</div>
-                      <div className="text-slate-200 text-[11px]">
-                        Changed by <strong className="text-amber-300">{lastChange.changedBy}</strong> ({lastChange.panel})
-                        {lastChange.timestamp && <span className="text-slate-400"> on {lastChange.timestamp}</span>}
+                {/* Dispatched Booking & WhatsApp Share Banner */}
+                {(selectedLead.status === "DISPATCHED" || Boolean((selectedLead as any).bookingRef) || isLeadAlreadyDispatched(selectedLead)) && (
+                  <div className="bg-purple-500/10 border border-purple-500/30 p-3.5 rounded-xl space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-purple-400" />
+                        <span className="text-xs font-bold text-purple-300">Ride Dispatched & Confirmed</span>
                       </div>
+                      {selectedLead.bookingRef && (
+                        <span className="text-xs font-mono font-bold bg-slate-950 px-2.5 py-0.5 rounded border border-purple-500/30 text-amber-400">
+                          {selectedLead.bookingRef}
+                        </span>
+                      )}
                     </div>
-                  );
-                }
-                return null;
-              })()}
-
-              {/* Dispatched Booking & WhatsApp Share Banner */}
-              {(selectedLead.status === "DISPATCHED" || Boolean((selectedLead as any).bookingRef) || isLeadAlreadyDispatched(selectedLead)) && (
-                <div className="bg-purple-500/10 border border-purple-500/30 p-3.5 rounded-xl space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-purple-400" />
-                      <span className="text-xs font-bold text-purple-300">Ride Dispatched & Confirmed</span>
-                    </div>
-                    {selectedLead.bookingRef && (
-                      <span className="text-xs font-mono font-bold bg-slate-950 px-2.5 py-0.5 rounded border border-purple-500/30 text-amber-400">
-                        {selectedLead.bookingRef}
-                      </span>
-                    )}
+                    <a
+                      href={buildWhatsAppShareUrl({
+                        customerName: selectedLead.customerName || selectedLead.name || selectedLead.contactName || selectedLead.companyName,
+                        customerPhone: selectedLead.phone,
+                        bookingRef: selectedLead.bookingRef,
+                        bookingType: selectedLead.tripType || selectedLead.serviceType,
+                        tripType: selectedLead.tripType || selectedLead.serviceType,
+                        pickupDateTime: selectedLead.pickupDateTime || selectedLead.createdAt,
+                        pickupLocation: extractPickupLocation(selectedLead) || selectedLead.pickupLocations,
+                        dropLocation: extractDropLocation(selectedLead) || selectedLead.dropLocations,
+                        vehicleModel: selectedLead.vehicleModel || selectedLead.assignedVehicle?.model,
+                        vehicleMake: selectedLead.vehicleMake || selectedLead.assignedVehicle?.make,
+                        vehicleRegistration: selectedLead.vehicleRegistration || selectedLead.assignedVehicle?.registrationNumber,
+                        driverName: selectedLead.driverName || selectedLead.assignedDriver?.name,
+                        driverPhone: selectedLead.driverPhone || selectedLead.assignedDriver?.phone,
+                        notes: selectedLead.notes,
+                      })}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2 rounded-lg text-xs uppercase tracking-wider shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
+                    >
+                      <Share2 className="w-4 h-4" />
+                      <span>Share Ride Confirmation on WhatsApp</span>
+                    </a>
                   </div>
-                  <a
-                    href={buildWhatsAppShareUrl({
-                      customerName: selectedLead.customerName || selectedLead.name || selectedLead.contactName || selectedLead.companyName,
-                      customerPhone: selectedLead.phone,
-                      bookingRef: selectedLead.bookingRef,
-                      bookingType: selectedLead.tripType || selectedLead.serviceType,
-                      tripType: selectedLead.tripType || selectedLead.serviceType,
-                      pickupDateTime: selectedLead.pickupDateTime || selectedLead.createdAt,
-                      pickupLocation: extractPickupLocation(selectedLead) || selectedLead.pickupLocations,
-                      dropLocation: extractDropLocation(selectedLead) || selectedLead.dropLocations,
-                      vehicleModel: selectedLead.vehicleModel || selectedLead.assignedVehicle?.model,
-                      vehicleMake: selectedLead.vehicleMake || selectedLead.assignedVehicle?.make,
-                      vehicleRegistration: selectedLead.vehicleRegistration || selectedLead.assignedVehicle?.registrationNumber,
-                      driverName: selectedLead.driverName || selectedLead.assignedDriver?.name,
-                      driverPhone: selectedLead.driverPhone || selectedLead.assignedDriver?.phone,
-                      notes: selectedLead.notes,
-                    })}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2 rounded-lg text-xs uppercase tracking-wider shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
-                  >
-                    <Share2 className="w-4 h-4" />
-                    <span>Share Ride Confirmation on WhatsApp</span>
-                  </a>
-                </div>
-              )}
+                )}
 
-              {/* Follow-up / Audit History Trail */}
-              <div className="space-y-1.5 border-t border-border pt-3">
-                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Audit & Follow-up History Log</div>
-                <div className="bg-background/80 p-3 rounded-lg border border-border text-xs font-mono text-slate-300 max-h-36 overflow-y-auto whitespace-pre-wrap leading-relaxed space-y-1 scrollbar-thin">
-                  {selectedLead.notes || "No previous history recorded."}
+                {/* Follow-up / Audit History Trail */}
+                <div className="space-y-1.5 border-t border-border pt-3">
+                  <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Audit & Follow-up History Log</div>
+                  <div className="bg-background/80 p-3 rounded-lg border border-border text-xs font-mono text-slate-300 max-h-36 overflow-y-auto whitespace-pre-wrap leading-relaxed space-y-1 scrollbar-thin">
+                    {selectedLead.notes || "No previous history recorded."}
+                  </div>
                 </div>
               </div>
 
-              <div className="pt-2 flex justify-between items-center">
+              {/* Sticky Footer Action Buttons */}
+              <div className="p-4 sm:p-5 border-t border-border/80 bg-surface flex justify-between items-center gap-3 shrink-0 rounded-b-2xl">
                 {selectedLead.status === "DISPATCHED" ? (
                   <Link
                     href="/master-admin/dispatch-radar"
@@ -2015,7 +2052,7 @@ export default function MasterOmnichannelCRMPage() {
 
                 <button
                   onClick={() => setSelectedLead(null)}
-                  className="px-4 py-2 bg-background hover:bg-white/10 border border-border text-slate-300 font-bold rounded-xl text-xs cursor-pointer"
+                  className="px-4 py-2 bg-background hover:bg-white/10 border border-border text-slate-300 font-bold rounded-xl text-xs cursor-pointer transition-colors"
                 >
                   Close
                 </button>
