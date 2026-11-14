@@ -612,104 +612,89 @@ export default function BookingWidget() {
     loadData();
   }, []);
 
+// Canonical normalization for vehicle classes according to PRD hierarchy
+function normalizeVehicleClass(cls?: string): string {
+  if (!cls) return "";
+  const clean = cls.toLowerCase().replace(/[^a-z0-9]/g, "");
+  if (clean.includes("subcompact") || clean.includes("urban")) return "subcompact_urban";
+  if (clean.includes("midpremium") || clean.includes("mid")) return "mid_premium";
+  if (clean.includes("premiumexecutive")) return "premium_executive";
+  if (clean === "premium") return "premium";
+  if (clean === "compact") return "compact";
+  if (clean === "executive") return "executive";
+  if (clean === "luxury") return "luxury";
+  return clean;
+}
+
   // Dynamically filter models uploaded in Admin Panel according to selected vehicleCategory & vehicleClass
   const availableModels = React.useMemo(() => {
     if (!localData.vehicleCategory) return [];
 
     const catLower = localData.vehicleCategory.toLowerCase().trim();
-    const classClean = (localData.vehicleClass || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const selectedNorm = normalizeVehicleClass(localData.vehicleClass);
 
     // 1. Filter models uploaded in the Admin Panel / Live Fleet Catalogue
     if (dbModels && dbModels.length > 0) {
       const matched = dbModels.filter((m: any) => {
         const mCat = (m.category || "").toLowerCase().trim();
-        const mSub = (m.subcategory || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+        const mNorm = normalizeVehicleClass(m.subcategory || m.subCategory || m.vehicleClass);
 
         const catMatches = mCat.includes(catLower) || catLower.includes(mCat);
-        const classMatches = !classClean || mSub.includes(classClean) || classClean.includes(mSub);
+        const classMatches = !selectedNorm || mNorm === selectedNorm;
 
         return catMatches && classMatches;
       });
 
-      if (matched.length > 0) {
-        const uniqueSet = new Set<string>();
-        const list: { value: string; label: string }[] = [];
-        matched.forEach((m: any) => {
-          const name = `${m.brand} ${m.modelName}`.trim();
-          if (!uniqueSet.has(name.toLowerCase())) {
-            uniqueSet.add(name.toLowerCase());
-            list.push({ value: name, label: name });
-          }
-        });
-        return list;
-      }
+      const uniqueSet = new Set<string>();
+      const list: { value: string; label: string }[] = [];
+      matched.forEach((m: any) => {
+        const name = `${m.brand} ${m.modelName}`.trim();
+        if (name && !uniqueSet.has(name.toLowerCase())) {
+          uniqueSet.add(name.toLowerCase());
+          list.push({ value: name, label: name });
+        }
+      });
+      return list;
     }
 
-    // 2. Realistic Catalogue fallbacks based on Temp Travel's fleet & PRD hierarchy
-    if (localData.vehicleCategory === "Sedan") {
-      if (localData.vehicleClass === "Compact") {
-        return [
-          { value: "Hyundai Aura", label: "Hyundai Aura" },
-          { value: "Maruti Suzuki Swift Dzire", label: "Maruti Suzuki Swift Dzire" },
-          { value: "Honda Amaze", label: "Honda Amaze" }
-        ];
+    // 2. Verified fleet fallbacks strictly matching Temp Travel's uploaded fleet
+    if (catLower.includes("sedan")) {
+      if (selectedNorm === "compact") {
+        return [{ value: "Hyundai Aura", label: "Hyundai Aura" }];
       }
-      if (localData.vehicleClass === "Executive") {
-        return [
-          { value: "Maruti Suzuki Ciaz", label: "Maruti Suzuki Ciaz" },
-          { value: "Honda City", label: "Honda City" },
-          { value: "Hyundai Verna", label: "Hyundai Verna" }
-        ];
+      if (selectedNorm === "premium_executive") {
+        return [{ value: "Maruti Suzuki Ciaz", label: "Maruti Suzuki Ciaz" }];
       }
-      if (localData.vehicleClass === "Premium Executive") {
-        return [
-          { value: "Maruti Suzuki Ciaz", label: "Maruti Suzuki Ciaz" },
-          { value: "Toyota Camry", label: "Toyota Camry" }
-        ];
-      }
-      if (localData.vehicleClass === "Luxury") {
-        return [
-          { value: "Toyota Camry", label: "Toyota Camry" },
-          { value: "Mercedes-Benz E-Class", label: "Mercedes-Benz E-Class" }
-        ];
+      if (selectedNorm === "executive" || selectedNorm === "luxury") {
+        return [];
       }
       return [
         { value: "Hyundai Aura", label: "Hyundai Aura" },
-        { value: "Maruti Suzuki Ciaz", label: "Maruti Suzuki Ciaz" },
-        { value: "Toyota Camry", label: "Toyota Camry" }
+        { value: "Maruti Suzuki Ciaz", label: "Maruti Suzuki Ciaz" }
       ];
     }
 
-    if (localData.vehicleCategory === "SUV") {
-      if (localData.vehicleClass === "Subcompact / Urban" || localData.vehicleClass === "Subcompact/Urban") {
-        return [
-          { value: "Hyundai Exter", label: "Hyundai Exter" },
-          { value: "Tata Nexon", label: "Tata Nexon" }
-        ];
+    if (catLower.includes("suv")) {
+      if (selectedNorm === "subcompact_urban") {
+        return [{ value: "Hyundai Exter", label: "Hyundai Exter" }];
       }
-      if (localData.vehicleClass === "Mid-Premium") {
+      if (selectedNorm === "mid_premium") {
         return [
-          { value: "Maruti Suzuki Ertiga", label: "Maruti Suzuki Ertiga" },
           { value: "KIA Carens", label: "KIA Carens" },
+          { value: "Maruti Suzuki Ertiga", label: "Maruti Suzuki Ertiga" },
           { value: "Toyota Rumion", label: "Toyota Rumion" }
         ];
       }
-      if (localData.vehicleClass === "Premium") {
-        return [
-          { value: "Toyota Innova Crysta", label: "Toyota Innova Crysta" },
-          { value: "Mahindra XUV700", label: "Mahindra XUV700" }
-        ];
+      if (selectedNorm === "premium") {
+        return [{ value: "Toyota Innova Crysta", label: "Toyota Innova Crysta" }];
       }
-      if (localData.vehicleClass === "Luxury") {
-        return [
-          { value: "Toyota Fortuner", label: "Toyota Fortuner" },
-          { value: "Toyota Innova Crysta", label: "Toyota Innova Crysta" }
-        ];
+      if (selectedNorm === "luxury") {
+        return [];
       }
       return [
         { value: "Hyundai Exter", label: "Hyundai Exter" },
-        { value: "Maruti Suzuki Ertiga", label: "Maruti Suzuki Ertiga" },
         { value: "KIA Carens", label: "KIA Carens" },
+        { value: "Maruti Suzuki Ertiga", label: "Maruti Suzuki Ertiga" },
         { value: "Toyota Rumion", label: "Toyota Rumion" },
         { value: "Toyota Innova Crysta", label: "Toyota Innova Crysta" }
       ];
@@ -722,99 +707,70 @@ export default function BookingWidget() {
     if (!outstationData.vehicleCategory) return [];
 
     const catLower = outstationData.vehicleCategory.toLowerCase().trim();
-    const classClean = (outstationData.vehicleClass || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const selectedNorm = normalizeVehicleClass(outstationData.vehicleClass);
 
     // 1. Filter models uploaded in the Admin Panel / Live Fleet Catalogue
     if (dbModels && dbModels.length > 0) {
       const matched = dbModels.filter((m: any) => {
         const mCat = (m.category || "").toLowerCase().trim();
-        const mSub = (m.subcategory || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+        const mNorm = normalizeVehicleClass(m.subcategory || m.subCategory || m.vehicleClass);
 
         const catMatches = mCat.includes(catLower) || catLower.includes(mCat);
-        const classMatches = !classClean || mSub.includes(classClean) || classClean.includes(mSub);
+        const classMatches = !selectedNorm || mNorm === selectedNorm;
 
         return catMatches && classMatches;
       });
 
-      if (matched.length > 0) {
-        const uniqueSet = new Set<string>();
-        const list: { value: string; label: string }[] = [];
-        matched.forEach((m: any) => {
-          const name = `${m.brand} ${m.modelName}`.trim();
-          if (!uniqueSet.has(name.toLowerCase())) {
-            uniqueSet.add(name.toLowerCase());
-            list.push({ value: name, label: name });
-          }
-        });
-        return list;
-      }
+      const uniqueSet = new Set<string>();
+      const list: { value: string; label: string }[] = [];
+      matched.forEach((m: any) => {
+        const name = `${m.brand} ${m.modelName}`.trim();
+        if (name && !uniqueSet.has(name.toLowerCase())) {
+          uniqueSet.add(name.toLowerCase());
+          list.push({ value: name, label: name });
+        }
+      });
+      return list;
     }
 
-    // 2. Realistic Catalogue fallbacks based on Temp Travel's fleet & PRD hierarchy
-    if (outstationData.vehicleCategory === "Sedan") {
-      if (outstationData.vehicleClass === "Compact") {
-        return [
-          { value: "Hyundai Aura", label: "Hyundai Aura" },
-          { value: "Maruti Suzuki Swift Dzire", label: "Maruti Suzuki Swift Dzire" },
-          { value: "Honda Amaze", label: "Honda Amaze" }
-        ];
+    // 2. Verified fleet fallbacks strictly matching Temp Travel's uploaded fleet
+    if (catLower.includes("sedan")) {
+      if (selectedNorm === "compact") {
+        return [{ value: "Hyundai Aura", label: "Hyundai Aura" }];
       }
-      if (outstationData.vehicleClass === "Executive") {
-        return [
-          { value: "Maruti Suzuki Ciaz", label: "Maruti Suzuki Ciaz" },
-          { value: "Honda City", label: "Honda City" },
-          { value: "Hyundai Verna", label: "Hyundai Verna" }
-        ];
+      if (selectedNorm === "premium_executive") {
+        return [{ value: "Maruti Suzuki Ciaz", label: "Maruti Suzuki Ciaz" }];
       }
-      if (outstationData.vehicleClass === "Premium Executive") {
-        return [
-          { value: "Maruti Suzuki Ciaz", label: "Maruti Suzuki Ciaz" },
-          { value: "Toyota Camry", label: "Toyota Camry" }
-        ];
-      }
-      if (outstationData.vehicleClass === "Luxury") {
-        return [
-          { value: "Toyota Camry", label: "Toyota Camry" },
-          { value: "Mercedes-Benz E-Class", label: "Mercedes-Benz E-Class" }
-        ];
+      if (selectedNorm === "executive" || selectedNorm === "luxury") {
+        return [];
       }
       return [
         { value: "Hyundai Aura", label: "Hyundai Aura" },
-        { value: "Maruti Suzuki Ciaz", label: "Maruti Suzuki Ciaz" },
-        { value: "Toyota Camry", label: "Toyota Camry" }
+        { value: "Maruti Suzuki Ciaz", label: "Maruti Suzuki Ciaz" }
       ];
     }
 
-    if (outstationData.vehicleCategory === "SUV") {
-      if (outstationData.vehicleClass === "Subcompact / Urban" || outstationData.vehicleClass === "Subcompact/Urban") {
-        return [
-          { value: "Hyundai Exter", label: "Hyundai Exter" },
-          { value: "Tata Nexon", label: "Tata Nexon" }
-        ];
+    if (catLower.includes("suv")) {
+      if (selectedNorm === "subcompact_urban") {
+        return [{ value: "Hyundai Exter", label: "Hyundai Exter" }];
       }
-      if (outstationData.vehicleClass === "Mid-Premium") {
+      if (selectedNorm === "mid_premium") {
         return [
-          { value: "Maruti Suzuki Ertiga", label: "Maruti Suzuki Ertiga" },
           { value: "KIA Carens", label: "KIA Carens" },
+          { value: "Maruti Suzuki Ertiga", label: "Maruti Suzuki Ertiga" },
           { value: "Toyota Rumion", label: "Toyota Rumion" }
         ];
       }
-      if (outstationData.vehicleClass === "Premium") {
-        return [
-          { value: "Toyota Innova Crysta", label: "Toyota Innova Crysta" },
-          { value: "Mahindra XUV700", label: "Mahindra XUV700" }
-        ];
+      if (selectedNorm === "premium") {
+        return [{ value: "Toyota Innova Crysta", label: "Toyota Innova Crysta" }];
       }
-      if (outstationData.vehicleClass === "Luxury") {
-        return [
-          { value: "Toyota Fortuner", label: "Toyota Fortuner" },
-          { value: "Toyota Innova Crysta", label: "Toyota Innova Crysta" }
-        ];
+      if (selectedNorm === "luxury") {
+        return [];
       }
       return [
         { value: "Hyundai Exter", label: "Hyundai Exter" },
-        { value: "Maruti Suzuki Ertiga", label: "Maruti Suzuki Ertiga" },
         { value: "KIA Carens", label: "KIA Carens" },
+        { value: "Maruti Suzuki Ertiga", label: "Maruti Suzuki Ertiga" },
         { value: "Toyota Rumion", label: "Toyota Rumion" },
         { value: "Toyota Innova Crysta", label: "Toyota Innova Crysta" }
       ];
@@ -1630,7 +1586,7 @@ export default function BookingWidget() {
                   <div className="relative h-[42px]">
                     <select
                       value={localData.vehicleClass || ""}
-                      onChange={(e) => setLocalData({ ...localData, vehicleClass: e.target.value })}
+                      onChange={(e) => setLocalData({ ...localData, vehicleClass: e.target.value, vehicleModel: "" })}
                       disabled={!localData.vehicleCategory}
                       className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -1673,7 +1629,9 @@ export default function BookingWidget() {
                           ? "- Select Category First -"
                           : !localData.vehicleClass
                             ? "- Select Class First -"
-                            : "- Please Select -"}
+                            : availableModels.length === 0
+                              ? "- No Vehicles in this Class -"
+                              : "- Please Select -"}
                       </option>
                       {availableModels.map((item, idx) => (
                         <option key={idx} value={item.value} className="bg-slate-900">
@@ -1943,7 +1901,7 @@ export default function BookingWidget() {
                   <div className="relative h-[42px]">
                     <select
                       value={outstationData.vehicleClass || ""}
-                      onChange={(e) => setOutstationData({ ...outstationData, vehicleClass: e.target.value })}
+                      onChange={(e) => setOutstationData({ ...outstationData, vehicleClass: e.target.value, vehicleModel: "" })}
                       disabled={!outstationData.vehicleCategory}
                       className="w-full h-full bg-slate-950/50 border border-white/10 rounded-lg pl-4 pr-10 text-sm text-slate-100 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -1986,7 +1944,9 @@ export default function BookingWidget() {
                           ? "- Select Category First -"
                           : !outstationData.vehicleClass
                             ? "- Select Class First -"
-                            : "- Please Select -"}
+                            : availableOutstationModels.length === 0
+                              ? "- No Vehicles in this Class -"
+                              : "- Please Select -"}
                       </option>
                       {availableOutstationModels.map((item, idx) => (
                         <option key={idx} value={item.value} className="bg-slate-900">
