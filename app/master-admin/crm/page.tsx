@@ -41,7 +41,8 @@ import {
   extractDropLocation,
   extractPickupTime,
   extractPickupDate,
-  formatToDateTimeLocal
+  formatToDateTimeLocal,
+  toIstDateTimeLocal
 } from "@/components/admin/lead-dispatch-modal";
 import { useDialog } from "@/app/components/DialogProvider";
 import { 
@@ -640,7 +641,7 @@ export default function MasterOmnichannelCRMPage() {
     const extractedDate = extractPickupDate(lead);
     const extractedTime = extractPickupTime(lead);
     const initialPickupDateTime = lead.pickupDateTime
-      ? (lead.pickupDateTime.length === 16 ? lead.pickupDateTime : lead.pickupDateTime.slice(0, 16))
+      ? toIstDateTimeLocal(lead.pickupDateTime)
       : formatToDateTimeLocal(extractedDate, extractedTime);
 
     setDispatchForm({

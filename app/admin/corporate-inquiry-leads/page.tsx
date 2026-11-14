@@ -107,9 +107,15 @@ export default function AdminCorporateInquiryLeadsPage() {
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {
-          fetchedLeads = data;
+          fetchedLeads = data.map((l: any) => ({
+            ...l,
+            status: normalizeLeadStatus(l.status),
+          }));
         } else if (data.leads) {
-          fetchedLeads = data.leads;
+          fetchedLeads = data.leads.map((l: any) => ({
+            ...l,
+            status: normalizeLeadStatus(l.status),
+          }));
           if (data.stats) setStats({ ...data.stats, CONVERTED: data.stats.CONVERTED ?? (data.stats as any).WON ?? 0 });
         }
       }
@@ -151,7 +157,7 @@ export default function AdminCorporateInquiryLeadsPage() {
               serviceType: l.tripType || l.serviceType || "Corporate Inquiry",
               requirements: l.notes || "",
               notes: l.notes || "",
-              status: (l.status || "NEW") as LeadStatus,
+              status: normalizeLeadStatus(l.status),
               createdAt: l.createdAt || new Date().toISOString()
             }));
 

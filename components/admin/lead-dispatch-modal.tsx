@@ -135,7 +135,7 @@ export function extractPickupDate(lead: any): string {
     try {
       const d = new Date(lead.pickupDateTime);
       if (!isNaN(d.getTime())) {
-        return d.toISOString().slice(0, 10);
+        return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(d);
       }
     } catch (e) {}
   }
@@ -143,11 +143,37 @@ export function extractPickupDate(lead: any): string {
     try {
       const d = new Date(lead.createdAt);
       if (!isNaN(d.getTime())) {
-        return d.toISOString().slice(0, 10);
+        return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(d);
       }
     } catch (e) {}
   }
-  return new Date().toISOString().slice(0, 10);
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date());
+}
+
+export function toIstDateTimeLocal(dt?: string | Date | null): string {
+  if (!dt) return "";
+  try {
+    if (typeof dt === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(dt.trim())) {
+      return dt.trim();
+    }
+    const d = typeof dt === "string" ? new Date(dt) : dt;
+    if (!isNaN(d.getTime())) {
+      const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Kolkata",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }).formatToParts(d);
+      const getPart = (type: string) => parts.find(p => p.type === type)?.value || "";
+      let hour = getPart("hour");
+      if (hour === "24") hour = "00";
+      return `${getPart("year")}-${getPart("month")}-${getPart("day")}T${hour.padStart(2, "0")}:${getPart("minute").padStart(2, "0")}`;
+    }
+  } catch (e) {}
+  return "";
 }
 
 export function formatToDateTimeLocal(dateStr?: string, timeStr?: string): string {
@@ -392,7 +418,7 @@ export default function LeadDispatchModal({
       const extractedDate = extractPickupDate(lead);
       const extractedTime = extractPickupTime(lead);
       const initialPickupDateTime = lead.pickupDateTime
-        ? (lead.pickupDateTime.length === 16 ? lead.pickupDateTime : lead.pickupDateTime.slice(0, 16))
+        ? toIstDateTimeLocal(lead.pickupDateTime)
         : formatToDateTimeLocal(extractedDate, extractedTime);
 
       setDispatchForm({

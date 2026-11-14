@@ -127,9 +127,15 @@ export default function AdminCorporateLeadsPage() {
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {
-          fetchedLeads = data;
+          fetchedLeads = data.map((l: any) => ({
+            ...l,
+            status: normalizeLeadStatus(l.status),
+          }));
         } else if (data.leads) {
-          fetchedLeads = data.leads;
+          fetchedLeads = data.leads.map((l: any) => ({
+            ...l,
+            status: normalizeLeadStatus(l.status),
+          }));
           if (data.stats) setStats({ ...data.stats, CONVERTED: data.stats.CONVERTED ?? (data.stats as any).WON ?? 0 });
         }
       }
@@ -172,7 +178,7 @@ export default function AdminCorporateLeadsPage() {
               serviceType: l.tripType || l.serviceType || "Pickup & Drop",
               requirements: l.requirements || l.notes || "",
               notes: l.notes || "",
-              status: (l.status || "NEW") as LeadStatus,
+              status: normalizeLeadStatus(l.status),
               createdAt: l.createdAt || new Date().toISOString()
             }));
 
@@ -357,9 +363,13 @@ export default function AdminCorporateLeadsPage() {
 
       if (res.ok) {
         const updated = await res.json();
-        setLeads(leads.map((l) => (l.id === id ? updated : l)));
+        const normUpdated = {
+          ...updated,
+          status: normalizeLeadStatus(updated.status),
+        };
+        setLeads(leads.map((l) => (l.id === id ? normUpdated : l)));
         if (activeLead && activeLead.id === id) {
-          setActiveLead(updated);
+          setActiveLead(normUpdated);
         }
         syncLeadStatusUpdateAcrossPanels({
           leadId: id,
