@@ -522,14 +522,38 @@ export default function BookingWidget() {
   const [bookingRef, setBookingRef] = useState<string | null>(null);
   const [dbModels, setDbModels] = useState<any[]>([]);
 
-  // Fetch dynamic categories, tour packages, and vehicle models from admin catalogue
+  // Fetch dynamic categories, tour packages, fleet vehicles, and models from admin catalogue
   useEffect(() => {
+    // 1. Immediate client hydration from local storage if present
+    let localFleet: any[] = [];
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("user_uploaded_fleet_vehicles") || localStorage.getItem("user_uploaded_fleet");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            localFleet = parsed;
+            const extracted = parsed.map((v: any) => ({
+              brand: (v.make || "").trim(),
+              modelName: (v.model || "").trim(),
+              category: v.categoryName || v.category?.name || "Sedan",
+              subcategory: v.vehicleClass || v.subCategory || "Executive"
+            }));
+            setDbModels(extracted);
+          }
+        }
+      } catch (e) {
+        console.warn("Local fleet parse error on booking widget:", e);
+      }
+    }
+
     async function loadData() {
       try {
-        const [catsRes, toursRes, modelsRes] = await Promise.all([
+        const [catsRes, toursRes, modelsRes, fleetRes] = await Promise.all([
           fetch("/api/fleet/categories"),
           fetch("/api/tours"),
-          fetch("/api/fleet/models")
+          fetch("/api/fleet/models"),
+          fetch("/api/fleet?minimal=true")
         ]);
 
         if (catsRes.ok) {
@@ -542,11 +566,44 @@ export default function BookingWidget() {
           setTours(toursData);
         }
 
+        let apiModels: any[] = [];
         if (modelsRes.ok) {
           const modelsData = await modelsRes.json();
           if (modelsData.models && Array.isArray(modelsData.models)) {
-            setDbModels(modelsData.models);
+            apiModels = modelsData.models;
           }
+        }
+
+        let apiFleet: any[] = [];
+        if (fleetRes.ok) {
+          const fData = await fleetRes.json();
+          apiFleet = Array.isArray(fData) ? fData : (fData.vehicles || []);
+        }
+
+        // Combine models from all sources: apiModels, apiFleet, and localFleet
+        const modelMap = new Map<string, any>();
+        apiModels.forEach((m: any) => {
+          const key = `${(m.brand || "").trim()} ${(m.modelName || "").trim()}`.toLowerCase();
+          if (key) modelMap.set(key, m);
+        });
+
+        [...apiFleet, ...localFleet].forEach((v: any) => {
+          const brand = (v.make || "").trim();
+          const modelName = (v.model || "").trim();
+          const key = `${brand} ${modelName}`.toLowerCase();
+          if (key && !modelMap.has(key)) {
+            modelMap.set(key, {
+              brand,
+              modelName,
+              category: v.categoryName || v.category?.name || "Sedan",
+              subcategory: v.vehicleClass || v.subCategory || "Executive"
+            });
+          }
+        });
+
+        const combinedModels = Array.from(modelMap.values());
+        if (combinedModels.length > 0) {
+          setDbModels(combinedModels);
         }
       } catch (err) {
         console.error("Failed to load booking widget dependencies:", err);
@@ -559,107 +616,102 @@ export default function BookingWidget() {
   const availableModels = React.useMemo(() => {
     if (!localData.vehicleCategory) return [];
 
-    const catLower = localData.vehicleCategory.toLowerCase();
-    const classLower = (localData.vehicleClass || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const catLower = localData.vehicleCategory.toLowerCase().trim();
+    const classClean = (localData.vehicleClass || "").toLowerCase().replace(/[^a-z0-9]/g, "");
 
-    // 1. Filter models uploaded in the Admin Panel DB Catalogue
+    // 1. Filter models uploaded in the Admin Panel / Live Fleet Catalogue
     if (dbModels && dbModels.length > 0) {
       const matched = dbModels.filter((m: any) => {
-        const mCat = (m.category || "").toLowerCase();
+        const mCat = (m.category || "").toLowerCase().trim();
         const mSub = (m.subcategory || "").toLowerCase().replace(/[^a-z0-9]/g, "");
 
         const catMatches = mCat.includes(catLower) || catLower.includes(mCat);
-        const classMatches = !classLower || mSub.includes(classLower) || classLower.includes(mSub);
+        const classMatches = !classClean || mSub.includes(classClean) || classClean.includes(mSub);
 
         return catMatches && classMatches;
       });
 
       if (matched.length > 0) {
-        return matched.map((m: any) => ({
-          value: `${m.brand} ${m.modelName}`,
-          label: `${m.brand} ${m.modelName}`
-        }));
+        const uniqueSet = new Set<string>();
+        const list: { value: string; label: string }[] = [];
+        matched.forEach((m: any) => {
+          const name = `${m.brand} ${m.modelName}`.trim();
+          if (!uniqueSet.has(name.toLowerCase())) {
+            uniqueSet.add(name.toLowerCase());
+            list.push({ value: name, label: name });
+          }
+        });
+        return list;
       }
     }
 
-    // 2. Default Seeded catalogue fallbacks per category & class if API models are not yet loaded
+    // 2. Realistic Catalogue fallbacks based on Temp Travel's fleet & PRD hierarchy
     if (localData.vehicleCategory === "Sedan") {
       if (localData.vehicleClass === "Compact") {
         return [
-          { value: "Maruti Suzuki Swift Dzire", label: "Maruti Suzuki Swift Dzire" },
           { value: "Hyundai Aura", label: "Hyundai Aura" },
-          { value: "Honda Amaze", label: "Honda Amaze" },
-          { value: "Tata Tigor", label: "Tata Tigor" }
+          { value: "Maruti Suzuki Swift Dzire", label: "Maruti Suzuki Swift Dzire" },
+          { value: "Honda Amaze", label: "Honda Amaze" }
         ];
       }
       if (localData.vehicleClass === "Executive") {
         return [
-          { value: "Honda City", label: "Honda City" },
-          { value: "Hyundai Verna", label: "Hyundai Verna" },
           { value: "Maruti Suzuki Ciaz", label: "Maruti Suzuki Ciaz" },
-          { value: "Skoda Slavia", label: "Skoda Slavia" }
+          { value: "Honda City", label: "Honda City" },
+          { value: "Hyundai Verna", label: "Hyundai Verna" }
         ];
       }
       if (localData.vehicleClass === "Premium Executive") {
         return [
-          { value: "Toyota Camry", label: "Toyota Camry" },
-          { value: "Skoda Superb", label: "Skoda Superb" },
-          { value: "Volkswagen Passat", label: "Volkswagen Passat" }
+          { value: "Maruti Suzuki Ciaz", label: "Maruti Suzuki Ciaz" },
+          { value: "Toyota Camry", label: "Toyota Camry" }
         ];
       }
       if (localData.vehicleClass === "Luxury") {
         return [
-          { value: "Mercedes-Benz E-Class", label: "Mercedes-Benz E-Class" },
-          { value: "BMW 5 Series", label: "BMW 5 Series" },
-          { value: "Audi A6", label: "Audi A6" },
-          { value: "Jaguar XF", label: "Jaguar XF" }
+          { value: "Toyota Camry", label: "Toyota Camry" },
+          { value: "Mercedes-Benz E-Class", label: "Mercedes-Benz E-Class" }
         ];
       }
       return [
-        { value: "Maruti Suzuki Swift Dzire", label: "Maruti Suzuki Swift Dzire" },
-        { value: "Honda City", label: "Honda City" },
-        { value: "Toyota Camry", label: "Toyota Camry" },
-        { value: "Mercedes-Benz E-Class", label: "Mercedes-Benz E-Class" }
+        { value: "Hyundai Aura", label: "Hyundai Aura" },
+        { value: "Maruti Suzuki Ciaz", label: "Maruti Suzuki Ciaz" },
+        { value: "Toyota Camry", label: "Toyota Camry" }
       ];
     }
 
     if (localData.vehicleCategory === "SUV") {
-      if (localData.vehicleClass === "Subcompact / Urban") {
+      if (localData.vehicleClass === "Subcompact / Urban" || localData.vehicleClass === "Subcompact/Urban") {
         return [
-          { value: "Tata Nexon", label: "Tata Nexon" },
-          { value: "Maruti Suzuki Brezza", label: "Maruti Suzuki Brezza" },
-          { value: "Hyundai Venue", label: "Hyundai Venue" },
-          { value: "Kia Sonet", label: "Kia Sonet" }
+          { value: "Hyundai Exter", label: "Hyundai Exter" },
+          { value: "Tata Nexon", label: "Tata Nexon" }
         ];
       }
       if (localData.vehicleClass === "Mid-Premium") {
         return [
-          { value: "Hyundai Creta", label: "Hyundai Creta" },
-          { value: "Kia Seltos", label: "Kia Seltos" },
-          { value: "Mahindra Scorpio-N", label: "Mahindra Scorpio-N" },
-          { value: "Tata Harrier", label: "Tata Harrier" }
+          { value: "Maruti Suzuki Ertiga", label: "Maruti Suzuki Ertiga" },
+          { value: "KIA Carens", label: "KIA Carens" },
+          { value: "Toyota Rumion", label: "Toyota Rumion" }
         ];
       }
       if (localData.vehicleClass === "Premium") {
         return [
-          { value: "Mahindra XUV700", label: "Mahindra XUV700" },
-          { value: "Tata Safari", label: "Tata Safari" },
-          { value: "MG Hector Plus", label: "MG Hector Plus" },
-          { value: "Jeep Compass", label: "Jeep Compass" }
+          { value: "Toyota Innova Crysta", label: "Toyota Innova Crysta" },
+          { value: "Mahindra XUV700", label: "Mahindra XUV700" }
         ];
       }
       if (localData.vehicleClass === "Luxury") {
         return [
           { value: "Toyota Fortuner", label: "Toyota Fortuner" },
-          { value: "Mercedes-Benz GLE", label: "Mercedes-Benz GLE" },
-          { value: "BMW X5", label: "BMW X5" }
+          { value: "Toyota Innova Crysta", label: "Toyota Innova Crysta" }
         ];
       }
       return [
-        { value: "Tata Nexon", label: "Tata Nexon" },
-        { value: "Hyundai Creta", label: "Hyundai Creta" },
-        { value: "Mahindra XUV700", label: "Mahindra XUV700" },
-        { value: "Toyota Fortuner", label: "Toyota Fortuner" }
+        { value: "Hyundai Exter", label: "Hyundai Exter" },
+        { value: "Maruti Suzuki Ertiga", label: "Maruti Suzuki Ertiga" },
+        { value: "KIA Carens", label: "KIA Carens" },
+        { value: "Toyota Rumion", label: "Toyota Rumion" },
+        { value: "Toyota Innova Crysta", label: "Toyota Innova Crysta" }
       ];
     }
 
@@ -669,107 +721,102 @@ export default function BookingWidget() {
   const availableOutstationModels = React.useMemo(() => {
     if (!outstationData.vehicleCategory) return [];
 
-    const catLower = outstationData.vehicleCategory.toLowerCase();
-    const classLower = (outstationData.vehicleClass || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const catLower = outstationData.vehicleCategory.toLowerCase().trim();
+    const classClean = (outstationData.vehicleClass || "").toLowerCase().replace(/[^a-z0-9]/g, "");
 
-    // 1. Filter models uploaded in the Admin Panel DB Catalogue
+    // 1. Filter models uploaded in the Admin Panel / Live Fleet Catalogue
     if (dbModels && dbModels.length > 0) {
       const matched = dbModels.filter((m: any) => {
-        const mCat = (m.category || "").toLowerCase();
+        const mCat = (m.category || "").toLowerCase().trim();
         const mSub = (m.subcategory || "").toLowerCase().replace(/[^a-z0-9]/g, "");
 
         const catMatches = mCat.includes(catLower) || catLower.includes(mCat);
-        const classMatches = !classLower || mSub.includes(classLower) || classLower.includes(mSub);
+        const classMatches = !classClean || mSub.includes(classClean) || classClean.includes(mSub);
 
         return catMatches && classMatches;
       });
 
       if (matched.length > 0) {
-        return matched.map((m: any) => ({
-          value: `${m.brand} ${m.modelName}`,
-          label: `${m.brand} ${m.modelName}`
-        }));
+        const uniqueSet = new Set<string>();
+        const list: { value: string; label: string }[] = [];
+        matched.forEach((m: any) => {
+          const name = `${m.brand} ${m.modelName}`.trim();
+          if (!uniqueSet.has(name.toLowerCase())) {
+            uniqueSet.add(name.toLowerCase());
+            list.push({ value: name, label: name });
+          }
+        });
+        return list;
       }
     }
 
-    // 2. Default Seeded catalogue fallbacks per category & class
+    // 2. Realistic Catalogue fallbacks based on Temp Travel's fleet & PRD hierarchy
     if (outstationData.vehicleCategory === "Sedan") {
       if (outstationData.vehicleClass === "Compact") {
         return [
-          { value: "Maruti Suzuki Swift Dzire", label: "Maruti Suzuki Swift Dzire" },
           { value: "Hyundai Aura", label: "Hyundai Aura" },
-          { value: "Honda Amaze", label: "Honda Amaze" },
-          { value: "Tata Tigor", label: "Tata Tigor" }
+          { value: "Maruti Suzuki Swift Dzire", label: "Maruti Suzuki Swift Dzire" },
+          { value: "Honda Amaze", label: "Honda Amaze" }
         ];
       }
       if (outstationData.vehicleClass === "Executive") {
         return [
-          { value: "Honda City", label: "Honda City" },
-          { value: "Hyundai Verna", label: "Hyundai Verna" },
           { value: "Maruti Suzuki Ciaz", label: "Maruti Suzuki Ciaz" },
-          { value: "Skoda Slavia", label: "Skoda Slavia" }
+          { value: "Honda City", label: "Honda City" },
+          { value: "Hyundai Verna", label: "Hyundai Verna" }
         ];
       }
       if (outstationData.vehicleClass === "Premium Executive") {
         return [
-          { value: "Toyota Camry", label: "Toyota Camry" },
-          { value: "Skoda Superb", label: "Skoda Superb" },
-          { value: "Volkswagen Passat", label: "Volkswagen Passat" }
+          { value: "Maruti Suzuki Ciaz", label: "Maruti Suzuki Ciaz" },
+          { value: "Toyota Camry", label: "Toyota Camry" }
         ];
       }
       if (outstationData.vehicleClass === "Luxury") {
         return [
-          { value: "Mercedes-Benz E-Class", label: "Mercedes-Benz E-Class" },
-          { value: "BMW 5 Series", label: "BMW 5 Series" },
-          { value: "Audi A6", label: "Audi A6" },
-          { value: "Jaguar XF", label: "Jaguar XF" }
+          { value: "Toyota Camry", label: "Toyota Camry" },
+          { value: "Mercedes-Benz E-Class", label: "Mercedes-Benz E-Class" }
         ];
       }
       return [
-        { value: "Maruti Suzuki Swift Dzire", label: "Maruti Suzuki Swift Dzire" },
-        { value: "Honda City", label: "Honda City" },
-        { value: "Toyota Camry", label: "Toyota Camry" },
-        { value: "Mercedes-Benz E-Class", label: "Mercedes-Benz E-Class" }
+        { value: "Hyundai Aura", label: "Hyundai Aura" },
+        { value: "Maruti Suzuki Ciaz", label: "Maruti Suzuki Ciaz" },
+        { value: "Toyota Camry", label: "Toyota Camry" }
       ];
     }
 
     if (outstationData.vehicleCategory === "SUV") {
-      if (outstationData.vehicleClass === "Subcompact / Urban") {
+      if (outstationData.vehicleClass === "Subcompact / Urban" || outstationData.vehicleClass === "Subcompact/Urban") {
         return [
-          { value: "Tata Nexon", label: "Tata Nexon" },
-          { value: "Maruti Suzuki Brezza", label: "Maruti Suzuki Brezza" },
-          { value: "Hyundai Venue", label: "Hyundai Venue" },
-          { value: "Kia Sonet", label: "Kia Sonet" }
+          { value: "Hyundai Exter", label: "Hyundai Exter" },
+          { value: "Tata Nexon", label: "Tata Nexon" }
         ];
       }
       if (outstationData.vehicleClass === "Mid-Premium") {
         return [
-          { value: "Hyundai Creta", label: "Hyundai Creta" },
-          { value: "Kia Seltos", label: "Kia Seltos" },
-          { value: "Mahindra Scorpio-N", label: "Mahindra Scorpio-N" },
-          { value: "Tata Harrier", label: "Tata Harrier" }
+          { value: "Maruti Suzuki Ertiga", label: "Maruti Suzuki Ertiga" },
+          { value: "KIA Carens", label: "KIA Carens" },
+          { value: "Toyota Rumion", label: "Toyota Rumion" }
         ];
       }
       if (outstationData.vehicleClass === "Premium") {
         return [
-          { value: "Mahindra XUV700", label: "Mahindra XUV700" },
-          { value: "Tata Safari", label: "Tata Safari" },
-          { value: "MG Hector Plus", label: "MG Hector Plus" },
-          { value: "Jeep Compass", label: "Jeep Compass" }
+          { value: "Toyota Innova Crysta", label: "Toyota Innova Crysta" },
+          { value: "Mahindra XUV700", label: "Mahindra XUV700" }
         ];
       }
       if (outstationData.vehicleClass === "Luxury") {
         return [
           { value: "Toyota Fortuner", label: "Toyota Fortuner" },
-          { value: "Mercedes-Benz GLE", label: "Mercedes-Benz GLE" },
-          { value: "BMW X5", label: "BMW X5" }
+          { value: "Toyota Innova Crysta", label: "Toyota Innova Crysta" }
         ];
       }
       return [
-        { value: "Tata Nexon", label: "Tata Nexon" },
-        { value: "Hyundai Creta", label: "Hyundai Creta" },
-        { value: "Mahindra XUV700", label: "Mahindra XUV700" },
-        { value: "Toyota Fortuner", label: "Toyota Fortuner" }
+        { value: "Hyundai Exter", label: "Hyundai Exter" },
+        { value: "Maruti Suzuki Ertiga", label: "Maruti Suzuki Ertiga" },
+        { value: "KIA Carens", label: "KIA Carens" },
+        { value: "Toyota Rumion", label: "Toyota Rumion" },
+        { value: "Toyota Innova Crysta", label: "Toyota Innova Crysta" }
       ];
     }
 

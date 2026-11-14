@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { verifyAdmin } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -40,25 +43,69 @@ export async function GET(req: NextRequest) {
       ],
     });
 
-    // Extract unique brands matching current category/subcategory filters
-    const brandWhere: any = {};
-    if (activeOnly) brandWhere.isActive = true;
-    if (category) brandWhere.category = { equals: category, mode: "insensitive" };
-    if (subcategory) brandWhere.subcategory = { equals: subcategory, mode: "insensitive" };
-
-    const matchingModelsForBrands = await prisma.vehicleModel.findMany({
-      where: brandWhere,
-      select: { brand: true, subcategory: true, category: true },
+    // Also fetch unique models from FleetVehicle to ensure every uploaded fleet car is included
+    const fleetVehicles = await prisma.fleetVehicle.findMany({
+      where: activeOnly ? { status: "AVAILABLE" } : {},
+      include: { category: true }
     });
 
-    const uniqueBrands = Array.from(new Set(matchingModelsForBrands.map(m => m.brand))).sort();
-    const uniqueSubcategories = Array.from(new Set(matchingModelsForBrands.map(m => m.subcategory))).sort();
+    const modelMap = new Map<string, any>();
+    models.forEach((m: any) => {
+      const key = `${m.brand} ${m.modelName}`.toLowerCase().trim();
+      modelMap.set(key, m);
+    });
+
+    fleetVehicles.forEach((v: any) => {
+      const b = (v.make || "").trim();
+      const m = (v.model || "").trim();
+      if (!b || !m) return;
+      const key = `${b} ${m}`.toLowerCase().trim();
+      const cat = v.category?.name || "Sedan";
+      const sub = v.subCategory || "Executive";
+
+      // Apply category/subcategory filters if passed
+      if (category && cat.toLowerCase() !== category.toLowerCase()) return;
+      if (subcategory && sub.toLowerCase().replace(/[^a-z0-9]/g, "") !== subcategory.toLowerCase().replace(/[^a-z0-9]/g, "")) return;
+      if (brand && b.toLowerCase() !== brand.toLowerCase()) return;
+      if (search) {
+        const sLower = search.toLowerCase();
+        if (!b.toLowerCase().includes(sLower) && !m.toLowerCase().includes(sLower) && !cat.toLowerCase().includes(sLower) && !sub.toLowerCase().includes(sLower)) {
+          return;
+        }
+      }
+
+      if (!modelMap.has(key)) {
+        modelMap.set(key, {
+          id: v.id,
+          brand: b,
+          modelName: m,
+          category: cat,
+          subcategory: sub,
+          minSeats: 4,
+          maxSeats: v.capacity || 7,
+          supportedFuelTypes: [v.fuelType || "DIESEL"],
+          supportedTransmissionTypes: [v.transmission || "MANUAL"],
+          isActive: v.status === "AVAILABLE"
+        });
+      }
+    });
+
+    const allModels = Array.from(modelMap.values());
+
+    // Extract unique brands matching current category/subcategory filters
+    const uniqueBrands = Array.from(new Set(allModels.map(m => m.brand))).sort();
+    const uniqueSubcategories = Array.from(new Set(allModels.map(m => m.subcategory))).sort();
 
     return NextResponse.json({
-      models,
+      models: allModels,
       brands: uniqueBrands,
       subcategories: uniqueSubcategories,
-    }, { status: 200 });
+    }, {
+      status: 200,
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate"
+      }
+    });
 
   } catch (error) {
     console.error("GET /api/fleet/models error:", error);

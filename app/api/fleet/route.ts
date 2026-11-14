@@ -249,6 +249,43 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Automatically sync or link model master so it appears in dynamic booking dropdowns
+    try {
+      const bTrim = (make || "Commercial Brand").trim();
+      const mTrim = (model || "Commercial Vehicle").trim();
+      const existingM = await prisma.vehicleModel.findFirst({
+        where: {
+          brand: { equals: bTrim, mode: "insensitive" },
+          modelName: { equals: mTrim, mode: "insensitive" }
+        }
+      });
+      let targetModelId = existingM?.id;
+      if (!existingM) {
+        const createdM = await prisma.vehicleModel.create({
+          data: {
+            brand: bTrim,
+            modelName: mTrim,
+            category: targetCategory.name,
+            subcategory: cls,
+            minSeats: 4,
+            maxSeats: Number(capacity) || 7,
+            supportedFuelTypes: [fuelType || "Diesel"],
+            supportedTransmissionTypes: [transmission || "MANUAL"],
+            isActive: true
+          }
+        });
+        targetModelId = createdM.id;
+      }
+      if (targetModelId) {
+        await prisma.fleetVehicle.update({
+          where: { id: created.id },
+          data: { vehicleModelId: targetModelId }
+        });
+      }
+    } catch (modelSyncErr) {
+      console.warn("Could not sync VehicleModel master:", modelSyncErr);
+    }
+
     return NextResponse.json({
       success: true,
       vehicle: {
