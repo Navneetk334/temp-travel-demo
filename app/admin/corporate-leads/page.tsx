@@ -880,7 +880,7 @@ export default function AdminCorporateLeadsPage() {
                             })()}
                           </td>
                           <td className="p-4 text-right space-x-1" onClick={(e) => e.stopPropagation()}>
-                            {(lead.status === "DISPATCHED" || (lead as any).bookingRef) ? (
+                            {(lead.status === "DISPATCHED" || Boolean((lead as any).bookingRef) || isLeadAlreadyDispatched(lead)) ? (
                               <>
                                 <a
                                   href={buildWhatsAppShareUrl({
@@ -1012,7 +1012,7 @@ export default function AdminCorporateLeadsPage() {
                   <span className={`text-[10px] font-extrabold py-1 px-3 rounded-full border uppercase ${getStatusBadge(activeLead.status)}`}>
                     {activeLead.status}
                   </span>
-                  {(activeLead.status === "DISPATCHED" || (activeLead as any).bookingRef) ? (
+                  {(activeLead.status === "DISPATCHED" || Boolean((activeLead as any).bookingRef) || isLeadAlreadyDispatched(activeLead)) ? (
                     <div className="flex flex-col items-end gap-1.5">
                       <a
                         href={buildWhatsAppShareUrl({

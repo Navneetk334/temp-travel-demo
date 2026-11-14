@@ -414,8 +414,7 @@ export default function MasterDispatchRadarPage() {
         !isDispatchDeleted(d) && 
         d.id !== id && 
         d.bookingRef !== id && 
-        d.bookingId !== id &&
-        (!target?.phone || d.phone !== target.phone)
+        d.bookingId !== id
       );
       localStorage.setItem("master_dispatches", JSON.stringify(next));
       return next;
@@ -430,8 +429,7 @@ export default function MasterDispatchRadarPage() {
             !isDispatchDeleted(b) && 
             b.id !== id && 
             b.bookingNumber !== id && 
-            b.bookingRef !== id &&
-            (!target?.phone || (b.customer?.phone || b.phone) !== target.phone)
+            b.bookingRef !== id
           );
           localStorage.setItem("user_uploaded_dispatched_bookings", JSON.stringify(next));
         }

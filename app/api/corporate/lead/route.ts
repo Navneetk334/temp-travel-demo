@@ -161,8 +161,14 @@ export async function GET(req: NextRequest) {
         const dropMatchNotes = lead.notes.match(/(?:Drop Address|Drop Location|Drop):\s*([^\n\r.]+)/i);
         if (dropMatchNotes && dropMatchNotes[1]) dropLocation = dropMatchNotes[1].trim();
       }
+      let bookingRef = (lead as any).bookingRef || null;
+      if (!bookingRef && lead.notes) {
+        const refMatch = lead.notes.match(/\[(?:BookingRef|Ref|PNR):\s*([a-zA-Z0-9_-]+)\]/i);
+        if (refMatch) bookingRef = refMatch[1].trim();
+      }
       return {
         ...lead,
+        bookingRef,
         status: lead.status === "WON" ? "CONVERTED" : lead.status,
         pickupLocation: lead.pickupLocations || "",
         dropLocation: dropLocation || null,

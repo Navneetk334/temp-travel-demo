@@ -133,10 +133,18 @@ export async function GET(req: NextRequest) {
 
     const totalPages = Math.ceil(totalCount / limit) || 1;
 
-    const mappedLeads = leads.map((lead: any) => ({
-      ...lead,
-      status: lead.status === "WON" ? "CONVERTED" : lead.status,
-    }));
+    const mappedLeads = leads.map((lead: any) => {
+      let bookingRef = (lead as any).bookingRef || null;
+      if (!bookingRef && lead.notes) {
+        const refMatch = lead.notes.match(/\[(?:BookingRef|Ref|PNR):\s*([a-zA-Z0-9_-]+)\]/i);
+        if (refMatch) bookingRef = refMatch[1].trim();
+      }
+      return {
+        ...lead,
+        bookingRef,
+        status: lead.status === "WON" ? "CONVERTED" : lead.status,
+      };
+    });
 
     return NextResponse.json({
       leads: mappedLeads,

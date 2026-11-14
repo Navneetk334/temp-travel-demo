@@ -133,13 +133,13 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 5. Update Lead Status to WON and persist assigned notes & tripType
+    // 5. Update Lead Status to DISPATCHED and persist assigned notes & tripType
     if (leadId) {
       try {
         await prisma.rentalLead.update({ 
           where: { id: leadId }, 
           data: { 
-            status: "WON",
+            status: "DISPATCHED",
             notes: finalNotes,
             ...(tripType ? { tripType } : {})
           } 
@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
         await prisma.corporateLead.update({ 
           where: { id: leadId }, 
           data: { 
-            status: "WON",
+            status: "DISPATCHED",
             notes: finalNotes,
             ...(tripType ? { serviceType: tripType } : {})
           } 
@@ -155,7 +155,7 @@ export async function POST(req: NextRequest) {
         await prisma.contactLead.update({ 
           where: { id: leadId }, 
           data: { 
-            status: "WON"
+            status: "DISPATCHED"
           } 
         }).catch(() => null);
       } catch (err) {

@@ -844,7 +844,7 @@ export default function AdminLocalRentalLeadsPage() {
                             })()}
                           </td>
                           <td className="p-4 text-right space-x-1" onClick={(e) => e.stopPropagation()}>
-                            {(lead.status === "DISPATCHED" || (lead as any).bookingRef) ? (
+                            {(lead.status === "DISPATCHED" || Boolean((lead as any).bookingRef) || isLeadAlreadyDispatched(lead)) ? (
                               <Link
                                 href="/admin/bookings-dispatch"
                                 title="Ride already dispatched — View in Dispatch CRM"
@@ -945,7 +945,7 @@ export default function AdminLocalRentalLeadsPage() {
                   <span className={`text-[10px] font-extrabold py-1 px-3 rounded-full border uppercase ${getStatusBadge(activeLead.status)}`}>
                     {activeLead.status}
                   </span>
-                  {(activeLead.status === "DISPATCHED" || (activeLead as any).bookingRef) ? (
+                  {(activeLead.status === "DISPATCHED" || Boolean((activeLead as any).bookingRef) || isLeadAlreadyDispatched(activeLead)) ? (
                     <Link
                       href="/admin/bookings-dispatch"
                       className="flex items-center gap-1.5 bg-purple-500/10 border border-purple-500/30 text-purple-400 hover:bg-purple-500/20 font-bold px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-sm cursor-pointer"

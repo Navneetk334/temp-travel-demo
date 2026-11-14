@@ -1296,7 +1296,7 @@ export default function MasterOmnichannelCRMPage() {
                       </td>
                       <td className="py-4 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
-                          {lead.status === "DISPATCHED" ? (
+                          {(lead.status === "DISPATCHED" || Boolean((lead as any).bookingRef) || isLeadAlreadyDispatched(lead)) ? (
                             <>
                               <a
                                 href={buildWhatsAppShareUrl({
@@ -1941,7 +1941,7 @@ export default function MasterOmnichannelCRMPage() {
               })()}
 
               {/* Dispatched Booking & WhatsApp Share Banner */}
-              {(selectedLead.status === "DISPATCHED") && (
+              {(selectedLead.status === "DISPATCHED" || Boolean((selectedLead as any).bookingRef) || isLeadAlreadyDispatched(selectedLead)) && (
                 <div className="bg-purple-500/10 border border-purple-500/30 p-3.5 rounded-xl space-y-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">

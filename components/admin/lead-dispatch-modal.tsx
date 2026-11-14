@@ -20,7 +20,7 @@ import {
 import LocationInput from "@/components/shared/location-input";
 import Portal from "@/components/shared/portal";
 import { getCurrentAdminUser, createLeadStatusAuditLog } from "@/lib/lead-sync";
-import { buildWhatsAppShareUrl } from "@/lib/whatsapp-share";
+import { buildWhatsAppShareUrl, formatIndianDateTime } from "@/lib/whatsapp-share";
 
 export interface LeadDispatchModalProps {
   isOpen: boolean;
@@ -517,7 +517,7 @@ export default function LeadDispatchModal({
       `[TripType: ${finalTripType}]`,
       assignedVeh ? `[Vehicle: ${assignedVeh.make || ""} ${assignedVeh.model || ""} | ${assignedVeh.registrationNumber || ""}]` : null,
       assignedDrv ? `[AssignedDriver: ${assignedDrv.name || ""}|${assignedDrv.phone || ""}|${assignedDrv.id || ""}]` : null,
-      finalPickupDateTime ? `[PickupTime: ${formattedSuccessPickupTime}]` : null,
+      finalPickupDateTime ? `[PickupTime: ${formatIndianDateTime(finalPickupDateTime)}]` : null,
     ].filter(Boolean).join(" ");
 
     const fullUpdatedNotes = [dispatchDetailsTag, updatedNotes].filter(Boolean).join("\n");
@@ -626,24 +626,9 @@ export default function LeadDispatchModal({
     });
   };
 
-  const formattedSuccessPickupTime = (() => {
-    if (!dispatchedSuccess?.pickupDateTime) return "As Scheduled";
-    try {
-      const d = new Date(dispatchedSuccess.pickupDateTime);
-      if (!isNaN(d.getTime())) {
-        return d.toLocaleString("en-IN", {
-          timeZone: "Asia/Kolkata",
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true
-        });
-      }
-    } catch (e) {}
-    return dispatchedSuccess.pickupDateTime;
-  })();
+  const formattedSuccessPickupTime = dispatchedSuccess?.pickupDateTime 
+    ? formatIndianDateTime(dispatchedSuccess.pickupDateTime) 
+    : "As Scheduled";
 
   return (
     <Portal>

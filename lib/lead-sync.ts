@@ -111,7 +111,19 @@ export function getDeletedDispatchIds(): Set<string> {
     const raw = localStorage.getItem("master_deleted_dispatch_ids");
     if (!raw) return new Set();
     const parsed = JSON.parse(raw);
-    return new Set(Array.isArray(parsed) ? parsed : []);
+    if (!Array.isArray(parsed)) return new Set();
+    // Sanitize: Only retain discrete booking/dispatch IDs, never blacklist customer phone numbers or names
+    const cleaned = parsed.filter((x: any) => {
+      if (typeof x !== "string") return false;
+      const s = x.trim();
+      if (/^\d{10}$/.test(s)) return false; // Purge raw phone numbers
+      if (s.toLowerCase() === "navneet" || s.toLowerCase() === "navneet kumar" || s.toLowerCase() === "ajay bhatnagar") return false;
+      return true;
+    });
+    if (cleaned.length !== parsed.length) {
+      localStorage.setItem("master_deleted_dispatch_ids", JSON.stringify(cleaned));
+    }
+    return new Set(cleaned);
   } catch {
     return new Set();
   }
@@ -119,10 +131,10 @@ export function getDeletedDispatchIds(): Set<string> {
 
 export function isDispatchDeleted(item: any): boolean {
   if (!item) return false;
-  // Explicitly purge the stale legacy "Ayush" phantom record
+  // Explicitly purge only the stale legacy "Ayush" phantom record
   const cName = String(item.customerName || item.customer?.name || item.contactName || item.name || "").trim().toLowerCase();
   const phone = String(item.phone || item.customerPhone || item.customer?.phone || "").replace(/\D/g, "");
-  if (cName === "ayush" || phone.endsWith("8448755117")) {
+  if (cName === "ayush" && (phone.endsWith("8448755117") || phone === "")) {
     return true;
   }
 
@@ -136,7 +148,6 @@ export function isDispatchDeleted(item: any): boolean {
   if (id && deletedSet.has(id)) return true;
   if (bookingRef && deletedSet.has(bookingRef)) return true;
   if (bookingId && deletedSet.has(bookingId)) return true;
-  if (phone && phone.length >= 10 && deletedSet.has(phone.slice(-10))) return true;
 
   return false;
 }
@@ -147,11 +158,6 @@ export function recordDeletedDispatch(id: string, extra?: { phone?: string; cust
     const set = getDeletedDispatchIds();
     if (id) set.add(id);
     if (extra?.bookingRef) set.add(extra.bookingRef);
-    if (extra?.customerName) set.add(extra.customerName.trim().toLowerCase());
-    if (extra?.phone) {
-      const digits = extra.phone.replace(/\D/g, "").slice(-10);
-      if (digits) set.add(digits);
-    }
     localStorage.setItem("master_deleted_dispatch_ids", JSON.stringify(Array.from(set)));
   } catch (e) {
     console.error("recordDeletedDispatch error:", e);

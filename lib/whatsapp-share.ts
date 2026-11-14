@@ -127,20 +127,34 @@ export function buildWhatsAppShareMessage(data: WhatsAppDispatchData): string {
   const pnr = data.bookingRef || noteDetails.bookingRef || "CONFIRMED";
 
   // Pickup Time Resolution
-  let pickupTime = noteDetails.pickupTime;
-  if (!pickupTime && data.pickupDateTime) {
-    pickupTime = formatIndianDateTime(data.pickupDateTime);
-  }
-  if (!pickupTime || pickupTime === "As Scheduled") {
-    if (data.notes) {
-      const timeMatch = data.notes.match(/Pickup Time:\s*([^,\n\.]+)/i);
-      const dateMatch = data.notes.match(/Pickup Date:\s*([^,\n\.]+)/i);
-      if (timeMatch) {
-        pickupTime = dateMatch ? `${dateMatch[1].trim()}, ${timeMatch[1].trim()}` : timeMatch[1].trim();
-      }
+  let pickupTime = "";
+
+  // 1. If valid pickupDateTime is passed directly, format it to Indian Standard Time
+  if (data.pickupDateTime) {
+    const formatted = formatIndianDateTime(data.pickupDateTime);
+    if (formatted && formatted.toLowerCase() !== "as scheduled") {
+      pickupTime = formatted;
     }
   }
-  if (!pickupTime) {
+
+  // 2. If not found, check noteDetails.pickupTime if not 'as scheduled'
+  if (!pickupTime && noteDetails.pickupTime && noteDetails.pickupTime.toLowerCase() !== "as scheduled") {
+    pickupTime = noteDetails.pickupTime;
+  }
+
+  // 3. Fallback: Parse notes or requirements for Pickup Date and Pickup Time
+  if (!pickupTime || pickupTime.toLowerCase() === "as scheduled") {
+    const searchString = `${data.notes || ""} ${data.bookingType || ""} ${data.tripType || ""}`;
+    const timeMatch = searchString.match(/(?:Pickup Time|Pickup at|Time):\s*([0-9]{1,2}:[0-9]{2}(?:\s*[APap][Mm])?)/i);
+    const dateMatch = searchString.match(/(?:Pickup Date|Travel Date|Date):\s*([0-9]{4}-[0-9]{2}-[0-9]{2}|[0-9]{1,2}[/-][0-9]{1,2}[/-][0-9]{2,4})/i);
+    if (timeMatch && dateMatch) {
+      pickupTime = `${dateMatch[1].trim()}, ${timeMatch[1].trim()}`;
+    } else if (timeMatch) {
+      pickupTime = timeMatch[1].trim();
+    }
+  }
+
+  if (!pickupTime || pickupTime.toLowerCase() === "as scheduled") {
     pickupTime = "As scheduled";
   }
 
