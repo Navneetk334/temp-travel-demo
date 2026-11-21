@@ -5,7 +5,7 @@ async function checkUsers() {
   const users = await prisma.user.findMany({
     where: {
       OR: [
-        { phone: { contains: "9560332555" } },
+        { phone: { contains: "7011729639" } },
         { email: { contains: "temptravel" } }
       ]
     }

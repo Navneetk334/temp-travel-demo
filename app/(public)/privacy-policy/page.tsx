@@ -339,7 +339,7 @@ export default function PrivacyPolicyPage() {
               </div>
               <div>
                 <span className="text-slate-400 block font-semibold">Customer & Corporate Helpline:</span>
-                <a href="tel:+917011729639" className="text-accent hover:underline font-bold">+91 70117 29639</a> / <a href="tel:+919560332555" className="text-accent hover:underline">+91 95603 32555</a>
+                <a href="tel:+917011729639" className="text-accent hover:underline font-bold">+91 70117 29639</a>
               </div>
             </div>
             <div className="pt-2 border-t border-border/60 text-[11px] text-slate-400">

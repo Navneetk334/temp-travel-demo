@@ -8,7 +8,7 @@ async function testCreate() {
         companyName: "Individual",
         contactName: "Test Lead",
         email: "test@temptravel.co.in",
-        phone: "+919560332555",
+        phone: "+917011729639",
         employeeCount: 1,
         pickupLocations: "T3 Arrival Road",
         serviceType: "Pickup & Drop (Individual)",
