@@ -240,18 +240,16 @@ function FleetContent() {
                     </div>
                     <div className="flex justify-between text-slate-300">
                       <span className="text-slate-400 font-sans flex items-center gap-1.5">
-                        <Gauge className="w-3.5 h-3.5 text-amber-400" /> Tariff:
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Chauffeur:
                       </span>
-                      <strong className="text-amber-400">
-                        ₹{v.perKmRate || 15}/km &bull; ₹{v.perHourRate || 150}/hr
-                      </strong>
+                      <strong className="text-emerald-400">Verified & Uniformed</strong>
                     </div>
-                    {v.driverAllowance && (
-                      <div className="flex justify-between text-slate-300 text-[11px]">
-                        <span className="text-slate-500 font-sans">Driver Day/Night Allowance:</span>
-                        <strong className="text-slate-300">₹{v.driverAllowance} / ₹{v.nightAllowance || 300}</strong>
-                      </div>
-                    )}
+                    <div className="flex justify-between text-slate-300 text-[11px]">
+                      <span className="text-slate-400 font-sans flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" /> Permit:
+                      </span>
+                      <strong className="text-slate-200">All-India Commercial</strong>
+                    </div>
                   </div>
                 </div>
 

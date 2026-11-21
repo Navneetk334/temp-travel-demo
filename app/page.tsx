@@ -520,8 +520,10 @@ export default function Homepage() {
 
                     <div className="pt-4 border-t border-border flex items-center justify-between">
                       <div>
-                        <span className="text-[10px] text-muted-foreground block uppercase font-bold">Base Tariff</span>
-                        <span className="text-base font-black text-amber-400">{vehicle.rate}</span>
+                        <span className="text-[10px] text-muted-foreground block uppercase font-bold">Chauffeur Service</span>
+                        <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                          <Shield className="w-3 h-3 text-emerald-400" /> Verified Driver
+                        </span>
                       </div>
                       <a
                         href="#book-widget"

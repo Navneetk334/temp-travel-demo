@@ -294,8 +294,8 @@ export default function VehicleBookingModal({
                   <span className="text-2xl font-black font-mono text-amber-400">{confirmation.bookingRef}</span>
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Estimated Tariff</span>
-                  <span className="text-xl font-black font-mono text-emerald-400">₹{confirmation.estimatedFare}</span>
+                  <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block">Status</span>
+                  <span className="text-xs font-black font-mono text-emerald-400 uppercase bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Received & Confirmed</span>
                 </div>
               </div>
 
@@ -336,7 +336,7 @@ export default function VehicleBookingModal({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               <a
                 href={`https://wa.me/91${confirmation.phone.replace(/\D/g, "").slice(-10)}?text=${encodeURIComponent(
-                  `*TEMP TRAVEL CAR RENTALS - BOOKING REQUEST*\n\nDear ${confirmation.customerName},\nWe have received your booking request.\n\n*PNR Ref:* ${confirmation.bookingRef}\n*Vehicle:* ${confirmation.vehicle} (${confirmation.category} - ${confirmation.vehicleClass})\n*Pickup Date & Time:* ${confirmation.pickupDate} at ${confirmation.pickupTime}\n*Pickup Location:* ${confirmation.pickupLocation}\n*Destination:* ${confirmation.dropLocation}\n*Estimated Tariff:* ₹${confirmation.estimatedFare}\n\nOur reservation team will assign a verified chauffeur shortly. Support: +91-7011729639.`
+                  `*TEMP TRAVEL CAR RENTALS - BOOKING REQUEST*\n\nDear ${confirmation.customerName},\nWe have received your booking request.\n\n*PNR Ref:* ${confirmation.bookingRef}\n*Vehicle:* ${confirmation.vehicle} (${confirmation.category} - ${confirmation.vehicleClass})\n*Pickup Date & Time:* ${confirmation.pickupDate} at ${confirmation.pickupTime}\n*Pickup Location:* ${confirmation.pickupLocation}\n*Destination:* ${confirmation.dropLocation}\n\nOur reservation team will assign a verified chauffeur shortly. Support: +91-7011729639.`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -403,15 +403,13 @@ export default function VehicleBookingModal({
                 </div>
 
                 <div className="text-right shrink-0 bg-slate-900/80 px-4 py-2 rounded-xl border border-white/5">
-                  <span className="text-[10px] text-slate-400 uppercase font-bold block">Tariff Rate</span>
-                  <div className="text-base font-black font-mono text-amber-400">
-                    ₹{vehicle.perKmRate || 16}/km &bull; ₹{vehicle.perHourRate || 160}/hr
+                  <span className="text-[10px] text-amber-400 uppercase font-bold block">Chauffeur Service</span>
+                  <div className="text-xs font-bold text-slate-100 mt-0.5">
+                    Verified Driver
                   </div>
-                  {vehicle.baseDailyRate && (
-                    <div className="text-[10px] text-slate-400 font-mono">
-                      Daily Base: ₹{vehicle.baseDailyRate}
-                    </div>
-                  )}
+                  <div className="text-[10px] text-slate-400 font-mono">
+                    All-India Commercial Permit
+                  </div>
                 </div>
               </div>
             </div>
@@ -701,13 +699,12 @@ export default function VehicleBookingModal({
                 />
               </div>
 
-              {/* Tariff Estimation Summary & Submission */}
+              {/* Reservation Review & Submission */}
               <div className="bg-slate-950 p-4 rounded-2xl border border-amber-500/20 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
-                  <span className="text-[10px] text-slate-400 uppercase font-bold block">Estimated Base Tariff</span>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black font-mono text-emerald-400">₹{estimatedFare}</span>
-                    <span className="text-[10px] text-slate-400">+ Tolls & GST as applicable</span>
+                  <span className="text-[10px] text-amber-400 uppercase font-bold block tracking-wider">Reservation Desk</span>
+                  <div className="text-xs text-slate-300">
+                    Transparent quote & verified chauffeur assigned upon booking review
                   </div>
                 </div>
 
