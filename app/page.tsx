@@ -365,7 +365,7 @@ export default function Homepage() {
       <section className="relative z-20 py-12 bg-surface/90 border-y border-border backdrop-blur-xl">
         <div className="max-w-[1750px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {[
-            { metric: "90,000+", label: "Verified Passengers Transported" },
+            { metric: "17,000+", label: "Verified Passengers Transported" },
             { metric: "99.85%", label: "Corporate On-Time Arrival Ratio" },
             { metric: "121+", label: "Satisfied clients" },
             { metric: "24/7", label: "Dedicated SPOC Command Center" }
