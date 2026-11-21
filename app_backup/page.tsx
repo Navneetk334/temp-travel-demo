@@ -467,7 +467,7 @@ export default function Homepage() {
                 </div>
                 <div>
                   <div className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Email Sales</div>
-                  <a href="mailto:info@temptravel.in" className="text-slate-200 font-bold hover:underline">info@temptravel.in</a>
+                  <a href="mailto:admin@temptravel.co.in" className="text-slate-200 font-bold hover:underline">admin@temptravel.co.in</a>
                 </div>
               </div>
 

@@ -6,7 +6,7 @@ import { Settings, Save, ShieldCheck, Mail, Phone, MapPin, Globe } from "lucide-
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState({
     siteName: "TEMP TRAVEL CAR RENTALS PVT LTD",
-    supportEmail: "info@temptravel.in",
+    supportEmail: "admin@temptravel.co.in",
     supportPhone: "+91 70117 29639",
     officeAddress: "Flat No C-102, Shanti Vihar, Lokhandwala Complex, Kandivali East, Mumbai, MH, 400101",
     seoTitle: "Temp Travel Car Rentals - Corporate Transportation & Cab Services",

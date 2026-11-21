@@ -132,7 +132,7 @@ export default function TermsAndConditionsPage() {
                 <p className="text-xs text-slate-400">Discuss custom SLAs and liability extensions for enterprise B2B accounts.</p>
               </div>
               <a 
-                href="mailto:info@temptravel.in" 
+                href="mailto:admin@temptravel.co.in" 
                 className="bg-surface border border-border hover:border-accent/40 text-slate-200 hover:text-accent font-bold py-2.5 px-5 rounded-lg text-xs flex items-center gap-1.5 transition-all uppercase tracking-wider shrink-0"
               >
                 <Mail className="w-4 h-4" />

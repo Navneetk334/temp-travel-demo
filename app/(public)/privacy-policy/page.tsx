@@ -45,7 +45,7 @@ export default function PrivacyPolicyPage() {
         "@type": "ContactPoint",
         "telephone": "+91-7011729639",
         "contactType": "customer service",
-        "email": "compliance@temptravel.in",
+        "email": "admin@temptravel.co.in",
         "areaServed": "IN"
       },
       "address": {
@@ -292,7 +292,7 @@ export default function PrivacyPolicyPage() {
             <li><strong>Right to Grievance Redressal:</strong> You have the right to expeditious grievance redressal regarding any data processing concerns.</li>
           </ul>
           <p className="text-xs text-slate-400">
-            To exercise any of these rights, please submit a written request to our Data Protection & Grievance Desk at <a href="mailto:compliance@temptravel.in" className="text-accent hover:underline">compliance@temptravel.in</a>.
+            To exercise any of these rights, please submit a written request to our Data Protection & Grievance Desk at <a href="mailto:admin@temptravel.co.in" className="text-accent hover:underline">admin@temptravel.co.in</a>.
           </p>
         </div>
       )
@@ -335,7 +335,7 @@ export default function PrivacyPolicyPage() {
               </div>
               <div>
                 <span className="text-slate-400 block font-semibold">Privacy & Compliance Email:</span>
-                <a href="mailto:compliance@temptravel.in" className="text-accent hover:underline font-mono">compliance@temptravel.in</a>
+                <a href="mailto:admin@temptravel.co.in" className="text-accent hover:underline font-mono">admin@temptravel.co.in</a>
               </div>
               <div>
                 <span className="text-slate-400 block font-semibold">Customer & Corporate Helpline:</span>
@@ -432,7 +432,7 @@ export default function PrivacyPolicyPage() {
                   </p>
                 </div>
                 <a 
-                  href="mailto:compliance@temptravel.in" 
+                  href="mailto:admin@temptravel.co.in" 
                   className="bg-accent hover:bg-yellow-500 text-slate-950 font-black py-2.5 px-5 rounded-xl text-xs flex items-center gap-2 transition-all uppercase tracking-wider shrink-0 shadow-lg shadow-accent/20"
                 >
                   <Mail className="w-4 h-4" />

@@ -40,7 +40,7 @@ export default function MasterSettingsVaultPage() {
   // Global Site Settings State
   const [globalSettings, setGlobalSettings] = useState({
     companyName: "TEMP TRAVEL CAR RENTALS PVT LTD",
-    contactEmail: "info@temptravel.in",
+    contactEmail: "admin@temptravel.co.in",
     contactPhone: "+91-7011729639",
     supportAddress: "Flat No C-102, Shanti Vihar, Lokhandwala Complex, Mumbai - 400101",
     currencySymbol: "₹",
@@ -55,7 +55,7 @@ export default function MasterSettingsVaultPage() {
   const [users, setUsers] = useState([
     { id: "u-1", name: "Master Command Center", email: "master@temptravel.in", role: "SUPER_ADMIN", status: "ACTIVE" },
     { id: "u-2", name: "Navneet Kumar", email: "admin@temptravel.in", role: "OPERATIONS_DISPATCH", status: "ACTIVE" },
-    { id: "u-3", name: "Accounts Team", email: "billing@temptravel.in", role: "ACCOUNTANT", status: "ACTIVE" },
+    { id: "u-3", name: "Accounts Team", email: "admin@temptravel.co.in", role: "ACCOUNTANT", status: "ACTIVE" },
     { id: "u-4", name: "Cash Desk Operator", email: "cash@temptravel.in", role: "CASH_ADMIN", status: "ACTIVE" },
   ]);
 
