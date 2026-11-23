@@ -635,6 +635,13 @@ export default function AdminPaymentsPage() {
 
               <div className="flex justify-end gap-3 pt-2 print:hidden no-print">
                 <button
+                  type="button"
+                  onClick={() => setReceiptRecord(null)}
+                  className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition-all border border-border"
+                >
+                  Close
+                </button>
+                <button
                   onClick={() => printElementById("printable-receipt", `Receipt - ${receiptRecord.receiptNumber}`)}
                   className="flex items-center gap-2 bg-amber-400 hover:bg-amber-500 text-slate-950 font-extrabold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider"
                 >

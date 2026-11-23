@@ -1877,13 +1877,13 @@ export default function AdminDutiesPage() {
                           <td className="p-2 bg-surface/50">
                             <input
                               type="text"
-                              readOnly
                               placeholder="0.0"
                               value={formData.totalHours}
-                              className="w-full bg-surface text-center text-accent font-extrabold p-2 rounded border border-accent/20 cursor-not-allowed"
-                              title="Auto-calculated from departure and garaging times (24h)"
+                              onChange={(e) => setFormData({ ...formData, totalHours: e.target.value })}
+                              className="w-full bg-surface text-center text-accent font-mono font-black p-1.5 rounded border border-accent/20 focus:border-accent"
+                              title="Auto-calculated from departure and garaging times (or enter manually)"
                             />
-                            <span className="text-[9px] text-slate-400 block mt-0.5">Auto-calculated</span>
+                            <span className="text-[9px] text-slate-400 block mt-0.5">Auto or Manual</span>
                           </td>
                         </tr>
                         <tr className="bg-surface/40 text-[10px] uppercase font-bold text-slate-300 border-b border-border">
@@ -2477,6 +2477,14 @@ export default function AdminDutiesPage() {
               <div className="flex flex-wrap items-center justify-end gap-3 pt-2 print:hidden no-print">
                 <button
                   type="button"
+                  onClick={() => setViewingDuty(null)}
+                  className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold rounded-xl text-xs uppercase tracking-wider transition-all border border-border"
+                >
+                  Close
+                </button>
+
+                <button
+                  type="button"
                   onClick={() => setViewingRouteDuty(viewingDuty)}
                   className="flex items-center gap-2 bg-sky-600 hover:bg-sky-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md"
                 >
@@ -2487,9 +2495,9 @@ export default function AdminDutiesPage() {
                 <button
                   type="button"
                   onClick={() => printElementById("printable-duty-slip", `Duty Slip - ${viewingDuty.tripSheetNo || viewingDuty.id}`)}
-                  className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all"
+                  className="flex items-center gap-2 bg-accent hover:bg-yellow-500 text-slate-950 font-extrabold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md"
                 >
-                  <Printer className="w-4 h-4 text-accent" />
+                  <Printer className="w-4 h-4" />
                   <span>Print Duty Slip</span>
                 </button>
               </div>
