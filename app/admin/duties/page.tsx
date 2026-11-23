@@ -39,12 +39,14 @@ import {
   Loader2,
   Paperclip,
   Navigation,
-  Copy
+  Copy,
+  Download
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 import { DutySlipRecord, DutyAttachment } from "@/lib/duties";
 import { isDispatchDeleted } from "@/lib/lead-sync";
 import { printElementById } from "@/lib/print";
+import { openMediaInNewTab, downloadMedia, dataUrlToBlob } from "@/lib/media";
 
 // Helper to convert any date string (YYYY-MM-DD or DD/MM/YYYY) to DD/MM/YYYY
 function formatToDDMMYYYY(val?: string): string {
@@ -308,6 +310,12 @@ export default function AdminDutiesPage() {
   const [isScanning, setIsScanning] = useState(false);
   const [scanMessage, setScanMessage] = useState("");
   const [uploadDocCategory, setUploadDocCategory] = useState<string>("Duty Slip");
+  const [previewMedia, setPreviewMedia] = useState<{
+    url: string;
+    name: string;
+    category?: string;
+    fileType?: "pdf" | "image";
+  } | null>(null);
 
   // Real Scanner & Camera Hub States
   const [isScanOptionsModalOpen, setIsScanOptionsModalOpen] = useState(false);
@@ -1336,21 +1344,40 @@ export default function AdminDutiesPage() {
                         </span>
 
                         {duty.attachments && duty.attachments.length > 0 ? (
-                          <div className="flex items-center gap-1 text-[10px] text-accent font-semibold">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const firstAtt = duty.attachments![0];
+                              setPreviewMedia({
+                                url: firstAtt.url,
+                                name: firstAtt.name,
+                                category: firstAtt.category,
+                                fileType: firstAtt.fileType
+                              });
+                            }}
+                            className="flex items-center gap-1 text-[10px] text-accent font-semibold hover:underline cursor-pointer"
+                            title="Click to preview attached documents"
+                          >
                             <Paperclip className="w-3 h-3" />
                             <span>{duty.attachments.length} file{duty.attachments.length > 1 ? "s" : ""}</span>
-                          </div>
-                        ) : duty.slipImageUrl ? (
-                          <a
-                            href={duty.slipImageUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[10px] text-accent hover:underline flex items-center gap-1 font-semibold"
-                            title="Open scanned slip in original quality"
+                          </button>
+                        ) : duty.slipImageUrl && !duty.slipImageUrl.includes("hero-bg") ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPreviewMedia({
+                                url: duty.slipImageUrl!,
+                                name: duty.slipImageName || `Duty_Slip_${duty.tripSheetNo}`,
+                                category: "DUTY SLIP",
+                                fileType: (duty.slipImageUrl!.includes("application/pdf") || (duty.slipImageName || "").toLowerCase().endsWith(".pdf")) ? "pdf" : "image"
+                              });
+                            }}
+                            className="text-[10px] text-accent hover:underline flex items-center gap-1 font-semibold cursor-pointer"
+                            title="Click to preview duty slip"
                           >
-                            <ExternalLink className="w-2.5 h-2.5" />
+                            <Eye className="w-2.5 h-2.5" />
                             <span>Slip Attached</span>
-                          </a>
+                          </button>
                         ) : null}
                       </div>
                     </td>
@@ -1552,19 +1579,26 @@ export default function AdminDutiesPage() {
                           </div>
 
                           <div className="flex items-center gap-1 shrink-0">
-                            <a
-                              href={att.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                              title="Open original document"
+                            <button
+                              type="button"
+                              onClick={() => setPreviewMedia(att)}
+                              className="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                              title="Preview document"
+                            >
+                              <Eye className="w-3.5 h-3.5 text-accent" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => openMediaInNewTab(att.url, att.name)}
+                              className="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                              title="Open original in new tab"
                             >
                               <ExternalLink className="w-3.5 h-3.5" />
-                            </a>
+                            </button>
                             <button
                               type="button"
                               onClick={() => handleRemoveAttachment(att.id)}
-                              className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
+                              className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
                               title="Remove document"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -1588,15 +1622,29 @@ export default function AdminDutiesPage() {
                       </div>
                     </div>
 
-                    <a
-                      href={formData.slipImageUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 text-xs text-accent hover:underline font-bold bg-background px-3 py-1.5 rounded-lg border border-border"
-                    >
-                      <Maximize2 className="w-3.5 h-3.5" />
-                      <span>View Full Resolution</span>
-                    </a>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setPreviewMedia({
+                          url: formData.slipImageUrl!,
+                          name: formData.slipImageName || `Duty_Slip_${formData.tripSheetNo}`,
+                          category: "DUTY SLIP",
+                          fileType: (formData.slipImageUrl!.includes("application/pdf") || (formData.slipImageName || "").toLowerCase().endsWith(".pdf")) ? "pdf" : "image"
+                        })}
+                        className="flex items-center gap-1.5 text-xs text-accent hover:underline font-bold bg-background px-3 py-1.5 rounded-lg border border-border cursor-pointer"
+                      >
+                        <Maximize2 className="w-3.5 h-3.5" />
+                        <span>Preview</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => openMediaInNewTab(formData.slipImageUrl!, formData.slipImageName || `Duty_Slip_${formData.tripSheetNo}`)}
+                        className="flex items-center gap-1 text-xs text-slate-300 hover:text-white font-bold bg-background px-2.5 py-1.5 rounded-lg border border-border cursor-pointer"
+                        title="Open in new tab"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5 text-accent" />
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <p className="text-[11px] text-slate-500 italic">No attachments added yet. Choose a category and click &quot;Upload Files / PDF&quot; or &quot;Scan / Camera&quot;.</p>
@@ -2430,15 +2478,24 @@ export default function AdminDutiesPage() {
                           </div>
                         </div>
 
-                        <a
-                          href={att.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-[11px] font-bold text-accent hover:underline bg-background px-2.5 py-1 rounded-lg border border-border shrink-0"
-                        >
-                          <ExternalLink className="w-3 h-3" />
-                          <span>View</span>
-                        </a>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => setPreviewMedia(att)}
+                            className="flex items-center gap-1 text-[11px] font-bold text-accent hover:underline bg-background px-2.5 py-1 rounded-lg border border-border shrink-0 cursor-pointer"
+                          >
+                            <Eye className="w-3 h-3" />
+                            <span>Preview</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => openMediaInNewTab(att.url, att.name)}
+                            className="p-1 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                            title="Open in new tab"
+                          >
+                            <ExternalLink className="w-3 h-3 text-slate-300" />
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -2457,15 +2514,30 @@ export default function AdminDutiesPage() {
                     </div>
                   </div>
 
-                  <a
-                    href={viewingDuty.slipImageUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 bg-accent hover:bg-yellow-500 text-slate-950 font-extrabold px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    <span>Open in New Tab (Full Quality)</span>
-                  </a>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewMedia({
+                        url: viewingDuty.slipImageUrl!,
+                        name: viewingDuty.slipImageName || `Duty_Slip_${viewingDuty.tripSheetNo}`,
+                        category: "DUTY SLIP",
+                        fileType: (viewingDuty.slipImageUrl!.includes("application/pdf") || (viewingDuty.slipImageName || "").toLowerCase().endsWith(".pdf")) ? "pdf" : "image"
+                      })}
+                      className="flex items-center gap-1.5 bg-accent hover:bg-yellow-500 text-slate-950 font-extrabold px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer"
+                    >
+                      <Eye className="w-4 h-4" />
+                      <span>Preview Slip</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => openMediaInNewTab(viewingDuty.slipImageUrl!, viewingDuty.slipImageName || `Duty_Slip_${viewingDuty.tripSheetNo}`)}
+                      className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-3.5 py-2 rounded-xl text-xs uppercase tracking-wider transition-all border border-border cursor-pointer"
+                      title="Open in new tab"
+                    >
+                      <ExternalLink className="w-4 h-4 text-accent" />
+                      <span>Open New Tab</span>
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="bg-background p-3.5 rounded-2xl border border-border text-center text-xs text-slate-400 print:hidden no-print">
@@ -3251,6 +3323,96 @@ export default function AdminDutiesPage() {
           </Portal>
         );
       })()}
+
+      {/* ========================================================================= */}
+      {/* MODAL 6: ATTACHMENT & SLIP PREVIEW MODAL */}
+      {/* ========================================================================= */}
+      {previewMedia && (
+        <Portal>
+          <div className="fixed inset-0 z-[100000] bg-black/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
+            <div className="bg-surface border border-border rounded-3xl max-w-4xl w-full p-4 sm:p-6 space-y-4 shadow-2xl relative my-auto max-h-[96vh] flex flex-col">
+              {/* Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-border gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  {previewMedia.fileType === "pdf" || previewMedia.url.includes("application/pdf") ? (
+                    <div className="w-9 h-9 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-400 flex flex-col items-center justify-center shrink-0">
+                      <FileText className="w-4 h-4" />
+                      <span className="text-[7px] font-black uppercase">PDF</span>
+                    </div>
+                  ) : (
+                    <div className="w-9 h-9 rounded-xl bg-accent/20 border border-accent/30 text-accent flex items-center justify-center shrink-0">
+                      <Camera className="w-4 h-4" />
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    {previewMedia.category && (
+                      <span className="text-[9px] font-black text-accent uppercase tracking-wider block">
+                        {previewMedia.category}
+                      </span>
+                    )}
+                    <h3 className="text-sm font-bold text-slate-100 truncate" title={previewMedia.name}>
+                      {previewMedia.name}
+                    </h3>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => openMediaInNewTab(previewMedia.url, previewMedia.name)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl border border-border transition-colors cursor-pointer"
+                    title="Open in new browser tab without restriction"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5 text-accent" />
+                    <span className="hidden sm:inline">Open in New Tab</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => downloadMedia(previewMedia.url, previewMedia.name)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl border border-border transition-colors cursor-pointer"
+                    title="Download file to device"
+                  >
+                    <Download className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="hidden sm:inline">Download</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPreviewMedia(null)}
+                    className="p-2 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-full transition-colors cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Content Body */}
+              <div className="flex-1 overflow-auto rounded-2xl bg-black/60 border border-border/60 p-2 flex items-center justify-center min-h-[300px] max-h-[78vh]">
+                {previewMedia.fileType === "pdf" || previewMedia.url.includes("application/pdf") ? (
+                  <iframe
+                    title={previewMedia.name}
+                    src={previewMedia.url.startsWith("data:") 
+                      ? (() => {
+                          const b = dataUrlToBlob(previewMedia.url);
+                          return b ? URL.createObjectURL(b) : previewMedia.url;
+                        })()
+                      : previewMedia.url
+                    }
+                    className="w-full h-[72vh] rounded-xl border-0 bg-slate-900"
+                  />
+                ) : (
+                  <img
+                    src={previewMedia.url}
+                    alt={previewMedia.name}
+                    className="max-h-[75vh] max-w-full object-contain rounded-xl shadow-lg"
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+        </Portal>
+      )}
 
     </div>
   );
