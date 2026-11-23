@@ -121,8 +121,9 @@ export async function GET(req: NextRequest) {
             { id: "2", from: b.pickupLocation || "Pickup Hub", to: b.dropLocation || "Drop Location", details: "Passenger Commute" }
           ],
 
-          slipImageUrl: "/images/hero/hero-bg.webp",
-          slipImageName: `duty_slip_${b.bookingNumber}.jpg`,
+          slipImageUrl: "",
+          slipImageName: "",
+          attachments: [],
           createdAt: b.createdAt.toISOString(),
           updatedAt: b.updatedAt.toISOString(),
         };
@@ -240,7 +241,8 @@ export async function POST(req: NextRequest) {
       usageTracks: Array.isArray(body.usageTracks) ? body.usageTracks : [],
 
       slipImageUrl: body.slipImageUrl || "",
-      slipImageName: body.slipImageName || "duty_slip_scan.jpg",
+      slipImageName: body.slipImageName || "",
+      attachments: Array.isArray(body.attachments) ? body.attachments : [],
 
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

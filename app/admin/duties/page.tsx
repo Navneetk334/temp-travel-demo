@@ -36,10 +36,12 @@ import {
   Check,
   Sliders,
   Laptop,
-  Loader2
+  Loader2,
+  Paperclip,
+  Navigation
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
-import { DutySlipRecord } from "@/lib/duties";
+import { DutySlipRecord, DutyAttachment } from "@/lib/duties";
 import { isDispatchDeleted } from "@/lib/lead-sync";
 
 export default function AdminDutiesPage() {
@@ -53,8 +55,10 @@ export default function AdminDutiesPage() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingDuty, setEditingDuty] = useState<DutySlipRecord | null>(null);
   const [viewingDuty, setViewingDuty] = useState<DutySlipRecord | null>(null);
+  const [viewingRouteDuty, setViewingRouteDuty] = useState<DutySlipRecord | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [scanMessage, setScanMessage] = useState("");
+  const [uploadDocCategory, setUploadDocCategory] = useState<string>("Duty Slip");
 
   // Real Scanner & Camera Hub States
   const [isScanOptionsModalOpen, setIsScanOptionsModalOpen] = useState(false);
@@ -122,6 +126,7 @@ export default function AdminDutiesPage() {
     usageTracks: [],
     slipImageUrl: "",
     slipImageName: "",
+    attachments: [],
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -200,8 +205,9 @@ export default function AdminDutiesPage() {
               { id: "1", from: "Garage", to: d.pickupLocation || "Pickup Hub", details: "Reporting" },
               { id: "2", from: d.pickupLocation || "Pickup Hub", to: d.dropLocation || "Drop Hub", details: "Transit" }
             ],
-            slipImageUrl: "/images/hero/hero-bg.webp",
-            slipImageName: `slip_${d.bookingNumber || d.id}.jpg`,
+            slipImageUrl: "",
+            slipImageName: "",
+            attachments: [],
             createdAt: d.createdAt || new Date().toISOString(),
             updatedAt: d.updatedAt || new Date().toISOString(),
           }));
@@ -289,6 +295,18 @@ export default function AdminDutiesPage() {
   // Open Edit Modal
   const handleOpenEditModal = (duty: DutySlipRecord) => {
     setEditingDuty(duty);
+    const existingAttachments: DutyAttachment[] = (duty.attachments && duty.attachments.length > 0)
+      ? duty.attachments
+      : duty.slipImageUrl && !duty.slipImageUrl.includes("hero-bg")
+        ? [{
+            id: `att_init_${Date.now()}`,
+            name: duty.slipImageName || "Duty_Slip",
+            category: "Duty Slip",
+            url: duty.slipImageUrl,
+            fileType: (duty.slipImageUrl.includes("application/pdf") || (duty.slipImageName || "").toLowerCase().endsWith(".pdf")) ? "pdf" : "image"
+          }]
+        : [];
+
     setFormData({
       tripSheetNo: duty.tripSheetNo,
       carNo: duty.carNo,
@@ -306,7 +324,7 @@ export default function AdminDutiesPage() {
       garagingKm: duty.garagingKm,
       totalHours: duty.totalHours,
       totalKms: duty.totalKms,
-      remarks: duty.remarks,
+      remarks: duty.remarks || "",
       serviceFeedback: duty.serviceFeedback,
       parkingTollTax: duty.parkingTollTax,
       releaseDate: duty.releaseDate,
@@ -324,13 +342,65 @@ export default function AdminDutiesPage() {
       handoverTime: duty.handoverTime,
       officeRemarks: duty.officeRemarks,
       usageTracks: duty.usageTracks || [],
-      slipImageUrl: duty.slipImageUrl || "",
+      slipImageUrl: duty.slipImageUrl && !duty.slipImageUrl.includes("hero-bg") ? duty.slipImageUrl : "",
       slipImageName: duty.slipImageName || "",
+      attachments: existingAttachments,
     });
     setIsFormModalOpen(true);
   };
 
-  // Auto-calculate Total KM & Total Hours
+  // Convert time string to 24-hour format HH:mm
+  const to24Hour = (timeStr?: string): string => {
+    if (!timeStr) return "";
+    const str = timeStr.trim();
+    if (/^([01]\d|2[0-3]):[0-5]\d$/.test(str)) {
+      return str;
+    }
+    const match = str.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?/i);
+    if (!match) return str;
+    let hours = parseInt(match[1], 10);
+    const minutes = match[2];
+    const modifier = match[3]?.toUpperCase();
+
+    if (modifier === "PM" && hours < 12) hours += 12;
+    if (modifier === "AM" && hours === 12) hours = 0;
+
+    return `${String(hours).padStart(2, "0")}:${minutes}`;
+  };
+
+  // Auto-calculate Total Hours in 24-hour time format
+  const handleCalculateHours = (departure: string, garaging: string, reporting?: string, release?: string) => {
+    const startTime = departure || reporting || "";
+    const endTime = garaging || release || "";
+    if (!startTime || !endTime) return;
+
+    const s24 = to24Hour(startTime);
+    const e24 = to24Hour(endTime);
+    if (!s24.includes(":") || !e24.includes(":")) return;
+
+    const [sH, sM] = s24.split(":").map(Number);
+    const [eH, eM] = e24.split(":").map(Number);
+    if (isNaN(sH) || isNaN(sM) || isNaN(eH) || isNaN(eM)) return;
+
+    const startTotalMins = sH * 60 + sM;
+    let endTotalMins = eH * 60 + eM;
+
+    // Handle overnight trips crossing midnight
+    if (endTotalMins < startTotalMins) {
+      endTotalMins += 24 * 60;
+    }
+
+    const diffMins = endTotalMins - startTotalMins;
+    const hours = diffMins / 60;
+    const computedHours = (Math.round(hours * 10) / 10).toFixed(1);
+
+    setFormData((prev) => ({
+      ...prev,
+      totalHours: computedHours,
+    }));
+  };
+
+  // Auto-calculate Total KM
   const handleCalculateTotals = (openingKmStr: string, garagingKmStr: string) => {
     const opening = parseFloat(openingKmStr);
     const garaging = parseFloat(garagingKmStr);
@@ -342,129 +412,124 @@ export default function AdminDutiesPage() {
     }
   };
 
-  // Handle Image Upload & Trigger OCR Auto-Fill
-  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // Handle Document Upload (PDF & Images, Multi-File Support)
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const img = new Image();
-      img.onload = () => {
-        // Compress the image via canvas
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
-        
-        // Scale down if it's too large (max 1920x1080 bounding box equivalent)
-        const MAX_DIM = 1920;
-        if (width > MAX_DIM || height > MAX_DIM) {
-          if (width > height) {
-            height *= MAX_DIM / width;
-            width = MAX_DIM;
+    const newAttachments: DutyAttachment[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+
+      await new Promise<void>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const resultStr = reader.result as string;
+          if (isPdf) {
+            newAttachments.push({
+              id: `att_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+              name: file.name,
+              category: uploadDocCategory || "Duty Slip",
+              url: resultStr,
+              fileType: "pdf",
+              size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
+              uploadedAt: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false }),
+            });
+            resolve();
           } else {
-            width *= MAX_DIM / height;
-            height = MAX_DIM;
+            const img = new Image();
+            img.onload = () => {
+              const canvas = document.createElement("canvas");
+              let width = img.width;
+              let height = img.height;
+              const MAX_DIM = 1920;
+              if (width > MAX_DIM || height > MAX_DIM) {
+                if (width > height) {
+                  height *= MAX_DIM / width;
+                  width = MAX_DIM;
+                } else {
+                  width *= MAX_DIM / height;
+                  height = MAX_DIM;
+                }
+              }
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext("2d");
+              if (ctx) {
+                ctx.drawImage(img, 0, 0, width, height);
+                const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+                newAttachments.push({
+                  id: `att_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+                  name: file.name,
+                  category: uploadDocCategory || "Duty Slip",
+                  url: compressedBase64,
+                  fileType: "image",
+                  size: `${(file.size / 1024).toFixed(0)} KB`,
+                  uploadedAt: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false }),
+                });
+              } else {
+                newAttachments.push({
+                  id: `att_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+                  name: file.name,
+                  category: uploadDocCategory || "Duty Slip",
+                  url: resultStr,
+                  fileType: "image",
+                  size: `${(file.size / 1024).toFixed(0)} KB`,
+                  uploadedAt: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false }),
+                });
+              }
+              resolve();
+            };
+            img.onerror = () => {
+              newAttachments.push({
+                id: `att_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+                name: file.name,
+                category: uploadDocCategory || "Duty Slip",
+                url: resultStr,
+                fileType: "image",
+                size: `${(file.size / 1024).toFixed(0)} KB`,
+                uploadedAt: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false }),
+              });
+              resolve();
+            };
+            img.src = resultStr;
           }
-        }
-        
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, width, height);
-          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6); // 60% quality
+        };
+        reader.readAsDataURL(file);
+      });
+    }
 
-          setFormData((prev) => ({
-            ...prev,
-            slipImageUrl: compressedBase64,
-            slipImageName: file.name,
-          }));
+    if (newAttachments.length > 0) {
+      setFormData((prev) => {
+        const combined = [...(prev.attachments || []), ...newAttachments];
+        const primarySlip = combined.find((a) => a.category === "Duty Slip") || combined[0];
+        return {
+          ...prev,
+          attachments: combined,
+          slipImageUrl: primarySlip?.url || prev.slipImageUrl,
+          slipImageName: primarySlip?.name || prev.slipImageName,
+        };
+      });
+      setScanMessage(`Attached ${newAttachments.length} document(s) successfully.`);
+    }
 
-          // Trigger OCR Scan
-          handlePerformOCRScan(compressedBase64, file.name);
-        }
-      };
-      img.src = reader.result as string;
-    };
-    reader.readAsDataURL(file);
+    if (e.target) e.target.value = "";
   };
 
-  // Real AI OCR Execution Engine (Gemini Vision)
-  const runRealTesseractOCR = async (imageSource: string, sourceName = "duty_slip_scan.jpg") => {
-    try {
-      setIsScanning(true);
-      setScannerProgress(20);
-      setScanMessage("Sending image to Cloud Vision AI for handwriting analysis...");
-
-      setScannerProgress(50);
-      const res = await fetch("/api/duties/ocr", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          imageBase64: imageSource,
-          fileName: sourceName,
-        }),
-      });
-      setScannerProgress(90);
-
-      const result = await res.json();
-      if (!res.ok || !result.success) {
-        throw new Error(result.error || "Vision AI processing failed");
-      }
-
-      if (result.success && result.extractedData) {
-        const ext = result.extractedData;
-        setFormData((prev) => ({
-          ...prev,
-          tripSheetNo: ext.tripSheetNo || prev.tripSheetNo,
-          carNo: ext.carNo || prev.carNo,
-          date: ext.date || prev.date,
-          reportedTo: ext.reportedTo || prev.reportedTo,
-          account: ext.account || prev.account,
-          reportAt: ext.reportAt || prev.reportAt,
-          garageDepartureTime: ext.garageDepartureTime || prev.garageDepartureTime,
-          garageOpeningKm: ext.garageOpeningKm || prev.garageOpeningKm,
-          reportingTime: ext.reportingTime || prev.reportingTime,
-          reportingKm: ext.reportingKm || prev.reportingKm,
-          releaseTime: ext.releaseTime || prev.releaseTime,
-          releaseKm: ext.releaseKm || prev.releaseKm,
-          garagingTime: ext.garagingTime || prev.garagingTime,
-          garagingKm: ext.garagingKm || prev.garagingKm,
-          totalHours: ext.totalHours || prev.totalHours,
-          totalKms: ext.totalKms || prev.totalKms,
-          remarks: ext.remarks || prev.remarks,
-          serviceFeedback: ext.serviceFeedback || prev.serviceFeedback,
-          parkingTollTax: ext.parkingTollTax || prev.parkingTollTax,
-          releaseDate: ext.releaseDate || prev.releaseDate,
-          placeOfRelease: ext.placeOfRelease || prev.placeOfRelease,
-          mobile: ext.mobile || prev.mobile,
-          officeTo: ext.officeTo || prev.officeTo,
-          bookedBy: ext.bookedBy || prev.bookedBy,
-          officeFor: ext.officeFor || prev.officeFor,
-          garageInTime: ext.garageInTime || prev.garageInTime,
-          garageInKm: ext.garageInKm || prev.garageInKm,
-          officeReleasePlace: ext.officeReleasePlace || prev.officeReleasePlace,
-          parkingAmount: ext.parkingAmount || prev.parkingAmount,
-          handoverPerson: ext.handoverPerson || prev.handoverPerson,
-          handoverDate: ext.handoverDate || prev.handoverDate,
-          handoverTime: ext.handoverTime || prev.handoverTime,
-          officeRemarks: ext.officeRemarks || prev.officeRemarks,
-          usageTracks: ext.usageTracks?.length ? ext.usageTracks : prev.usageTracks,
-          slipImageUrl: imageSource,
-          slipImageName: sourceName,
-        }));
-        setScannerProgress(100);
-        setScanMessage(
-          "✨ Document Successfully Deciphered via Vision AI!"
-        );
-      }
-    } catch (err: any) {
-      console.error("Real OCR error:", err);
-      setScanMessage(`OCR Failed: ${err.message}`);
-    } finally {
-      setIsScanning(false);
-    }
+  // Remove single attachment from formData
+  const handleRemoveAttachment = (attId: string) => {
+    setFormData((prev) => {
+      const filtered = (prev.attachments || []).filter((a) => a.id !== attId);
+      const primarySlip = filtered.find((a) => a.category === "Duty Slip") || filtered[0];
+      return {
+        ...prev,
+        attachments: filtered,
+        slipImageUrl: primarySlip ? primarySlip.url : "",
+        slipImageName: primarySlip ? primarySlip.name : "",
+      };
+    });
   };
 
   // Real Camera Document Scanner Controls
@@ -509,12 +574,29 @@ export default function AdminDutiesPage() {
     const ctx = canvas.getContext("2d");
     if (ctx) {
       ctx.drawImage(video, 0, 0, w, h);
-      const dataUrl = canvas.toDataURL("image/jpeg", 0.6); // 60% quality to avoid 413 Payload Too Large
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
       stopCamera();
       setIsPrinterScannerModalOpen(false);
       setIsScanOptionsModalOpen(false);
       setIsFormModalOpen(true);
-      await runRealTesseractOCR(dataUrl, `camera_capture_${Date.now()}.jpg`);
+
+      const newAtt: DutyAttachment = {
+        id: `att_${Date.now()}`,
+        name: `camera_capture_${Date.now()}.jpg`,
+        category: "Duty Slip",
+        url: dataUrl,
+        fileType: "image",
+        size: "Captured",
+        uploadedAt: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false })
+      };
+
+      setFormData((prev) => ({
+        ...prev,
+        slipImageUrl: dataUrl,
+        slipImageName: newAtt.name,
+        attachments: [...(prev.attachments || []), newAtt],
+      }));
+      setScanMessage("Camera snapshot captured and attached to duty slip.");
     }
   };
 
@@ -564,20 +646,27 @@ export default function AdminDutiesPage() {
       setScannerProgress(60);
 
       if (data.success && (data.imageBase64 || data.imageUrl)) {
-        setScannerStatusText(`Acquired physical scan from ${selectedScannerDevice}! Running real OCR...`);
+        setScannerStatusText(`Acquired physical scan from ${selectedScannerDevice}! Attaching to duty slip...`);
         const realScanImage = data.imageBase64 || data.imageUrl;
+        const newAtt: DutyAttachment = {
+          id: `att_${Date.now()}`,
+          name: data.fileName || `hp_scan_${Date.now()}.jpg`,
+          category: "Duty Slip",
+          url: realScanImage,
+          fileType: (data.fileName || "").toLowerCase().endsWith(".pdf") ? "pdf" : "image",
+          size: "Scanned",
+          uploadedAt: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false })
+        };
         
         setFormData((prev) => ({
           ...prev,
           slipImageUrl: realScanImage,
-          slipImageName: data.fileName || `hp_scan_${Date.now()}.jpg`,
+          slipImageName: newAtt.name,
+          attachments: [...(prev.attachments || []), newAtt],
         }));
 
-        setScannerProgress(80);
-        await runRealTesseractOCR(realScanImage, data.fileName || "hp_scan.jpg");
-
         setScannerProgress(100);
-        setScannerStatusText("Physical scan & OCR complete! Opening duty slip...");
+        setScannerStatusText("Physical scan complete! Opening duty slip...");
 
         setTimeout(() => {
           setIsScanningPrinter(false);
@@ -595,8 +684,6 @@ export default function AdminDutiesPage() {
       setScanCloudGuidance(`Physical scan connection: ${err.message || "Failed to communicate with scanner"}`);
     }
   };
-
-  const handlePerformOCRScan = runRealTesseractOCR;
 
   // Add Leg / Route Log to Car Usage Sheet
   const handleAddRouteLog = () => {
@@ -761,7 +848,7 @@ export default function AdminDutiesPage() {
             className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-border font-bold px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md"
           >
             <Scan className="w-4 h-4 text-accent" />
-            <span>Scan Slip (OCR)</span>
+            <span>Scan / Upload Slip</span>
           </button>
 
           <button
@@ -960,7 +1047,12 @@ export default function AdminDutiesPage() {
                           {duty.serviceFeedback}
                         </span>
 
-                        {duty.slipImageUrl && (
+                        {duty.attachments && duty.attachments.length > 0 ? (
+                          <div className="flex items-center gap-1 text-[10px] text-accent font-semibold">
+                            <Paperclip className="w-3 h-3" />
+                            <span>{duty.attachments.length} file{duty.attachments.length > 1 ? "s" : ""}</span>
+                          </div>
+                        ) : duty.slipImageUrl ? (
                           <a
                             href={duty.slipImageUrl}
                             target="_blank"
@@ -969,14 +1061,22 @@ export default function AdminDutiesPage() {
                             title="Open scanned slip in original quality"
                           >
                             <ExternalLink className="w-2.5 h-2.5" />
-                            <span>Scan Attached</span>
+                            <span>Slip Attached</span>
                           </a>
-                        )}
+                        ) : null}
                       </div>
                     </td>
 
                     <td className="py-3.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => setViewingRouteDuty(duty)}
+                          className="p-1.5 bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 rounded-lg transition-colors"
+                          title="View Route on Map"
+                        >
+                          <Navigation className="w-4 h-4" />
+                        </button>
+
                         <button
                           onClick={() => setViewingDuty(duty)}
                           className="p-1.5 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white rounded-lg transition-colors"
@@ -1016,7 +1116,7 @@ export default function AdminDutiesPage() {
       </div>
 
       {/* ========================================================================= */}
-      {/* MODAL 1: ADD / EDIT DUTY SLIP & OCR SCANNER MODAL */}
+      {/* MODAL 1: ADD / EDIT DUTY SLIP & DOCUMENT VAULT MODAL */}
       {/* ========================================================================= */}
       {isFormModalOpen && (
         <Portal>
@@ -1047,29 +1147,45 @@ export default function AdminDutiesPage() {
                 </button>
               </div>
 
-              {/* SCANNER & OCR UPLOAD BOX */}
+              {/* DUTY SLIP & MULTI-EXPENSE MEDIA VAULT */}
               <div className="bg-background p-4 sm:p-5 rounded-2xl border border-border space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="p-2.5 bg-accent/10 border border-accent/20 rounded-xl text-accent">
-                      <Scan className="w-5 h-5" />
+                      <Paperclip className="w-5 h-5" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-slate-100">Scan & Auto-Fill Duty Slip (OCR)</h4>
+                      <h4 className="text-sm font-bold text-slate-100">Duty Slip & Expense Media Vault</h4>
                       <p className="text-[11px] text-slate-400">
-                        Upload printer scan, mobile photo, or camera capture to auto-populate all fields.
+                        Upload original duty slip scan plus separate receipts (Toll, Parking, State Tax, Fuel, etc.). PDF & Image formats supported.
                       </p>
                     </div>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2.5">
+                    {/* Category Selector */}
+                    <select
+                      value={uploadDocCategory}
+                      onChange={(e) => setUploadDocCategory(e.target.value)}
+                      className="bg-surface border border-border text-slate-200 text-xs font-semibold rounded-xl px-3 py-2 focus:outline-none focus:border-accent"
+                    >
+                      <option value="Duty Slip">Duty Slip</option>
+                      <option value="Toll Tax Receipt">Toll Tax Receipt</option>
+                      <option value="Parking Receipt">Parking Receipt</option>
+                      <option value="State Tax / Border">State Tax / Border</option>
+                      <option value="Fuel Receipt">Fuel Receipt</option>
+                      <option value="Other Receipt">Other Attachment</option>
+                    </select>
+
                     <input
                       type="file"
                       ref={fileInputRef}
-                      accept="image/*,.pdf"
-                      onChange={handleImageFileChange}
+                      accept="image/*,application/pdf,.pdf"
+                      multiple
+                      onChange={handleFileUpload}
                       className="hidden"
                     />
+
                     <button
                       type="button"
                       onClick={() => setIsPrinterScannerModalOpen(true)}
@@ -1077,7 +1193,7 @@ export default function AdminDutiesPage() {
                       className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-border font-bold px-3.5 py-2 rounded-xl text-xs uppercase tracking-wider transition-all disabled:opacity-50 shadow-sm"
                     >
                       <Printer className="w-3.5 h-3.5 text-accent" />
-                      <span>Scan from Printer</span>
+                      <span>Scan / Camera</span>
                     </button>
 
                     <button
@@ -1086,39 +1202,100 @@ export default function AdminDutiesPage() {
                       disabled={isScanning || isScanningPrinter}
                       className="flex items-center gap-2 bg-accent hover:bg-yellow-500 text-slate-950 font-extrabold px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition-all disabled:opacity-50 shadow-md shadow-accent/20"
                     >
-                      {isScanning ? (
-                        <>
-                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                          <span>Scanning...</span>
-                        </>
-                      ) : (
-                        <>
-                          <UploadCloud className="w-3.5 h-3.5" />
-                          <span>Upload from Device</span>
-                        </>
-                      )}
+                      <UploadCloud className="w-3.5 h-3.5" />
+                      <span>Upload Files / PDF</span>
                     </button>
                   </div>
                 </div>
 
-                {/* Scan Status & Preview */}
+                {/* Status Message */}
                 {scanMessage && (
-                  <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 text-xs flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 flex-shrink-0" />
-                    <span>{scanMessage}</span>
+                  <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 text-xs flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 flex-shrink-0" />
+                      <span>{scanMessage}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setScanMessage("")}
+                      className="text-slate-400 hover:text-white"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 )}
 
-                {formData.slipImageUrl && (
+                {/* Uploaded Attachments Gallery */}
+                {formData.attachments && formData.attachments.length > 0 ? (
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                      Uploaded Documents & Receipts ({formData.attachments.length})
+                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                      {formData.attachments.map((att) => (
+                        <div
+                          key={att.id}
+                          className="flex items-center justify-between p-2.5 bg-surface border border-border rounded-xl group hover:border-slate-600 transition-colors"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            {att.fileType === "pdf" ? (
+                              <div className="w-10 h-10 rounded-lg bg-rose-500/20 border border-rose-500/30 text-rose-400 flex flex-col items-center justify-center shrink-0">
+                                <FileText className="w-4 h-4" />
+                                <span className="text-[8px] font-black uppercase">PDF</span>
+                              </div>
+                            ) : (
+                              <img
+                                src={att.url}
+                                alt={att.name}
+                                className="w-10 h-10 object-cover rounded-lg border border-border shrink-0"
+                              />
+                            )}
+                            <div className="min-w-0">
+                              <span className="text-[10px] font-bold text-accent uppercase tracking-wider block">
+                                {att.category}
+                              </span>
+                              <span className="text-xs font-semibold text-slate-200 block truncate max-w-[150px]" title={att.name}>
+                                {att.name}
+                              </span>
+                              {att.size && (
+                                <span className="text-[10px] text-slate-400">{att.size}</span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1 shrink-0">
+                            <a
+                              href={att.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                              title="Open original document"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveAttachment(att.id)}
+                              className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
+                              title="Remove document"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : formData.slipImageUrl ? (
                   <div className="flex items-center justify-between bg-surface p-3 rounded-xl border border-border">
                     <div className="flex items-center gap-3">
                       <img
                         src={formData.slipImageUrl}
                         alt="Scanned Slip Preview"
-                        className="w-14 h-14 object-cover rounded-lg border border-border"
+                        className="w-12 h-12 object-cover rounded-lg border border-border"
                       />
                       <div>
-                        <span className="text-xs font-bold text-slate-200 block">{formData.slipImageName || "duty_slip_scan.jpg"}</span>
+                        <span className="text-xs font-bold text-slate-200 block">{formData.slipImageName || "Duty Slip"}</span>
                         <span className="text-[10px] text-emerald-400 font-semibold">Slip Image Stored & Attached</span>
                       </div>
                     </div>
@@ -1130,9 +1307,11 @@ export default function AdminDutiesPage() {
                       className="flex items-center gap-1.5 text-xs text-accent hover:underline font-bold bg-background px-3 py-1.5 rounded-lg border border-border"
                     >
                       <Maximize2 className="w-3.5 h-3.5" />
-                      <span>View Full Resolution Scan</span>
+                      <span>View Full Resolution</span>
                     </a>
                   </div>
+                ) : (
+                  <p className="text-[11px] text-slate-500 italic">No attachments added yet. Choose a category and click &quot;Upload Files / PDF&quot; or &quot;Scan / Camera&quot;.</p>
                 )}
               </div>
 
@@ -1233,10 +1412,10 @@ export default function AdminDutiesPage() {
                     <table className="w-full text-center border-collapse">
                       <thead className="bg-surface border-b border-border text-[10px] uppercase font-bold text-slate-300">
                         <tr>
-                          <th className="p-2 border-r border-border">Departure Garage</th>
-                          <th className="p-2 border-r border-border">Reporting Time</th>
-                          <th className="p-2 border-r border-border">Release Time</th>
-                          <th className="p-2 border-r border-border">Garaging Time</th>
+                          <th className="p-2 border-r border-border">Departure Garage (24h)</th>
+                          <th className="p-2 border-r border-border">Reporting Time (24h)</th>
+                          <th className="p-2 border-r border-border">Release Time (24h)</th>
+                          <th className="p-2 border-r border-border">Garaging Time (24h)</th>
                           <th className="p-2 bg-surface/90 font-extrabold text-accent">Total Hours</th>
                         </tr>
                       </thead>
@@ -1244,48 +1423,62 @@ export default function AdminDutiesPage() {
                         <tr className="border-b border-border">
                           <td className="p-2 border-r border-border">
                             <input
-                              type="text"
-                              placeholder="06:30 AM"
-                              value={formData.garageDepartureTime}
-                              onChange={(e) => setFormData({ ...formData, garageDepartureTime: e.target.value })}
-                              className="w-full bg-surface text-center text-slate-100 p-1.5 rounded border border-border focus:border-accent"
+                              type="time"
+                              value={to24Hour(formData.garageDepartureTime)}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setFormData((prev) => ({ ...prev, garageDepartureTime: val }));
+                                handleCalculateHours(val, formData.reportingTime, formData.releaseTime, formData.garagingTime);
+                              }}
+                              className="w-full bg-surface text-center font-mono font-bold text-slate-100 p-2 rounded border border-border focus:border-accent [color-scheme:dark]"
                             />
                           </td>
                           <td className="p-2 border-r border-border">
                             <input
-                              type="text"
-                              placeholder="07:15 AM"
-                              value={formData.reportingTime}
-                              onChange={(e) => setFormData({ ...formData, reportingTime: e.target.value })}
-                              className="w-full bg-surface text-center text-slate-100 p-1.5 rounded border border-border focus:border-accent"
+                              type="time"
+                              value={to24Hour(formData.reportingTime)}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setFormData((prev) => ({ ...prev, reportingTime: val }));
+                                handleCalculateHours(formData.garageDepartureTime, val, formData.releaseTime, formData.garagingTime);
+                              }}
+                              className="w-full bg-surface text-center font-mono font-bold text-slate-100 p-2 rounded border border-border focus:border-accent [color-scheme:dark]"
                             />
                           </td>
                           <td className="p-2 border-r border-border">
                             <input
-                              type="text"
-                              placeholder="07:45 PM"
-                              value={formData.releaseTime}
-                              onChange={(e) => setFormData({ ...formData, releaseTime: e.target.value })}
-                              className="w-full bg-surface text-center text-slate-100 p-1.5 rounded border border-border focus:border-accent"
+                              type="time"
+                              value={to24Hour(formData.releaseTime)}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setFormData((prev) => ({ ...prev, releaseTime: val }));
+                                handleCalculateHours(formData.garageDepartureTime, formData.reportingTime, val, formData.garagingTime);
+                              }}
+                              className="w-full bg-surface text-center font-mono font-bold text-slate-100 p-2 rounded border border-border focus:border-accent [color-scheme:dark]"
                             />
                           </td>
                           <td className="p-2 border-r border-border">
                             <input
-                              type="text"
-                              placeholder="08:30 PM"
-                              value={formData.garagingTime}
-                              onChange={(e) => setFormData({ ...formData, garagingTime: e.target.value })}
-                              className="w-full bg-surface text-center text-slate-100 p-1.5 rounded border border-border focus:border-accent"
+                              type="time"
+                              value={to24Hour(formData.garagingTime)}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setFormData((prev) => ({ ...prev, garagingTime: val }));
+                                handleCalculateHours(formData.garageDepartureTime, formData.reportingTime, formData.releaseTime, val);
+                              }}
+                              className="w-full bg-surface text-center font-mono font-bold text-slate-100 p-2 rounded border border-border focus:border-accent [color-scheme:dark]"
                             />
                           </td>
                           <td className="p-2 bg-surface/50">
                             <input
                               type="text"
-                              placeholder="14.0"
+                              readOnly
+                              placeholder="0.0"
                               value={formData.totalHours}
-                              onChange={(e) => setFormData({ ...formData, totalHours: e.target.value })}
-                              className="w-full bg-surface text-center text-accent font-extrabold p-1.5 rounded border border-accent/20 focus:border-accent"
+                              className="w-full bg-surface text-center text-accent font-extrabold p-2 rounded border border-accent/20 cursor-not-allowed"
+                              title="Auto-calculated from departure and garaging times (24h)"
                             />
+                            <span className="text-[9px] text-slate-400 block mt-0.5">Auto-calculated</span>
                           </td>
                         </tr>
                         <tr className="bg-surface/40 text-[10px] uppercase font-bold text-slate-300 border-b border-border">
@@ -1350,17 +1543,6 @@ export default function AdminDutiesPage() {
                         </tr>
                       </tbody>
                     </table>
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-400 font-bold uppercase mb-1">Remarks / Next Requirement</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Airport Transfer + Local Client Commute with night halt"
-                      value={formData.remarks}
-                      onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
-                      className="w-full bg-background border border-border rounded-lg p-2.5 text-slate-100 focus:border-accent"
-                    />
                   </div>
                 </div>
 
@@ -1446,14 +1628,24 @@ export default function AdminDutiesPage() {
                       <MapPin className="w-4 h-4 text-accent" />
                       <span>4. Car Usage Track Sheet (Route Details)</span>
                     </h3>
-                    <button
-                      type="button"
-                      onClick={handleAddRouteLog}
-                      className="text-xs text-accent font-bold hover:underline flex items-center gap-1.5"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Add Route Log</span>
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setViewingRouteDuty(formData as any)}
+                        className="text-xs text-sky-400 font-bold hover:underline flex items-center gap-1.5"
+                      >
+                        <Navigation className="w-3.5 h-3.5" />
+                        <span>Preview Route on Map</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleAddRouteLog}
+                        className="text-xs text-accent font-bold hover:underline flex items-center gap-1.5"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add Route Log</span>
+                      </button>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -1774,8 +1966,58 @@ export default function AdminDutiesPage() {
                 </div>
               </div>
 
-              {/* Scanned Image Link Preview */}
-              {viewingDuty.slipImageUrl && (
+              {/* Attached Original Documents & Expense Receipts */}
+              {viewingDuty.attachments && viewingDuty.attachments.length > 0 ? (
+                <div className="bg-background p-4 rounded-2xl border border-border space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-200">
+                      Attached Documents & Receipts ({viewingDuty.attachments.length})
+                    </span>
+                    <span className="text-[10px] text-slate-400">Original high-resolution attachments</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {viewingDuty.attachments.map((att) => (
+                      <div
+                        key={att.id}
+                        className="flex items-center justify-between p-2.5 bg-surface border border-border rounded-xl"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          {att.fileType === "pdf" ? (
+                            <div className="w-9 h-9 rounded-lg bg-rose-500/20 border border-rose-500/30 text-rose-400 flex flex-col items-center justify-center shrink-0">
+                              <FileText className="w-4 h-4" />
+                              <span className="text-[7px] font-black uppercase">PDF</span>
+                            </div>
+                          ) : (
+                            <img
+                              src={att.url}
+                              alt={att.name}
+                              className="w-9 h-9 object-cover rounded-lg border border-border shrink-0"
+                            />
+                          )}
+                          <div className="min-w-0">
+                            <span className="text-[9px] font-bold text-accent uppercase tracking-wider block">
+                              {att.category}
+                            </span>
+                            <span className="text-xs font-semibold text-slate-200 block truncate max-w-[140px]" title={att.name}>
+                              {att.name}
+                            </span>
+                          </div>
+                        </div>
+
+                        <a
+                          href={att.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 text-[11px] font-bold text-accent hover:underline bg-background px-2.5 py-1 rounded-lg border border-border shrink-0"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          <span>View</span>
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : viewingDuty.slipImageUrl && !viewingDuty.slipImageUrl.includes("hero-bg") ? (
                 <div className="bg-background p-4 rounded-2xl border border-border flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <img
@@ -1799,10 +2041,23 @@ export default function AdminDutiesPage() {
                     <span>Open in New Tab (Full Quality)</span>
                   </a>
                 </div>
+              ) : (
+                <div className="bg-background p-3.5 rounded-2xl border border-border text-center text-xs text-slate-400">
+                  <span>No original physical documents or slips attached to this duty record.</span>
+                </div>
               )}
 
               {/* Action Buttons */}
-              <div className="flex justify-end gap-3 pt-2">
+              <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setViewingRouteDuty(viewingDuty)}
+                  className="flex items-center gap-2 bg-sky-600 hover:bg-sky-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md"
+                >
+                  <Navigation className="w-4 h-4" />
+                  <span>View Route on Map</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => window.print()}
@@ -1818,25 +2073,8 @@ export default function AdminDutiesPage() {
         </Portal>
       )}
 
-      {/* Hidden File & Camera Inputs for OCR Ingestion */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        accept="image/*,application/pdf"
-        className="hidden"
-        onChange={handleImageFileChange}
-      />
-      <input
-        type="file"
-        ref={mobileCameraInputRef}
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={handleImageFileChange}
-      />
-
       {/* ========================================================================= */}
-      {/* MODAL 3: SCAN METHOD SELECTOR MODAL */}
+      {/* MODAL 3: SCAN / CAPTURE METHOD SELECTOR MODAL */}
       {/* ========================================================================= */}
       {isScanOptionsModalOpen && (
         <Portal>
@@ -1851,13 +2089,13 @@ export default function AdminDutiesPage() {
 
               <div className="space-y-1">
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-accent/20 text-accent border border-accent/30 inline-block">
-                  Optical Character Recognition Engine
+                  Document & Media Ingestion
                 </span>
                 <h3 className="text-xl font-black text-slate-50">
-                  Select Duty Slip Capture Method
+                  Select Document Capture Method
                 </h3>
                 <p className="text-xs text-slate-400">
-                  Choose how you would like to capture and auto-fill the physical duty slip.
+                  Choose how you would like to capture or upload the physical duty slip and receipts.
                 </p>
               </div>
 
@@ -2118,7 +2356,7 @@ export default function AdminDutiesPage() {
                     {printerPingStatus === "LAN_LOCAL" && (
                       <p className="text-[11px] text-amber-400 mt-1 flex items-center gap-1">
                         <AlertCircle className="w-3 h-3" />
-                        <span>Local device profile selected. Ready for scan job execution & OCR parsing.</span>
+                        <span>Local device profile selected. Ready for scan job execution &amp; document ingestion.</span>
                       </p>
                     )}
                   </div>
@@ -2134,7 +2372,7 @@ export default function AdminDutiesPage() {
                         disabled={isScanningPrinter}
                         className="w-full bg-background border border-border rounded-xl p-2.5 text-slate-100 font-semibold focus:border-accent disabled:opacity-50"
                       >
-                        <option value="300">300 DPI (Standard OCR Clarity)</option>
+                        <option value="300">300 DPI (Standard Clarity)</option>
                         <option value="600">600 DPI (High Precision Archive)</option>
                         <option value="150">150 DPI (Fast Draft)</option>
                       </select>
@@ -2199,7 +2437,7 @@ export default function AdminDutiesPage() {
                       ) : (
                         <>
                           <Printer className="w-4 h-4" />
-                          <span>Scan from {selectedScannerDevice.split(" [")[0] || "Physical Device"} & Auto-Fill</span>
+                          <span>Scan from {selectedScannerDevice.split(" [")[0] || "Physical Device"} &amp; Attach</span>
                         </>
                       )}
                     </button>
@@ -2309,7 +2547,7 @@ export default function AdminDutiesPage() {
                           className="flex-1 flex items-center justify-center gap-2 bg-accent hover:bg-yellow-500 text-slate-950 font-black py-3 px-4 rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg shadow-accent/20 disabled:opacity-50"
                         >
                           <Camera className="w-4 h-4" />
-                          <span>Capture Slip & Run Real OCR</span>
+                          <span>Capture Slip &amp; Attach</span>
                         </button>
                       </div>
                     </div>
@@ -2317,7 +2555,7 @@ export default function AdminDutiesPage() {
                 </div>
               )}
 
-              {/* TAB 3: FILE INGESTION & OCR */}
+              {/* TAB 3: FILE INGESTION */}
               {scannerTab === "FILE_UPLOAD" && (
                 <div className="space-y-4 text-xs">
                   <div
@@ -2336,12 +2574,151 @@ export default function AdminDutiesPage() {
                       </p>
                     </div>
                     <span className="inline-block px-3 py-1 bg-white/5 text-slate-300 rounded-full text-[10px] font-bold">
-                      Tesseract.js Client & Server OCR Enabled
+                      PDF &amp; High-Resolution Media Ingestion
                     </span>
                   </div>
                 </div>
               )}
 
+            </div>
+          </div>
+        </Portal>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 5: ROUTE ON MAP MODAL */}
+      {/* ========================================================================= */}
+      {viewingRouteDuty && (
+        <Portal>
+          <div className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+            <div className="bg-surface border border-border rounded-3xl max-w-4xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative my-auto max-h-[94vh] overflow-y-auto scrollbar-thin">
+              <button
+                onClick={() => setViewingRouteDuty(null)}
+                className="absolute top-5 right-5 p-2 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-full transition-colors z-10"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {/* Header */}
+              <div className="border-b border-border pb-4">
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-500/20 text-sky-400 border border-sky-500/30">
+                    Route Log &amp; GPS Trajectory
+                  </span>
+                  <span className="text-xs text-slate-400 font-mono">Trip Sheet: {viewingRouteDuty.tripSheetNo}</span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-black text-slate-50 mt-1 flex items-center gap-2">
+                  <Navigation className="w-5 h-5 text-sky-400" />
+                  <span>Route Map &amp; Stops Trajectory</span>
+                </h2>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Visual map view of the entered route log stops. Take a screenshot or share this route with corporate clients.
+                </p>
+              </div>
+
+              {/* Trip Summary Quick Banner */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-background p-4 rounded-2xl border border-border text-xs">
+                <div>
+                  <span className="text-slate-400 font-bold block">Vehicle</span>
+                  <span className="font-mono font-extrabold text-slate-100">{viewingRouteDuty.carNo || "N/A"}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-bold block">Guest / Reported To</span>
+                  <span className="font-bold text-slate-100 truncate block">{viewingRouteDuty.reportedTo || "N/A"}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-bold block">Total Distance</span>
+                  <span className="font-mono font-black text-accent">{viewingRouteDuty.totalKms || "0"} KM</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-bold block">Total Hours</span>
+                  <span className="font-mono font-black text-emerald-400">{viewingRouteDuty.totalHours || "0"} Hrs</span>
+                </div>
+              </div>
+
+              {/* Route Stops List */}
+              <div className="space-y-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-300 block">
+                  Logged Route Stops ({viewingRouteDuty.usageTracks?.length || 0} legs)
+                </span>
+                {viewingRouteDuty.usageTracks && viewingRouteDuty.usageTracks.length > 0 ? (
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                    {viewingRouteDuty.usageTracks.map((leg, i) => (
+                      <div
+                        key={leg.id || i}
+                        className="flex items-center gap-3 bg-background border border-border p-3 rounded-xl text-xs"
+                      >
+                        <span className="w-6 h-6 rounded-full bg-accent/20 text-accent font-bold text-xs flex items-center justify-center shrink-0">
+                          {i + 1}
+                        </span>
+                        <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 min-w-0">
+                          <span className="font-semibold text-slate-100 truncate">{leg.from || "Start Point"}</span>
+                          <span className="text-slate-500 font-bold sm:inline hidden">→</span>
+                          <span className="font-semibold text-emerald-400 truncate">{leg.to || "Destination"}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-3 bg-background border border-border rounded-xl text-xs text-slate-400">
+                    No individual legs recorded in route log. Map displays general route between reporting location ({viewingRouteDuty.reportAt || "Start"}) and release location ({viewingRouteDuty.placeOfRelease || "End"}).
+                  </div>
+                )}
+              </div>
+
+              {/* Map Preview Embed */}
+              {(() => {
+                const tracks = viewingRouteDuty.usageTracks || [];
+                const firstLeg = tracks[0];
+                const lastLeg = tracks[tracks.length - 1];
+                const origin = firstLeg?.from || viewingRouteDuty.reportAt || "New Delhi";
+                const destination = lastLeg?.to || viewingRouteDuty.placeOfRelease || "Delhi NCR";
+                const waypoints = tracks.slice(1, -1).map((t) => t.to || t.from).filter(Boolean);
+                const gmapsDirUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}${waypoints.length > 0 ? `&waypoints=${encodeURIComponent(waypoints.join('|'))}` : ""}`;
+                const embedQuery = `${origin} to ${destination}`;
+
+                return (
+                  <div className="space-y-3">
+                    <div className="rounded-2xl overflow-hidden border border-border shadow-lg bg-black h-80 relative">
+                      <iframe
+                        title="Route Map Trajectory"
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0 }}
+                        src={`https://maps.google.com/maps?q=${encodeURIComponent(embedQuery)}&t=&z=12&ie=UTF8&iwloc=&output=embed`}
+                        allowFullScreen
+                      />
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                      <p className="text-[11px] text-slate-400 flex items-center gap-1.5">
+                        <Camera className="w-3.5 h-3.5 text-accent" />
+                        <span>Take a screenshot of this view to share route trajectory with passengers.</span>
+                      </p>
+
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={gmapsDirUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1.5 bg-sky-600 hover:bg-sky-500 text-white font-extrabold px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span>Open in Google Maps</span>
+                        </a>
+
+                        <button
+                          type="button"
+                          onClick={() => setViewingRouteDuty(null)}
+                          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs uppercase tracking-wider transition-all"
+                        >
+                          Close
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </Portal>

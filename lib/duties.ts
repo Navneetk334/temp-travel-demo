@@ -1,5 +1,15 @@
 import prisma from "@/lib/prisma";
 
+export interface DutyAttachment {
+  id: string;
+  name: string;
+  category: "Duty Slip" | "Toll Receipt" | "Parking Receipt" | "State Tax" | "Fuel Slip" | "Other" | string;
+  url: string;
+  fileType: "image" | "pdf";
+  size?: string;
+  uploadedAt?: string;
+}
+
 export interface DutySlipRecord {
   id: string;
   tripSheetNo: string;
@@ -20,7 +30,7 @@ export interface DutySlipRecord {
   garagingKm: string;
   totalHours: string;
   totalKms: string;
-  remarks: string;
+  remarks?: string;
 
   // Feedback & Settlement
   serviceFeedback: "EXCELLENT" | "GOOD" | "POOR" | string;
@@ -48,6 +58,7 @@ export interface DutySlipRecord {
   // Scanned Image Vault
   slipImageUrl?: string;
   slipImageName?: string;
+  attachments?: DutyAttachment[];
 
   createdAt: string;
   updatedAt: string;
