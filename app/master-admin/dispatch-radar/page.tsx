@@ -212,7 +212,9 @@ export default function MasterDispatchRadarPage() {
             const hasDriver = Boolean(drvName && drvName !== "Pending Chauffeur" && drvName !== "Unassigned");
 
             let status: "IN_TRANSIT" | "ASSIGNED" | "AVAILABLE" = "ASSIGNED";
-            if (b.status === "IN_TRANSIT" || b.status === "IN_PROGRESS") {
+            if (b.status === "COMPLETED" || b.status === "CANCELLED") {
+              status = "AVAILABLE";
+            } else if (b.status === "IN_TRANSIT" || b.status === "IN_PROGRESS") {
               status = "IN_TRANSIT";
             } else if (hasVehicle || hasDriver || b.status === "CONFIRMED" || b.status === "DRIVER_ASSIGNED" || b.status === "VEHICLE_ASSIGNED") {
               status = "ASSIGNED";
@@ -282,7 +284,9 @@ export default function MasterDispatchRadarPage() {
           const hasDriver = Boolean(drvName && drvName !== "Pending Chauffeur" && drvName !== "Unassigned");
 
           let status: "IN_TRANSIT" | "ASSIGNED" | "AVAILABLE" = "ASSIGNED";
-          if (b.status === "IN_TRANSIT" || b.status === "IN_PROGRESS") {
+          if (b.status === "COMPLETED" || b.status === "CANCELLED") {
+            status = "AVAILABLE";
+          } else if (b.status === "IN_TRANSIT" || b.status === "IN_PROGRESS") {
             status = "IN_TRANSIT";
           } else if (hasVehicle || hasDriver || b.status === "CONFIRMED") {
             status = "ASSIGNED";
@@ -331,31 +335,72 @@ export default function MasterDispatchRadarPage() {
         });
 
         // Merge all sources deduplicated
-        const dispatchesMap = new Map<string, any>();
-        convertedApiDispatches.forEach(d => {
-          if (!isDispatchDeleted(d)) dispatchesMap.set(d.bookingRef || d.id, d);
+        const mergedList: any[] = [];
+        const seenKeys = new Set<string>();
+
+        const registerKeys = (item: any) => {
+          if (!item) return;
+          if (item.id) seenKeys.add(String(item.id));
+          if (item.bookingRef) seenKeys.add(String(item.bookingRef));
+          if (item.bookingNumber) seenKeys.add(String(item.bookingNumber));
+          if (item.bookingId) seenKeys.add(String(item.bookingId));
+        };
+
+        const matchesItem = (item: any, candidate: any) => {
+          if (!item || !candidate) return false;
+          const cleanPhone = (p?: string) => (p || "").replace(/\D/g, "").slice(-10);
+          const p1 = cleanPhone(item.phone || item.driverPhone);
+          const p2 = cleanPhone(candidate.phone || candidate.driverPhone);
+
+          return (
+            (item.id && (candidate.id === item.id || candidate.bookingRef === item.id || candidate.bookingNumber === item.id || candidate.bookingId === item.id)) ||
+            (item.bookingRef && (candidate.id === item.bookingRef || candidate.bookingRef === item.bookingRef || candidate.bookingNumber === item.bookingRef || candidate.bookingId === item.bookingRef)) ||
+            (item.bookingNumber && (candidate.id === item.bookingNumber || candidate.bookingRef === item.bookingNumber || candidate.bookingNumber === item.bookingNumber || candidate.bookingId === item.bookingNumber)) ||
+            (item.bookingId && (candidate.id === item.bookingId || candidate.bookingRef === item.bookingId || candidate.bookingNumber === item.bookingId || candidate.bookingId === item.bookingId)) ||
+            (item.notes && candidate.id && item.notes.includes(candidate.id)) ||
+            (candidate.notes && item.id && candidate.notes.includes(item.id)) ||
+            (p1 && p2 && p1 === p2 && p1.length === 10 && item.pickupLocation === candidate.pickupLocation)
+          );
+        };
+
+        // 1. Live API dispatches (Highest Authority)
+        convertedApiDispatches.forEach(apiItem => {
+          if (isDispatchDeleted(apiItem)) return;
+
+          // Check if matches any local item to keep local telemetry lat/lng if closer
+          const matchingLocal = localMaster.find(loc => matchesItem(loc, apiItem)) ||
+            convertedLocalDispatched.find(loc => matchesItem(loc, apiItem));
+
+          const merged = matchingLocal
+            ? { ...matchingLocal, ...apiItem }
+            : apiItem;
+
+          registerKeys(merged);
+          mergedList.push(merged);
         });
-        convertedLocalDispatched.forEach(d => {
-          if (!isDispatchDeleted(d)) {
-            const key = d.bookingRef || d.id;
-            if (!dispatchesMap.has(key)) dispatchesMap.set(key, d);
-          }
-        });
-        localMaster.forEach(d => {
-          if (!isDispatchDeleted(d)) {
-            const key = d.bookingRef || d.id;
-            if (!dispatchesMap.has(key)) {
-              dispatchesMap.set(key, d);
-            } else {
-              const existing = dispatchesMap.get(key);
-              dispatchesMap.set(key, { ...existing, ...d });
-            }
+
+        // 2. Converted Local Dispatched Bookings (Secondary)
+        convertedLocalDispatched.forEach(locDisp => {
+          if (isDispatchDeleted(locDisp)) return;
+          const alreadyAdded = mergedList.some(item => matchesItem(item, locDisp));
+          if (!alreadyAdded) {
+            registerKeys(locDisp);
+            mergedList.push(locDisp);
           }
         });
 
-        const mergedDrivers = Array.from(dispatchesMap.values()).filter((d: any) => !isDispatchDeleted(d));
-        if (mergedDrivers.length > 0) {
-          setDrivers(mergedDrivers);
+        // 3. Local Master Dispatches (Fallback)
+        localMaster.forEach(locMaster => {
+          if (isDispatchDeleted(locMaster)) return;
+          const alreadyAdded = mergedList.some(item => matchesItem(item, locMaster));
+          if (!alreadyAdded) {
+            registerKeys(locMaster);
+            mergedList.push(locMaster);
+          }
+        });
+
+        if (mergedList.length > 0) {
+          setDrivers(mergedList);
         } else if (localMaster.length > 0) {
           setDrivers(localMaster.filter((d: any) => !isDispatchDeleted(d)));
         }
@@ -367,6 +412,19 @@ export default function MasterDispatchRadarPage() {
 
     loadAllDispatches();
     syncExistingDispatchesToLeads();
+
+    const handleStorageUpdate = () => {
+      loadAllDispatches();
+    };
+    window.addEventListener("storage", handleStorageUpdate);
+    window.addEventListener("dispatch_status_updated", handleStorageUpdate);
+    window.addEventListener("crm_leads_updated", handleStorageUpdate);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageUpdate);
+      window.removeEventListener("dispatch_status_updated", handleStorageUpdate);
+      window.removeEventListener("crm_leads_updated", handleStorageUpdate);
+    };
   }, []);
 
   const getVehicleBusy = (v: any) => {

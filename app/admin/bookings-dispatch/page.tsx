@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 import { buildWhatsAppShareUrl } from "@/lib/whatsapp-share";
+import { removeDispatchFromLeads } from "@/lib/lead-sync";
 
 export type BookingStatus = 
   | "PENDING" 
@@ -209,18 +210,77 @@ export default function BookingDispatchPage() {
 
   const handleStatusChange = async (id: string, newStatus: BookingStatus) => {
     setUpdatingStatus(newStatus);
-    // 1. Update local storage dispatched bookings
+    const target = bookings.find((b) => b.id === id || b.bookingNumber === id);
+    const targetRef = target?.bookingNumber || id;
+
+    // 1. Update user_uploaded_dispatched_bookings in localStorage
     try {
       const stored = localStorage.getItem("user_uploaded_dispatched_bookings");
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
-          const updatedLocal = parsed.map((b: any) => (b.id === id || b.bookingNumber === id) ? { ...b, status: newStatus } : b);
+          const updatedLocal = parsed.map((b: any) => 
+            (b.id === id || b.bookingNumber === id || b.bookingRef === id || (targetRef && (b.id === targetRef || b.bookingNumber === targetRef || b.bookingRef === targetRef)))
+              ? { ...b, status: newStatus } 
+              : b
+          );
           localStorage.setItem("user_uploaded_dispatched_bookings", JSON.stringify(updatedLocal));
         }
       }
     } catch (e) {
       console.error(e);
+    }
+
+    // 2. Synchronize status into master_dispatches in localStorage
+    try {
+      const masterRaw = localStorage.getItem("master_dispatches");
+      if (masterRaw) {
+        const parsedMaster = JSON.parse(masterRaw);
+        if (Array.isArray(parsedMaster)) {
+          const updatedMaster = parsedMaster.map((d: any) => {
+            const matches = 
+              d.id === id || 
+              d.bookingRef === id || 
+              d.bookingNumber === id || 
+              d.bookingId === id ||
+              (targetRef && (d.id === targetRef || d.bookingRef === targetRef || d.bookingNumber === targetRef)) ||
+              (d.notes && (d.notes.includes(id) || (targetRef && d.notes.includes(targetRef))));
+            return matches ? { ...d, status: newStatus } : d;
+          });
+          localStorage.setItem("master_dispatches", JSON.stringify(updatedMaster));
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    // 3. Synchronize status into user_uploaded_crm_leads
+    try {
+      const crmRaw = localStorage.getItem("user_uploaded_crm_leads");
+      if (crmRaw) {
+        const parsedCrm = JSON.parse(crmRaw);
+        if (Array.isArray(parsedCrm)) {
+          const updatedCrm = parsedCrm.map((l: any) => {
+            const matches = 
+              l.id === id || 
+              l.bookingRef === id || 
+              (targetRef && (l.bookingRef === targetRef || l.id === targetRef));
+            return matches 
+              ? { ...l, status: newStatus === "COMPLETED" ? "CONVERTED" : (newStatus === "CANCELLED" ? "LOST" : l.status) } 
+              : l;
+          });
+          localStorage.setItem("user_uploaded_crm_leads", JSON.stringify(updatedCrm));
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    // Dispatch broadcast events so other open tabs/panels (e.g. Master Admin) sync immediately
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(new Event("crm_leads_updated"));
+      window.dispatchEvent(new Event("dispatch_status_updated"));
     }
 
     setBookings(prev => prev.map(b => (b.id === id || b.bookingNumber === id) ? { ...b, status: newStatus } : b));
@@ -229,7 +289,6 @@ export default function BookingDispatchPage() {
     }
 
     try {
-      const target = bookings.find((b) => b.id === id || b.bookingNumber === id);
       await fetch(`/api/bookings/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -336,6 +395,47 @@ export default function BookingDispatchPage() {
       console.error(e);
     }
 
+    // Synchronize assignment into master_dispatches in localStorage
+    try {
+      const masterRaw = localStorage.getItem("master_dispatches");
+      if (masterRaw) {
+        const parsedMaster = JSON.parse(masterRaw);
+        if (Array.isArray(parsedMaster)) {
+          const targetRef = activeBooking.bookingNumber || activeBooking.id;
+          const newStatus = selectedVeh && targetDriver ? "VEHICLE_ASSIGNED" : (targetDriver ? "DRIVER_ASSIGNED" : "CONFIRMED");
+          const updatedMaster = parsedMaster.map((d: any) => {
+            const matches = 
+              d.id === activeBooking.id || 
+              d.bookingRef === activeBooking.id || 
+              d.bookingNumber === activeBooking.id || 
+              d.bookingId === activeBooking.id ||
+              (targetRef && (d.id === targetRef || d.bookingRef === targetRef || d.bookingNumber === targetRef));
+            if (matches) {
+              return {
+                ...d,
+                status: newStatus,
+                driverName: targetDriver?.name || d.driverName,
+                driverPhone: targetDriver?.phone || d.driverPhone,
+                driverId: targetDriver?.id || d.driverId,
+                regNumber: selectedVeh?.registrationNumber || d.regNumber,
+                vehicleModel: selectedVeh ? `${selectedVeh.make || ""} ${selectedVeh.model || ""}`.trim() : d.vehicleModel,
+                vehicleId: selectedVeh?.id || d.vehicleId
+              };
+            }
+            return d;
+          });
+          localStorage.setItem("master_dispatches", JSON.stringify(updatedMaster));
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(new Event("dispatch_status_updated"));
+    }
+
     try {
       const res = await fetch(`/api/bookings/${activeBooking.id}`, {
         method: "PUT",
@@ -406,6 +506,17 @@ export default function BookingDispatchPage() {
     const targetBooking = bookings.find((b) => b.id === id);
     const bookingNum = targetBooking?.bookingNumber;
 
+    // Purge across omnichannel dispatches & blacklists
+    try {
+      removeDispatchFromLeads(id, {
+        customerName: targetBooking?.customer?.name,
+        phone: targetBooking?.customer?.phone,
+        bookingRef: bookingNum || id
+      });
+    } catch (e) {
+      console.error(e);
+    }
+
     try {
       const local = localStorage.getItem("user_uploaded_crm_leads");
       if (local) {
@@ -418,6 +529,11 @@ export default function BookingDispatchPage() {
       }
     } catch (e) {
       console.error(e);
+    }
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(new Event("dispatch_status_updated"));
     }
 
     try {

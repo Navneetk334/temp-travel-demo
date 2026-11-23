@@ -171,7 +171,7 @@ export default function MasterAdminDashboard() {
         fetch("/api/corporate/lead"),
         fetch("/api/fleet?minimal=true"),
         fetch("/api/admin/drivers"),
-        fetch("/api/bookings")
+        fetch(`/api/bookings?limit=100&_t=${Date.now()}`, { cache: "no-store" })
       ]);
 
       const seenLeadKeys = new Set<string>();
@@ -217,46 +217,170 @@ export default function MasterAdminDashboard() {
         const bData = await bookingsRes.value.json();
         const bList = Array.isArray(bData) ? bData : (bData.bookings || []);
         if (bList.length > 0) {
-          const mappedBookings = bList.map((b: any) => ({
-            id: b.id || b.bookingNumber,
-            customerName: b.customer?.name || "Customer Lead",
-            phone: b.customer?.phone || "",
-            email: b.customer?.email || "",
-            tripType: b.type ? b.type.replace(/_/g, " ") : "Dispatched Ride",
-            vehicleCategory: b.vehicleCategory?.name || "Sedan",
-            vehicleClass: b.vehicle?.model ? "" : "Executive",
-            vehicleModel: b.vehicle?.model || "Standard",
-            pickupLocation: b.pickupLocation || "Pickup Hub",
-            dropLocation: b.dropLocation || "",
-            fare: b.netAmount ? String(b.netAmount) : "2800",
-            advance: b.payments?.[0]?.amount ? String(b.payments[0].amount) : "0",
-            status: b.status || "CONFIRMED",
-            regNumber: b.vehicle?.registrationNumber || "Pending Allocation",
-            driverName: b.vehicle?.driver?.name || "Pending Allocation",
-            driverPhone: b.vehicle?.driver?.phone || "",
-            createdAt: b.createdAt
-          }));
+          const mappedBookings = bList.map((b: any) => {
+            let drvName = b.driver?.name || b.vehicle?.driver?.name || "";
+            let drvPhone = b.driver?.phone || b.vehicle?.driver?.phone || "";
+            let drvId = b.driver?.id || b.vehicle?.driver?.id || "";
 
-          const localDisp = JSON.parse(localStorage.getItem("master_dispatches") || "[]");
-          const seenDisp = new Set<string>();
-          const allDispatches: any[] = [];
+            if (!drvName && b.notes) {
+              const match = b.notes.match(/\[AssignedDriver:\s*([^|\]]+)\|([^|\]]+)(?:\|([^\]]+))?\]/);
+              if (match) {
+                drvName = match[1].trim();
+                drvPhone = match[2].trim();
+                drvId = match[3]?.trim() || "";
+              }
+            }
 
-          mappedBookings.filter((d: any) => !isDispatchDeleted(d)).forEach((d: any) => {
-            seenDisp.add(d.id);
-            allDispatches.push(d);
+            let vCategory = b.vehicleCategory?.name || "Sedan";
+            let vClass = b.vehicle?.vehicleClass || "";
+            let vModel = b.vehicle ? `${b.vehicle.make ? b.vehicle.make + " " : ""}${b.vehicle.model || ""}`.trim() : "";
+            let vReg = b.vehicle?.registrationNumber || "";
+
+            if (b.notes) {
+              const vMatch = b.notes.match(/\[Vehicle:\s*([^|\]]+)(?:\|\s*([^\]]+))?\]/);
+              if (vMatch) {
+                if (!vModel) vModel = vMatch[1].trim();
+                if (!vReg && vMatch[2]) vReg = vMatch[2].trim();
+              }
+              const qMatch = b.notes.match(/Quick Dispatch:\s*(\w+)?\s*([^(]+)?\(([^)]+)\)/i);
+              if (qMatch) {
+                if (!vCategory && qMatch[1]) vCategory = qMatch[1].trim();
+                if (!vClass && qMatch[2]) vClass = qMatch[2].trim();
+                if (!vModel && qMatch[3]) vModel = qMatch[3].trim();
+              }
+              const cMatch = b.notes.match(/\[VehicleClass:\s*([^\]]+)\]/i);
+              if (cMatch && !vClass) {
+                vClass = cMatch[1].trim();
+              }
+            }
+
+            if (!vModel) vModel = "Standard Fleet";
+            if (!vClass) vClass = "Executive";
+            if (!vReg) vReg = "Pending Allocation";
+            if (!drvName) drvName = "Pending Allocation";
+
+            const ref = b.bookingNumber || `TT-${(b.id || "").slice(-6).toUpperCase()}`;
+
+            let tripDisplay = "Dispatched Ride";
+            if (b.notes) {
+              const tMatch = b.notes.match(/\[TripType:\s*([^\]]+)\]/i);
+              if (tMatch) tripDisplay = tMatch[1].trim();
+            }
+            if (tripDisplay === "Dispatched Ride" && b.type) {
+              tripDisplay = b.type.replace(/_/g, " ");
+            }
+
+            return {
+              id: b.id || ref,
+              bookingRef: ref,
+              bookingNumber: b.bookingNumber || ref,
+              bookingId: b.id,
+              customerName: b.customer?.name || "Customer Lead",
+              phone: b.customer?.phone || "",
+              email: b.customer?.email || "",
+              tripType: tripDisplay,
+              vehicleCategory: vCategory,
+              vehicleClass: vClass,
+              vehicleModel: vModel,
+              pickupLocation: b.pickupLocation && b.pickupLocation !== "TBD" ? b.pickupLocation : "Pickup Hub",
+              dropLocation: b.dropLocation || "",
+              fare: b.netAmount ? String(b.netAmount) : (b.totalAmount ? String(b.totalAmount) : "2800"),
+              advance: b.payments?.[0]?.amount ? String(b.payments[0].amount) : "0",
+              status: b.status || "CONFIRMED",
+              regNumber: vReg,
+              driverName: drvName,
+              driverPhone: drvPhone,
+              driverId: drvId,
+              createdAt: b.createdAt,
+              notes: b.notes || ""
+            };
           });
 
+          const localDisp = JSON.parse(localStorage.getItem("master_dispatches") || "[]");
+          const allDispatches: any[] = [];
+          const matchedLocalIndices = new Set<number>();
+
+          // Match each live DB booking with any existing local dispatch
+          mappedBookings.filter((d: any) => !isDispatchDeleted(d)).forEach((dbItem: any) => {
+            const cleanPhone = (p?: string) => (p || "").replace(/\D/g, "").slice(-10);
+            const dbPhone = cleanPhone(dbItem.phone);
+
+            let matchedLocal: any = null;
+            if (Array.isArray(localDisp)) {
+              for (let i = 0; i < localDisp.length; i++) {
+                if (matchedLocalIndices.has(i)) continue;
+                const loc = localDisp[i];
+                if (!loc) continue;
+
+                const idMatch = 
+                  loc.id === dbItem.id ||
+                  loc.bookingId === dbItem.id ||
+                  loc.id === dbItem.bookingNumber ||
+                  loc.bookingRef === dbItem.bookingNumber ||
+                  loc.bookingRef === dbItem.id ||
+                  loc.bookingNumber === dbItem.bookingNumber ||
+                  loc.bookingNumber === dbItem.id ||
+                  (loc.id && dbItem.notes && dbItem.notes.includes(loc.id)) ||
+                  (loc.bookingRef && dbItem.notes && dbItem.notes.includes(loc.bookingRef));
+
+                const phoneAndRouteMatch = 
+                  dbPhone && dbPhone.length === 10 &&
+                  cleanPhone(loc.phone) === dbPhone &&
+                  (loc.pickupLocation === dbItem.pickupLocation || loc.customerName?.toLowerCase() === dbItem.customerName?.toLowerCase());
+
+                if (idMatch || phoneAndRouteMatch) {
+                  matchedLocal = loc;
+                  matchedLocalIndices.add(i);
+                  break;
+                }
+              }
+            }
+
+            if (matchedLocal) {
+              // Merge: live DB status ALWAYS overrides local status!
+              const merged = {
+                ...matchedLocal,
+                ...dbItem,
+                status: dbItem.status,
+                id: dbItem.id,
+                bookingRef: dbItem.bookingRef || matchedLocal.bookingRef || matchedLocal.id,
+                bookingId: dbItem.bookingId || dbItem.id,
+                vehicleModel: (dbItem.vehicleModel && dbItem.vehicleModel !== "Standard Fleet") ? dbItem.vehicleModel : (matchedLocal.vehicleModel || dbItem.vehicleModel),
+                vehicleClass: (dbItem.vehicleClass && dbItem.vehicleClass !== "Executive") ? dbItem.vehicleClass : (matchedLocal.vehicleClass || dbItem.vehicleClass),
+                vehicleCategory: matchedLocal.vehicleCategory || dbItem.vehicleCategory,
+                pickupLocation: (dbItem.pickupLocation && dbItem.pickupLocation !== "Pickup Hub") ? dbItem.pickupLocation : (matchedLocal.pickupLocation || dbItem.pickupLocation),
+                dropLocation: dbItem.dropLocation || matchedLocal.dropLocation || "",
+                driverName: (dbItem.driverName && !dbItem.driverName.includes("Pending")) ? dbItem.driverName : (matchedLocal.driverName || dbItem.driverName),
+                regNumber: (dbItem.regNumber && !dbItem.regNumber.includes("Pending")) ? dbItem.regNumber : (matchedLocal.regNumber || dbItem.regNumber),
+                fare: dbItem.fare || matchedLocal.fare || "2800",
+                advance: dbItem.advance || matchedLocal.advance || "0",
+              };
+              allDispatches.push(merged);
+            } else {
+              allDispatches.push(dbItem);
+            }
+          });
+
+          // Append any remaining unmatched local dispatches that haven't been deleted
           if (Array.isArray(localDisp)) {
-            localDisp.filter((d: any) => !isDispatchDeleted(d)).forEach((d: any) => {
-              if (d && !seenDisp.has(d.id)) {
-                seenDisp.add(d.id);
-                allDispatches.push(d);
+            localDisp.forEach((loc: any, idx: number) => {
+              if (!matchedLocalIndices.has(idx) && loc && !isDispatchDeleted(loc)) {
+                allDispatches.push(loc);
               }
             });
           }
 
+          // Persist the synchronized dispatches back into master_dispatches
+          try {
+            localStorage.setItem("master_dispatches", JSON.stringify(allDispatches));
+          } catch (e) {
+            console.error(e);
+          }
+
           setDispatches(allDispatches);
-          const activeCount = allDispatches.filter((d: any) => d.status === "IN_TRANSIT" || d.status === "ASSIGNED" || d.status === "CONFIRMED").length;
+          const activeCount = allDispatches.filter((d: any) => 
+            d.status === "IN_TRANSIT" || d.status === "ASSIGNED" || d.status === "IN_PROGRESS" || d.status === "CONFIRMED"
+          ).length;
           setStats(prev => ({ ...prev, activeRides: activeCount }));
         }
       }
@@ -318,7 +442,9 @@ export default function MasterAdminDashboard() {
         if (Array.isArray(parsed)) {
           const valid = parsed.filter((d: any) => !isDispatchDeleted(d));
           setDispatches(valid);
-          const activeCount = valid.filter((d: any) => d.status === "IN_TRANSIT" || d.status === "ASSIGNED").length;
+          const activeCount = valid.filter((d: any) => 
+            d.status === "IN_TRANSIT" || d.status === "ASSIGNED" || d.status === "IN_PROGRESS" || d.status === "CONFIRMED"
+          ).length;
           setStats(prev => ({ ...prev, activeRides: activeCount }));
         }
       }
@@ -328,6 +454,21 @@ export default function MasterAdminDashboard() {
 
     handleSyncSystems();
     syncExistingDispatchesToLeads();
+  }, []);
+
+  // Listen for broadcast events so changes made in Admin Panel / other tabs reflect instantly
+  useEffect(() => {
+    const handleStorageUpdate = () => {
+      handleSyncSystems();
+    };
+    window.addEventListener("storage", handleStorageUpdate);
+    window.addEventListener("crm_leads_updated", handleStorageUpdate);
+    window.addEventListener("dispatch_status_updated", handleStorageUpdate);
+    return () => {
+      window.removeEventListener("storage", handleStorageUpdate);
+      window.removeEventListener("crm_leads_updated", handleStorageUpdate);
+      window.removeEventListener("dispatch_status_updated", handleStorageUpdate);
+    };
   }, []);
 
   const busyVehiclesMap = useMemo(() => {
@@ -543,19 +684,55 @@ export default function MasterAdminDashboard() {
     let updatedDispatch: any = null;
     setDispatches(prev => {
       const next = prev.map(d => {
-        if (d.id === id) {
+        if (d.id === id || d.bookingRef === id || d.bookingId === id || d.bookingNumber === id) {
           updatedDispatch = { ...d, status: newStatus };
           return updatedDispatch;
         }
         return d;
       });
       localStorage.setItem("master_dispatches", JSON.stringify(next));
-      const activeCount = next.filter((d: any) => d.status === "IN_TRANSIT" || d.status === "ASSIGNED").length;
+      const activeCount = next.filter((d: any) => 
+        d.status === "IN_TRANSIT" || d.status === "ASSIGNED" || d.status === "IN_PROGRESS" || d.status === "CONFIRMED"
+      ).length;
       setStats(s => ({ ...s, activeRides: activeCount }));
       return next;
     });
+
     if (updatedDispatch) {
       syncDispatchToLeads(updatedDispatch);
+
+      // Synchronize into user_uploaded_dispatched_bookings
+      try {
+        const stored = localStorage.getItem("user_uploaded_dispatched_bookings");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            const updated = parsed.map((b: any) =>
+              (b.id === id || b.bookingNumber === id || b.bookingRef === id || (updatedDispatch.bookingId && b.id === updatedDispatch.bookingId))
+                ? { ...b, status: newStatus }
+                : b
+            );
+            localStorage.setItem("user_uploaded_dispatched_bookings", JSON.stringify(updated));
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+
+      // Call backend API to persist to live PostgreSQL database
+      const targetDbId = updatedDispatch.bookingId || (updatedDispatch.id && !updatedDispatch.id.startsWith("DISP-") ? updatedDispatch.id : null);
+      if (targetDbId) {
+        fetch(`/api/bookings/${targetDbId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: newStatus }),
+        }).catch(err => console.error("Failed to update status on DB:", err));
+      }
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("storage"));
+        window.dispatchEvent(new Event("dispatch_status_updated"));
+      }
     }
   };
 
@@ -864,9 +1041,9 @@ export default function MasterAdminDashboard() {
                     <div className="flex justify-between items-start gap-2">
                       <span
                         className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${
-                          item.status === "IN_TRANSIT"
+                          item.status === "IN_TRANSIT" || item.status === "IN_PROGRESS"
                             ? "bg-amber-500/10 text-amber-400 border-amber-500/30 animate-pulse"
-                            : item.status === "ASSIGNED"
+                            : item.status === "ASSIGNED" || item.status === "DRIVER_ASSIGNED" || item.status === "VEHICLE_ASSIGNED" || item.status === "CONFIRMED"
                             ? "bg-blue-500/10 text-blue-400 border-blue-500/30"
                             : item.status === "COMPLETED"
                             ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
@@ -888,7 +1065,7 @@ export default function MasterAdminDashboard() {
                         <span>{item.phone}</span>
                       </div>
                       <div className="text-xs text-amber-400/90 font-semibold mt-1">
-                        {item.vehicleCategory || "Sedan"} &bull; {item.vehicleClass || "Executive"} &bull; {item.vehicleModel || "Any"}
+                        {[item.vehicleCategory || "Sedan", item.vehicleClass, item.vehicleModel || "Standard Fleet"].filter(Boolean).join(" • ")}
                       </div>
                     </div>
 
@@ -945,6 +1122,7 @@ export default function MasterAdminDashboard() {
                     >
                       <option value="ASSIGNED">Assigned</option>
                       <option value="IN_TRANSIT">In Transit</option>
+                      <option value="IN_PROGRESS">In Progress</option>
                       <option value="COMPLETED">Completed</option>
                       <option value="CANCELLED">Cancel</option>
                     </select>
