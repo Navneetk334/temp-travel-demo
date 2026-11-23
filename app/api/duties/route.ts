@@ -206,12 +206,15 @@ export async function POST(req: NextRequest) {
       reportAt: body.reportAt || "",
       
       // Time & KMs
+      garageDepartureDate: body.garageDepartureDate || "",
       garageDepartureTime: body.garageDepartureTime || "06:30 AM",
       garageOpeningKm: body.garageOpeningKm || "45100",
+      reportingDate: body.reportingDate || "",
       reportingTime: body.reportingTime || "07:30 AM",
       reportingKm: body.reportingKm || "45115",
       releaseTime: body.releaseTime || "06:30 PM",
       releaseKm: body.releaseKm || "45195",
+      garagingDate: body.garagingDate || "",
       garagingTime: body.garagingTime || "07:30 PM",
       garagingKm: body.garagingKm || "45210",
       totalHours: body.totalHours || "8.0",

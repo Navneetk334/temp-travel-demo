@@ -20,12 +20,15 @@ export interface DutySlipRecord {
   reportAt: string;
   
   // Time & Kilometer Log
+  garageDepartureDate?: string;
   garageDepartureTime: string;
   garageOpeningKm: string;
+  reportingDate?: string;
   reportingTime: string;
   reportingKm: string;
   releaseTime: string;
   releaseKm: string;
+  garagingDate?: string;
   garagingTime: string;
   garagingKm: string;
   totalHours: string;

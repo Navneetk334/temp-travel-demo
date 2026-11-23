@@ -44,6 +44,127 @@ import Portal from "@/components/shared/portal";
 import { DutySlipRecord, DutyAttachment } from "@/lib/duties";
 import { isDispatchDeleted } from "@/lib/lead-sync";
 
+// Helper to convert any date string (YYYY-MM-DD or DD/MM/YYYY) to DD/MM/YYYY
+function formatToDDMMYYYY(val?: string): string {
+  if (!val) return "";
+  const trimmed = val.trim();
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(trimmed)) {
+    return trimmed;
+  }
+  if (/^\d{2}-\d{2}-\d{4}$/.test(trimmed)) {
+    return trimmed.replace(/-/g, "/");
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    const [y, m, d] = trimmed.split("-");
+    return `${d}/${m}/${y}`;
+  }
+  const parsed = new Date(trimmed);
+  if (!isNaN(parsed.getTime())) {
+    const d = String(parsed.getDate()).padStart(2, "0");
+    const m = String(parsed.getMonth() + 1).padStart(2, "0");
+    const y = parsed.getFullYear();
+    return `${d}/${m}/${y}`;
+  }
+  return trimmed;
+}
+
+// Helper to convert DD/MM/YYYY to YYYY-MM-DD for native date pickers
+function toYYYYMMDD(val?: string): string {
+  if (!val) return "";
+  const trimmed = val.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    return trimmed;
+  }
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(trimmed)) {
+    const [d, m, y] = trimmed.split("/");
+    return `${y}-${m}-${d}`;
+  }
+  if (/^\d{2}-\d{2}-\d{4}$/.test(trimmed)) {
+    const [d, m, y] = trimmed.split("-");
+    return `${y}-${m}-${d}`;
+  }
+  const parsed = new Date(trimmed);
+  if (!isNaN(parsed.getTime())) {
+    return parsed.toISOString().split("T")[0];
+  }
+  return "";
+}
+
+// Calculate total days between start and end dates
+function calculateTotalDays(startStr?: string, endStr?: string): string {
+  if (!startStr || !endStr) return "1 Day";
+  const startISO = toYYYYMMDD(startStr);
+  const endISO = toYYYYMMDD(endStr);
+  if (!startISO || !endISO) return "1 Day";
+  const start = new Date(startISO);
+  const end = new Date(endISO);
+  const diffTime = end.getTime() - start.getTime();
+  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  if (diffDays <= 1) return "1 Day";
+  return `${diffDays} Days`;
+}
+
+// Reusable DatePicker with DD/MM/YYYY display, direct input and calendar pop-up
+function DatePickerDDMMYYYY({
+  value,
+  onChange,
+  className = "",
+  placeholder = "dd/mm/yyyy",
+}: {
+  value: string;
+  onChange: (val: string) => void;
+  className?: string;
+  placeholder?: string;
+}) {
+  const hiddenDateRef = useRef<HTMLInputElement>(null);
+  const displayVal = formatToDDMMYYYY(value);
+  const isoVal = toYYYYMMDD(value);
+
+  return (
+    <div className="relative flex items-center w-full">
+      <input
+        type="text"
+        placeholder={placeholder}
+        value={displayVal}
+        onChange={(e) => {
+          onChange(e.target.value);
+        }}
+        className={`w-full bg-surface text-center font-mono font-bold text-slate-100 p-2 pr-7 rounded border border-border focus:border-accent text-xs placeholder:text-slate-500 ${className}`}
+      />
+      <button
+        type="button"
+        onClick={() => {
+          if (hiddenDateRef.current) {
+            if (hiddenDateRef.current.showPicker) {
+              hiddenDateRef.current.showPicker();
+            } else {
+              hiddenDateRef.current.click();
+            }
+          }
+        }}
+        className="absolute right-1.5 p-1 text-accent hover:text-yellow-400 transition-colors"
+        title="Select date (dd/mm/yyyy)"
+      >
+        <Calendar className="w-3.5 h-3.5" />
+      </button>
+      <input
+        type="date"
+        ref={hiddenDateRef}
+        value={isoVal}
+        onClick={(e) => e.currentTarget.showPicker?.()}
+        onChange={(e) => {
+          const raw = e.target.value;
+          if (raw) {
+            onChange(formatToDDMMYYYY(raw));
+          }
+        }}
+        className="sr-only pointer-events-none absolute"
+        tabIndex={-1}
+      />
+    </div>
+  );
+}
+
 export default function AdminDutiesPage() {
   const [duties, setDuties] = useState<DutySlipRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -96,12 +217,16 @@ export default function AdminDutiesPage() {
     reportedTo: "",
     account: "",
     reportAt: "",
+    garageDepartureDate: "",
     garageDepartureTime: "",
     garageOpeningKm: "",
+    reportingDate: "",
     reportingTime: "",
     reportingKm: "",
+    releaseDate: "",
     releaseTime: "",
     releaseKm: "",
+    garagingDate: "",
     garagingTime: "",
     garagingKm: "",
     totalHours: "",
@@ -109,7 +234,6 @@ export default function AdminDutiesPage() {
     remarks: "",
     serviceFeedback: "EXCELLENT",
     parkingTollTax: "",
-    releaseDate: "",
     placeOfRelease: "",
     mobile: "",
     officeTo: "",
@@ -285,10 +409,19 @@ export default function AdminDutiesPage() {
   // Open Create Modal
   const handleOpenCreateModal = () => {
     setEditingDuty(null);
+    const today = new Date();
+    const todayISO = today.toISOString().split("T")[0];
+    const todayDD = formatToDDMMYYYY(todayISO);
     setFormData({
       ...initialFormState,
       tripSheetNo: `TT-DS-${Math.floor(1000 + Math.random() * 9000)}`,
+      date: todayISO,
+      garageDepartureDate: todayDD,
+      reportingDate: todayDD,
+      releaseDate: todayDD,
+      garagingDate: todayDD,
     });
+    setScanMessage("");
     setIsFormModalOpen(true);
   };
 
@@ -307,6 +440,8 @@ export default function AdminDutiesPage() {
           }]
         : [];
 
+    const dutyDateDD = formatToDDMMYYYY(duty.date);
+
     setFormData({
       tripSheetNo: duty.tripSheetNo,
       carNo: duty.carNo,
@@ -314,12 +449,16 @@ export default function AdminDutiesPage() {
       reportedTo: duty.reportedTo,
       account: duty.account,
       reportAt: duty.reportAt,
+      garageDepartureDate: duty.garageDepartureDate ? formatToDDMMYYYY(duty.garageDepartureDate) : dutyDateDD,
       garageDepartureTime: duty.garageDepartureTime,
       garageOpeningKm: duty.garageOpeningKm,
+      reportingDate: duty.reportingDate ? formatToDDMMYYYY(duty.reportingDate) : dutyDateDD,
       reportingTime: duty.reportingTime,
       reportingKm: duty.reportingKm,
+      releaseDate: duty.releaseDate ? formatToDDMMYYYY(duty.releaseDate) : dutyDateDD,
       releaseTime: duty.releaseTime,
       releaseKm: duty.releaseKm,
+      garagingDate: duty.garagingDate ? formatToDDMMYYYY(duty.garagingDate) : dutyDateDD,
       garagingTime: duty.garagingTime,
       garagingKm: duty.garagingKm,
       totalHours: duty.totalHours,
@@ -327,7 +466,6 @@ export default function AdminDutiesPage() {
       remarks: duty.remarks || "",
       serviceFeedback: duty.serviceFeedback,
       parkingTollTax: duty.parkingTollTax,
-      releaseDate: duty.releaseDate,
       placeOfRelease: duty.placeOfRelease,
       mobile: duty.mobile,
       officeTo: duty.officeTo,
@@ -346,6 +484,7 @@ export default function AdminDutiesPage() {
       slipImageName: duty.slipImageName || "",
       attachments: existingAttachments,
     });
+    setScanMessage("");
     setIsFormModalOpen(true);
   };
 
@@ -368,8 +507,15 @@ export default function AdminDutiesPage() {
     return `${String(hours).padStart(2, "0")}:${minutes}`;
   };
 
-  // Auto-calculate Total Hours in 24-hour time format
-  const handleCalculateHours = (departure: string, garaging: string, reporting?: string, release?: string) => {
+  // Auto-calculate Total Hours in 24-hour time format (with multi-day date support)
+  const handleCalculateHours = (
+    departure: string,
+    garaging: string,
+    reporting?: string,
+    release?: string,
+    depDate?: string,
+    garDate?: string
+  ) => {
     const startTime = departure || reporting || "";
     const endTime = garaging || release || "";
     if (!startTime || !endTime) return;
@@ -382,15 +528,29 @@ export default function AdminDutiesPage() {
     const [eH, eM] = e24.split(":").map(Number);
     if (isNaN(sH) || isNaN(sM) || isNaN(eH) || isNaN(eM)) return;
 
-    const startTotalMins = sH * 60 + sM;
-    let endTotalMins = eH * 60 + eM;
+    const sDateISO = depDate ? toYYYYMMDD(depDate) : "";
+    const eDateISO = garDate ? toYYYYMMDD(garDate) : "";
 
-    // Handle overnight trips crossing midnight
-    if (endTotalMins < startTotalMins) {
-      endTotalMins += 24 * 60;
+    let diffMins = 0;
+    if (sDateISO && eDateISO && sDateISO !== eDateISO) {
+      const startDateTime = new Date(`${sDateISO}T${s24}:00`);
+      const endDateTime = new Date(`${eDateISO}T${e24}:00`);
+      if (!isNaN(startDateTime.getTime()) && !isNaN(endDateTime.getTime())) {
+        const diffMs = endDateTime.getTime() - startDateTime.getTime();
+        diffMins = Math.max(0, Math.round(diffMs / 60000));
+      } else {
+        const startTotalMins = sH * 60 + sM;
+        let endTotalMins = eH * 60 + eM;
+        if (endTotalMins < startTotalMins) endTotalMins += 24 * 60;
+        diffMins = endTotalMins - startTotalMins;
+      }
+    } else {
+      const startTotalMins = sH * 60 + sM;
+      let endTotalMins = eH * 60 + eM;
+      if (endTotalMins < startTotalMins) endTotalMins += 24 * 60;
+      diffMins = endTotalMins - startTotalMins;
     }
 
-    const diffMins = endTotalMins - startTotalMins;
     const hours = diffMins / 60;
     const computedHours = (Math.round(hours * 10) / 10).toFixed(1);
 
@@ -993,7 +1153,7 @@ export default function AdminDutiesPage() {
                       <span className="font-mono font-bold text-accent block">{duty.tripSheetNo}</span>
                       <span className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
                         <Calendar className="w-3 h-3" />
-                        {duty.date}
+                        {formatToDDMMYYYY(duty.date)}
                       </span>
                     </td>
 
@@ -1349,14 +1509,21 @@ export default function AdminDutiesPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-slate-400 font-bold uppercase mb-1">Date *</label>
-                      <input
-                        type="date"
-                        required
+                      <label className="block text-slate-400 font-bold uppercase mb-1">Date * (dd/mm/yyyy)</label>
+                      <DatePickerDDMMYYYY
                         value={formData.date}
-                        onClick={(e) => e.currentTarget.showPicker?.()}
-                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                        className="w-full bg-background border border-border rounded-lg p-2.5 text-slate-100 focus:border-accent cursor-pointer [color-scheme:dark]"
+                        onChange={(val) => {
+                          const iso = toYYYYMMDD(val);
+                          const dd = formatToDDMMYYYY(val);
+                          setFormData((prev) => ({
+                            ...prev,
+                            date: iso || val,
+                            garageDepartureDate: prev.garageDepartureDate || dd,
+                            reportingDate: prev.reportingDate || dd,
+                            releaseDate: prev.releaseDate || dd,
+                            garagingDate: prev.garagingDate || dd,
+                          }));
+                        }}
                       />
                     </div>
                   </div>
@@ -1404,7 +1571,7 @@ export default function AdminDutiesPage() {
                       <span>2. Garage-to-Garage Time & KM Tracking Table</span>
                     </h3>
                     <span className="text-[10px] text-amber-400 font-semibold italic">
-                      * Timing & Distance Calculated From Garage to Garage basis as per R.T.O. Rules
+                      * Dates in DD/MM/YYYY format • Timing & Distance Calculated From Garage to Garage basis
                     </span>
                   </div>
 
@@ -1412,14 +1579,96 @@ export default function AdminDutiesPage() {
                     <table className="w-full text-center border-collapse">
                       <thead className="bg-surface border-b border-border text-[10px] uppercase font-bold text-slate-300">
                         <tr>
-                          <th className="p-2 border-r border-border">Departure Garage (24h)</th>
-                          <th className="p-2 border-r border-border">Reporting Time (24h)</th>
-                          <th className="p-2 border-r border-border">Release Time (24h)</th>
-                          <th className="p-2 border-r border-border">Garaging Time (24h)</th>
-                          <th className="p-2 bg-surface/90 font-extrabold text-accent">Total Hours</th>
+                          <th className="p-2 border-r border-border">Departure Garage</th>
+                          <th className="p-2 border-r border-border">Reporting</th>
+                          <th className="p-2 border-r border-border">Release</th>
+                          <th className="p-2 border-r border-border">Garaging</th>
+                          <th className="p-2 bg-surface/90 font-extrabold text-accent">Total</th>
                         </tr>
                       </thead>
                       <tbody>
+                        {/* 1. DATES ROW (DD/MM/YYYY) */}
+                        <tr className="bg-surface/50 text-[10px] uppercase font-bold text-slate-300 border-b border-border">
+                          <td className="p-1 border-r border-border text-slate-400">Date (dd/mm/yyyy)</td>
+                          <td className="p-1 border-r border-border text-slate-400">Date (dd/mm/yyyy)</td>
+                          <td className="p-1 border-r border-border text-slate-400">Date (dd/mm/yyyy)</td>
+                          <td className="p-1 border-r border-border text-slate-400">Date (dd/mm/yyyy)</td>
+                          <td className="p-1 bg-surface/90 font-extrabold text-accent">Total Days</td>
+                        </tr>
+                        <tr className="border-b border-border bg-surface/20">
+                          <td className="p-2 border-r border-border">
+                            <DatePickerDDMMYYYY
+                              value={formData.garageDepartureDate || formatToDDMMYYYY(formData.date)}
+                              onChange={(val) => {
+                                setFormData((prev) => ({ ...prev, garageDepartureDate: val }));
+                                handleCalculateHours(
+                                  formData.garageDepartureTime,
+                                  formData.garagingTime,
+                                  formData.reportingTime,
+                                  formData.releaseTime,
+                                  val,
+                                  formData.garagingDate || formData.releaseDate || val
+                                );
+                              }}
+                            />
+                          </td>
+                          <td className="p-2 border-r border-border">
+                            <DatePickerDDMMYYYY
+                              value={formData.reportingDate || formData.garageDepartureDate || formatToDDMMYYYY(formData.date)}
+                              onChange={(val) => setFormData((prev) => ({ ...prev, reportingDate: val }))}
+                            />
+                          </td>
+                          <td className="p-2 border-r border-border">
+                            <DatePickerDDMMYYYY
+                              value={formData.releaseDate || formData.garageDepartureDate || formatToDDMMYYYY(formData.date)}
+                              onChange={(val) => {
+                                setFormData((prev) => ({ ...prev, releaseDate: val }));
+                                handleCalculateHours(
+                                  formData.garageDepartureTime,
+                                  formData.garagingTime,
+                                  formData.reportingTime,
+                                  formData.releaseTime,
+                                  formData.garageDepartureDate,
+                                  formData.garagingDate || val
+                                );
+                              }}
+                            />
+                          </td>
+                          <td className="p-2 border-r border-border">
+                            <DatePickerDDMMYYYY
+                              value={formData.garagingDate || formData.releaseDate || formData.garageDepartureDate || formatToDDMMYYYY(formData.date)}
+                              onChange={(val) => {
+                                setFormData((prev) => ({ ...prev, garagingDate: val }));
+                                handleCalculateHours(
+                                  formData.garageDepartureTime,
+                                  formData.garagingTime,
+                                  formData.reportingTime,
+                                  formData.releaseTime,
+                                  formData.garageDepartureDate,
+                                  val
+                                );
+                              }}
+                            />
+                          </td>
+                          <td className="p-2 bg-surface/50">
+                            <div className="font-mono font-black text-slate-100 text-xs">
+                              {calculateTotalDays(
+                                formData.garageDepartureDate || formData.date,
+                                formData.garagingDate || formData.releaseDate || formData.date
+                              )}
+                            </div>
+                            <span className="text-[9px] text-slate-400 block mt-0.5">Duration</span>
+                          </td>
+                        </tr>
+
+                        {/* 2. TIME ROW (24H) */}
+                        <tr className="bg-surface/40 text-[10px] uppercase font-bold text-slate-300 border-b border-border">
+                          <td className="p-1 border-r border-border">Departure Time (24h)</td>
+                          <td className="p-1 border-r border-border">Reporting Time (24h)</td>
+                          <td className="p-1 border-r border-border">Release Time (24h)</td>
+                          <td className="p-1 border-r border-border">Garaging Time (24h)</td>
+                          <td className="p-1 bg-surface/90 font-extrabold text-accent">Total Hours</td>
+                        </tr>
                         <tr className="border-b border-border">
                           <td className="p-2 border-r border-border">
                             <input
@@ -1428,7 +1677,14 @@ export default function AdminDutiesPage() {
                               onChange={(e) => {
                                 const val = e.target.value;
                                 setFormData((prev) => ({ ...prev, garageDepartureTime: val }));
-                                handleCalculateHours(val, formData.reportingTime, formData.releaseTime, formData.garagingTime);
+                                handleCalculateHours(
+                                  val,
+                                  formData.garagingTime,
+                                  formData.reportingTime,
+                                  formData.releaseTime,
+                                  formData.garageDepartureDate,
+                                  formData.garagingDate
+                                );
                               }}
                               className="w-full bg-surface text-center font-mono font-bold text-slate-100 p-2 rounded border border-border focus:border-accent [color-scheme:dark]"
                             />
@@ -1440,7 +1696,14 @@ export default function AdminDutiesPage() {
                               onChange={(e) => {
                                 const val = e.target.value;
                                 setFormData((prev) => ({ ...prev, reportingTime: val }));
-                                handleCalculateHours(formData.garageDepartureTime, val, formData.releaseTime, formData.garagingTime);
+                                handleCalculateHours(
+                                  formData.garageDepartureTime,
+                                  formData.garagingTime,
+                                  val,
+                                  formData.releaseTime,
+                                  formData.garageDepartureDate,
+                                  formData.garagingDate
+                                );
                               }}
                               className="w-full bg-surface text-center font-mono font-bold text-slate-100 p-2 rounded border border-border focus:border-accent [color-scheme:dark]"
                             />
@@ -1452,7 +1715,14 @@ export default function AdminDutiesPage() {
                               onChange={(e) => {
                                 const val = e.target.value;
                                 setFormData((prev) => ({ ...prev, releaseTime: val }));
-                                handleCalculateHours(formData.garageDepartureTime, formData.reportingTime, val, formData.garagingTime);
+                                handleCalculateHours(
+                                  formData.garageDepartureTime,
+                                  formData.garagingTime,
+                                  formData.reportingTime,
+                                  val,
+                                  formData.garageDepartureDate,
+                                  formData.garagingDate
+                                );
                               }}
                               className="w-full bg-surface text-center font-mono font-bold text-slate-100 p-2 rounded border border-border focus:border-accent [color-scheme:dark]"
                             />
@@ -1464,7 +1734,14 @@ export default function AdminDutiesPage() {
                               onChange={(e) => {
                                 const val = e.target.value;
                                 setFormData((prev) => ({ ...prev, garagingTime: val }));
-                                handleCalculateHours(formData.garageDepartureTime, formData.reportingTime, formData.releaseTime, val);
+                                handleCalculateHours(
+                                  formData.garageDepartureTime,
+                                  val,
+                                  formData.reportingTime,
+                                  formData.releaseTime,
+                                  formData.garageDepartureDate,
+                                  formData.garagingDate
+                                );
                               }}
                               className="w-full bg-surface text-center font-mono font-bold text-slate-100 p-2 rounded border border-border focus:border-accent [color-scheme:dark]"
                             />
@@ -1831,7 +2108,7 @@ export default function AdminDutiesPage() {
                       Trip Sheet No: {viewingDuty.tripSheetNo}
                     </span>
                     <span className="text-xs text-slate-600 font-bold block">
-                      Date: {viewingDuty.date}
+                      Date: {formatToDDMMYYYY(viewingDuty.date)}
                     </span>
                   </div>
                 </div>
@@ -1865,14 +2142,35 @@ export default function AdminDutiesPage() {
                 <table className="w-full text-xs border-collapse border border-slate-400 text-center">
                   <thead className="bg-slate-100 text-[10px] uppercase font-bold text-slate-800 border-b border-slate-400">
                     <tr>
-                      <th className="p-1.5 border border-slate-400">Time of Departure Garage</th>
-                      <th className="p-1.5 border border-slate-400">Time of Reporting</th>
-                      <th className="p-1.5 border border-slate-400">Time of Release</th>
-                      <th className="p-1.5 border border-slate-400">Time of Garaging</th>
-                      <th className="p-1.5 border border-slate-400 bg-slate-200 font-extrabold">Total Hours</th>
+                      <th className="p-1.5 border border-slate-400">Departure Garage</th>
+                      <th className="p-1.5 border border-slate-400">Reporting</th>
+                      <th className="p-1.5 border border-slate-400">Release</th>
+                      <th className="p-1.5 border border-slate-400">Garaging</th>
+                      <th className="p-1.5 border border-slate-400 bg-slate-200 font-extrabold">Total</th>
                     </tr>
                   </thead>
                   <tbody>
+                    <tr className="bg-slate-50 text-[10px] uppercase font-bold text-slate-700">
+                      <td className="p-1 border border-slate-400">Date (DD/MM/YYYY)</td>
+                      <td className="p-1 border border-slate-400">Date (DD/MM/YYYY)</td>
+                      <td className="p-1 border border-slate-400">Date (DD/MM/YYYY)</td>
+                      <td className="p-1 border border-slate-400">Date (DD/MM/YYYY)</td>
+                      <td className="p-1 border border-slate-400 bg-slate-100">Total Days</td>
+                    </tr>
+                    <tr>
+                      <td className="p-2 border border-slate-400 font-mono font-medium">{formatToDDMMYYYY(viewingDuty.garageDepartureDate || viewingDuty.date)}</td>
+                      <td className="p-2 border border-slate-400 font-mono font-medium">{formatToDDMMYYYY(viewingDuty.reportingDate || viewingDuty.garageDepartureDate || viewingDuty.date)}</td>
+                      <td className="p-2 border border-slate-400 font-mono font-medium">{formatToDDMMYYYY(viewingDuty.releaseDate || viewingDuty.garageDepartureDate || viewingDuty.date)}</td>
+                      <td className="p-2 border border-slate-400 font-mono font-medium">{formatToDDMMYYYY(viewingDuty.garagingDate || viewingDuty.releaseDate || viewingDuty.garageDepartureDate || viewingDuty.date)}</td>
+                      <td className="p-2 border border-slate-400 font-bold bg-slate-100">{calculateTotalDays(viewingDuty.garageDepartureDate || viewingDuty.date, viewingDuty.garagingDate || viewingDuty.releaseDate || viewingDuty.date)}</td>
+                    </tr>
+                    <tr className="bg-slate-50 text-[10px] uppercase font-bold text-slate-700">
+                      <td className="p-1 border border-slate-400">Departure Time (24h)</td>
+                      <td className="p-1 border border-slate-400">Reporting Time (24h)</td>
+                      <td className="p-1 border border-slate-400">Release Time (24h)</td>
+                      <td className="p-1 border border-slate-400">Garaging Time (24h)</td>
+                      <td className="p-1 border border-slate-400 bg-slate-100 font-extrabold">Total Hours</td>
+                    </tr>
                     <tr>
                       <td className="p-2 border border-slate-400 font-medium">{viewingDuty.garageDepartureTime}</td>
                       <td className="p-2 border border-slate-400 font-medium">{viewingDuty.reportingTime}</td>
