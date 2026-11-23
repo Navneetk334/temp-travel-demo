@@ -44,6 +44,7 @@ import {
 import Portal from "@/components/shared/portal";
 import { DutySlipRecord, DutyAttachment } from "@/lib/duties";
 import { isDispatchDeleted } from "@/lib/lead-sync";
+import { printElementById } from "@/lib/print";
 
 // Helper to convert any date string (YYYY-MM-DD or DD/MM/YYYY) to DD/MM/YYYY
 function formatToDDMMYYYY(val?: string): string {
@@ -2201,18 +2202,18 @@ export default function AdminDutiesPage() {
       {/* ========================================================================= */}
       {viewingDuty && (
         <Portal>
-          <div className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-            <div className="bg-surface border border-border rounded-3xl max-w-3xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative my-auto max-h-[92vh] overflow-y-auto scrollbar-thin">
+          <div className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 overflow-y-auto print:static print:bg-white print:p-0 print:overflow-visible print:inset-auto print:block">
+            <div className="bg-surface border border-border rounded-3xl max-w-3xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative my-auto max-h-[92vh] overflow-y-auto scrollbar-thin print:bg-white print:border-none print:shadow-none print:p-0 print:m-0 print:max-h-none print:w-full print:max-w-none print:overflow-visible">
               
               <button
                 onClick={() => setViewingDuty(null)}
-                className="absolute top-5 right-5 p-2 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-full transition-colors z-10"
+                className="absolute top-5 right-5 p-2 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-full transition-colors z-10 print:hidden no-print"
               >
                 <X className="w-5 h-5" />
               </button>
 
               {/* Printable Official Paper Layout */}
-              <div id="printable-duty-slip" className="bg-white text-slate-950 p-6 sm:p-8 rounded-2xl shadow-xl space-y-5 font-sans border border-slate-300">
+              <div id="printable-duty-slip" className="bg-white text-slate-950 p-6 sm:p-8 rounded-2xl shadow-xl space-y-5 font-sans border border-slate-300 print:shadow-none print:border-none print:p-0 print:m-0 print:rounded-none">
                 
                 {/* Header */}
                 <div className="border-b-2 border-slate-900 pb-4 flex justify-between items-start">
@@ -2393,7 +2394,7 @@ export default function AdminDutiesPage() {
 
               {/* Attached Original Documents & Expense Receipts */}
               {viewingDuty.attachments && viewingDuty.attachments.length > 0 ? (
-                <div className="bg-background p-4 rounded-2xl border border-border space-y-3">
+                <div className="bg-background p-4 rounded-2xl border border-border space-y-3 print:hidden no-print">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-200">
                       Attached Documents & Receipts ({viewingDuty.attachments.length})
@@ -2443,7 +2444,7 @@ export default function AdminDutiesPage() {
                   </div>
                 </div>
               ) : viewingDuty.slipImageUrl && !viewingDuty.slipImageUrl.includes("hero-bg") ? (
-                <div className="bg-background p-4 rounded-2xl border border-border flex items-center justify-between">
+                <div className="bg-background p-4 rounded-2xl border border-border flex items-center justify-between print:hidden no-print">
                   <div className="flex items-center gap-3">
                     <img
                       src={viewingDuty.slipImageUrl}
@@ -2467,13 +2468,13 @@ export default function AdminDutiesPage() {
                   </a>
                 </div>
               ) : (
-                <div className="bg-background p-3.5 rounded-2xl border border-border text-center text-xs text-slate-400">
+                <div className="bg-background p-3.5 rounded-2xl border border-border text-center text-xs text-slate-400 print:hidden no-print">
                   <span>No original physical documents or slips attached to this duty record.</span>
                 </div>
               )}
 
               {/* Action Buttons */}
-              <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
+              <div className="flex flex-wrap items-center justify-end gap-3 pt-2 print:hidden no-print">
                 <button
                   type="button"
                   onClick={() => setViewingRouteDuty(viewingDuty)}
@@ -2485,7 +2486,7 @@ export default function AdminDutiesPage() {
 
                 <button
                   type="button"
-                  onClick={() => window.print()}
+                  onClick={() => printElementById("printable-duty-slip", `Duty Slip - ${viewingDuty.tripSheetNo || viewingDuty.id}`)}
                   className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all"
                 >
                   <Printer className="w-4 h-4 text-accent" />

@@ -22,6 +22,7 @@ import {
   Calendar
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
+import { printElementById } from "@/lib/print";
 
 interface CashRecord {
   id: string;
@@ -580,61 +581,61 @@ export default function AdminPaymentsPage() {
       {/* MODAL 2: PRINTABLE CASH RECEIPT */}
       {receiptRecord && (
         <Portal>
-          <div className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-            <div className="bg-surface border border-border rounded-2xl p-8 max-w-xl w-full space-y-6 shadow-2xl relative">
+          <div className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 print:static print:bg-white print:p-0 print:overflow-visible print:inset-auto print:block">
+            <div className="bg-surface border border-border rounded-2xl p-8 max-w-xl w-full space-y-6 shadow-2xl relative print:bg-white print:border-none print:shadow-none print:p-0 print:m-0 print:max-h-none print:w-full print:max-w-none print:overflow-visible">
               <button
                 onClick={() => setReceiptRecord(null)}
-                className="absolute top-4 right-4 text-slate-400 hover:text-white p-1"
+                className="absolute top-4 right-4 text-slate-400 hover:text-white p-1 print:hidden no-print"
               >
                 <X className="w-5 h-5" />
               </button>
 
               {/* Printable Receipt Card */}
-              <div id="printable-receipt" className="bg-background p-6 rounded-xl border border-border space-y-6 text-slate-100">
+              <div id="printable-receipt" className="bg-background p-6 rounded-xl border border-border space-y-6 text-slate-100 print:bg-white print:text-slate-950 print:border-none print:shadow-none print:p-0">
                 <div className="flex justify-between items-start border-b border-border pb-4">
                   <div>
-                    <h2 className="text-lg font-black text-slate-50 uppercase tracking-tight">TEMP TRAVEL CAR RENTALS PVT LTD</h2>
-                    <p className="text-[10px] text-slate-400">Plot No. 183, Kh No. 16/2, Qutub Vihar PH-I, New Delhi - 110071</p>
-                    <p className="text-[10px] text-amber-400 font-bold mt-0.5">GSTIN: 07AACCT9842M1Z5 • Cash Collection Desk</p>
+                    <h2 className="text-lg font-black text-slate-50 uppercase tracking-tight print:text-slate-950">TEMP TRAVEL CAR RENTALS PVT LTD</h2>
+                    <p className="text-[10px] text-slate-400 print:text-slate-700">Plot No. 183, Kh No. 16/2, Qutub Vihar PH-I, New Delhi - 110071</p>
+                    <p className="text-[10px] text-amber-400 font-bold mt-0.5 print:text-slate-900">GSTIN: 07AACCT9842M1Z5 • Cash Collection Desk</p>
                   </div>
                   <div className="text-right">
-                    <span className="text-xs font-mono font-bold text-amber-400 block">{receiptRecord.receiptNumber}</span>
-                    <span className="text-[10px] text-slate-400 block">{new Date(receiptRecord.collectedAt).toLocaleDateString()}</span>
+                    <span className="text-xs font-mono font-bold text-amber-400 block print:text-slate-950">{receiptRecord.receiptNumber}</span>
+                    <span className="text-[10px] text-slate-400 block print:text-slate-600">{new Date(receiptRecord.collectedAt).toLocaleDateString()}</span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 text-xs">
                   <div>
                     <span className="text-[10px] text-slate-500 uppercase font-bold block">Booking Reference</span>
-                    <span className="font-extrabold text-slate-200">{receiptRecord.bookingNumber}</span>
+                    <span className="font-extrabold text-slate-200 print:text-slate-900">{receiptRecord.bookingNumber}</span>
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-500 uppercase font-bold block">Customer Name</span>
-                    <span className="font-extrabold text-slate-200">{receiptRecord.customerName}</span>
+                    <span className="font-extrabold text-slate-200 print:text-slate-900">{receiptRecord.customerName}</span>
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-500 uppercase font-bold block">Assigned Chauffeur</span>
-                    <span className="font-extrabold text-slate-200">{receiptRecord.driverName}</span>
+                    <span className="font-extrabold text-slate-200 print:text-slate-900">{receiptRecord.driverName}</span>
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-500 uppercase font-bold block">Received By Staff</span>
-                    <span className="font-extrabold text-slate-200">{receiptRecord.receivedByStaff}</span>
+                    <span className="font-extrabold text-slate-200 print:text-slate-900">{receiptRecord.receivedByStaff}</span>
                   </div>
                 </div>
 
-                <div className="bg-surface p-4 rounded-lg border border-border flex justify-between items-center">
-                  <span className="text-xs font-extrabold uppercase text-slate-300">Total Cash Payment Received:</span>
-                  <span className="text-2xl font-black text-amber-400">₹{receiptRecord.amount.toLocaleString()}</span>
+                <div className="bg-surface p-4 rounded-lg border border-border flex justify-between items-center print:bg-slate-100 print:border-slate-300">
+                  <span className="text-xs font-extrabold uppercase text-slate-300 print:text-slate-900">Total Cash Payment Received:</span>
+                  <span className="text-2xl font-black text-amber-400 print:text-slate-950">₹{receiptRecord.amount.toLocaleString()}</span>
                 </div>
 
-                <div className="text-[10px] text-slate-400 italic">
+                <div className="text-[10px] text-slate-400 italic print:text-slate-700">
                   Note: {receiptRecord.remarks}
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-2">
+              <div className="flex justify-end gap-3 pt-2 print:hidden no-print">
                 <button
-                  onClick={() => window.print()}
+                  onClick={() => printElementById("printable-receipt", `Receipt - ${receiptRecord.receiptNumber}`)}
                   className="flex items-center gap-2 bg-amber-400 hover:bg-amber-500 text-slate-950 font-extrabold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider"
                 >
                   <Printer className="w-4 h-4" />
