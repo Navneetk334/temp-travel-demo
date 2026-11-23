@@ -38,7 +38,8 @@ import {
   Laptop,
   Loader2,
   Paperclip,
-  Navigation
+  Navigation,
+  Copy
 } from "lucide-react";
 import Portal from "@/components/shared/portal";
 import { DutySlipRecord, DutyAttachment } from "@/lib/duties";
@@ -165,6 +166,130 @@ function DatePickerDDMMYYYY({
   );
 }
 
+// =========================================================================
+// GARAGE & ROUTE NAVIGATION HELPERS
+// =========================================================================
+const GARAGE_NAME = "Temp Travel Car Rentals Pvt. Ltd.";
+const GARAGE_FULL_ADDRESS = "Plot No. 183, Kh No. 16/2, Qutub Vihar PH-I, New Delhi - 110071";
+const GARAGE_MAP_QUERY = "Temp Travel Car Rentals Pvt. Ltd., Qutub Vihar, New Delhi 110071";
+
+function isGarageKeyword(text?: string): boolean {
+  if (!text) return false;
+  const lower = text.trim().toLowerCase();
+  return (
+    lower === "garage" ||
+    lower === "base" ||
+    lower === "company garage" ||
+    lower === "our garage" ||
+    lower.includes("temp travel") ||
+    lower.startsWith("garage") ||
+    lower.endsWith("garage")
+  );
+}
+
+function resolvePlaceForMap(rawPlace?: string): { displayName: string; mapQuery: string; isGarage: boolean } {
+  if (!rawPlace) {
+    return {
+      displayName: "Garage (Temp Travel Car Rentals)",
+      mapQuery: GARAGE_MAP_QUERY,
+      isGarage: true,
+    };
+  }
+
+  const trimmed = rawPlace.trim();
+  if (isGarageKeyword(trimmed)) {
+    return {
+      displayName: "Garage (Temp Travel Car Rentals Pvt. Ltd.)",
+      mapQuery: GARAGE_MAP_QUERY,
+      isGarage: true,
+    };
+  }
+
+  let query = trimmed;
+  if (!/(delhi|gurgaon|gurugram|noida|ghaziabad|faridabad|haryana|up|uttar pradesh)/i.test(trimmed)) {
+    query = `${trimmed}, Delhi NCR`;
+  }
+
+  return {
+    displayName: trimmed,
+    mapQuery: query,
+    isGarage: false,
+  };
+}
+
+interface ParsedRouteStop {
+  displayName: string;
+  mapQuery: string;
+  isGarage: boolean;
+  raw: string;
+  stopIndex: number;
+  isStart: boolean;
+  isDrop: boolean;
+  isReturn: boolean;
+}
+
+function parseRouteStops(
+  tracks: Array<{ from?: string; to?: string }>,
+  reportAt?: string,
+  placeOfRelease?: string
+): ParsedRouteStop[] {
+  const rawList: string[] = [];
+
+  const pushIfDistinct = (str?: string) => {
+    if (!str) return;
+    const clean = str.trim();
+    if (!clean) return;
+    if (rawList.length > 0 && rawList[rawList.length - 1].toLowerCase() === clean.toLowerCase()) {
+      return;
+    }
+    rawList.push(clean);
+  };
+
+  if (tracks && tracks.length > 0) {
+    tracks.forEach((leg) => {
+      const fromVal = (leg.from || "").trim();
+      const toVal = (leg.to || "").trim();
+      if (fromVal) pushIfDistinct(fromVal);
+      if (toVal) pushIfDistinct(toVal);
+    });
+  } else {
+    pushIfDistinct(GARAGE_NAME);
+    if (reportAt) pushIfDistinct(reportAt);
+    if (placeOfRelease && placeOfRelease.toLowerCase() !== (reportAt || "").toLowerCase()) {
+      pushIfDistinct(placeOfRelease);
+    }
+    pushIfDistinct(GARAGE_NAME);
+  }
+
+  if (rawList.length === 1) {
+    if (isGarageKeyword(rawList[0])) {
+      if (reportAt) pushIfDistinct(reportAt);
+      else pushIfDistinct("Delhi NCR");
+    } else {
+      rawList.unshift(GARAGE_NAME);
+    }
+  }
+
+  const hasGarageReturn = rawList.length > 2 && isGarageKeyword(rawList[rawList.length - 1]);
+  const dropIndex = hasGarageReturn ? rawList.length - 2 : rawList.length - 1;
+
+  return rawList.map((raw, idx) => {
+    const resolved = resolvePlaceForMap(raw);
+    const isStart = idx === 0;
+    const isReturn = hasGarageReturn && idx === rawList.length - 1;
+    const isDrop = idx === dropIndex && !isStart && !isReturn;
+
+    return {
+      ...resolved,
+      raw,
+      stopIndex: idx + 1,
+      isStart,
+      isDrop,
+      isReturn,
+    };
+  });
+}
+
 export default function AdminDutiesPage() {
   const [duties, setDuties] = useState<DutySlipRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -177,6 +302,8 @@ export default function AdminDutiesPage() {
   const [editingDuty, setEditingDuty] = useState<DutySlipRecord | null>(null);
   const [viewingDuty, setViewingDuty] = useState<DutySlipRecord | null>(null);
   const [viewingRouteDuty, setViewingRouteDuty] = useState<DutySlipRecord | null>(null);
+  const [routeViewMode, setRouteViewMode] = useState<"PASSENGER_DROP" | "FULL_CIRCUIT">("PASSENGER_DROP");
+  const [copiedRouteUrl, setCopiedRouteUrl] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [scanMessage, setScanMessage] = useState("");
   const [uploadDocCategory, setUploadDocCategory] = useState<string>("Duty Slip");
@@ -2886,141 +3013,235 @@ export default function AdminDutiesPage() {
       {/* ========================================================================= */}
       {/* MODAL 5: ROUTE ON MAP MODAL */}
       {/* ========================================================================= */}
-      {viewingRouteDuty && (
-        <Portal>
-          <div className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-            <div className="bg-surface border border-border rounded-3xl max-w-4xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative my-auto max-h-[94vh] overflow-y-auto scrollbar-thin">
-              <button
-                onClick={() => setViewingRouteDuty(null)}
-                className="absolute top-5 right-5 p-2 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-full transition-colors z-10"
-              >
-                <X className="w-5 h-5" />
-              </button>
+      {viewingRouteDuty && (() => {
+        const allStops = parseRouteStops(
+          viewingRouteDuty.usageTracks || [],
+          viewingRouteDuty.reportAt,
+          viewingRouteDuty.placeOfRelease
+        );
 
-              {/* Header */}
-              <div className="border-b border-border pb-4">
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-500/20 text-sky-400 border border-sky-500/30">
-                    Route Log &amp; GPS Trajectory
-                  </span>
-                  <span className="text-xs text-slate-400 font-mono">Trip Sheet: {viewingRouteDuty.tripSheetNo}</span>
-                </div>
-                <h2 className="text-xl sm:text-2xl font-black text-slate-50 mt-1 flex items-center gap-2">
-                  <Navigation className="w-5 h-5 text-sky-400" />
-                  <span>Route Map &amp; Stops Trajectory</span>
-                </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Visual map view of the entered route log stops. Take a screenshot or share this route with corporate clients.
-                </p>
-              </div>
+        const hasGarageReturn = allStops.length > 2 && allStops[allStops.length - 1].isReturn;
+        
+        // Active stops based on view mode (Passenger Drop Route vs Full Circuit)
+        const activeStops = (routeViewMode === "PASSENGER_DROP" && hasGarageReturn)
+          ? allStops.slice(0, -1)
+          : allStops;
 
-              {/* Trip Summary Quick Banner */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-background p-4 rounded-2xl border border-border text-xs">
-                <div>
-                  <span className="text-slate-400 font-bold block">Vehicle</span>
-                  <span className="font-mono font-extrabold text-slate-100">{viewingRouteDuty.carNo || "N/A"}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 font-bold block">Guest / Reported To</span>
-                  <span className="font-bold text-slate-100 truncate block">{viewingRouteDuty.reportedTo || "N/A"}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 font-bold block">Total Distance</span>
-                  <span className="font-mono font-black text-accent">{viewingRouteDuty.totalKms || "0"} KM</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 font-bold block">Total Hours</span>
-                  <span className="font-mono font-black text-emerald-400">{viewingRouteDuty.totalHours || "0"} Hrs</span>
-                </div>
-              </div>
+        const originStop = activeStops[0];
+        const destStop = activeStops[activeStops.length - 1];
+        const waypointStops = activeStops.slice(1, -1);
 
-              {/* Route Stops List */}
-              <div className="space-y-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-300 block">
-                  Logged Route Stops ({viewingRouteDuty.usageTracks?.length || 0} legs)
-                </span>
-                {viewingRouteDuty.usageTracks && viewingRouteDuty.usageTracks.length > 0 ? (
-                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                    {viewingRouteDuty.usageTracks.map((leg, i) => (
-                      <div
-                        key={leg.id || i}
-                        className="flex items-center gap-3 bg-background border border-border p-3 rounded-xl text-xs"
-                      >
-                        <span className="w-6 h-6 rounded-full bg-accent/20 text-accent font-bold text-xs flex items-center justify-center shrink-0">
-                          {i + 1}
-                        </span>
-                        <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 min-w-0">
-                          <span className="font-semibold text-slate-100 truncate">{leg.from || "Start Point"}</span>
-                          <span className="text-slate-500 font-bold sm:inline hidden">→</span>
-                          <span className="font-semibold text-emerald-400 truncate">{leg.to || "Destination"}</span>
-                        </div>
-                      </div>
-                    ))}
+        const originQuery = originStop?.mapQuery || GARAGE_MAP_QUERY;
+        const destQuery = destStop?.mapQuery || GARAGE_MAP_QUERY;
+        const waypointQueries = waypointStops.map((s) => s.mapQuery);
+
+        // Google Maps Official Navigation URL
+        const gmapsDirUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(originQuery)}&destination=${encodeURIComponent(destQuery)}${
+          waypointQueries.length > 0 ? `&waypoints=${encodeURIComponent(waypointQueries.join("|"))}` : ""
+        }&travelmode=driving`;
+
+        // Direct Directions Embed
+        const embedUrl = `https://maps.google.com/maps?saddr=${encodeURIComponent(originQuery)}&daddr=${encodeURIComponent(destQuery)}${
+          waypointQueries.length > 0 ? `+to:${waypointQueries.map((w) => encodeURIComponent(w)).join("+to:")}` : ""
+        }&output=embed`;
+
+        const handleCopyLink = () => {
+          if (navigator?.clipboard) {
+            navigator.clipboard.writeText(gmapsDirUrl);
+            setCopiedRouteUrl(true);
+            setTimeout(() => setCopiedRouteUrl(false), 2500);
+          }
+        };
+
+        return (
+          <Portal>
+            <div className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+              <div className="bg-surface border border-border rounded-3xl max-w-4xl w-full p-6 sm:p-8 space-y-5 shadow-2xl relative my-auto max-h-[94vh] overflow-y-auto scrollbar-thin">
+                <button
+                  onClick={() => setViewingRouteDuty(null)}
+                  className="absolute top-5 right-5 p-2 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-full transition-colors z-10"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+
+                {/* Header */}
+                <div className="border-b border-border pb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-500/20 text-sky-400 border border-sky-500/30">
+                      Live Route Navigation &amp; GPS Trajectory
+                    </span>
+                    <span className="text-xs text-slate-400 font-mono">Trip Sheet: {viewingRouteDuty.tripSheetNo}</span>
                   </div>
-                ) : (
-                  <div className="p-3 bg-background border border-border rounded-xl text-xs text-slate-400">
-                    No individual legs recorded in route log. Map displays general route between reporting location ({viewingRouteDuty.reportAt || "Start"}) and release location ({viewingRouteDuty.placeOfRelease || "End"}).
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-50 mt-1 flex items-center gap-2">
+                    <Navigation className="w-5 h-5 text-sky-400" />
+                    <span>Route Map &amp; Exact Waypoint Navigation</span>
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Garage is automatically pinned to <strong className="text-slate-200">Temp Travel Car Rentals Pvt. Ltd. (Qutub Vihar, New Delhi)</strong> with every route stop sequentially routed on Google Maps.
+                  </p>
+                </div>
+
+                {/* Trip Summary Quick Banner */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-background p-4 rounded-2xl border border-border text-xs">
+                  <div>
+                    <span className="text-slate-400 font-bold block">Vehicle</span>
+                    <span className="font-mono font-extrabold text-slate-100">{viewingRouteDuty.carNo || "N/A"}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 font-bold block">Guest / Reported To</span>
+                    <span className="font-bold text-slate-100 truncate block">{viewingRouteDuty.reportedTo || "N/A"}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 font-bold block">Total Distance</span>
+                    <span className="font-mono font-black text-accent">{viewingRouteDuty.totalKms || "0"} KM</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 font-bold block">Total Hours</span>
+                    <span className="font-mono font-black text-emerald-400">{viewingRouteDuty.totalHours || "0"} Hrs</span>
+                  </div>
+                </div>
+
+                {/* Route Mode Switcher (if last leg is return to garage) */}
+                {hasGarageReturn && (
+                  <div className="flex items-center gap-2 bg-background p-1.5 rounded-xl border border-border text-xs font-bold w-max">
+                    <button
+                      type="button"
+                      onClick={() => setRouteViewMode("PASSENGER_DROP")}
+                      className={`px-3 py-1.5 rounded-lg transition-all ${
+                        routeViewMode === "PASSENGER_DROP"
+                          ? "bg-emerald-500 text-slate-950 font-black shadow"
+                          : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      <span>Passenger Drop Route (Garage ➔ Drop Point)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRouteViewMode("FULL_CIRCUIT")}
+                      className={`px-3 py-1.5 rounded-lg transition-all ${
+                        routeViewMode === "FULL_CIRCUIT"
+                          ? "bg-accent text-slate-950 font-black shadow"
+                          : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      <span>Full Circuit (Garage ➔ Drop ➔ Return Garage)</span>
+                    </button>
                   </div>
                 )}
-              </div>
 
-              {/* Map Preview Embed */}
-              {(() => {
-                const tracks = viewingRouteDuty.usageTracks || [];
-                const firstLeg = tracks[0];
-                const lastLeg = tracks[tracks.length - 1];
-                const origin = firstLeg?.from || viewingRouteDuty.reportAt || "New Delhi";
-                const destination = lastLeg?.to || viewingRouteDuty.placeOfRelease || "Delhi NCR";
-                const waypoints = tracks.slice(1, -1).map((t) => t.to || t.from).filter(Boolean);
-                const gmapsDirUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}${waypoints.length > 0 ? `&waypoints=${encodeURIComponent(waypoints.join('|'))}` : ""}`;
-                const embedQuery = `${origin} to ${destination}`;
-
-                return (
-                  <div className="space-y-3">
-                    <div className="rounded-2xl overflow-hidden border border-border shadow-lg bg-black h-80 relative">
-                      <iframe
-                        title="Route Map Trajectory"
-                        width="100%"
-                        height="100%"
-                        style={{ border: 0 }}
-                        src={`https://maps.google.com/maps?q=${encodeURIComponent(embedQuery)}&t=&z=12&ie=UTF8&iwloc=&output=embed`}
-                        allowFullScreen
-                      />
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
-                      <p className="text-[11px] text-slate-400 flex items-center gap-1.5">
-                        <Camera className="w-3.5 h-3.5 text-accent" />
-                        <span>Take a screenshot of this view to share route trajectory with passengers.</span>
-                      </p>
-
-                      <div className="flex items-center gap-2">
-                        <a
-                          href={gmapsDirUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 bg-sky-600 hover:bg-sky-500 text-white font-extrabold px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md"
+                {/* Sequential Route Stops Path & Badges */}
+                <div className="space-y-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-300 block">
+                    Sequential Navigation Stops ({activeStops.length} Waypoints)
+                  </span>
+                  <div className="flex flex-wrap items-center gap-2 p-3 bg-background border border-border rounded-2xl text-xs">
+                    {activeStops.map((st, i) => (
+                      <React.Fragment key={i}>
+                        <div
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs transition-all ${
+                            st.isStart
+                              ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold"
+                              : st.isDrop
+                              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold"
+                              : st.isReturn
+                              ? "bg-sky-500/20 text-sky-300 border border-sky-500/40 font-bold"
+                              : "bg-surface text-slate-200 border border-border"
+                          }`}
                         >
-                          <ExternalLink className="w-3.5 h-3.5" />
-                          <span>Open in Google Maps</span>
-                        </a>
+                          <span className="w-5 h-5 rounded-full bg-white/10 text-[10px] font-mono font-black flex items-center justify-center shrink-0">
+                            {i + 1}
+                          </span>
+                          <span className="font-semibold">{st.displayName}</span>
+                          {st.isStart && (
+                            <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-black">
+                              Start
+                            </span>
+                          )}
+                          {st.isDrop && (
+                            <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-400 text-slate-950 font-black">
+                              Drop Point
+                            </span>
+                          )}
+                          {st.isReturn && (
+                            <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-sky-400 text-slate-950 font-black">
+                              Garage Return
+                            </span>
+                          )}
+                        </div>
+                        {i < activeStops.length - 1 && (
+                          <span className="text-slate-500 font-extrabold text-sm px-0.5">➔</span>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                </div>
 
-                        <button
-                          type="button"
-                          onClick={() => setViewingRouteDuty(null)}
-                          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs uppercase tracking-wider transition-all"
-                        >
-                          Close
-                        </button>
-                      </div>
+                {/* Map Preview Embed */}
+                <div className="space-y-3">
+                  <div className="rounded-2xl overflow-hidden border border-border shadow-2xl bg-black h-80 relative">
+                    <iframe
+                      title="Route Map Trajectory"
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      src={embedUrl}
+                      allowFullScreen
+                    />
+                  </div>
+
+                  {/* Footer Actions */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                    <p className="text-[11px] text-slate-400 flex items-center gap-1.5">
+                      <Camera className="w-3.5 h-3.5 text-accent" />
+                      <span>Take a screenshot of this view to share route trajectory with passengers.</span>
+                    </p>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleCopyLink}
+                        className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-3.5 py-2 rounded-xl text-xs uppercase tracking-wider transition-all border border-border shadow-sm"
+                        title="Copy direct Google Maps link"
+                      >
+                        {copiedRouteUrl ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-emerald-400" />
+                            <span className="text-emerald-400 font-extrabold">Link Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5 text-accent" />
+                            <span>Copy Route Link</span>
+                          </>
+                        )}
+                      </button>
+
+                      <a
+                        href={gmapsDirUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 bg-sky-600 hover:bg-sky-500 text-white font-extrabold px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>Open in Google Maps</span>
+                      </a>
+
+                      <button
+                        type="button"
+                        onClick={() => setViewingRouteDuty(null)}
+                        className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs uppercase tracking-wider transition-all"
+                      >
+                        Close
+                      </button>
                     </div>
                   </div>
-                );
-              })()}
+                </div>
+
+              </div>
             </div>
-          </div>
-        </Portal>
-      )}
+          </Portal>
+        );
+      })()}
 
     </div>
   );
